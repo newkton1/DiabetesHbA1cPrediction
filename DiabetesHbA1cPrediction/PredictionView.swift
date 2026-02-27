@@ -162,8 +162,8 @@ struct PredictionView: View {
                     .padding(.vertical, 20)
                 }
             }
-            .navigationTitle("HbA1c Prediction")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle("Sugar Values")
+            .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showShareSheet) {
                 ShareSheet(text: shareText)
             }

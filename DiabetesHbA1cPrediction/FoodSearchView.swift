@@ -135,7 +135,7 @@ struct FoodSearchView: View {
                         .font(.headline)
                         .foregroundColor(.primary)
 
-                    // Serving size and calories
+                    // Serving size and carbohydrates
                     HStack(spacing: 8) {
                         Text("\(String(format: "%.0f", food.servingSize)) \(food.servingUnit)")
                             .font(.caption)
@@ -144,106 +144,59 @@ struct FoodSearchView: View {
                         Text("•")
                             .foregroundColor(.secondary)
 
-                        Text("\(Int(food.calories)) cal")
+                        Text("\(Int(food.carbohydrates)) g Carbs")
                             .font(.caption)
                             .fontWeight(.semibold)
                             .foregroundColor(.primary)
                     }
 
-                    // Carbs and macro info
-                    HStack(spacing: 12) {
-                        macroBadge(
-                            label: "C",
-                            value: food.carbohydrates,
-                            color: .blue
-                        )
-                        macroBadge(
-                            label: "P",
-                            value: food.protein,
-                            color: .red
-                        )
-                        macroBadge(
-                            label: "F",
-                            value: food.fat,
-                            color: .orange
-                        )
-
-                        Spacer()
+                    // Macro info - bulleted list matching MealLogView style
+                    VStack(alignment: .leading, spacing: 2) {
+                        MacroBulletRow(label: "Carbs", value: food.carbohydrates, color: .orange)
+                        MacroBulletRow(label: "Fiber", value: food.fiber, color: .green)
+                        MacroBulletRow(label: "Proteins", value: food.protein, color: .blue)
+                        MacroBulletRow(label: "Fats", value: food.fat, color: .purple)
+                        
+                        // Glycemic Index - gray text on one line, red for High
+                        HStack(spacing: 4) {
+                            Text("•")
+                                .foregroundColor(.gray)
+                            Text("GI")
+                                .fontWeight(.medium)
+                            Text("\(food.glycemicIndex)")
+                            Text(giLabel(for: Double(food.glycemicIndex)))
+                                .foregroundColor(giLabelColor(for: Double(food.glycemicIndex)))
+                        }
+                        .foregroundColor(.gray)
                     }
-                    .font(.caption2)
+                    .font(.caption)
                 }
 
                 Spacer()
-
-                // Glycemic Index indicator
-                giIndicator(for: Double(food.glycemicIndex))
             }
             .contentShape(Rectangle())
         }
     }
 
-    /// Small badge showing a macro value
-    @ViewBuilder
-    private func macroBadge(label: String, value: Double, color: Color) -> some View {
-        HStack(spacing: 2) {
-            Text(label)
-                .fontWeight(.semibold)
-            Text("\(String(format: "%.0f", value))g")
-        }
-        .padding(.horizontal, 6)
-        .padding(.vertical, 3)
-        .background(color.opacity(0.15))
-        .cornerRadius(4)
-        .foregroundColor(color)
-    }
-
-    /// Color-coded GI indicator: green (0-55 Low), yellow (56-69 Medium), red (70+ High)
-    @ViewBuilder
-    private func giIndicator(for glycemicIndex: Double) -> some View {
-        VStack(alignment: .center, spacing: 4) {
-            let giColor = giColor(for: glycemicIndex)
-            let giLabel = giLabel(for: glycemicIndex)
-
-            HStack(spacing: 4) {
-                Circle()
-                    .fill(giColor)
-                    .frame(width: 8, height: 8)
-
-                Text("\(Int(glycemicIndex))")
-                    .font(.caption2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
-            }
-
-            Text(giLabel)
-                .font(.caption2)
-                .foregroundColor(giColor)
-                .fontWeight(.semibold)
-        }
-        .frame(width: 50)
-    }
-
     // MARK: - Helper Methods
-
-    /// Returns the color for a given glycemic index value
-    private func giColor(for index: Double) -> Color {
-        if index <= 55 {
-            return .green
-        } else if index <= 69 {
-            return .yellow
-        } else {
-            return .red
-        }
-    }
 
     /// Returns the label for a given glycemic index value
     private func giLabel(for index: Double) -> String {
         if index <= 55 {
             return "Low"
         } else if index <= 69 {
-            return "Med"
+            return "Medium"
         } else {
             return "High"
+        }
+    }
+
+    /// Returns the color for a given glycemic index value (red for High, gray for others)
+    private func giLabelColor(for index: Double) -> Color {
+        if index > 69 {
+            return .red
+        } else {
+            return .gray
         }
     }
 }

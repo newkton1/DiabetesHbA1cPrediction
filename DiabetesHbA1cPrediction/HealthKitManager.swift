@@ -73,6 +73,7 @@ class HealthKitManager: ObservableObject {
             HKQuantityType.quantityType(forIdentifier: .stepCount)!,
             HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!,
             HKQuantityType.quantityType(forIdentifier: .appleExerciseTime)!,
+            HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)!,
             HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!,
             HKWorkoutType.workoutType()
         ]
@@ -244,6 +245,46 @@ class HealthKitManager: ObservableObject {
         }
     }
 
+    /// Fetches total walking/running distance over a specified number of days.
+    ///
+    /// - Parameter days: Number of days back to query (default: 30)
+    /// - Returns: Total distance in kilometers as a Double
+    func fetchWalkingRunningDistance(days: Int = 30) async -> Double {
+        guard isAuthorized else {
+            return 0
+        }
+
+        let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)!
+
+        let calendar = Calendar.current
+        let startDate = calendar.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: Date(), options: .strictStartDate)
+
+        return await withCheckedContinuation { continuation in
+            let query = HKStatisticsQuery(
+                quantityType: distanceType,
+                quantitySamplePredicate: predicate,
+                options: .cumulativeSum
+            ) { _, result, error in
+                if let error = error {
+                    print("Error fetching walking/running distance: \(error.localizedDescription)")
+                    continuation.resume(returning: 0)
+                    return
+                }
+
+                guard let result = result, let sum = result.sumQuantity() else {
+                    continuation.resume(returning: 0)
+                    return
+                }
+
+                let distanceKm = sum.doubleValue(for: HKUnit.meterUnit(with: .kilo))
+                continuation.resume(returning: distanceKm)
+            }
+
+            self.healthStore.execute(query)
+        }
+    }
+
     /// Fetches blood glucose readings from HealthKit.
     ///
     /// This method retrieves glucose samples, which may come from:
@@ -316,9 +357,11 @@ class HealthKitManager: ObservableObject {
     private struct WorkoutData: Sendable {
         let uuid: String
         let startDate: Date
+        let endDate: Date
         let type: String
         let duration: Double
         let caloriesBurned: Double
+        let distanceKm: Double
     }
 
     /// Syncs recent workouts from HealthKit to CoreData.
@@ -349,13 +392,22 @@ class HealthKitManager: ObservableObject {
                let sumQuantity = statistics.sumQuantity() {
                 calories = sumQuantity.doubleValue(for: HKUnit.kilocalorie())
             }
-            
+
+            var distanceKm: Double = 0
+            if let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning),
+               let statistics = workout.statistics(for: distanceType),
+               let sumQuantity = statistics.sumQuantity() {
+                distanceKm = sumQuantity.doubleValue(for: HKUnit.meterUnit(with: .kilo))
+            }
+
             return WorkoutData(
                 uuid: workout.uuid.uuidString,
                 startDate: workout.startDate,
+                endDate: workout.endDate,
                 type: workout.workoutActivityType.description,
-                duration: workout.duration,
-                caloriesBurned: calories
+                duration: workout.duration / 60.0, // Convert seconds to minutes for CoreData
+                caloriesBurned: calories,
+                distanceKm: distanceKm
             )
         }
 
@@ -443,11 +495,25 @@ class HealthKitManager: ObservableObject {
 
                     // Create new ExerciseSessionEntity
                     let entity = ExerciseSessionEntity(context: context)
+                    entity.id = UUID()
                     entity.startDate = workoutData.startDate
+                    entity.endDate = workoutData.endDate
                     entity.type = workoutData.type
                     entity.duration = workoutData.duration
                     entity.caloriesBurned = workoutData.caloriesBurned
-                    entity.notes = "HealthKit UUID: \(workoutData.uuid)"
+                    // Estimate intensity from calories and duration (moderate = 5)
+                    if workoutData.duration > 0 {
+                        let calPerMin = workoutData.caloriesBurned / workoutData.duration
+                        entity.intensity = min(10, max(1, calPerMin / 2.0))
+                    } else {
+                        entity.intensity = 5
+                    }
+                    // Store HealthKit UUID and distance in notes for reference
+                    var noteParts = ["HealthKit UUID: \(workoutData.uuid)"]
+                    if workoutData.distanceKm > 0 {
+                        noteParts.append(String(format: "Distance: %.2f km", workoutData.distanceKm))
+                    }
+                    entity.notes = noteParts.joined(separator: " | ")
 
                     count += 1
                 }
@@ -512,6 +578,204 @@ class HealthKitManager: ObservableObject {
                     print("Error saving glucose data to CoreData: \(error.localizedDescription)")
                 }
                 
+                continuation.resume(returning: count)
+            }
+        }
+    }
+
+    // MARK: - Daily Activity Sync
+
+    /// Data structure for daily activity summaries
+    private struct DailyActivityData: Sendable {
+        let date: Date
+        let steps: Double
+        let distanceKm: Double
+        let calories: Double
+        let estimatedMinutes: Double
+    }
+
+    /// Fetches a daily statistic for a given quantity type over a date range.
+    ///
+    /// - Parameters:
+    ///   - identifier: The HKQuantityTypeIdentifier to query
+    ///   - unit: The HKUnit to use for the result
+    ///   - start: Start date of the range
+    ///   - end: End date of the range
+    /// - Returns: The cumulative sum for that day, or 0 if no data
+    private func fetchDailyStatistic(identifier: HKQuantityTypeIdentifier, unit: HKUnit, start: Date, end: Date) async -> Double {
+        guard let quantityType = HKQuantityType.quantityType(forIdentifier: identifier) else {
+            return 0
+        }
+
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
+
+        return await withCheckedContinuation { continuation in
+            let query = HKStatisticsQuery(
+                quantityType: quantityType,
+                quantitySamplePredicate: predicate,
+                options: .cumulativeSum
+            ) { _, result, error in
+                if let error = error {
+                    print("Error fetching \(identifier.rawValue): \(error.localizedDescription)")
+                    continuation.resume(returning: 0)
+                    return
+                }
+                guard let result = result, let sum = result.sumQuantity() else {
+                    continuation.resume(returning: 0)
+                    return
+                }
+                continuation.resume(returning: sum.doubleValue(for: unit))
+            }
+            self.healthStore.execute(query)
+        }
+    }
+
+    /// Syncs daily walking/activity data from HealthKit to CoreData.
+    ///
+    /// Unlike `syncExerciseToCorData` which only imports formal HKWorkout records,
+    /// this method fetches ambient step count, walking distance, and active calories
+    /// that the iPhone records automatically during casual walking throughout the day.
+    ///
+    /// For each day with meaningful activity (>500 steps), it creates an
+    /// ExerciseSessionEntity of type "Walking" spanning the full day.
+    ///
+    /// - Parameters:
+    ///   - context: NSManagedObjectContext for CoreData operations
+    ///   - days: Number of days back to sync (default: 30)
+    /// - Returns: Count of newly imported daily activity records
+    func syncDailyActivityToCorData(context: NSManagedObjectContext, days: Int = 30) async -> Int {
+        guard isAuthorized else {
+            return 0
+        }
+
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        var dailyDataList: [DailyActivityData] = []
+
+        // Fetch daily stats for each day
+        for dayOffset in 0..<days {
+            guard let dayStart = calendar.date(byAdding: .day, value: -dayOffset, to: today),
+                  let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) else {
+                continue
+            }
+
+            // Fetch steps, distance, and calories for this day
+            let steps = await fetchDailyStatistic(
+                identifier: .stepCount,
+                unit: HKUnit.count(),
+                start: dayStart,
+                end: dayEnd
+            )
+
+            // Skip days with minimal activity (less than 500 steps)
+            guard steps >= 500 else { continue }
+
+            let distanceKm = await fetchDailyStatistic(
+                identifier: .distanceWalkingRunning,
+                unit: HKUnit.meterUnit(with: .kilo),
+                start: dayStart,
+                end: dayEnd
+            )
+
+            let calories = await fetchDailyStatistic(
+                identifier: .activeEnergyBurned,
+                unit: HKUnit.kilocalorie(),
+                start: dayStart,
+                end: dayEnd
+            )
+
+            // Estimate walking minutes from steps (roughly 100 steps per minute of walking)
+            let estimatedMinutes = steps / 100.0
+
+            dailyDataList.append(DailyActivityData(
+                date: dayStart,
+                steps: steps,
+                distanceKm: distanceKm,
+                calories: calories,
+                estimatedMinutes: estimatedMinutes
+            ))
+        }
+
+        guard !dailyDataList.isEmpty else { return 0 }
+
+        return await Self.importDailyActivityToCoreData(dailyDataList: dailyDataList, context: context)
+    }
+
+    /// Imports daily activity data to CoreData (nonisolated to work with context.perform)
+    private static nonisolated func importDailyActivityToCoreData(dailyDataList: [DailyActivityData], context: NSManagedObjectContext) async -> Int {
+        await withCheckedContinuation { continuation in
+            context.perform {
+                var count = 0
+                let calendar = Calendar.current
+
+                for activityData in dailyDataList {
+                    let dayEnd = calendar.date(byAdding: .day, value: 1, to: activityData.date) ?? activityData.date
+
+                    // Check if we already have a "Daily Walking" entry for this date
+                    let fetchRequest = NSFetchRequest<ExerciseSessionEntity>(
+                        entityName: "ExerciseSessionEntity"
+                    )
+                    fetchRequest.predicate = NSPredicate(
+                        format: "notes CONTAINS %@ AND startDate >= %@ AND startDate < %@",
+                        "DailyActivity",
+                        activityData.date as NSDate,
+                        dayEnd as NSDate
+                    )
+
+                    do {
+                        let existing = try context.fetch(fetchRequest)
+                        if !existing.isEmpty {
+                            // Already have this day's data — update it with latest values
+                            if let entity = existing.first {
+                                entity.duration = activityData.estimatedMinutes
+                                entity.caloriesBurned = activityData.calories
+                                entity.notes = String(format: "DailyActivity | Steps: %.0f | Distance: %.2f km", activityData.steps, activityData.distanceKm)
+                                // Intensity based on steps: light (<5000), moderate (5000-10000), vigorous (>10000)
+                                if activityData.steps >= 10000 {
+                                    entity.intensity = 7
+                                } else if activityData.steps >= 5000 {
+                                    entity.intensity = 5
+                                } else {
+                                    entity.intensity = 3
+                                }
+                            }
+                            continue
+                        }
+                    } catch {
+                        print("Error checking for duplicate daily activity: \(error.localizedDescription)")
+                        continue
+                    }
+
+                    // Create new ExerciseSessionEntity for this day's walking activity
+                    let entity = ExerciseSessionEntity(context: context)
+                    entity.id = UUID()
+                    entity.startDate = activityData.date
+                    entity.endDate = dayEnd
+                    entity.type = "Walking"
+                    entity.duration = activityData.estimatedMinutes
+                    entity.caloriesBurned = activityData.calories
+                    entity.notes = String(format: "DailyActivity | Steps: %.0f | Distance: %.2f km", activityData.steps, activityData.distanceKm)
+
+                    // Intensity based on step count
+                    if activityData.steps >= 10000 {
+                        entity.intensity = 7
+                    } else if activityData.steps >= 5000 {
+                        entity.intensity = 5
+                    } else {
+                        entity.intensity = 3
+                    }
+
+                    count += 1
+                }
+
+                // Save to CoreData
+                do {
+                    try context.save()
+                } catch {
+                    print("Error saving daily activity data to CoreData: \(error.localizedDescription)")
+                }
+
                 continuation.resume(returning: count)
             }
         }

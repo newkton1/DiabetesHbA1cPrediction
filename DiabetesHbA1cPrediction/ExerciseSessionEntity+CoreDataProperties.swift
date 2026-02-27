@@ -19,6 +19,7 @@ extension ExerciseSessionEntity {
     @NSManaged nonisolated public var type: String?
     @NSManaged nonisolated public var startDate: Date?
     @NSManaged nonisolated public var endDate: Date?
+    @NSManaged nonisolated public var distance: Double
     @NSManaged nonisolated public var duration: Double
     @NSManaged nonisolated public var intensity: Double
     @NSManaged nonisolated public var caloriesBurned: Double

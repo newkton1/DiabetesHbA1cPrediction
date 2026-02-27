@@ -1,12 +1,24 @@
 import SwiftUI
 import CoreData
 
+/// Segment options for meal log view
+enum MealLogSegment: String, CaseIterable {
+    case logged = "Logged"
+    case planned = "Planned"
+}
+
 /// MealLogView displays a chronological list of logged meals grouped by date.
 /// Users can add new meals, delete existing ones, and view nutritional summaries.
 /// The view integrates with CoreData (MealEntity) and allows food selection from a database.
 struct MealLogView: View {
     // MARK: - Environment & State
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var isPortrait: Bool {
+        verticalSizeClass == .regular && horizontalSizeClass == .compact
+    }
 
     /// Fetch all meals from CoreData, sorted by timestamp (most recent first)
     @FetchRequest(
@@ -17,57 +29,313 @@ struct MealLogView: View {
     ) private var allMeals: FetchedResults<MealEntity>
 
     @State private var showAddMealSheet = false
+    @State private var showLastMealSheet = false
+    @State private var showPlannedMealSheet = false
     @State private var selectedFood: FoodItem?
+    @State private var selectedSegment: MealLogSegment = .logged
+    @State private var expandedMealId: UUID? = nil
+
+    // MARK: - Filtered Meals
+    
+    /// Meals filtered by segment (logged vs planned)
+    private var filteredMeals: [MealEntity] {
+        switch selectedSegment {
+        case .logged:
+            return allMeals.filter { $0.mealType != "plannedMeal" }
+        case .planned:
+            return allMeals.filter { $0.mealType == "plannedMeal" }
+        }
+    }
+    
+    /// Groups filtered meals by date
+    private var filteredMealsByDate: [Date: [MealEntity]] {
+        var grouped: [Date: [MealEntity]] = [:]
+        let calendar = Calendar.current
+
+        for meal in filteredMeals {
+            let dateToUse: Date
+            if selectedSegment == .planned, let plannedDate = meal.plannedDateTime {
+                dateToUse = plannedDate
+            } else if let timestamp = meal.timestamp {
+                dateToUse = timestamp
+            } else {
+                continue
+            }
+            
+            let dateComponent = calendar.startOfDay(for: dateToUse)
+
+            if grouped[dateComponent] != nil {
+                grouped[dateComponent]?.append(meal)
+            } else {
+                grouped[dateComponent] = [meal]
+            }
+        }
+
+        return grouped
+    }
 
     // MARK: - Body
     var body: some View {
         NavigationStack {
-            ZStack {
-                if allMeals.isEmpty {
-                    // Empty state
-                    VStack(spacing: 16) {
-                        Image(systemName: "fork.knife")
-                            .font(.system(size: 48))
-                            .foregroundColor(.gray)
-                        Text("No Meals Logged")
-                            .font(.headline)
-                        Text("Add your first meal to get started")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+            if isPortrait {
+                portraitBody
+            } else {
+                landscapeBody
+            }
+        }
+    }
+
+    // MARK: - Portrait Layout (List-based)
+    private var portraitBody: some View {
+        List {
+            // Segmented control as first row
+            Section {
+                segmentPicker
+            }
+
+            if filteredMeals.isEmpty {
+                Section {
+                    emptyStateView
+                }
+            } else {
+                mealSections
+            }
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Text("Meal Builder")
+                    .font(.system(size: 22, weight: .bold))
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+            toolbarContent
+        }
+        .sheet(isPresented: $showAddMealSheet) {
+            AddMealSheetView(selectedFood: $selectedFood)
+                .environment(\.managedObjectContext, viewContext)
+        }
+        .sheet(isPresented: $showLastMealSheet) {
+            LastMealView()
+                .environment(\.managedObjectContext, viewContext)
+        }
+        .sheet(isPresented: $showPlannedMealSheet) {
+            PlannedMealView()
+                .environment(\.managedObjectContext, viewContext)
+        }
+    }
+
+    // MARK: - Landscape Layout (ScrollView-based for proper scrolling)
+    private var landscapeBody: some View {
+        VStack(spacing: 0) {
+            // Header: title on left, + button on right
+            HStack {
+                Text("Meal Builder")
+                    .font(.system(size: 22, weight: .bold))
+
+                Spacer()
+
+                Menu {
+                    Button(action: { showLastMealSheet = true }) {
+                        Label("Log Last Meal", systemImage: "clock.arrow.circlepath")
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(.systemBackground))
+                    Button(action: { showPlannedMealSheet = true }) {
+                        Label("Plan Meal/Feast", systemImage: "calendar.badge.plus")
+                    }
+                    Divider()
+                    Button(action: { showAddMealSheet = true }) {
+                        Label("Quick Add (Manual)", systemImage: "square.and.pencil")
+                    }
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(.blue)
+                }
+            }
+            .padding(.horizontal)
+            .padding(.top, 6)
+            .padding(.bottom, 2)
+
+            // Segmented control pinned at top
+            segmentPicker
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+
+            // Scrollable meal content
+            ScrollView {
+                if filteredMeals.isEmpty {
+                    emptyStateView
+                        .padding(.vertical, 20)
                 } else {
-                    List {
-                        // Group meals by date
-                        ForEach(mealsByDate.keys.sorted(by: >), id: \.self) { date in
-                            Section(header: Text(dateFormatter.string(from: date))) {
-                                ForEach(mealsByDate[date] ?? []) { meal in
-                                    mealRow(for: meal)
+                    LazyVStack(spacing: 0) {
+                        ForEach(filteredMealsByDate.keys.sorted(by: selectedSegment == .planned ? (<) : (>)), id: \.self) { date in
+                            // Section header
+                            HStack {
+                                Text(sectionHeader(for: date))
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.secondary)
+                                    .textCase(.uppercase)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.top, 12)
+                            .padding(.bottom, 4)
+
+                            // Meal rows
+                            ForEach(filteredMealsByDate[date] ?? []) { meal in
+                                MealRowView(
+                                    meal: meal,
+                                    isExpanded: expandedMealId == meal.id,
+                                    onTap: {
+                                        withAnimation {
+                                            if expandedMealId == meal.id {
+                                                expandedMealId = nil
+                                            } else {
+                                                expandedMealId = meal.id
+                                            }
+                                        }
+                                    },
+                                    timeFormatter: timeFormatter
+                                )
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        viewContext.delete(meal)
+                                        try? viewContext.save()
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
                                 }
-                                .onDelete { indices in
-                                    deleteMeals(at: indices, for: date)
-                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 2)
+
+                                Divider()
+                                    .padding(.horizontal, 16)
                             }
                         }
                     }
-                    .listStyle(.insetGrouped)
                 }
             }
-            .navigationTitle("Meal Log")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button(action: { showAddMealSheet = true }) {
-                        Image(systemName: "plus")
-                            .font(.system(.body, design: .rounded))
-                    }
+        }
+        .navigationBarHidden(true)
+        .sheet(isPresented: $showAddMealSheet) {
+            AddMealSheetView(selectedFood: $selectedFood)
+                .environment(\.managedObjectContext, viewContext)
+        }
+        .sheet(isPresented: $showLastMealSheet) {
+            LastMealView()
+                .environment(\.managedObjectContext, viewContext)
+        }
+        .sheet(isPresented: $showPlannedMealSheet) {
+            PlannedMealView()
+                .environment(\.managedObjectContext, viewContext)
+        }
+    }
+
+    // MARK: - Shared Components
+
+    private var segmentPicker: some View {
+        Picker("Meal Type", selection: $selectedSegment) {
+            ForEach(MealLogSegment.allCases, id: \.self) { segment in
+                Text(segment.rawValue).tag(segment)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
+
+    private var emptyStateView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: selectedSegment == .logged ? "fork.knife" : "calendar")
+                .font(.system(size: 40))
+                .foregroundColor(.gray)
+            Text(selectedSegment == .logged ? "No Meals Logged" : "No Planned Meals")
+                .font(.headline)
+            Text(selectedSegment == .logged ? "Log your meals to track nutrition" : "Plan future meals to see their impact")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+
+            Button(action: {
+                if selectedSegment == .logged {
+                    showLastMealSheet = true
+                } else {
+                    showPlannedMealSheet = true
+                }
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "plus.circle.fill")
+                    Text(selectedSegment == .logged ? "Build Meal" : "Plan Meal/Feast")
+                }
+                .font(.headline)
+            }
+            .buttonStyle(.borderedProminent)
+            .padding(.top, 4)
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.vertical, 20)
+    }
+
+    @ViewBuilder
+    private var mealSections: some View {
+        ForEach(filteredMealsByDate.keys.sorted(by: selectedSegment == .planned ? (<) : (>)), id: \.self) { date in
+            Section(header: Text(sectionHeader(for: date))) {
+                ForEach(filteredMealsByDate[date] ?? []) { meal in
+                    MealRowView(
+                        meal: meal,
+                        isExpanded: expandedMealId == meal.id,
+                        onTap: {
+                            withAnimation {
+                                if expandedMealId == meal.id {
+                                    expandedMealId = nil
+                                } else {
+                                    expandedMealId = meal.id
+                                }
+                            }
+                        },
+                        timeFormatter: timeFormatter
+                    )
+                }
+                .onDelete { indices in
+                    deleteMeals(at: indices, for: date)
                 }
             }
-            .sheet(isPresented: $showAddMealSheet) {
-                AddMealSheetView(selectedFood: $selectedFood)
-                    .environment(\.managedObjectContext, viewContext)
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .primaryAction) {
+            Menu {
+                Button(action: { showLastMealSheet = true }) {
+                    Label("Log Last Meal", systemImage: "clock.arrow.circlepath")
+                }
+                Button(action: { showPlannedMealSheet = true }) {
+                    Label("Plan Meal/Feast", systemImage: "calendar.badge.plus")
+                }
+                Divider()
+                Button(action: { showAddMealSheet = true }) {
+                    Label("Quick Add (Manual)", systemImage: "square.and.pencil")
+                }
+            } label: {
+                Image(systemName: "plus.circle.fill")
+                    .font(.title2)
+                    .foregroundColor(.blue)
             }
+        }
+    }
+    
+    /// Generate section header text
+    private func sectionHeader(for date: Date) -> String {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(date) {
+            return "Today"
+        } else if calendar.isDateInTomorrow(date) {
+            return "Tomorrow"
+        } else if calendar.isDateInYesterday(date) {
+            return "Yesterday"
+        } else {
+            return dateFormatter.string(from: date)
         }
     }
 
@@ -132,37 +400,33 @@ struct MealLogView: View {
                 }
             }
 
-            // Macro summary: Carbs, Protein, Fat, Fiber
-            HStack(spacing: 8) {
-                macroSummaryBadge(
-                    label: "Carbs",
-                    value: getTotalMacro(from: meal, type: "carbs"),
-                    unit: " g",
-                    color: .blue
-                )
-                macroSummaryBadge(
-                    label: "Protein",
-                    value: getTotalMacro(from: meal, type: "protein"),
-                    unit: " g",
-                    color: .red
-                )
-                macroSummaryBadge(
-                    label: "Fats",
-                    value: getTotalMacro(from: meal, type: "fat"),
-                    unit: " g",
-                    color: .orange
-                )
-                if let fiber = getTotalMacroOptional(from: meal, type: "fiber") {
-                    macroSummaryBadge(
-                        label: "Fiber",
-                        value: fiber,
-                        unit: " g",
-                        color: .green
-                    )
+            // Macro summary — portrait: bulleted vertical list; landscape: horizontal badges
+            if isPortrait {
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 0) {
+                        MacroBulletRow(label: "Carbs", value: getTotalMacro(from: meal, type: "carbs"), color: .orange)
+                        Spacer()
+                        MacroBulletRow(label: "Proteins", value: getTotalMacro(from: meal, type: "protein"), color: .blue)
+                        Spacer()
+                    }
+                    HStack(spacing: 0) {
+                        MacroBulletRow(label: "Fiber", value: getTotalMacroOptional(from: meal, type: "fiber") ?? 0, color: .green)
+                        Spacer()
+                        MacroBulletRow(label: "Fats", value: getTotalMacro(from: meal, type: "fat"), color: .purple)
+                        Spacer()
+                    }
                 }
-                Spacer()
+                .font(.caption)
+            } else {
+                HStack(spacing: 6) {
+                    MacroBadge(label: "Carbs", value: getTotalMacro(from: meal, type: "carbs"), color: .orange)
+                    MacroBadge(label: "Fiber", value: getTotalMacroOptional(from: meal, type: "fiber") ?? 0, color: .green)
+                    MacroBadge(label: "Protein", value: getTotalMacro(from: meal, type: "protein"), color: .blue)
+                    MacroBadge(label: "Fat", value: getTotalMacro(from: meal, type: "fat"), color: .purple)
+                    Spacer()
+                }
+                .font(.caption)
             }
-            .font(.caption)
         }
         .padding(.vertical, 4)
     }
@@ -212,7 +476,7 @@ struct MealLogView: View {
 
     /// Deletes meals at specified indices for a given date
     private func deleteMeals(at offsets: IndexSet, for date: Date) {
-        guard let mealsForDate = mealsByDate[date] else { return }
+        guard let mealsForDate = filteredMealsByDate[date] else { return }
 
         for index in offsets {
             let mealToDelete = mealsForDate[index]
@@ -223,6 +487,199 @@ struct MealLogView: View {
             try viewContext.save()
         } catch {
             print("Error deleting meal: \(error.localizedDescription)")
+        }
+    }
+}
+
+// MARK: - Meal Row View
+
+/// A row view for displaying a meal with expandable food items
+struct MealRowView: View {
+    @Environment(\.verticalSizeClass) var verticalSizeClass
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+
+    let meal: MealEntity
+    let isExpanded: Bool
+    let onTap: () -> Void
+    let timeFormatter: DateFormatter
+
+    /// True when the device is in portrait orientation
+    private var isPortrait: Bool {
+        verticalSizeClass == .regular && horizontalSizeClass == .compact
+    }
+
+    /// Get food items from the meal
+    private var foodItems: [MealFoodItemEntity] {
+        guard let items = meal.foodItems as? Set<MealFoodItemEntity> else { return [] }
+        return items.sorted { ($0.foodName ?? "") < ($1.foodName ?? "") }
+    }
+    
+    /// Get total carbs from macronutrients
+    private var totalCarbs: Double {
+        guard let macros = meal.macronutrients as? Set<MacronutrientEntity> else { return 0 }
+        return macros.filter { $0.type == "carbohydrates" || $0.type == "carbs" }.reduce(0) { $0 + $1.amount }
+    }
+    
+    /// Get total protein
+    private var totalProtein: Double {
+        guard let macros = meal.macronutrients as? Set<MacronutrientEntity> else { return 0 }
+        return macros.filter { $0.type == "protein" }.reduce(0) { $0 + $1.amount }
+    }
+    
+    /// Get total fat
+    private var totalFat: Double {
+        guard let macros = meal.macronutrients as? Set<MacronutrientEntity> else { return 0 }
+        return macros.filter { $0.type == "fat" }.reduce(0) { $0 + $1.amount }
+    }
+    
+    /// Get total fiber
+    private var totalFiber: Double {
+        guard let macros = meal.macronutrients as? Set<MacronutrientEntity> else { return 0 }
+        return macros.filter { $0.type == "fiber" }.reduce(0) { $0 + $1.amount }
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Main row (tappable)
+            Button(action: onTap) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Text(meal.name ?? "Meal")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            
+                            if !foodItems.isEmpty {
+                                Text("(\(foodItems.count) item\(foodItems.count == 1 ? "" : "s"))")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        
+                        if let timestamp = meal.timestamp {
+                            HStack(spacing: 4) {
+                                Text(timeFormatter.string(from: timestamp))
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                
+                                if meal.mealType == "lastMeal" && meal.timeSinceLastMeal > 0 {
+                                    Text("• \(meal.timeSinceLastMeal, specifier: "%.1f") h ago")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                        
+                        if meal.mealType == "plannedMeal", let plannedDate = meal.plannedDateTime {
+                            Text("Planned: \(plannedDate, style: .date) at \(plannedDate, style: .time)")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    if !foodItems.isEmpty {
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+            
+            // Macro summary — portrait: single-column bulleted list; landscape: horizontal badges
+            if isPortrait {
+                VStack(alignment: .leading, spacing: 4) {
+                    MacroBulletRow(label: "Carbs", value: totalCarbs, color: .orange)
+                    MacroBulletRow(label: "Fiber", value: totalFiber, color: .green)
+                    MacroBulletRow(label: "Proteins", value: totalProtein, color: .blue)
+                    MacroBulletRow(label: "Fats", value: totalFat, color: .purple)
+                }
+                .font(.caption)
+            } else {
+                HStack(spacing: 6) {
+                    MacroBadge(label: "Carbs", value: totalCarbs, color: .orange)
+                    MacroBadge(label: "Fiber", value: totalFiber, color: .green)
+                    MacroBadge(label: "Protein", value: totalProtein, color: .blue)
+                    MacroBadge(label: "Fat", value: totalFat, color: .purple)
+                    Spacer()
+                }
+                .font(.caption)
+            }
+            
+            // Expanded food items
+            if isExpanded && !foodItems.isEmpty {
+                Divider()
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Food Items:")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                    
+                    ForEach(foodItems, id: \.id) { item in
+                        HStack {
+                            Text(item.foodName ?? "Unknown")
+                                .font(.subheadline)
+                            
+                            Spacer()
+                            
+                            Text("\(Int(item.quantity))x")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Text("\(Int(item.carbsPerServing * item.quantity)) g")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(.orange)
+                        }
+                        .padding(.leading, 8)
+                    }
+                }
+                .padding(.top, 4)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+/// Small macro badge component (used in landscape mode)
+struct MacroBadge: View {
+    let label: String
+    let value: Double
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 2) {
+            Text(label)
+                .fontWeight(.medium)
+            Text("\(Int(value)) g")
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .background(color.opacity(0.15))
+        .foregroundColor(color)
+        .cornerRadius(4)
+    }
+}
+
+/// Bulleted macro row component (used in portrait mode)
+struct MacroBulletRow: View {
+    let label: String
+    let value: Double
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text("\u{2022}")
+                .foregroundColor(color)
+                .fontWeight(.bold)
+            Text(label)
+                .foregroundColor(color)
+                .fontWeight(.medium)
+            Text("\(Int(value)) g")
+                .foregroundColor(color)
         }
     }
 }
@@ -279,15 +736,15 @@ struct AddMealSheetView: View {
                 // MARK: Nutrition Section
                 Section(header: Text("Nutrition")) {
                     HStack {
-                        Text("Calories")
-                        TextField("0", text: $calories)
+                        Text("Carbohydrates (g)")
+                        TextField("0", text: $carbs)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }
 
                     HStack {
-                        Text("Carbohydrates (g)")
-                        TextField("0", text: $carbs)
+                        Text("Calories")
+                        TextField("0", text: $calories)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }

@@ -11,6 +11,8 @@ import CoreData
 /// - Estimated calorie calculation based on exercise type and duration
 struct ExerciseLogView: View {
     @Environment(\.managedObjectContext) var moc
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @FetchRequest(
         entity: ExerciseSessionEntity.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \ExerciseSessionEntity.startDate, ascending: false)]
@@ -20,96 +22,39 @@ struct ExerciseLogView: View {
     @State private var showSyncAlert = false
     @State private var syncMessage = ""
     @State private var isSyncing = false
+    @State private var syncSuccess = false
     @State private var showDeleteConfirmation = false
     @State private var exerciseToDelete: ExerciseSessionEntity?
 
+    private var isPortrait: Bool {
+        verticalSizeClass == .regular && horizontalSizeClass == .compact
+    }
+
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // MARK: - Header with Sync Button
-                HStack {
-                    Text("Exercise Log")
-                        .font(.title2)
-                        .fontWeight(.bold)
-
-                    Spacer()
-
-                    Button(action: syncFromHealth) {
-                        HStack(spacing: 4) {
-                            if isSyncing {
-                                ProgressView()
-                                    .scaleEffect(0.8, anchor: .center)
-                            } else {
-                                Image(systemName: "arrow.triangle.2.circlepath")
-                            }
-                            Text("Sync Health")
-                                .font(.caption)
-                        }
-                        .foregroundColor(.blue)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Color.blue.opacity(0.1))
-                        .cornerRadius(6)
-                    }
-                    .disabled(isSyncing)
+            Group {
+                if isPortrait {
+                    portraitContent
+                } else {
+                    landscapeContent
                 }
-                .padding()
-
-                // MARK: - Weekly Summary Card
-                WeeklySummaryCard(exercises: exercises)
-                    .padding()
-
-                // MARK: - Exercise List
-                List {
-                    if exercises.isEmpty {
-                        VStack(alignment: .center, spacing: 12) {
-                            Image(systemName: "figure.walk")
-                                .font(.system(size: 40))
-                                .foregroundColor(.gray)
-
-                            Text("No Exercise Sessions")
-                                .font(.headline)
-
-                            Text("Add your first workout or sync from Health")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.vertical, 40)
-                        .listRowSeparator(.hidden)
-                    } else {
-                        ForEach(exercises, id: \.id) { exercise in
-                            ExerciseRowView(exercise: exercise)
-                                .contextMenu {
-                                    Button(role: .destructive) {
-                                        exerciseToDelete = exercise
-                                        showDeleteConfirmation = true
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                    }
-                                }
-                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                    Button(role: .destructive) {
-                                        deleteSingleExercise(exercise)
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                    }
-                                }
-                        }
-                    }
-                }
-                .listStyle(.plain)
             }
+            .id(isPortrait) // Force full view rebuild on orientation change
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    EditButton()
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: { showAddSheet = true }) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(.blue)
+                // Portrait only: title on left, + button on right
+                if isPortrait {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Text("Exercise Log")
+                            .font(.system(size: 22, weight: .bold))
+                            .fixedSize(horizontal: true, vertical: false)
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: { showAddSheet = true }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(.blue)
+                        }
                     }
                 }
             }
@@ -137,18 +82,233 @@ struct ExerciseLogView: View {
         }
     }
 
+    // MARK: - Portrait Content
+    private var portraitContent: some View {
+        VStack(spacing: 0) {
+            // MARK: - This Week header with Sync Button
+            HStack {
+                Text("This Week")
+                    .font(.headline)
+
+                Spacer()
+
+                syncHealthButton
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 8)
+
+            // MARK: - Weekly Summary Card (without its own title)
+            WeeklySummaryCardNoTitle(exercises: exercises)
+                .padding(.horizontal)
+                .padding(.bottom)
+
+            // MARK: - Exercise List
+            List {
+                if exercises.isEmpty {
+                    emptyStateView
+                } else {
+                    ForEach(exercises, id: \.id) { exercise in
+                        ExerciseRowView(exercise: exercise)
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    exerciseToDelete = exercise
+                                    showDeleteConfirmation = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    deleteSingleExercise(exercise)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                                .tint(.red)
+                            }
+                    }
+                }
+            }
+            .listStyle(.plain)
+        }
+    }
+
+    // MARK: - Landscape Content
+    private var landscapeContent: some View {
+        VStack(spacing: 0) {
+            // Fixed header: title on left, + button on right
+            HStack {
+                Text("Exercise Log")
+                    .font(.system(size: 22, weight: .bold))
+                Spacer()
+                Button(action: { showAddSheet = true }) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(.blue)
+                }
+            }
+            .padding(.horizontal)
+            .padding(.top, 6)
+            .padding(.bottom, 2)
+
+            // Scrollable content
+            ScrollView {
+                VStack(spacing: 4) {
+                    // "This Week" header with Sync Health button on right
+                    HStack {
+                        Text("This Week")
+                            .font(.headline)
+                        Spacer()
+                        Button(action: syncFromHealth) {
+                            HStack(spacing: 4) {
+                                if isSyncing {
+                                    ProgressView()
+                                        .scaleEffect(0.8, anchor: .center)
+                                } else {
+                                    Image(systemName: syncSuccess ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
+                                }
+                                Text("Sync Health")
+                                    .font(.system(size: 12))
+                            }
+                            .foregroundColor(syncSuccess ? .green : .blue)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background((syncSuccess ? Color.green : Color.blue).opacity(0.1))
+                            .cornerRadius(6.6)
+                            .animation(.easeInOut(duration: 0.3), value: syncSuccess)
+                        }
+                        .disabled(isSyncing)
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 4)
+
+                    // Weekly summary card (without "This Week" header - using NoTitle version)
+                    WeeklySummaryCardNoTitle(exercises: exercises)
+                        .padding(.horizontal)
+
+                    // Exercise items
+                    if exercises.isEmpty {
+                        emptyStateView
+                            .padding(.vertical, 20)
+                    } else {
+                        LazyVStack(spacing: 0) {
+                            ForEach(exercises, id: \.id) { exercise in
+                                ExerciseRowView(exercise: exercise)
+                                    .contextMenu {
+                                        Button(role: .destructive) {
+                                            exerciseToDelete = exercise
+                                            showDeleteConfirmation = true
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
+                                    .padding(.horizontal)
+                                    .padding(.vertical, 4)
+
+                                Divider()
+                                    .padding(.horizontal)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .navigationBarHidden(true)
+    }
+
+    // MARK: - Shared Components
+
+    private var syncHealthButton: some View {
+        Button(action: syncFromHealth) {
+            HStack(spacing: 4) {
+                if isSyncing {
+                    ProgressView()
+                        .scaleEffect(0.88, anchor: .center)
+                } else {
+                    Image(systemName: syncSuccess ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
+                }
+                Text("Sync Health")
+                    .font(.system(size: 13.2))
+            }
+            .foregroundColor(syncSuccess ? .green : .blue)
+            .padding(.horizontal, 13.2)
+            .padding(.vertical, 8.8)
+            .background((syncSuccess ? Color.green : Color.blue).opacity(0.1))
+            .cornerRadius(6.6)
+            .animation(.easeInOut(duration: 0.3), value: syncSuccess)
+        }
+        .disabled(isSyncing)
+    }
+
+    private var emptyStateView: some View {
+        VStack(alignment: .center, spacing: 12) {
+            Image(systemName: "figure.walk")
+                .font(.system(size: 40))
+                .foregroundColor(.gray)
+
+            Text("No Exercise Sessions")
+                .font(.headline)
+
+            Text("Add your first workout or sync from Health")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.vertical, 40)
+        .listRowSeparator(.hidden)
+    }
     // MARK: - Helper Methods
 
-    /// Syncs exercise data from HealthKit
+    /// Syncs exercise data from HealthKit to CoreData
     func syncFromHealth() {
         isSyncing = true
 
-        // Note: In a real app, this would call HealthKitManager.shared.syncExerciseData()
-        // For now, we'll simulate the sync
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            syncMessage = "Sync completed successfully"
+        Task {
+            let healthKitManager = HealthKitManager.shared
+
+            // Ensure we have HealthKit authorization first
+            let authorized = await healthKitManager.requestAuthorization()
+            guard authorized else {
+                syncMessage = "HealthKit authorization denied. Please enable access in Settings > Health > Data Access & Devices."
+                showSyncAlert = true
+                isSyncing = false
+                return
+            }
+
+            // Sync formal workout records from HealthKit to CoreData
+            let exerciseCount = await healthKitManager.syncExerciseToCorData(context: moc, days: 30)
+
+            // Sync daily walking/step activity (ambient data from casual walking)
+            let activityCount = await healthKitManager.syncDailyActivityToCorData(context: moc, days: 30)
+
+            // Also sync glucose data while we're at it
+            let glucoseCount = await healthKitManager.syncGlucoseToCorData(context: moc, days: 30)
+
+            // Build a descriptive sync message
+            var messageParts: [String] = []
+            if exerciseCount > 0 {
+                messageParts.append("\(exerciseCount) new workout\(exerciseCount == 1 ? "" : "s")")
+            }
+            if activityCount > 0 {
+                messageParts.append("\(activityCount) day\(activityCount == 1 ? "" : "s") of walking activity")
+            }
+            if glucoseCount > 0 {
+                messageParts.append("\(glucoseCount) new glucose reading\(glucoseCount == 1 ? "" : "s")")
+            }
+
+            if messageParts.isEmpty {
+                syncMessage = "Sync completed. No new data found in HealthKit for the last 30 days."
+            } else {
+                syncMessage = "Sync completed successfully! Imported \(messageParts.joined(separator: ", "))."
+            }
+
             showSyncAlert = true
             isSyncing = false
+            syncSuccess = true
+
+            // Reset sync success indicator after 10 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                syncSuccess = false
+            }
         }
     }
 
@@ -181,6 +341,151 @@ struct ExerciseLogView: View {
 // MARK: - Weekly Summary Card
 /// Displays aggregated weekly exercise statistics
 struct WeeklySummaryCard: View {
+    @Environment(\.verticalSizeClass) var verticalSizeClass
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+
+    let exercises: FetchedResults<ExerciseSessionEntity>
+
+    private var isPortrait: Bool {
+        verticalSizeClass == .regular && horizontalSizeClass == .compact
+    }
+
+    var weeklyStats: (minutes: Double, calories: Double, sessions: Int) {
+        let calendar = Calendar.current
+        let weekAgo = calendar.date(byAdding: .day, value: -7, to: Date()) ?? Date()
+
+        let thisWeekExercises = exercises.filter { exercise in
+            guard let startDate = exercise.startDate else { return false }
+            return startDate >= weekAgo
+        }
+
+        let totalMinutes = thisWeekExercises.reduce(0) { $0 + $1.duration }
+        let totalCalories = thisWeekExercises.reduce(0) { $0 + $1.caloriesBurned }
+        let sessionCount = thisWeekExercises.count
+
+        return (totalMinutes, totalCalories, sessionCount)
+    }
+
+    /// Formats an integer without thousands separators
+    private func formatNoComma(_ value: Int) -> String {
+        return "\(value)"
+    }
+
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Text("This Week")
+                    .font(.headline)
+                Spacer()
+            }
+
+            if isPortrait {
+                // Portrait: text titles with unit labels, no icons
+                HStack(spacing: 0) {
+                    VStack(spacing: 2) {
+                        Text("Time")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.secondary)
+                        Text("Minutes")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Text(formatNoComma(Int(weeklyStats.minutes)))
+                            .font(.subheadline)
+                            .fontWeight(.bold)
+                    }
+                    .frame(maxWidth: .infinity)
+
+                    VStack(spacing: 2) {
+                        Text("Energy")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.secondary)
+                        Text("Calories")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Text(formatNoComma(Int(weeklyStats.calories)))
+                            .font(.subheadline)
+                            .fontWeight(.bold)
+                    }
+                    .frame(maxWidth: .infinity)
+
+                    VStack(spacing: 2) {
+                        Text("Sessions")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.secondary)
+                        Text("Count")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Text("\(weeklyStats.sessions)")
+                            .font(.subheadline)
+                            .fontWeight(.bold)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+            } else {
+                // Landscape: original icon-based layout
+                HStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "clock.fill")
+                                .foregroundColor(.blue)
+                            Text("Minutes")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Text(formatNoComma(Int(weeklyStats.minutes)))
+                            .font(.title3)
+                            .fontWeight(.bold)
+                    }
+
+                    Spacer()
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "flame.fill")
+                                .foregroundColor(.orange)
+                            Text("Calories")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Text(formatNoComma(Int(weeklyStats.calories)))
+                            .font(.title3)
+                            .fontWeight(.bold)
+                    }
+
+                    Spacer()
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "dumbbell.fill")
+                                .foregroundColor(.green)
+                            Text("Sessions")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Text(formatNoComma(weeklyStats.sessions))
+                            .font(.title3)
+                            .fontWeight(.bold)
+                    }
+
+                    Spacer()
+                }
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+            }
+        }
+    }
+}
+
+// MARK: - Weekly Summary Card (No Title) - for Portrait mode
+/// Displays aggregated weekly exercise statistics without the "This Week" header
+struct WeeklySummaryCardNoTitle: View {
     let exercises: FetchedResults<ExerciseSessionEntity>
 
     var weeklyStats: (minutes: Double, calories: Double, sessions: Int) {
@@ -199,104 +504,118 @@ struct WeeklySummaryCard: View {
         return (totalMinutes, totalCalories, sessionCount)
     }
 
+    /// Formats an integer without thousands separators
+    private func formatNoComma(_ value: Int) -> String {
+        return "\(value)"
+    }
+
     var body: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Text("This Week")
-                    .font(.headline)
-                Spacer()
+        HStack(spacing: 0) {
+            VStack(spacing: 2) {
+                Text("Time")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                Text("Minutes")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                Text(formatNoComma(Int(weeklyStats.minutes)))
+                    .font(.subheadline)
+                    .fontWeight(.bold)
             }
+            .frame(maxWidth: .infinity)
 
-            HStack(spacing: 16) {
-                // Total Minutes
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "clock.fill")
-                            .foregroundColor(.blue)
-                        Text("Minutes")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-
-                    Text("\(Int(weeklyStats.minutes))")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                }
-
-                Spacer()
-
-                // Total Calories
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "flame.fill")
-                            .foregroundColor(.orange)
-                        Text("Calories")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-
-                    Text("\(Int(weeklyStats.calories))")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                }
-
-                Spacer()
-
-                // Session Count
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "dumbbell.fill")
-                            .foregroundColor(.green)
-                        Text("Sessions")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-
-                    Text("\(weeklyStats.sessions)")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                }
-
-                Spacer()
+            VStack(spacing: 2) {
+                Text("Energy")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                Text("Calories")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                Text(formatNoComma(Int(weeklyStats.calories)))
+                    .font(.subheadline)
+                    .fontWeight(.bold)
             }
-            .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(12)
+            .frame(maxWidth: .infinity)
+
+            VStack(spacing: 2) {
+                Text("Sessions")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                Text("Count")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                Text("\(weeklyStats.sessions)")
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+            }
+            .frame(maxWidth: .infinity)
         }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
     }
 }
 
 // MARK: - Exercise Row View
 /// Individual row for displaying an exercise session
 struct ExerciseRowView: View {
+    @Environment(\.verticalSizeClass) var verticalSizeClass
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+
     let exercise: ExerciseSessionEntity
 
-    var duration: String {
-        let hours = Int(exercise.duration) / 60
-        let minutes = Int(exercise.duration) % 60
+    /// True when the device is in portrait orientation
+    private var isPortrait: Bool {
+        verticalSizeClass == .regular && horizontalSizeClass == .compact
+    }
 
-        if hours > 0 {
-            return "\(hours)h \(minutes)m"
-        } else {
-            return "\(minutes)m"
-        }
+    /// Formats an integer without thousands separators
+    private func formatNoComma(_ value: Int) -> String {
+        return "\(value)"
+    }
+
+    /// Duration displayed in minutes only for both portrait and landscape
+    var durationText: String {
+        let totalMinutes = Int(exercise.duration)
+        return "\(totalMinutes) min"
+    }
+
+    /// Format the exercise date as MM/dd
+    private var dateText: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd"
+        return formatter.string(from: exercise.startDate ?? Date())
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            // Exercise type icon
-            Image(systemName: exerciseIcon(for: exercise.type ?? ""))
-                .font(.title2)
-                .foregroundColor(.blue)
-                .frame(width: 30)
+        if isPortrait {
+            portraitLayout
+        } else {
+            landscapeLayout
+        }
+    }
 
-            // Exercise details
+    // MARK: - Portrait Layout
+    /// Icon next to title, duration & calories horizontal, vertical intensity bar on far right
+    private var portraitLayout: some View {
+        HStack(spacing: 10) {
+            // Exercise details with icon inline with title
             VStack(alignment: .leading, spacing: 6) {
-                Text(exercise.type ?? "Unknown")
-                    .font(.headline)
+                // Icon + Title + Date on same line
+                HStack(spacing: 6) {
+                    Image(systemName: exerciseIcon(for: exercise.type ?? ""))
+                        .font(.headline)
+                        .foregroundColor(.blue)
+                    Text("\(exercise.type ?? "Unknown") \(dateText)")
+                        .font(.headline)
+                }
 
+                // Duration and calories on same horizontal line
                 HStack(spacing: 12) {
-                    Label(duration, systemImage: "clock")
+                    Label(durationText, systemImage: "clock")
                         .font(.caption)
                         .foregroundColor(.secondary)
 
@@ -308,7 +627,59 @@ struct ExerciseRowView: View {
 
             Spacer()
 
-            // Intensity bar (1-10)
+            // Vertical intensity bar on far right, closely matching label height
+            HStack(alignment: .center, spacing: 3) {
+                // Bar with fixed segment heights to match label
+                VStack(spacing: 0.5) {
+                    ForEach((1...10).reversed(), id: \.self) { level in
+                        Rectangle()
+                            .fill(intensityColor(for: level, currentIntensity: Int(exercise.intensity)))
+                            .frame(width: 6, height: 5.5)
+                    }
+                }
+
+                // Vertical letter label
+                VStack(spacing: 0) {
+                    ForEach(Array("Intensity"), id: \.self) { char in
+                        Text(String(char))
+                            .font(.system(size: 7))
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 8)
+    }
+
+    // MARK: - Landscape Layout
+    /// Original horizontal layout for landscape mode
+    private var landscapeLayout: some View {
+        HStack(spacing: 12) {
+            // Exercise type icon
+            Image(systemName: exerciseIcon(for: exercise.type ?? ""))
+                .font(.title2)
+                .foregroundColor(.blue)
+                .frame(width: 30)
+
+            // Exercise details
+            VStack(alignment: .leading, spacing: 6) {
+                Text("\(exercise.type ?? "Unknown") \(dateText)")
+                    .font(.headline)
+
+                HStack(spacing: 12) {
+                    Label(durationText, systemImage: "clock")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    Label("\(formatNoComma(Int(exercise.caloriesBurned))) cal", systemImage: "flame.fill")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Spacer()
+
+            // Horizontal intensity bar (1-10)
             VStack(alignment: .trailing, spacing: 4) {
                 Text("Intensity")
                     .font(.caption2)
@@ -374,11 +745,11 @@ struct ExerciseRowView: View {
 struct AddExerciseSessionSheet: View {
     @Binding var isPresented: Bool
     var moc: NSManagedObjectContext
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     @State private var selectedType = "Walking"
     @State private var selectedStartDate = Date()
-    @State private var hours: Int = 0
-    @State private var minutes: Int = 30
+    @State private var durationMinutes: Int = 30
     @State private var intensity: Double = 5
     @State private var distance: Double = 5.0 // Distance in km for Walking/Running/Cycling
     @State private var caloriesBurned: String = ""
@@ -392,9 +763,20 @@ struct AddExerciseSessionSheet: View {
         ["Walking", "Running", "Cycling"].contains(selectedType)
     }
 
+    private var isPortrait: Bool {
+        verticalSizeClass != .compact
+    }
+
     var body: some View {
         NavigationStack {
-            Form {
+            VStack(spacing: 0) {
+                if isPortrait {
+                    Text("Add Exercise Session")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 6)
+                }
+                Form {
                 Section("Exercise Type") {
                     Picker("Type", selection: $selectedType) {
                         ForEach(exerciseTypes, id: \.self) { type in
@@ -408,38 +790,24 @@ struct AddExerciseSessionSheet: View {
                 }
 
                 Section("Duration") {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Hours")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Stepper(value: $hours, in: 0...23) {
-                                Text("\(hours)")
-                                    .frame(width: 24)
+                    Stepper(value: $durationMinutes, in: 5...300, step: 5) {
+                        if durationMinutes >= 60 {
+                            let hrs = durationMinutes / 60
+                            let mins = durationMinutes % 60
+                            if mins == 0 {
+                                Text("\(hrs) hr")
+                                    .font(.body)
+                                    .fontWeight(.semibold)
+                            } else {
+                                Text("\(hrs) hr \(mins) min")
+                                    .font(.body)
+                                    .fontWeight(.semibold)
                             }
-                        }
-                        .frame(maxWidth: .infinity)
-
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Minutes")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Stepper(value: $minutes, in: 0...59) {
-                                Text("\(minutes)")
-                                    .frame(width: 24)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Total")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text("\(hours * 60 + minutes) minutes")
-                                .font(.subheadline)
+                        } else {
+                            Text("\(durationMinutes) min")
+                                .font(.body)
                                 .fontWeight(.semibold)
                         }
-                        .frame(maxWidth: .infinity)
                     }
                 }
 
@@ -485,7 +853,8 @@ struct AddExerciseSessionSheet: View {
                         .frame(height: 80)
                 }
             }
-            .navigationTitle("Add Exercise Session")
+            }
+            .navigationTitle(isPortrait ? "" : "Add Exercise Session")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -498,7 +867,7 @@ struct AddExerciseSessionSheet: View {
                     Button("Save") {
                         saveExercise()
                     }
-                    .disabled(selectedType.isEmpty || (hours == 0 && minutes == 0))
+                    .disabled(selectedType.isEmpty || durationMinutes == 0)
                 }
             }
         }
@@ -506,7 +875,7 @@ struct AddExerciseSessionSheet: View {
 
     /// Saves the new exercise session to Core Data
     func saveExercise() {
-        let durationInMinutes = Double(hours * 60 + minutes)
+        let durationInMinutes = Double(durationMinutes)
         let calories = useEstimatedCalories ? estimateCalories() : Double(caloriesBurned) ?? 0
 
         let newExercise = ExerciseSessionEntity(context: moc)
@@ -517,6 +886,7 @@ struct AddExerciseSessionSheet: View {
         newExercise.duration = durationInMinutes
         newExercise.intensity = intensity
         newExercise.caloriesBurned = calories
+        newExercise.distance = isDistanceBasedExercise ? distance : 0.0
         newExercise.notes = notes.isEmpty ? nil : notes
 
         do {
@@ -530,7 +900,7 @@ struct AddExerciseSessionSheet: View {
     /// Estimates calories burned based on exercise type, duration, and intensity
     /// Uses approximate values for average person (varies by weight, fitness level, etc.)
     func estimateCalories() -> Double {
-        let durationInMinutes = Double(hours * 60 + minutes)
+        let durationInMinutes = Double(durationMinutes)
         let intensity = self.intensity
 
         // Base calories per minute for each exercise type

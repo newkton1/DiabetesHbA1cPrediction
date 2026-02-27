@@ -7,36 +7,42 @@ import CoreData
 /// health conditions, and other relevant data. It validates input data and persists
 /// changes to Core Data using the UserDemographicsEntity and HealthConditionEntity.
 ///
-/// The form is organized into three main sections:
-/// 1. Personal Information (age, sex, date of birth, height, weight)
-/// 2. Health Conditions (diabetes, COPD, heart disease, tobacco use, alcohol consumption)
-/// 3. About (calculated BMI and current age)
+/// Height and weight units are locale-aware: US defaults to lbs/ft-in, elsewhere to kg/cm.
+/// Core Data always stores metric (kg, cm). Conversion happens at the UI layer.
 struct UserProfileView: View {
     // MARK: - Environment
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var isPortrait: Bool {
+        verticalSizeClass == .regular && horizontalSizeClass == .compact
+    }
 
     // MARK: - Fetch Requests
-    /// Fetch the single UserDemographicsEntity (or create one if none exists).
-    /// Assuming there's only one user profile per app instance.
     @FetchRequest(
         entity: UserDemographicsEntity.entity(),
         sortDescriptors: []
     ) private var userDemographics: FetchedResults<UserDemographicsEntity>
 
-    /// Fetch the associated HealthConditionEntity.
     @FetchRequest(
         entity: HealthConditionEntity.entity(),
         sortDescriptors: []
     ) private var healthConditions: FetchedResults<HealthConditionEntity>
+
+    // MARK: - Unit Profile
+    @ObservedObject private var hwProfile = HeightWeightUnitProfile.shared
 
     // MARK: - State Variables
     // Personal Information
     @State private var age: String = ""
     @State private var sex: String = "Male"
     @State private var dateOfBirth: Date = Date()
-    @State private var height: String = "" // in centimeters
-    @State private var weight: String = "" // in kilograms
+    @State private var weight: String = ""      // displayed in user's preferred unit
+    @State private var heightCm: String = ""    // used when unit is cm
+    @State private var heightFt: String = ""    // used when unit is ft-in
+    @State private var heightIn: String = ""    // used when unit is ft-in
 
     // Health Conditions
     @State private var hasDiabetes: Bool = false
@@ -50,103 +56,18 @@ struct UserProfileView: View {
     @State private var showValidationError = false
     @State private var validationErrorMessage = ""
     @State private var isSaving = false
+    @State private var showSaveSuccess = false
+    @FocusState private var isTextFieldFocused: Bool
 
     // MARK: - Body
     var body: some View {
-        NavigationStack {
-            Form {
-                // MARK: - Section 1: Personal Information
-                Section(header: Text("Personal Information")) {
-                    HStack {
-                        Label("Age", systemImage: "calendar.circle.fill")
-                        Spacer()
-                        TextField("Age", text: $age)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 60)
-                    }
-
-                    Picker(selection: $sex, label: Label("Sex", systemImage: "person.fill")) {
-                        Text("Male").tag("Male")
-                        Text("Female").tag("Female")
-                        Text("Other").tag("Other")
-                    }
-
-                    HStack {
-                        Label("Height (cm)", systemImage: "figure.wave")
-                        Spacer()
-                        TextField("Height", text: $height)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 60)
-                    }
-
-                    HStack {
-                        Label("Weight (kg)", systemImage: "scale.3d")
-                        Spacer()
-                        TextField("Weight", text: $weight)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 60)
-                    }
-                }
-
-                // MARK: - Section 2: Health Conditions
-                Section(header: Text("Health Conditions")) {
-                    Toggle(isOn: $hasDiabetes) {
-                        Label("Diabetes", systemImage: "drop.circle.fill")
-                    }
-
-                    // Only show diabetes type picker if diabetes toggle is on
-                    if hasDiabetes {
-                        Picker(selection: $diabetesType, label: Label("Diabetes Type", systemImage: "pills.fill")) {
-                            Text("Type 1").tag("Type 1")
-                            Text("Type 2").tag("Type 2")
-                            Text("Gestational").tag("Gestational")
-                            Text("Other").tag("Other")
-                        }
-                    }
-
-                    Toggle(isOn: $hasCOPD) {
-                        Label("COPD", systemImage: "lungs.fill")
-                    }
-
-                    Toggle(isOn: $hasHeartDisease) {
-                        Label("Heart Disease", systemImage: "heart.circle.fill")
-                    }
-
-                    Picker(selection: $tobaccoUse, label: Label("Tobacco Use", systemImage: "smoke.fill")) {
-                        Text("Never").tag("Never")
-                        Text("Former").tag("Former")
-                        Text("Current").tag("Current")
-                    }
-
-                    HStack {
-                        Label("Alcohol Units/Week", systemImage: "wineglass.fill")
-                        Spacer()
-                        Stepper(value: $alcoholUnitsPerWeek, in: 0...30, step: 1) {
-                            Text("\(alcoholUnitsPerWeek)")
-                                .frame(width: 40)
-                        }
-                    }
-                }
-
-                // MARK: - Section 3: About
-                Section(header: Text("About")) {
-                    // Display calculated BMI
-                    HStack {
-                        Label("BMI", systemImage: "figure.stand")
-                        Spacer()
-                        Text(calculateBMI())
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
-            .navigationTitle("User Profile")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    // Save Button
+        VStack(spacing: 0) {
+            // Landscape: custom header with title on left, Save button on right
+            if !isPortrait {
+                HStack {
+                    Text("User Profile")
+                        .font(.system(size: 22, weight: .bold))
+                    Spacer()
                     Button(action: saveProfile) {
                         if isSaving {
                             ProgressView()
@@ -157,36 +78,263 @@ struct UserProfileView: View {
                     }
                     .disabled(isSaving || !isFormValid())
                 }
+                .padding(.horizontal)
+                .padding(.top, 6)
+                .padding(.bottom, 2)
+            }
 
-                ToolbarItem(placement: .navigationBarLeading) {
-                    // Close/Dismiss Button
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
+            Form {
+            // MARK: - Section 1: Personal Information
+            Section(header: Text("Personal Information")) {
+                HStack {
+                    Label("Age", systemImage: "calendar.circle.fill")
+                    Spacer()
+                    TextField("Age", text: $age)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 60)
+                        .focused($isTextFieldFocused)
+                }
+
+                Picker(selection: $sex, label: Label("Sex", systemImage: "person.fill")) {
+                    Text("Male").tag("Male")
+                    Text("Female").tag("Female")
+                    Text("Other").tag("Other")
+                }
+
+                // Height field — adapts to user's unit preference
+                if hwProfile.heightUnit == .cm {
+                    HStack {
+                        Label("Height (cm)", systemImage: "figure.wave")
+                        Spacer()
+                        TextField("cm", text: $heightCm)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 60)
+                            .focused($isTextFieldFocused)
+                    }
+                } else {
+                    HStack {
+                        Label("Height (ft-in)", systemImage: "figure.wave")
+                        Spacer()
+                        TextField("ft", text: $heightFt)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 40)
+                            .focused($isTextFieldFocused)
+                        Text("'")
+                            .foregroundColor(.secondary)
+                        TextField("in", text: $heightIn)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 40)
+                            .focused($isTextFieldFocused)
+                        Text("\"")
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                // Weight field — adapts to user's unit preference
+                HStack {
+                    Label(hwProfile.weightUnit == .kg ? "Weight (kg)" : "Weight (lbs)",
+                          systemImage: "scale.3d")
+                    Spacer()
+                    TextField(hwProfile.weightUnit == .kg ? "kg" : "lbs", text: $weight)
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 60)
+                        .focused($isTextFieldFocused)
+                }
+            }
+
+            // MARK: - Section 2: Health Conditions
+            Section(header: Text("Health Conditions")) {
+                Toggle(isOn: $hasDiabetes) {
+                    Label("Diabetes", systemImage: "drop.circle.fill")
+                }
+
+                if hasDiabetes {
+                    Picker(selection: $diabetesType, label: Label("Diabetes Type", systemImage: "pills.fill")) {
+                        Text("Type 1").tag("Type 1")
+                        Text("Type 2").tag("Type 2")
+                        Text("Gestational").tag("Gestational")
+                        Text("Other").tag("Other")
+                    }
+                }
+
+                Toggle(isOn: $hasCOPD) {
+                    Label("COPD", systemImage: "lungs.fill")
+                }
+
+                Toggle(isOn: $hasHeartDisease) {
+                    Label("Heart Disease", systemImage: "heart.circle.fill")
+                }
+
+                Picker(selection: $tobaccoUse, label: Label("Tobacco Use", systemImage: "smoke.fill")) {
+                    Text("Never").tag("Never")
+                    Text("Former").tag("Former")
+                    Text("Current").tag("Current")
+                }
+
+                HStack {
+                    Label("Alcohol Units/Week", systemImage: "wineglass.fill")
+                    Spacer()
+                    Stepper(value: $alcoholUnitsPerWeek, in: 0...30, step: 1) {
+                        Text("\(alcoholUnitsPerWeek)")
+                            .frame(width: 40)
                     }
                 }
             }
-            .alert("Validation Error", isPresented: $showValidationError) {
-                Button("OK") { }
-            } message: {
-                Text(validationErrorMessage)
+
+            // MARK: - Section 3: About
+            Section(header: Text("About")) {
+                HStack {
+                    Label("BMI", systemImage: "figure.stand")
+                    Spacer()
+                    let bmiResult = calculateBMI()
+                    Text(bmiResult.text)
+                        .foregroundColor(bmiResult.color)
+                }
             }
-            .onAppear {
-                loadExistingProfile()
+
+            // MARK: - Section 4: Settings
+            Section(header: Text("Settings")) {
+                NavigationLink(destination: HbA1cSettingsView(profile: HbA1cUserProfile.shared)) {
+                    HStack {
+                        Label("HbA1c Units", systemImage: "globe")
+                        Spacer()
+                        Text(HbA1cUserProfile.shared.effectiveUnit.shortUnit)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                // Weight unit picker
+                Picker(selection: $hwProfile.weightUnit,
+                       label: Label("Weight Units", systemImage: "scale.3d")) {
+                    ForEach(HeightWeightUnitProfile.WeightUnit.allCases) { unit in
+                        Text(unit.label).tag(unit)
+                    }
+                }
+                .onChange(of: hwProfile.weightUnit) { oldUnit, newUnit in
+                    convertWeightDisplay(from: oldUnit, to: newUnit)
+                }
+
+                // Height unit picker
+                Picker(selection: $hwProfile.heightUnit,
+                       label: Label("Height Units", systemImage: "figure.wave")) {
+                    ForEach(HeightWeightUnitProfile.HeightUnit.allCases) { unit in
+                        Text(unit.label).tag(unit)
+                    }
+                }
+                .onChange(of: hwProfile.heightUnit) { oldUnit, newUnit in
+                    convertHeightDisplay(from: oldUnit, to: newUnit)
+                }
+            }
+        }
+        }
+        .navigationTitle(isPortrait ? "User Profile" : "")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            // Portrait: title on left, Save button on right
+            if isPortrait {
+                ToolbarItem(placement: .topBarLeading) {
+                    Text("User Profile")
+                        .font(.system(size: 22, weight: .bold))
+                        .fixedSize(horizontal: true, vertical: false)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: saveProfile) {
+                        if isSaving {
+                            ProgressView()
+                        } else {
+                            Text("Save")
+                                .fontWeight(.semibold)
+                        }
+                    }
+                    .disabled(isSaving || !isFormValid())
+                }
+            }
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    isTextFieldFocused = false
+                }
+            }
+        }
+        .alert("Validation Error", isPresented: $showValidationError) {
+            Button("OK") { }
+        } message: {
+            Text(validationErrorMessage)
+        }
+        .alert("Profile Saved", isPresented: $showSaveSuccess) {
+            Button("OK") { }
+        } message: {
+            Text("Your profile has been saved successfully.")
+        }
+        .onAppear {
+            loadExistingProfile()
+        }
+    }
+
+    // MARK: - Unit Conversion on Toggle
+
+    /// When user switches weight unit, convert the displayed value
+    private func convertWeightDisplay(from oldUnit: HeightWeightUnitProfile.WeightUnit,
+                                       to newUnit: HeightWeightUnitProfile.WeightUnit) {
+        guard let value = Double(weight), value > 0 else { return }
+        if oldUnit == .kg && newUnit == .lbs {
+            weight = String(format: "%.0f", hwProfile.kgToLbs(value))
+        } else if oldUnit == .lbs && newUnit == .kg {
+            weight = String(format: "%.1f", hwProfile.lbsToKg(value))
+        }
+    }
+
+    /// When user switches height unit, convert the displayed value
+    private func convertHeightDisplay(from oldUnit: HeightWeightUnitProfile.HeightUnit,
+                                       to newUnit: HeightWeightUnitProfile.HeightUnit) {
+        if oldUnit == .cm && newUnit == .ftIn {
+            if let cm = Double(heightCm), cm > 0 {
+                let (feet, inches) = hwProfile.cmToFtIn(cm)
+                heightFt = String(feet)
+                heightIn = String(inches)
+            }
+        } else if oldUnit == .ftIn && newUnit == .cm {
+            if let ft = Int(heightFt), let inches = Int(heightIn) {
+                let cm = hwProfile.ftInToCm(feet: ft, inches: inches)
+                heightCm = String(format: "%.0f", cm)
             }
         }
     }
 
     // MARK: - Helper Methods
 
-    /// Load existing user profile data from Core Data into the state variables.
-    /// If no profile exists, the form starts with default values.
+    /// Load existing user profile data from Core Data, converting to user's preferred units.
     private func loadExistingProfile() {
-        // Load UserDemographicsEntity data
         if let userDemographic = userDemographics.first {
             age = String(userDemographic.age)
             sex = userDemographic.sex ?? "Male"
-            height = String(userDemographic.height)
-            weight = String(userDemographic.weight)
+
+            // Load weight (stored as kg) and convert to user's unit
+            let storedWeightKg = userDemographic.weight
+            if storedWeightKg > 0 {
+                if hwProfile.weightUnit == .lbs {
+                    weight = String(format: "%.0f", hwProfile.kgToLbs(storedWeightKg))
+                } else {
+                    weight = String(format: "%.1f", storedWeightKg)
+                }
+            }
+
+            // Load height (stored as cm) and convert to user's unit
+            let storedHeightCm = userDemographic.height
+            if storedHeightCm > 0 {
+                if hwProfile.heightUnit == .ftIn {
+                    let (feet, inches) = hwProfile.cmToFtIn(storedHeightCm)
+                    heightFt = String(feet)
+                    heightIn = String(inches)
+                } else {
+                    heightCm = String(format: "%.0f", storedHeightCm)
+                }
+            }
 
             if let dob = userDemographic.dateOfBirth {
                 dateOfBirth = dob
@@ -195,14 +343,8 @@ struct UserProfileView: View {
             if let diabetesTypeValue = userDemographic.diabetesType {
                 diabetesType = diabetesTypeValue
             }
-
-            if let menopausalStatus = userDemographic.menopausalStatus {
-                // You can use this for further logic if needed
-                _ = menopausalStatus
-            }
         }
 
-        // Load HealthConditionEntity data
         if let healthCondition = healthConditions.first {
             hasDiabetes = healthCondition.hasDiabetes
             hasCOPD = healthCondition.hasCOPD
@@ -216,60 +358,91 @@ struct UserProfileView: View {
         }
     }
 
-    /// Validate the form input according to specified constraints.
-    /// - Age: 1-120 years
-    /// - Weight: 20-300 kg
-    /// - Height: 50-250 cm
-    /// - Returns: True if all fields are valid, false otherwise.
+    // MARK: - Metric Conversion Helpers
+
+    /// Convert the displayed weight to kilograms for storage
+    private func weightInKg() -> Double? {
+        guard let value = Double(weight) else { return nil }
+        return hwProfile.weightUnit == .lbs ? hwProfile.lbsToKg(value) : value
+    }
+
+    /// Convert the displayed height to centimetres for storage
+    private func heightInCm() -> Double? {
+        if hwProfile.heightUnit == .ftIn {
+            guard let ft = Int(heightFt), let inches = Int(heightIn) else { return nil }
+            return hwProfile.ftInToCm(feet: ft, inches: inches)
+        } else {
+            return Double(heightCm)
+        }
+    }
+
+    // MARK: - Validation
+
+    /// Validate the form input with unit-aware ranges.
     private func isFormValid() -> Bool {
         // Check age
         if let ageInt = Int(age), ageInt < 1 || ageInt > 120 {
             return false
         }
 
-        // Check weight
-        if let weightDouble = Double(weight), weightDouble < 20 || weightDouble > 300 {
-            return false
+        // Check weight in user's unit
+        if let w = Double(weight) {
+            if hwProfile.weightUnit == .kg {
+                if w < 20 || w > 300 { return false }
+            } else {
+                if w < 44 || w > 660 { return false }
+            }
         }
 
-        // Check height
-        if let heightDouble = Double(height), heightDouble < 50 || heightDouble > 250 {
-            return false
+        // Check height in user's unit
+        if hwProfile.heightUnit == .cm {
+            if let h = Double(heightCm), (h < 50 || h > 250) { return false }
+        } else {
+            if let ft = Int(heightFt), let inches = Int(heightIn) {
+                let totalInches = ft * 12 + inches
+                if totalInches < 20 || totalInches > 98 { return false }
+                if inches < 0 || inches > 11 { return false }
+            }
         }
 
-        // At least one of age, weight, height should be filled
-        return !age.isEmpty && !height.isEmpty && !weight.isEmpty
+        // Ensure required fields are filled
+        let heightFilled = hwProfile.heightUnit == .cm ? !heightCm.isEmpty : (!heightFt.isEmpty && !heightIn.isEmpty)
+        return !age.isEmpty && !weight.isEmpty && heightFilled
     }
 
-    /// Calculate Body Mass Index (BMI) based on current height and weight.
-    /// BMI = weight (kg) / (height (m))^2
-    /// - Returns: Formatted BMI string with interpretation, or "N/A" if data is incomplete.
-    private func calculateBMI() -> String {
-        guard let heightCm = Double(height),
-              let weightKg = Double(weight),
-              heightCm > 0 else {
-            return "N/A"
+    // MARK: - BMI Calculation
+
+    /// Calculate BMI from the displayed values, converting to metric first.
+    private func calculateBMI() -> (text: String, color: Color) {
+        guard let heightCmVal = heightInCm(),
+              let weightKgVal = weightInKg(),
+              heightCmVal > 0 else {
+            return ("N/A", .secondary)
         }
 
-        let heightM = heightCm / 100.0
-        let bmi = weightKg / (heightM * heightM)
+        let heightM = heightCmVal / 100.0
+        let bmi = weightKgVal / (heightM * heightM)
 
         let category: String
+        let color: Color
         if bmi < 18.5 {
             category = "Underweight"
+            color = .orange
         } else if bmi < 25.0 {
             category = "Normal"
+            color = .green
         } else if bmi < 30.0 {
             category = "Overweight"
+            color = .orange
         } else {
             category = "Obese"
+            color = .orange
         }
 
-        return String(format: "%.1f - %@", bmi, category)
+        return (String(format: "%.1f - %@", bmi, category), color)
     }
 
     /// Calculate the current age based on the selected date of birth.
-    /// - Returns: Integer age in years.
     private func calculateCurrentAge() -> Int {
         let calendar = Calendar.current
         let now = Date()
@@ -277,19 +450,26 @@ struct UserProfileView: View {
         return ageComponents.year ?? 0
     }
 
-    /// Save the user profile to Core Data.
-    /// Creates new entities if they don't exist, or updates existing ones.
-    /// Validates all fields before saving.
+    // MARK: - Save
+
+    /// Save the user profile to Core Data. Converts to metric before storing.
     private func saveProfile() {
-        // Validate form
         guard isFormValid() else {
             showValidationError = true
             if let ageInt = Int(age), ageInt < 1 || ageInt > 120 {
                 validationErrorMessage = "Age must be between 1 and 120 years."
-            } else if let heightDouble = Double(height), heightDouble < 50 || heightDouble > 250 {
-                validationErrorMessage = "Height must be between 50 and 250 cm."
-            } else if let weightDouble = Double(weight), weightDouble < 20 || weightDouble > 300 {
-                validationErrorMessage = "Weight must be between 20 and 300 kg."
+            } else if heightInCm() == nil || (heightInCm()! < 50 || heightInCm()! > 250) {
+                if hwProfile.heightUnit == .cm {
+                    validationErrorMessage = "Height must be between 50 and 250 cm."
+                } else {
+                    validationErrorMessage = "Height must be between 1'8\" and 8'2\"."
+                }
+            } else if weightInKg() == nil || (weightInKg()! < 20 || weightInKg()! > 300) {
+                if hwProfile.weightUnit == .kg {
+                    validationErrorMessage = "Weight must be between 20 and 300 kg."
+                } else {
+                    validationErrorMessage = "Weight must be between 44 and 660 lbs."
+                }
             } else {
                 validationErrorMessage = "Please fill in all required fields."
             }
@@ -298,7 +478,6 @@ struct UserProfileView: View {
 
         isSaving = true
 
-        // Create or update UserDemographicsEntity
         let userDemographic: UserDemographicsEntity
         if let existing = userDemographics.first {
             userDemographic = existing
@@ -309,12 +488,11 @@ struct UserProfileView: View {
         userDemographic.age = Int16(age) ?? 0
         userDemographic.sex = sex
         userDemographic.dateOfBirth = dateOfBirth
-        userDemographic.height = Double(height) ?? 0.0
-        userDemographic.weight = Double(weight) ?? 0.0
+        userDemographic.height = heightInCm() ?? 0.0    // always stored as cm
+        userDemographic.weight = weightInKg() ?? 0.0     // always stored as kg
         userDemographic.diabetesType = hasDiabetes ? diabetesType : nil
         userDemographic.menopausalStatus = sex == "Female" ? "Not specified" : nil
 
-        // Create or update HealthConditionEntity
         let healthCondition: HealthConditionEntity
         if let existing = healthConditions.first {
             healthCondition = existing
@@ -329,11 +507,11 @@ struct UserProfileView: View {
         healthCondition.tobaccoUse = tobaccoUse
         healthCondition.alcoholUnitsPerWeek = Double(alcoholUnitsPerWeek)
 
-        // Save to Core Data
         do {
             try viewContext.save()
             isSaving = false
-            dismiss()
+            isTextFieldFocused = false
+            showSaveSuccess = true
         } catch {
             isSaving = false
             showValidationError = true

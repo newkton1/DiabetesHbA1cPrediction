@@ -22,6 +22,12 @@ extension MealEntity {
     @NSManaged public var timestamp: Date?
     @NSManaged public var unitString: String?
     @NSManaged public var macronutrients: NSSet?
+    
+    // New attributes for meal builder
+    @NSManaged public var mealType: String?
+    @NSManaged public var timeSinceLastMeal: Double
+    @NSManaged public var plannedDateTime: Date?
+    @NSManaged public var foodItems: NSSet?
 
 }
 
@@ -39,6 +45,23 @@ extension MealEntity {
 
     @objc(removeMacronutrients:)
     @NSManaged public func removeFromMacronutrients(_ values: NSSet)
+
+}
+
+// MARK: Generated accessors for foodItems
+extension MealEntity {
+
+    @objc(addFoodItemsObject:)
+    @NSManaged public func addToFoodItems(_ value: MealFoodItemEntity)
+
+    @objc(removeFoodItemsObject:)
+    @NSManaged public func removeFromFoodItems(_ value: MealFoodItemEntity)
+
+    @objc(addFoodItems:)
+    @NSManaged public func addToFoodItems(_ values: NSSet)
+
+    @objc(removeFoodItems:)
+    @NSManaged public func removeFromFoodItems(_ values: NSSet)
 
 }
 

@@ -9,23 +9,10 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
-	</dict>
-	<key>SuppressBuildableAutocreation</key>
-	<dict>
-		<key>93CC102C2F400B20003B36A4</key>
+		<key>h.xcscheme_^#shared#^_</key>
 		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>93CC103E2F400B22003B36A4</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>93CC10482F400B22003B36A4</key>
-		<dict>
-			<key>primary</key>
-			<true/>
+			<key>orderHint</key>
+			<integer>0</integer>
 		</dict>
 	</dict>
 </dict>

@@ -13,9 +13,17 @@ struct PredictionInput {
     let dailyCarbIntake: Double          // grams - carbohydrate consumption
     let dailyCalories: Double            // kilocalories - total energy intake
 
-    // Physical Activity
+    // Physical Activity (7-day window)
     let weeklyExerciseMinutes: Double    // minutes - total aerobic exercise per week
     let exerciseIntensityAvg: Double     // 1-10 scale - average intensity of exercise sessions
+
+    // Cardio-specific metrics (Walking/Running/Cycling - last 7 days)
+    var cardioDistanceKm: Double = 0     // km - total distance from cardio exercises
+    var cardioCaloriesBurned: Double = 0 // calories - total from cardio exercises
+
+    // Non-cardio metrics (all other exercise types - last 7 days)
+    var nonCardioMinutes: Double = 0     // minutes - total duration of non-cardio exercises
+    var nonCardioIntensityAvg: Double = 0 // 1-10 scale - average intensity of non-cardio
 
     // Demographics
     let age: Int                         // years
@@ -34,6 +42,15 @@ struct PredictionInput {
     let tobaccoUse: String               // "Never", "Former", or "Current"
     let alcoholUnitsPerWeek: Double      // standard drink units per week
     let timeSinceLastMealHours: Double   // hours since last food intake
+    
+    // Last Meal Data (for immediate glucose impact)
+    var lastMealCarbs: Double = 0        // grams - carbohydrates from last meal
+    var lastMealGlycemicLoad: Double = 0 // glycemic load of last meal
+    
+    // Planned Meal Data (for future impact projection)
+    var plannedMealCarbs: Double? = nil   // grams - planned meal carbohydrates
+    var plannedMealGlycemicLoad: Double? = nil  // planned meal glycemic load
+    var hoursUntilPlannedMeal: Double? = nil    // hours until planned meal
 }
 
 /// Struct representing the HbA1c prediction result with clinical interpretation
@@ -87,18 +104,36 @@ class HbA1cPredictionEngine: ObservableObject {
             contributingFactors["High Carb Intake"] = carbAdjustment
         }
 
-        // Step 4: Apply exercise adjustment
-        // Regular physical activity improves insulin sensitivity and glucose control
-        // Effects: 150+ min/week moderate intensity reduces HbA1c by ~0.3%
+        // Step 4: Apply exercise adjustment (dual-pathway, 7-day history)
+        // Cardio (Walking/Running/Cycling): uses distance + calories burned
+        // Non-cardio (all others): uses duration + intensity
         // Reference: American Diabetes Association Standards of Care
-        // Exercise effect compounds with intensity: max reduction = -0.3%
-        if input.weeklyExerciseMinutes > 0 {
-            let exerciseEffect = min(
+        var totalExerciseEffect = 0.0
+
+        // Cardio pathway: distance + calories
+        if input.cardioDistanceKm > 0 || input.cardioCaloriesBurned > 0 {
+            let distanceEffect = input.cardioDistanceKm * 0.02  // ~0.3% reduction per 15 km/week
+            let calorieEffect = (input.cardioCaloriesBurned / 500.0) * 0.15  // ~0.15% per 500 cal
+            let cardioEffect = min(0.4, distanceEffect + calorieEffect)
+            totalExerciseEffect += cardioEffect
+            contributingFactors["Cardio Exercise"] = -cardioEffect
+        }
+
+        // Non-cardio pathway: duration + intensity
+        if input.nonCardioMinutes > 0 {
+            let nonCardioEffect = min(
                 0.3,
-                (input.weeklyExerciseMinutes / 150.0) * (input.exerciseIntensityAvg / 10.0) * 0.3
+                (input.nonCardioMinutes / 150.0) * (input.nonCardioIntensityAvg / 10.0) * 0.3
             )
-            predictedHbA1c -= exerciseEffect
-            contributingFactors["Exercise Benefits"] = -exerciseEffect
+            totalExerciseEffect += nonCardioEffect
+            contributingFactors["Other Exercise"] = -nonCardioEffect
+        }
+
+        // Cap total exercise benefit at 0.6% HbA1c reduction
+        totalExerciseEffect = min(0.6, totalExerciseEffect)
+        if totalExerciseEffect > 0 {
+            predictedHbA1c -= totalExerciseEffect
+            contributingFactors["Exercise Benefits"] = -totalExerciseEffect
         }
 
         // Step 5: Apply age adjustment
@@ -188,6 +223,28 @@ class HbA1cPredictionEngine: ObservableObject {
             predictedHbA1c += alcoholAdjustment
             contributingFactors["Alcohol Consumption"] = alcoholAdjustment
         }
+        
+        // Step 11: Apply recent meal impact adjustment
+        // Recent high glycemic load meals have a transient effect on blood glucose
+        // that can affect HbA1c trajectory if patterns persist
+        if input.lastMealGlycemicLoad > 0 && input.timeSinceLastMealHours < 6 {
+            // Recent meal impact decreases with time
+            let timeFactor = max(0, 1.0 - input.timeSinceLastMealHours / 6.0)
+            
+            if input.lastMealGlycemicLoad > 25 {
+                // High glycemic load meal (>25)
+                let mealImpact = min(0.1, (input.lastMealGlycemicLoad - 25) / 50.0 * 0.1) * timeFactor
+                predictedHbA1c += mealImpact
+                contributingFactors["Recent High GL Meal"] = mealImpact
+            }
+        }
+        
+        // High carb recent meals add additional impact
+        if input.lastMealCarbs > 80 && input.timeSinceLastMealHours < 4 {
+            let carbImpact = min(0.05, (input.lastMealCarbs - 80) / 100.0 * 0.05)
+            predictedHbA1c += carbImpact
+            contributingFactors["Recent High Carb Meal"] = carbImpact
+        }
 
         // Ensure predicted HbA1c stays within physiological bounds
         predictedHbA1c = max(4.0, min(14.0, predictedHbA1c))
@@ -246,9 +303,10 @@ class HbA1cPredictionEngine: ObservableObject {
         let meals = fetchMeals(from: context, days: 30) ?? []
         let (dailyCarbIntake, dailyCalories) = calculateDailyNutrition(meals)
 
-        // Fetch exercise sessions from last 30 days
-        let exerciseSessions = fetchExerciseSessions(from: context, days: 30) ?? []
+        // Fetch exercise sessions from last 7 days
+        let exerciseSessions = fetchExerciseSessions(from: context, days: 7) ?? []
         let (weeklyExerciseMinutes, exerciseIntensityAvg) = calculateExerciseMetrics(exerciseSessions)
+        let exerciseSplit = calculateExerciseSplit(exerciseSessions)
 
         // Fetch user demographics
         guard let demographics = fetchUserDemographics(from: context) else {
@@ -259,7 +317,14 @@ class HbA1cPredictionEngine: ObservableObject {
         // Fetch health conditions
         let healthConditions = fetchHealthConditions(from: context) ?? [:]
 
-        let input = PredictionInput(
+        // Fetch last meal data for meal-aware prediction
+        let lastMealData = fetchLastMeal(from: context)
+        
+        // Fetch next planned meal
+        let plannedMeals = fetchPlannedMeals(from: context)
+        let nextPlannedMeal = plannedMeals.first
+        
+        var input = PredictionInput(
             averageGlucose: averageGlucose,
             glucoseVariability: glucoseVariability,
             dailyCarbIntake: dailyCarbIntake,
@@ -275,8 +340,27 @@ class HbA1cPredictionEngine: ObservableObject {
             hasHeartDisease: healthConditions["HeartDisease"] ?? false,
             tobaccoUse: demographics.tobaccoUse,
             alcoholUnitsPerWeek: demographics.alcoholUnitsPerWeek,
-            timeSinceLastMealHours: calculateTimeSinceLastMeal(meals)
+            timeSinceLastMealHours: lastMealData?.hoursSince ?? calculateTimeSinceLastMeal(meals)
         )
+        
+        // Add cardio/non-cardio exercise split
+        input.cardioDistanceKm = exerciseSplit.cardioDistanceKm
+        input.cardioCaloriesBurned = exerciseSplit.cardioCalories
+        input.nonCardioMinutes = exerciseSplit.nonCardioMinutes
+        input.nonCardioIntensityAvg = exerciseSplit.nonCardioIntensityAvg
+
+        // Add last meal data
+        if let lastMeal = lastMealData {
+            input.lastMealCarbs = lastMeal.carbs
+            input.lastMealGlycemicLoad = lastMeal.glycemicLoad
+        }
+        
+        // Add planned meal data
+        if let planned = nextPlannedMeal {
+            input.plannedMealCarbs = planned.carbs
+            input.plannedMealGlycemicLoad = planned.glycemicLoad
+            input.hoursUntilPlannedMeal = planned.hoursUntil
+        }
 
         return input
     }
@@ -291,21 +375,212 @@ class HbA1cPredictionEngine: ObservableObject {
             return nil
         }
 
-        // Run prediction
+        // Run prediction (includes dual-pathway exercise calculation)
         let result = predict(from: input)
+        var finalHbA1c = result.predictedHbA1c
+        var finalConfidence = result.confidenceLevel
+        var updatedFactors = result.contributingFactors
+
+        // Blend with prior HbA1c measurements if available (2–5 readings)
+        if let priorReadings = fetchPriorHbA1cReadings(from: context), priorReadings.count >= 2 {
+            finalHbA1c = blendWithPriorHbA1c(
+                formulaPrediction: finalHbA1c,
+                priorReadings: priorReadings
+            )
+            finalHbA1c = max(4.0, min(14.0, finalHbA1c))
+            finalConfidence = min(1.0, finalConfidence + 0.15)
+            updatedFactors["Prior HbA1c Blending"] = 0.0  // marker indicating blending was applied
+        }
+
+        let finalResult = PredictionResult(
+            predictedHbA1c: round(finalHbA1c * 10.0) / 10.0,
+            confidenceLevel: finalConfidence,
+            riskCategory: determineRiskCategory(hbA1c: finalHbA1c),
+            contributingFactors: updatedFactors,
+            recommendations: result.recommendations
+        )
 
         // Save prediction result to Core Data
-        savePredictionResult(result, to: context)
+        savePredictionResult(finalResult, to: context)
 
         // Attempt to save context
         do {
             try context.save()
             print("Successfully saved prediction result to Core Data")
-            return result
+            return finalResult
         } catch {
             print("Error saving prediction result: \(error.localizedDescription)")
             return nil
         }
+    }
+
+    // MARK: - Meal-Aware Prediction Methods
+    
+    /// Fetches the most recent logged meal (not planned) with calculated totals
+    /// - Parameter context: NSManagedObjectContext for Core Data access
+    /// - Returns: Tuple containing carbs, glycemic load, and hours since meal; nil if no meal found
+    func fetchLastMeal(from context: NSManagedObjectContext) -> (carbs: Double, glycemicLoad: Double, hoursSince: Double)? {
+        let fetchRequest: NSFetchRequest<MealEntity> = MealEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "mealType != %@ OR mealType == nil", "plannedMeal")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \MealEntity.timestamp, ascending: false)]
+        fetchRequest.fetchLimit = 1
+        
+        do {
+            guard let meal = try context.fetch(fetchRequest).first,
+                  let timestamp = meal.timestamp else {
+                return nil
+            }
+            
+            // Calculate totals from food items or macronutrients
+            var totalCarbs: Double = 0
+            var totalGlycemicLoad: Double = 0
+            
+            // Try to get from food items first (new system)
+            if let foodItems = meal.foodItems as? Set<MealFoodItemEntity>, !foodItems.isEmpty {
+                for item in foodItems {
+                    let carbsForItem = item.carbsPerServing * item.quantity
+                    let fiberForItem = item.fiberPerServing * item.quantity
+                    let netCarbs = max(0, carbsForItem - fiberForItem)
+                    totalCarbs += carbsForItem
+                    totalGlycemicLoad += (Double(item.glycemicIndex) * netCarbs) / 100.0
+                }
+            } else if let macros = meal.macronutrients as? Set<MacronutrientEntity> {
+                // Fall back to macronutrients (legacy system)
+                totalCarbs = macros.filter { $0.type == "carbohydrates" || $0.type == "carbs" }
+                    .reduce(0) { $0 + $1.amount }
+                // Estimate glycemic load with average GI of 55
+                totalGlycemicLoad = (55 * totalCarbs) / 100.0
+            }
+            
+            // Use meal's timeSinceLastMeal if available, otherwise calculate from timestamp
+            let hoursSince: Double
+            if meal.timeSinceLastMeal > 0 {
+                // Add time elapsed since the meal was logged
+                let loggedHoursAgo = Date().timeIntervalSince(timestamp) / 3600.0
+                hoursSince = meal.timeSinceLastMeal + loggedHoursAgo
+            } else {
+                hoursSince = Date().timeIntervalSince(timestamp) / 3600.0
+            }
+            
+            return (carbs: totalCarbs, glycemicLoad: totalGlycemicLoad, hoursSince: hoursSince)
+        } catch {
+            print("Error fetching last meal: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    /// Fetches upcoming planned meals
+    /// - Parameter context: NSManagedObjectContext for Core Data access
+    /// - Returns: Array of tuples containing carbs, glycemic load, and hours until meal
+    func fetchPlannedMeals(from context: NSManagedObjectContext) -> [(carbs: Double, glycemicLoad: Double, hoursUntil: Double)] {
+        let fetchRequest: NSFetchRequest<MealEntity> = MealEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "mealType == %@ AND plannedDateTime > %@", "plannedMeal", Date() as NSDate)
+        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \MealEntity.plannedDateTime, ascending: true)]
+        
+        do {
+            let meals = try context.fetch(fetchRequest)
+            
+            return meals.compactMap { meal -> (carbs: Double, glycemicLoad: Double, hoursUntil: Double)? in
+                guard let plannedDate = meal.plannedDateTime else { return nil }
+                
+                var totalCarbs: Double = 0
+                var totalGlycemicLoad: Double = 0
+                
+                // Try to get from food items first (new system)
+                if let foodItems = meal.foodItems as? Set<MealFoodItemEntity>, !foodItems.isEmpty {
+                    for item in foodItems {
+                        let carbsForItem = item.carbsPerServing * item.quantity
+                        let fiberForItem = item.fiberPerServing * item.quantity
+                        let netCarbs = max(0, carbsForItem - fiberForItem)
+                        totalCarbs += carbsForItem
+                        totalGlycemicLoad += (Double(item.glycemicIndex) * netCarbs) / 100.0
+                    }
+                } else if let macros = meal.macronutrients as? Set<MacronutrientEntity> {
+                    // Fall back to macronutrients (legacy system)
+                    totalCarbs = macros.filter { $0.type == "carbohydrates" || $0.type == "carbs" }
+                        .reduce(0) { $0 + $1.amount }
+                    // Estimate glycemic load with average GI of 55
+                    totalGlycemicLoad = (55 * totalCarbs) / 100.0
+                }
+                
+                let hoursUntil = plannedDate.timeIntervalSince(Date()) / 3600.0
+                
+                return (carbs: totalCarbs, glycemicLoad: totalGlycemicLoad, hoursUntil: hoursUntil)
+            }
+        } catch {
+            print("Error fetching planned meals: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
+    /// Predicts future HbA1c impact based on a planned meal
+    /// - Parameters:
+    ///   - currentPrediction: The current HbA1c prediction result
+    ///   - plannedMealCarbs: Carbohydrates in the planned meal (grams)
+    ///   - plannedMealGI: Average glycemic index of the planned meal
+    ///   - hoursUntilMeal: Hours until the meal will be consumed
+    /// - Returns: Adjusted prediction result incorporating the planned meal impact
+    func predictWithPlannedMeal(
+        currentPrediction: PredictionResult,
+        plannedMealCarbs: Double,
+        plannedMealGI: Double,
+        hoursUntilMeal: Double
+    ) -> PredictionResult {
+        var adjustedHbA1c = currentPrediction.predictedHbA1c
+        var updatedFactors = currentPrediction.contributingFactors
+        
+        // Calculate glycemic load of planned meal
+        let glycemicLoad = (plannedMealGI * plannedMealCarbs) / 100.0
+        
+        // Impact factor based on meal size and GI
+        // High GL meals (>20) have more significant impact
+        // The impact is reduced for meals further in the future (less immediate effect)
+        let timeFactor = max(0.5, 1.0 - (hoursUntilMeal / 24.0) * 0.3)  // Reduces impact for meals >8h away
+        
+        if glycemicLoad > 20 {
+            // High glycemic load meal
+            let glImpact = min(0.15, (glycemicLoad - 20) / 100.0 * 0.15) * timeFactor
+            adjustedHbA1c += glImpact
+            updatedFactors["Planned High GL Meal"] = glImpact
+        } else if glycemicLoad > 10 {
+            // Moderate glycemic load meal
+            let glImpact = min(0.05, (glycemicLoad - 10) / 50.0 * 0.05) * timeFactor
+            adjustedHbA1c += glImpact
+            updatedFactors["Planned Moderate GL Meal"] = glImpact
+        }
+        // Low GL meals (<10) have minimal impact
+        
+        // High carb meals (>60g) add additional adjustment
+        if plannedMealCarbs > 60 {
+            let carbImpact = min(0.1, (plannedMealCarbs - 60) / 100.0 * 0.1) * timeFactor
+            adjustedHbA1c += carbImpact
+            updatedFactors["Planned High Carb Meal"] = carbImpact
+        }
+        
+        // Ensure bounds
+        adjustedHbA1c = max(4.0, min(14.0, adjustedHbA1c))
+        
+        // Update recommendations based on planned meal
+        var updatedRecommendations = currentPrediction.recommendations
+        
+        if glycemicLoad > 20 {
+            updatedRecommendations.insert("Consider reducing portion size or choosing lower GI alternatives for your planned meal", at: 0)
+        }
+        
+        if plannedMealCarbs > 80 {
+            updatedRecommendations.insert("Your planned meal is high in carbohydrates. Consider adding protein or fiber to slow glucose absorption", at: 0)
+        }
+        
+        // Determine updated risk category
+        let updatedRiskCategory = determineRiskCategory(hbA1c: adjustedHbA1c)
+        
+        return PredictionResult(
+            predictedHbA1c: round(adjustedHbA1c * 10.0) / 10.0,
+            confidenceLevel: currentPrediction.confidenceLevel * 0.9,  // Slightly lower confidence for projected values
+            riskCategory: updatedRiskCategory,
+            contributingFactors: updatedFactors,
+            recommendations: updatedRecommendations
+        )
     }
 
     // MARK: - Private Helper Methods
@@ -330,10 +605,13 @@ class HbA1cPredictionEngine: ObservableObject {
             }
 
             let glucoseValues = results.compactMap { object -> Double? in
-                if let glucoseValue = object.value(forKey: "glucoseValue") as? NSNumber {
-                    return glucoseValue.doubleValue
+                guard let glucoseValue = object.value(forKey: "value") as? NSNumber else { return nil }
+                let unit = object.value(forKey: "unit") as? String ?? "mg/dL"
+                // Nathan formula requires mg/dL — convert mmol/L readings before use
+                if unit == "mmol/L" {
+                    return glucoseValue.doubleValue * 18.0182
                 }
-                return nil
+                return glucoseValue.doubleValue
             }
 
             return glucoseValues.isEmpty ? nil : glucoseValues
@@ -370,8 +648,8 @@ class HbA1cPredictionEngine: ObservableObject {
         let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "ExerciseSessionEntity")
 
         let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
-        fetchRequest.predicate = NSPredicate(format: "timestamp >= %@", cutoffDate as NSDate)
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
+        fetchRequest.predicate = NSPredicate(format: "startDate >= %@", cutoffDate as NSDate)
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "startDate", ascending: false)]
 
         do {
             return try context.fetch(fetchRequest) as? [NSManagedObject]
@@ -382,24 +660,47 @@ class HbA1cPredictionEngine: ObservableObject {
     }
 
     /// Fetches user demographic information from Core Data
+    /// Combines data from UserDemographicsEntity and HealthConditionEntity
     private func fetchUserDemographics(
         from context: NSManagedObjectContext
     ) -> (age: Int, sex: String, bmi: Double, hasDiabetes: Bool, diabetesType: String?, tobaccoUse: String, alcoholUnitsPerWeek: Double)? {
-        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "UserDemographicsEntity")
+        let userFetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "UserDemographicsEntity")
+        let healthFetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "HealthConditionEntity")
 
         do {
-            guard let results = try context.fetch(fetchRequest) as? [NSManagedObject],
-                  let user = results.first else {
-                return nil
+            // Fetch user demographics
+            guard let userResults = try context.fetch(userFetchRequest) as? [NSManagedObject],
+                  let user = userResults.first else {
+                // Return default values if no user profile exists
+                return (age: 40, sex: "Unknown", bmi: 25.0, hasDiabetes: false, diabetesType: nil, tobaccoUse: "Never", alcoholUnitsPerWeek: 0.0)
             }
 
-            let age = (user.value(forKey: "age") as? NSNumber)?.intValue ?? 0
+            let age = (user.value(forKey: "age") as? NSNumber)?.intValue ?? 40
             let sex = (user.value(forKey: "sex") as? String) ?? "Unknown"
-            let bmi = (user.value(forKey: "bmi") as? NSNumber)?.doubleValue ?? 25.0
-            let hasDiabetes = (user.value(forKey: "hasDiabetes") as? NSNumber)?.boolValue ?? false
-            let diabetesType = user.value(forKey: "diabetesType") as? String
-            let tobaccoUse = (user.value(forKey: "tobaccoUse") as? String) ?? "Never"
-            let alcoholUnitsPerWeek = (user.value(forKey: "alcoholUnitsPerWeek") as? NSNumber)?.doubleValue ?? 0.0
+            
+            // Calculate BMI from height and weight
+            let height = (user.value(forKey: "height") as? NSNumber)?.doubleValue ?? 170.0 // cm
+            let weight = (user.value(forKey: "weight") as? NSNumber)?.doubleValue ?? 70.0 // kg
+            let heightInMeters = height / 100.0
+            let bmi = heightInMeters > 0 ? weight / (heightInMeters * heightInMeters) : 25.0
+            
+            // Get diabetes type from user demographics (if exists there)
+            var diabetesType = user.value(forKey: "diabetesType") as? String
+            
+            // Fetch health conditions for additional data
+            var hasDiabetes = false
+            var tobaccoUse = "Never"
+            var alcoholUnitsPerWeek = 0.0
+            
+            if let healthResults = try context.fetch(healthFetchRequest) as? [NSManagedObject],
+               let health = healthResults.first {
+                hasDiabetes = (health.value(forKey: "hasDiabetes") as? NSNumber)?.boolValue ?? false
+                if diabetesType == nil {
+                    diabetesType = health.value(forKey: "diabetesType") as? String
+                }
+                tobaccoUse = (health.value(forKey: "tobaccoUse") as? String) ?? "Never"
+                alcoholUnitsPerWeek = (health.value(forKey: "alcoholUnitsPerWeek") as? NSNumber)?.doubleValue ?? 0.0
+            }
 
             return (age, sex, bmi, hasDiabetes, diabetesType, tobaccoUse, alcoholUnitsPerWeek)
         } catch {
@@ -413,16 +714,19 @@ class HbA1cPredictionEngine: ObservableObject {
         let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "HealthConditionEntity")
 
         do {
-            guard let results = try context.fetch(fetchRequest) as? [NSManagedObject] else {
+            guard let results = try context.fetch(fetchRequest) as? [NSManagedObject],
+                  let health = results.first else {
                 return [:]
             }
 
             var conditions: [String: Bool] = [:]
-            for entity in results {
-                if let conditionName = entity.value(forKey: "conditionName") as? String,
-                   let isActive = entity.value(forKey: "isActive") as? NSNumber {
-                    conditions[conditionName] = isActive.boolValue
-                }
+            
+            // Get conditions from the HealthConditionEntity attributes
+            if let hasCOPD = (health.value(forKey: "hasCOPD") as? NSNumber)?.boolValue {
+                conditions["COPD"] = hasCOPD
+            }
+            if let hasHeartDisease = (health.value(forKey: "hasHeartDisease") as? NSNumber)?.boolValue {
+                conditions["HeartDisease"] = hasHeartDisease
             }
 
             return conditions
@@ -430,6 +734,84 @@ class HbA1cPredictionEngine: ObservableObject {
             print("Error fetching health conditions: \(error.localizedDescription)")
             return [:]
         }
+    }
+
+    /// Fetches prior HbA1c measurements from GlucoseReadingEntity
+    /// Filters for manual finger stick and FreeStyle Libre measurements only
+    /// Returns up to 5 most recent readings converted to NGSP percentage
+    private func fetchPriorHbA1cReadings(
+        from context: NSManagedObjectContext,
+        maxReadings: Int = 5
+    ) -> [Double]? {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "GlucoseReadingEntity")
+
+        // Filter for HbA1c measurements (unit is NGSP % or mmol/mol)
+        // and valid sources (Manual Finger Stick or FreeStyle Libre manual entry)
+        let unitPredicate = NSPredicate(format: "unit IN %@", ["NGSP %", "mmol/mol"])
+        let sourcePredicate = NSPredicate(format: "source IN %@", ["Manual Finger Stick", "FreeStyle Libre 2 (manual entry)"])
+        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [unitPredicate, sourcePredicate])
+
+        // Sort by timestamp descending to get most recent first
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
+        fetchRequest.fetchLimit = maxReadings
+
+        do {
+            guard let results = try context.fetch(fetchRequest) as? [NSManagedObject] else {
+                return nil
+            }
+
+            let hba1cValues = results.compactMap { object -> Double? in
+                guard let value = object.value(forKey: "value") as? NSNumber,
+                      let unit = object.value(forKey: "unit") as? String else {
+                    return nil
+                }
+                // Convert to NGSP percentage if stored as IFCC mmol/mol
+                if unit == "mmol/mol" {
+                    return ifccToNGSP(value.doubleValue)
+                } else if unit == "NGSP %" {
+                    return value.doubleValue
+                }
+                return nil
+            }
+
+            return hba1cValues.isEmpty ? nil : hba1cValues
+        } catch {
+            print("Error fetching prior HbA1c readings: \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    /// Blends formula-based prediction with prior HbA1c measurements
+    /// Uses recency-weighted averaging: most recent readings have higher weight
+    /// Minimum 2 readings required for blending, maximum 5 readings used
+    /// Returns blended HbA1c in NGSP %
+    private func blendWithPriorHbA1c(
+        formulaPrediction: Double,
+        priorReadings: [Double]
+    ) -> Double {
+        // Require minimum 2 readings for blending
+        guard priorReadings.count >= 2 else {
+            return formulaPrediction
+        }
+
+        // Use up to 5 most recent readings (already sorted newest first)
+        let limitedReadings = Array(priorReadings.prefix(5))
+
+        // Recency-weighted average: newest gets highest weight
+        var weightedSum = 0.0
+        var totalWeight = 0.0
+        for (index, reading) in limitedReadings.enumerated() {
+            let weight = Double(limitedReadings.count - index)
+            weightedSum += reading * weight
+            totalWeight += weight
+        }
+
+        let priorAverage = weightedSum / totalWeight
+
+        // Blend: 30% formula-based + 70% weighted prior average
+        // Actual measurements are more reliable than formula estimates
+        let blendedValue = (formulaPrediction * 0.3) + (priorAverage * 0.7)
+        return blendedValue
     }
 
     /// Calculates coefficient of variation from glucose readings
@@ -449,8 +831,27 @@ class HbA1cPredictionEngine: ObservableObject {
     private func calculateDailyNutrition(_ meals: [NSManagedObject]) -> (carbs: Double, calories: Double) {
         guard !meals.isEmpty else { return (0, 0) }
 
-        let totalCarbs = meals.reduce(0) { $0 + (($1.value(forKey: "carbohydrates") as? NSNumber)?.doubleValue ?? 0) }
-        let totalCalories = meals.reduce(0) { $0 + (($1.value(forKey: "calories") as? NSNumber)?.doubleValue ?? 0) }
+        var totalCarbs: Double = 0
+        var totalCalories: Double = 0
+        
+        for meal in meals {
+            // Get calories directly from meal
+            if let calories = (meal.value(forKey: "calories") as? NSNumber)?.doubleValue {
+                totalCalories += calories
+            }
+            
+            // Get carbs from macronutrients relationship
+            if let macronutrients = meal.value(forKey: "macronutrients") as? Set<NSManagedObject> {
+                for macro in macronutrients {
+                    let macroType = macro.value(forKey: "type") as? String ?? ""
+                    if macroType == "carbohydrates" || macroType == "carbs" {
+                        if let amount = (macro.value(forKey: "amount") as? NSNumber)?.doubleValue {
+                            totalCarbs += amount
+                        }
+                    }
+                }
+            }
+        }
 
         // Calculate daily average if we have multiple days of data
         let daysOfData = Set(meals.compactMap { meal -> String? in
@@ -470,8 +871,8 @@ class HbA1cPredictionEngine: ObservableObject {
     private func calculateExerciseMetrics(_ sessions: [NSManagedObject]) -> (weeklyMinutes: Double, avgIntensity: Double) {
         guard !sessions.isEmpty else { return (0, 0) }
 
-        let totalMinutes = sessions.reduce(0) { $0 + (($1.value(forKey: "durationMinutes") as? NSNumber)?.doubleValue ?? 0) }
-        let totalIntensity = sessions.reduce(0) { $0 + (($1.value(forKey: "intensityLevel") as? NSNumber)?.doubleValue ?? 5) }
+        let totalMinutes = sessions.reduce(0) { $0 + (($1.value(forKey: "duration") as? NSNumber)?.doubleValue ?? 0) }
+        let totalIntensity = sessions.reduce(0) { $0 + (($1.value(forKey: "intensity") as? NSNumber)?.doubleValue ?? 5) }
         let avgIntensity = totalIntensity / Double(sessions.count)
 
         // Calculate weekly average if data spans multiple weeks
@@ -479,6 +880,35 @@ class HbA1cPredictionEngine: ObservableObject {
         let weeklyMinutes = totalMinutes / Double(weeksOfData)
 
         return (weeklyMinutes, avgIntensity)
+    }
+
+    /// Calculates cardio vs non-cardio exercise split from 7-day session data
+    /// Cardio (Walking/Running/Cycling): returns distance + calories
+    /// Non-cardio (all others): returns duration + average intensity
+    private func calculateExerciseSplit(_ sessions: [NSManagedObject]) -> (cardioDistanceKm: Double, cardioCalories: Double, nonCardioMinutes: Double, nonCardioIntensityAvg: Double) {
+        guard !sessions.isEmpty else { return (0, 0, 0, 0) }
+
+        let cardioTypes: Set<String> = ["Walking", "Running", "Cycling"]
+        var cardioDistance = 0.0
+        var cardioCalories = 0.0
+        var nonCardioMinutes = 0.0
+        var nonCardioIntensitySum = 0.0
+        var nonCardioCount = 0
+
+        for session in sessions {
+            let type = (session.value(forKey: "type") as? String) ?? ""
+            if cardioTypes.contains(type) {
+                cardioDistance += (session.value(forKey: "distance") as? NSNumber)?.doubleValue ?? 0
+                cardioCalories += (session.value(forKey: "caloriesBurned") as? NSNumber)?.doubleValue ?? 0
+            } else {
+                nonCardioMinutes += (session.value(forKey: "duration") as? NSNumber)?.doubleValue ?? 0
+                nonCardioIntensitySum += (session.value(forKey: "intensity") as? NSNumber)?.doubleValue ?? 5
+                nonCardioCount += 1
+            }
+        }
+
+        let nonCardioIntensityAvg = nonCardioCount > 0 ? nonCardioIntensitySum / Double(nonCardioCount) : 0
+        return (cardioDistance, cardioCalories, nonCardioMinutes, nonCardioIntensityAvg)
     }
 
     /// Calculates time since last meal in hours
@@ -605,33 +1035,28 @@ class HbA1cPredictionEngine: ObservableObject {
     }
 
     /// Saves prediction result to Core Data as HbA1cPredictionEntity
+    /// Values are stored in IFCC (mmol/mol) format for international standardization
     private func savePredictionResult(_ result: PredictionResult, to context: NSManagedObjectContext) {
         let predictionEntity = NSEntityDescription.insertNewObject(
             forEntityName: "HbA1cPredictionEntity",
             into: context
         )
 
-        predictionEntity.setValue(result.predictedHbA1c, forKey: "predictedHbA1c")
+        // Convert NGSP (%) to IFCC (mmol/mol) for canonical storage
+        let ifccValue = ngspToIFCC(result.predictedHbA1c)
+        
+        predictionEntity.setValue(UUID(), forKey: "id")
+        predictionEntity.setValue(ifccValue, forKey: "predictedValue")
         predictionEntity.setValue(result.confidenceLevel, forKey: "confidenceLevel")
-        predictionEntity.setValue(result.riskCategory, forKey: "riskCategory")
         predictionEntity.setValue(Date(), forKey: "predictionDate")
+        predictionEntity.setValue(modelVersion, forKey: "modelVersion")
 
-        // Save contributing factors as JSON string
+        // Save contributing factors as JSON data
         if let factorsJSON = try? JSONSerialization.data(
             withJSONObject: result.contributingFactors,
             options: []
         ) {
             predictionEntity.setValue(factorsJSON, forKey: "contributingFactorsJSON")
         }
-
-        // Save recommendations as JSON array
-        if let recommendationsJSON = try? JSONSerialization.data(
-            withJSONObject: result.recommendations,
-            options: []
-        ) {
-            predictionEntity.setValue(recommendationsJSON, forKey: "recommendationsJSON")
-        }
-
-        predictionEntity.setValue(modelVersion, forKey: "modelVersion")
     }
 }
