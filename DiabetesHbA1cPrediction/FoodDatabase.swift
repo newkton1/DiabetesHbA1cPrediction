@@ -496,6 +496,7 @@ class FoodDatabase {
         allFoods.append(FoodItem(name: "Oyakodon (Chicken Egg Bowl)", category: "Asian & Japanese", servingSize: 1, servingUnit: "bowl", calories: 520, carbohydrates: 72, protein: 28, fat: 12, fiber: 1.5, glycemicIndex: 68))
         allFoods.append(FoodItem(name: "Tempura Shrimp", category: "Asian & Japanese", servingSize: 4, servingUnit: "pieces", calories: 220, carbohydrates: 18, protein: 12, fat: 12, fiber: 0.5, glycemicIndex: 45))
         allFoods.append(FoodItem(name: "Vegetable Tempura", category: "Asian & Japanese", servingSize: 1, servingUnit: "cup", calories: 180, carbohydrates: 22, protein: 3, fat: 9, fiber: 2, glycemicIndex: 50))
+        allFoods.append(FoodItem(name: "Kakiage", category: "Asian & Japanese", servingSize: 1, servingUnit: "piece", calories: 150, carbohydrates: 16, protein: 3, fat: 8, fiber: 1.5, glycemicIndex: 48))
         allFoods.append(FoodItem(name: "Yakitori (Chicken Skewer)", category: "Asian & Japanese", servingSize: 2, servingUnit: "skewers", calories: 180, carbohydrates: 6, protein: 22, fat: 8, fiber: 0, glycemicIndex: 25))
         allFoods.append(FoodItem(name: "Unagi (Grilled Eel)", category: "Asian & Japanese", servingSize: 3, servingUnit: "oz", calories: 236, carbohydrates: 0, protein: 24, fat: 15, fiber: 0, glycemicIndex: 0))
         allFoods.append(FoodItem(name: "Sukiyaki", category: "Asian & Japanese", servingSize: 1, servingUnit: "cup", calories: 280, carbohydrates: 18, protein: 24, fat: 12, fiber: 2, glycemicIndex: 40))
