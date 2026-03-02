@@ -69,7 +69,7 @@ struct GlucoseLogView: View {
 
             readingsList
         }
-        .navigationTitle("Sugar Values")
+        .navigationTitle("Glucose Readings")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -95,7 +95,7 @@ struct GlucoseLogView: View {
         VStack(spacing: 0) {
             // Fixed header: title on left, + button on right
             HStack {
-                Text("Instant Blood Sugar")
+                Text("Instant Blood Glucose")
                     .font(.system(size: 22, weight: .bold))
 
                 Spacer()

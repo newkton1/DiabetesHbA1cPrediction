@@ -420,7 +420,7 @@ struct EstimatedImpactContent: View {
                 } else if gl > (isFeast ? 30 : 20) {
                     recommendation = "High glycemic load. Consider lower-GI alternatives to reduce glucose spike."
                 } else if carbs > (isFeast ? 100 : 80) {
-                    recommendation = "High carbs. Adding protein or healthy fats can help moderate blood sugar response."
+                    recommendation = "High carbs. Adding protein or healthy fats can help moderate blood glucose response."
                 }
         // 6. Estimate post-meal walk to offset glucose rise
         let walkRec = computeWalkRecommendation(estimatedGlucoseRise: estimatedGlucoseRise)

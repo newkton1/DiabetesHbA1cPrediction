@@ -612,15 +612,15 @@ private struct QuickStatsView: View {
             }
 
             HStack(spacing: 12) {
-                // Sugar Values Card - Compact layout
+                // Glucose Readings Card - Compact layout
                 NavigationLink(destination: GlucoseLogView()) {
                     VStack(alignment: .leading, spacing: 4) {
-                        // Icon + "Sugar" on same line
+                        // Icon + "Glucose" on same line
                         HStack(spacing: isLandscape ? 4 : 6) {
                             Image(systemName: "drop.fill")
                                 .font(isLandscape ? .caption : .body)
                                 .foregroundColor(.red)
-                            Text("Sugar")
+                            Text("Glucose")
                                 .font(.caption)
                                 .fontWeight(.semibold)
                             Spacer()

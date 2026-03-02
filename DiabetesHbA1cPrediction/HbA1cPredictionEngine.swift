@@ -1030,7 +1030,7 @@ class HbA1cPredictionEngine: ObservableObject {
         // Factor-specific recommendations
         if contributingFactors["Glucose Variability"] ?? 0 > 0.1 {
             recommendations.append("Focus on glucose stability: eat consistent meals at regular times")
-            recommendations.append("Identify and avoid foods that cause blood sugar spikes")
+            recommendations.append("Identify and avoid foods that cause blood glucose spikes")
         }
 
         if contributingFactors["High Carb Intake"] ?? 0 > 0.05 {

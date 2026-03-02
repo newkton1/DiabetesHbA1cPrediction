@@ -162,7 +162,7 @@ struct PredictionView: View {
                     .padding(.vertical, 20)
                 }
             }
-            .navigationTitle("Sugar Values")
+            .navigationTitle("Glucose Readings")
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showShareSheet) {
                 ShareSheet(text: shareText)
@@ -822,7 +822,7 @@ private struct ContributingFactorsChart: View {
     private func factorColor(for factor: String) -> Color {
         let lowerFactor = factor.lowercased()
 
-        if lowerFactor.contains("glucose") || lowerFactor.contains("blood sugar") {
+        if lowerFactor.contains("glucose") || lowerFactor.contains("blood glucose") {
             return .blue
         } else if lowerFactor.contains("activity") || lowerFactor.contains("exercise") {
             return .green

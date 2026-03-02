@@ -42,7 +42,7 @@ struct FoodItem: Identifiable, Equatable {
     let fiber: Double
 
     /// Glycemic Index (0-100 scale, indicates how quickly the food raises blood glucose)
-    /// Lower GI foods have less impact on blood sugar spikes
+    /// Lower GI foods have less impact on blood glucose spikes
     let glycemicIndex: Int
 
     /// Calculated net carbs (carbohydrates - fiber)
