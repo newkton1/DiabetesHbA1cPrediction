@@ -20,8 +20,9 @@ struct MealBuilderView: View {
     @State private var showingFoodSearch = false
     @State private var showingError = false
     @State private var errorMessage = ""
+    @State private var isReady = false          // defer heavy content until sheet animates in
     let mealType: MealType
-    private let predictionEngine = HbA1cPredictionEngine()
+    @State private var predictionEngine = HbA1cPredictionEngine()
 
     init(mealType: MealType) {
         self.mealType = mealType
@@ -32,165 +33,17 @@ struct MealBuilderView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                if isPortrait {
-                    Text(mealType == .lastMeal ? "Log Last Meal" : mealType == .feast ? "Plan a Feast" : "Plan a Meal")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.vertical, 6)
+            Group {
+                if isReady {
+                    formContent
+                } else {
+                    // Lightweight placeholder while sheet animates in
+                    ProgressView("Loading…")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                List {
-                // Meal name section
-                Section {
-                    TextField("Meal Name (optional)", text: $mealBuilder.mealName)
-                        .focused($isMealNameFocused)
-                        .submitLabel(.done)
-                        .onSubmit { isMealNameFocused = false }
-                }
-                    // Feast banner
-                                    if mealType == .feast {
-                                        Section {
-                                            FeastModeBannerView()
-                                                .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
-                                                .listRowBackground(Color.clear)
-                                        }
-                                    }
-                // Add foods button
-                Section {
-                    Button(action: { showingFoodSearch = true }) {
-                        HStack {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(.blue)
-                            
-                            Text("Search & Add Foods")
-                                .foregroundColor(.blue)
-                            
-                            Spacer()
-                            
-                            if mealBuilder.foodCount > 0 {
-                                Text("\(mealBuilder.foodCount)")
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(12)
-                            }
-                        }
-                    }
-                }
-                
-                // Selected foods section
-                if !mealBuilder.selectedFoods.isEmpty {
-                    Section(header: Text("Selected Foods")) {
-                        ForEach(Array(mealBuilder.selectedFoods.enumerated()), id: \.element.id) { index, selectedFood in
-                            SelectedFoodRow(
-                                selectedFood: selectedFood,
-                                onIncrement: { mealBuilder.incrementQuantity(at: index) },
-                                onDecrement: { mealBuilder.decrementQuantity(at: index) },
-                                onDelete: { mealBuilder.removeFood(at: index) }
-                            )
-                        }
-                        .onDelete { indexSet in
-                            for index in indexSet {
-                                mealBuilder.removeFood(at: index)
-                            }
-                        }
-                    }
-                    
-                    // Nutrition summary section (bulleted list style)
-                    Section(header: Text("Nutrition Summary")) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            NutritionBulletRow(label: "Carbs", value: "\(Int(mealBuilder.totalCarbohydrates)) g", color: .orange)
-                            NutritionBulletRow(label: "Fiber", value: "\(Int(mealBuilder.totalFiber)) g", color: .green)
-                            NutritionBulletRow(label: "Protein", value: "\(Int(mealBuilder.totalProtein)) g", color: .blue)
-                            NutritionBulletRow(label: "Fat", value: "\(Int(mealBuilder.totalFat)) g", color: .purple)
-                            NutritionBulletRow(label: "Cal", value: "\(Int(mealBuilder.totalCalories))", color: .red)
-                            NutritionBulletRow(label: "GI", value: "\(Int(mealBuilder.averageGlycemicIndex))", color: .gray)
-                        }
-                    }
-
-                }
-
-                // Estimated Impact section (planned meals only, always visible)
-                    if mealType == .plannedMeal || mealType == .feast {                    Section(header: Text("Estimated Impact")) {
-                        EstimatedImpactContent(
-                            mealBuilder: mealBuilder,
-                                                        viewContext: viewContext,
-                                                        predictionEngine: predictionEngine,
-                                                        mealType: mealType
-                        )
-                    }
-                }
-
-                // Time section (varies by meal type)
-                Section(header: Text(mealType == .lastMeal ? "Time Since Meal" : "Planned Date & Time")) {
-                    if mealType == .lastMeal {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("How long ago did you eat this meal?")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
-                            HStack {
-                                Text("\(mealBuilder.timeSinceLastMeal, specifier: "%.1f") h")
-                                    .font(.title2)
-                                    .fontWeight(.semibold)
-                                
-                                Spacer()
-                                
-                                Stepper("", value: $mealBuilder.timeSinceLastMeal, in: 0...24, step: 0.5)
-                                    .labelsHidden()
-                            }
-                            
-                            // Quick time buttons
-                            HStack(spacing: 8) {
-                                QuickTimeButton(title: "Just now", hours: 0, selectedHours: $mealBuilder.timeSinceLastMeal)
-                                QuickTimeButton(title: "1 h", hours: 1, selectedHours: $mealBuilder.timeSinceLastMeal)
-                                QuickTimeButton(title: "2 h", hours: 2, selectedHours: $mealBuilder.timeSinceLastMeal)
-                                QuickTimeButton(title: "3 h", hours: 3, selectedHours: $mealBuilder.timeSinceLastMeal)
-                            }
-                        }
-                        .padding(.vertical, 4)
-                    } else {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("When do you plan to eat this meal?")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
-                            DatePicker(
-                                "Date & Time",
-                                selection: $mealBuilder.plannedDateTime,
-                                in: Date()...,
-                                displayedComponents: [.date, .hourAndMinute]
-                            )
-                            .datePickerStyle(.compact)
-                        }
-                        .padding(.vertical, 4)
-                    }
-                }
-                
-                // Total carbs footer
-                if !mealBuilder.selectedFoods.isEmpty {
-                    Section {
-                        HStack {
-                            Text("TOTAL CARBOHYDRATES")
-                                .font(.headline)
-                            Spacer()
-                            Text("\(Int(mealBuilder.totalCarbohydrates)) g")
-                                .font(.title)
-                                .fontWeight(.bold)
-                                .foregroundColor(.orange)
-                        }
-                        .padding(.vertical, 8)
-                    }
-                }
-
             }
             .scrollDismissesKeyboard(.interactively)
-            }
-            .ignoresSafeArea(.keyboard)
-            .navigationTitle(isPortrait ? "" : (mealType == .lastMeal ? "Log Last Meal" : mealType == .feast ? "Plan a Feast" : "Plan a Meal"))
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -220,9 +73,168 @@ struct MealBuilderView: View {
             } message: {
                 Text(errorMessage)
             }
+            .onAppear {
+                // Defer heavy form rendering until after the sheet animation completes
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    isReady = true
+                }
+            }
         }
     }
-    
+
+    // MARK: - Form Content (deferred)
+
+    @ViewBuilder
+    private var formContent: some View {
+        Form {
+            // Meal name section — title used as section header so it sits tight
+            Section(header:
+                Text(mealType == .lastMeal ? "Last Meal" : mealType == .feast ? "Plan Feast Treat" : "Plan Meal")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .textCase(nil)
+            ) {
+                TextField("Meal Name (optional)", text: $mealBuilder.mealName)
+                    .focused($isMealNameFocused)
+                    .submitLabel(.done)
+                    .onSubmit { isMealNameFocused = false }
+            }
+
+            // Feast banner
+            if mealType == .feast {
+                Section {
+                    FeastModeBannerView()
+                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                        .listRowBackground(Color.clear)
+                }
+            }
+
+            // Add foods button
+            Section {
+                Button(action: { showingFoodSearch = true }) {
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.blue)
+                        Text("Search & Add Foods")
+                            .foregroundColor(.blue)
+                        Spacer()
+                        if mealBuilder.foodCount > 0 {
+                            Text("\(mealBuilder.foodCount)")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                        }
+                    }
+                }
+            }
+
+            // Selected foods section
+            if !mealBuilder.selectedFoods.isEmpty {
+                Section(header: Text("Selected Foods")) {
+                    ForEach(Array(mealBuilder.selectedFoods.enumerated()), id: \.element.id) { index, selectedFood in
+                        SelectedFoodRow(
+                            selectedFood: selectedFood,
+                            onIncrement: { mealBuilder.incrementQuantity(at: index) },
+                            onDecrement: { mealBuilder.decrementQuantity(at: index) },
+                            onDelete: { mealBuilder.removeFood(at: index) }
+                        )
+                    }
+                    .onDelete { indexSet in
+                        for index in indexSet {
+                            mealBuilder.removeFood(at: index)
+                        }
+                    }
+                }
+
+                // Nutrition summary section
+                Section(header: Text("Nutrition Summary")) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        NutritionBulletRow(label: "Carbs", value: "\(Int(mealBuilder.totalCarbohydrates)) g", color: .orange)
+                        NutritionBulletRow(label: "Fiber", value: "\(Int(mealBuilder.totalFiber)) g", color: .green)
+                        NutritionBulletRow(label: "Protein", value: "\(Int(mealBuilder.totalProtein)) g", color: .blue)
+                        NutritionBulletRow(label: "Fat", value: "\(Int(mealBuilder.totalFat)) g", color: .purple)
+                        NutritionBulletRow(label: "Cal", value: "\(Int(mealBuilder.totalCalories))", color: .red)
+                        NutritionBulletRow(label: "GI", value: "\(Int(mealBuilder.averageGlycemicIndex))", color: .gray)
+                    }
+                }
+            }
+
+            // Estimated Impact section (planned meals only)
+            if mealType == .plannedMeal || mealType == .feast {
+                Section(header: Text("Estimated Impact")) {
+                    EstimatedImpactContent(
+                        mealBuilder: mealBuilder,
+                        viewContext: viewContext,
+                        predictionEngine: predictionEngine,
+                        mealType: mealType
+                    )
+                }
+            }
+
+            // Time section
+            Section(header: Text(mealType == .lastMeal ? "Time Since Meal" : "Planned Date & Time")) {
+                if mealType == .lastMeal {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("How long ago did you eat this meal?")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        HStack {
+                            Text("\(mealBuilder.timeSinceLastMeal, specifier: "%.1f") h")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                            Spacer()
+                            Stepper("", value: $mealBuilder.timeSinceLastMeal, in: 0...24, step: 0.5)
+                                .labelsHidden()
+                        }
+                        HStack(spacing: 8) {
+                            QuickTimeButton(title: "Just now", hours: 0, selectedHours: $mealBuilder.timeSinceLastMeal)
+                            QuickTimeButton(title: "1 h", hours: 1, selectedHours: $mealBuilder.timeSinceLastMeal)
+                            QuickTimeButton(title: "2 h", hours: 2, selectedHours: $mealBuilder.timeSinceLastMeal)
+                            QuickTimeButton(title: "3 h", hours: 3, selectedHours: $mealBuilder.timeSinceLastMeal)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                } else {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("When do you plan to eat this meal?")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        DatePicker(
+                            "Date & Time",
+                            selection: $mealBuilder.plannedDateTime,
+                            in: Date()...,
+                            displayedComponents: [.date, .hourAndMinute]
+                        )
+                        .datePickerStyle(.compact)
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+
+            // Total carbs footer
+            if !mealBuilder.selectedFoods.isEmpty {
+                Section {
+                    HStack {
+                        Text("TOTAL CARBOHYDRATES")
+                            .font(.headline)
+                        Spacer()
+                        Text("\(Int(mealBuilder.totalCarbohydrates)) g")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(.orange)
+                    }
+                    .padding(.vertical, 8)
+                }
+            }
+        }
+        .contentMargins(.top, 0, for: .scrollContent)
+    }
+
     private var isPortrait: Bool {
         verticalSizeClass != .compact
     }
@@ -289,90 +301,110 @@ struct MealImpactResult {
 
 /// Self-contained view that computes and displays estimated meal impact
 /// Observes MealBuilder directly so it updates automatically when foods change
+/// Uses @State + task to avoid blocking the main thread with Core Data fetches
 struct EstimatedImpactContent: View {
     @ObservedObject var mealBuilder: MealBuilder
     var viewContext: NSManagedObjectContext
     var predictionEngine: HbA1cPredictionEngine
     var mealType: MealType = .plannedMeal
-    
+
+    @State private var cachedImpact: MealImpactResult?
+    @State private var computeTask: Task<Void, Never>?
+
     var body: some View {
-        let impact = computeImpact()
-        if let impact = impact {
-            // Glucose spike estimate
-            HStack {
-                Image(systemName: "waveform.path.ecg")
-                    .foregroundColor(impact.glucoseColor)
-                    .frame(width: 24)
-                Text("Est. glucose rise")
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text("+\(Int(impact.estimatedGlucoseRise)) mg/dL")
-                    .fontWeight(.semibold)
-                    .foregroundColor(impact.glucoseColor)
-            }
-
-            // HbA1c impact
-            HStack {
-                Image(systemName: "chart.line.uptrend.xyaxis")
-                    .foregroundColor(impact.hba1cColor)
-                    .frame(width: 24)
-                Text("HbA1c impact")
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text(impact.hba1cDelta >= 0.05 ? String(format: "+%.1f%%", impact.hba1cDelta) : "Minimal")
-                    .fontWeight(.semibold)
-                    .foregroundColor(impact.hba1cColor)
-            }
-
-            // Comparison with typical meals
-            HStack {
-                Image(systemName: "arrow.left.arrow.right")
-                    .foregroundColor(.blue)
-                    .frame(width: 24)
-                Text("vs. your typical meal")
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text(impact.comparisonText)
-                    .fontWeight(.semibold)
-                    .foregroundColor(impact.comparisonColor)
-            }
-
-            // Glycemic load indicator
-            HStack {
-                Image(systemName: impact.glCategory == "Low" ? "checkmark.circle.fill" : impact.glCategory == "Moderate" ? "exclamationmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundColor(impact.glColor)
-                    .frame(width: 24)
-                Text("Glycemic load")
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text("\(Int(impact.glycemicLoad)) (\(impact.glCategory))")
-                    .fontWeight(.semibold)
-                    .foregroundColor(impact.glColor)
-            }
-
-            // Recommendation if any
-            if let recommendation = impact.recommendation {
-                HStack(alignment: .top) {
-                    Image(systemName: "lightbulb.fill")
-                        .foregroundColor(.yellow)
+        Group {
+            let impact = cachedImpact
+            if let impact = impact {
+                // Glucose spike estimate
+                HStack {
+                    Image(systemName: "waveform.path.ecg")
+                        .foregroundColor(impact.glucoseColor)
                         .frame(width: 24)
-                    Text(recommendation)
-                        .font(.caption)
+                    Text("Est. glucose rise")
                         .foregroundColor(.secondary)
+                    Spacer()
+                    Text("+\(Int(impact.estimatedGlucoseRise)) mg/dL")
+                        .fontWeight(.semibold)
+                        .foregroundColor(impact.glucoseColor)
                 }
-                .padding(.top, 4)
-            }
 
-            // Walk recommendation
-            if let walkRec = impact.walkRecommendation {
-                           WalkRecommendationCard(recommendation: walkRec)
-                               .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
-                               .listRowBackground(Color.clear)
-                               .padding(.top, 4)
-                       }
-        } else {
-            Text("Add foods to see estimated impact")
-                .foregroundColor(.secondary)
+                // HbA1c impact
+                HStack {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .foregroundColor(impact.hba1cColor)
+                        .frame(width: 24)
+                    Text("HbA1c impact")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text(impact.hba1cDelta >= 0.05 ? String(format: "+%.1f%%", impact.hba1cDelta) : "Minimal")
+                        .fontWeight(.semibold)
+                        .foregroundColor(impact.hba1cColor)
+                }
+
+                // Comparison with typical meals
+                HStack {
+                    Image(systemName: "arrow.left.arrow.right")
+                        .foregroundColor(.blue)
+                        .frame(width: 24)
+                    Text("vs. your typical meal")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text(impact.comparisonText)
+                        .fontWeight(.semibold)
+                        .foregroundColor(impact.comparisonColor)
+                }
+
+                // Glycemic load indicator
+                HStack {
+                    Image(systemName: impact.glCategory == "Low" ? "checkmark.circle.fill" : impact.glCategory == "Moderate" ? "exclamationmark.circle.fill" : "xmark.circle.fill")
+                        .foregroundColor(impact.glColor)
+                        .frame(width: 24)
+                    Text("Glycemic load")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("\(Int(impact.glycemicLoad)) (\(impact.glCategory))")
+                        .fontWeight(.semibold)
+                        .foregroundColor(impact.glColor)
+                }
+
+                // Recommendation if any
+                if let recommendation = impact.recommendation {
+                    HStack(alignment: .top) {
+                        Image(systemName: "lightbulb.fill")
+                            .foregroundColor(.yellow)
+                            .frame(width: 24)
+                        Text(recommendation)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.top, 4)
+                }
+
+                // Walk recommendation
+                if let walkRec = impact.walkRecommendation {
+                    WalkRecommendationCard(recommendation: walkRec)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                        .listRowBackground(Color.clear)
+                        .padding(.top, 4)
+                }
+            } else {
+                Text("Add foods to see estimated impact")
+                    .foregroundColor(.secondary)
+            }
+        }
+        // Recompute impact asynchronously when foods or planned time change
+        .onChange(of: mealBuilder.foodCount) { _, _ in scheduleCompute() }
+        .onChange(of: mealBuilder.plannedDateTime) { _, _ in scheduleCompute() }
+    }
+
+    /// Debounced async computation — avoids blocking the main thread
+    private func scheduleCompute() {
+        computeTask?.cancel()
+        computeTask = Task { @MainActor in
+            // Small delay to debounce rapid changes
+            try? await Task.sleep(nanoseconds: 150_000_000) // 150ms
+            guard !Task.isCancelled else { return }
+            cachedImpact = computeImpact()
         }
     }
 

@@ -7,8 +7,8 @@ struct ContentView: View {
 
     enum Tab: String, CaseIterable {
         case dashboard = "Dashboard"
+        case meals     = "What if?"
         case glucose   = "Glucose"
-        case meals     = "Plan & Log"
         case exercise  = "Exercise"
         case profile   = "Profile"
 
@@ -21,24 +21,32 @@ struct ContentView: View {
             case .profile:   return "person.crop.circle"
             }
         }
+
+        /// Shorter label for the tab bar to prevent truncation
+        var tabLabel: String {
+            switch self {
+            case .exercise: return "Xcise"
+            default: return rawValue
+            }
+        }
     }
 
     var body: some View {
         TabView(selection: $selectedTab) {
             NavigationStack { DashboardView(selectedTab: $selectedTab) }
-                .tabItem { Label(Tab.dashboard.rawValue, systemImage: Tab.dashboard.iconName) }
+                .tabItem { Label(Tab.dashboard.tabLabel, systemImage: Tab.dashboard.iconName) }
                 .tag(Tab.dashboard)
-            NavigationStack { GlucoseLogView() }
-                .tabItem { Label(Tab.glucose.rawValue, systemImage: Tab.glucose.iconName) }
-                .tag(Tab.glucose)
-            NavigationStack { PlannedMealView() }
-                .tabItem { Label(Tab.meals.rawValue, systemImage: Tab.meals.iconName) }
+            NavigationStack { PlannedMealView(selectedTab: $selectedTab) }
+                .tabItem { Label(Tab.meals.tabLabel, systemImage: Tab.meals.iconName) }
                 .tag(Tab.meals)
+            NavigationStack { GlucoseLogView() }
+                .tabItem { Label(Tab.glucose.tabLabel, systemImage: Tab.glucose.iconName) }
+                .tag(Tab.glucose)
             NavigationStack { ExerciseLogView() }
-                .tabItem { Label(Tab.exercise.rawValue, systemImage: Tab.exercise.iconName) }
+                .tabItem { Label(Tab.exercise.tabLabel, systemImage: Tab.exercise.iconName) }
                 .tag(Tab.exercise)
             NavigationStack { UserProfileView() }
-                .tabItem { Label(Tab.profile.rawValue, systemImage: Tab.profile.iconName) }
+                .tabItem { Label(Tab.profile.tabLabel, systemImage: Tab.profile.iconName) }
                 .tag(Tab.profile)
         }
         .tint(selectedTab == .meals ? .planAccent : .blue)

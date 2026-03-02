@@ -3,9 +3,13 @@ import SwiftUI
 import CoreData
 
 struct PlannedMealView: View {
+    @Binding var selectedTab: ContentView.Tab
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @State private var showingStandardPlanner = false
     @State private var showingFeastPlanner    = false
+
+    private var isLandscape: Bool { verticalSizeClass == .compact }
 
     /// Builds the multi-colored "Before You Eat" description without using deprecated Text `+` operator
     private static var beforeYouEatDescription: AttributedString {
@@ -22,9 +26,20 @@ struct PlannedMealView: View {
     }
 
     var body: some View {
-        NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
+                    // Custom header with back chevron + title
+                    HStack {
+                        Button(action: { selectedTab = .dashboard }) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
+                        Text("What If?")
+                            .font(.system(size: 22, weight: .bold))
+                        Spacer()
+                    }
+                    .padding(.horizontal)
                     // Explainer banner
                     VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 6) {
@@ -55,14 +70,14 @@ struct PlannedMealView: View {
                     // Action buttons
                     VStack(spacing: 12) {
                         Button(action: { showingStandardPlanner = true }) {
-                            Label("Plan a Meal", systemImage: "calendar.badge.plus")
+                            Label("Plan Meal", systemImage: "calendar.badge.plus")
                                 .frame(maxWidth: .infinity).padding()
                                 .background(Color.planAccent).foregroundColor(.white)
                                 .cornerRadius(12).font(.headline)
                         }.buttonStyle(.plain)
 
                         Button(action: { showingFeastPlanner = true }) {
-                            Label("Plan a Feast", systemImage: "party.popper.fill")
+                            Label("Plan Feast Treat", systemImage: "party.popper.fill")
                                 .frame(maxWidth: .infinity).padding()
                                 .background(Color.feastAccent.opacity(0.13))
                                 .foregroundColor(.feastAccent)
@@ -70,10 +85,6 @@ struct PlannedMealView: View {
                                 .overlay(RoundedRectangle(cornerRadius: 12)
                                     .stroke(Color.feastAccent.opacity(0.40), lineWidth: 1))
                         }.buttonStyle(.plain)
-
-                        Text("Feast mode uses relaxed thresholds — ideal for holiday or celebration meals.")
-                            .font(.caption).foregroundColor(.secondary)
-                            .multilineTextAlignment(.center).padding(.horizontal, 8)
                     }.padding(.horizontal)
 
                     Spacer(minLength: 24)
@@ -81,8 +92,8 @@ struct PlannedMealView: View {
                 .padding(.vertical)
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("Plan Ahead")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showingStandardPlanner) {
                 MealBuilderView(mealType: .plannedMeal)
                     .environment(\.managedObjectContext, viewContext)
@@ -91,7 +102,6 @@ struct PlannedMealView: View {
                 MealBuilderView(mealType: .feast)
                     .environment(\.managedObjectContext, viewContext)
             }
-        }
     }
 }
 
@@ -109,7 +119,7 @@ private struct PlanFeatureRow: View {
 }
 
 #Preview {
-    PlannedMealView()
+    PlannedMealView(selectedTab: .constant(.meals))
         .environment(\.managedObjectContext,
                      PersistenceController.preview.container.viewContext)
 }

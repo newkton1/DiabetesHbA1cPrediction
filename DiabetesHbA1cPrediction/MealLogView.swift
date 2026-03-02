@@ -121,7 +121,7 @@ struct MealLogView: View {
                 .environment(\.managedObjectContext, viewContext)
         }
         .sheet(isPresented: $showPlannedMealSheet) {
-            PlannedMealView()
+            PlannedMealView(selectedTab: .constant(.meals))
                 .environment(\.managedObjectContext, viewContext)
         }
     }
@@ -228,7 +228,7 @@ struct MealLogView: View {
                 .environment(\.managedObjectContext, viewContext)
         }
         .sheet(isPresented: $showPlannedMealSheet) {
-            PlannedMealView()
+            PlannedMealView(selectedTab: .constant(.meals))
                 .environment(\.managedObjectContext, viewContext)
         }
     }

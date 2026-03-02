@@ -461,6 +461,14 @@ class FoodDatabase {
         allFoods.append(FoodItem(name: "Miso Soup", category: "Soups", servingSize: 1, servingUnit: "cup", calories: 54, carbohydrates: 4, protein: 5.5, fat: 2.5, fiber: 1, glycemicIndex: 15))
         allFoods.append(FoodItem(name: "Leek Soup", category: "Soups", servingSize: 1, servingUnit: "cup", calories: 70, carbohydrates: 11, protein: 2, fat: 2, fiber: 1.5, glycemicIndex: 45))
 
+        // MARK: - Quiches & Stews (5 items)
+
+        allFoods.append(FoodItem(name: "Plain Cheese Quiche", category: "Quiches & Stews", servingSize: 1, servingUnit: "slice", calories: 350, carbohydrates: 22, protein: 14, fat: 24, fiber: 0.8, glycemicIndex: 45))
+        allFoods.append(FoodItem(name: "Bacon Quiche", category: "Quiches & Stews", servingSize: 1, servingUnit: "slice", calories: 380, carbohydrates: 22, protein: 16, fat: 26, fiber: 0.8, glycemicIndex: 45))
+        allFoods.append(FoodItem(name: "Broccoli Quiche", category: "Quiches & Stews", servingSize: 1, servingUnit: "slice", calories: 320, carbohydrates: 23, protein: 13, fat: 20, fiber: 2, glycemicIndex: 43))
+        allFoods.append(FoodItem(name: "Beef Vegetable Stew", category: "Quiches & Stews", servingSize: 1, servingUnit: "cup", calories: 235, carbohydrates: 18, protein: 20, fat: 10, fiber: 3, glycemicIndex: 38))
+        allFoods.append(FoodItem(name: "Pork Vegetable Stew", category: "Quiches & Stews", servingSize: 1, servingUnit: "cup", calories: 250, carbohydrates: 17, protein: 19, fat: 12, fiber: 3, glycemicIndex: 38))
+
         // MARK: - Asian & Japanese Foods (100 items)
 
         // Japanese Rice & Noodles

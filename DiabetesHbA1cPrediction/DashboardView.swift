@@ -81,7 +81,7 @@ struct DashboardView: View {
                         .padding(.horizontal)
                         
                         // Split section: Chart + HbA1c card on left, Action cards on right
-                        HStack(alignment: .top, spacing: 16) {
+                        HStack(alignment: .top, spacing: 8) {
                             // Left side: HbA1c Card + Glucose Trend Chart
                             VStack(spacing: 12) {
                                 // HbA1c card at top
@@ -548,32 +548,23 @@ private struct QuickStatsView: View {
     var body: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                // Meals Today Card - Compact layout
+                // Meals Card - Compact layout
                 NavigationLink(destination: MealLogView()) {
                     VStack(alignment: .leading, spacing: 4) {
-                        // Icon + "Meals/Meal" on same line
-                        HStack(spacing: 6) {
+                        HStack(spacing: isLandscape ? 4 : 6) {
                             Image(systemName: "fork.knife")
-                                .font(.body)
+                                .font(isLandscape ? .caption : .body)
                                 .foregroundColor(.orange)
-                            Text(isLandscape ? "Meal" : "Meals")
-                                .font(.caption)
+                            Text("Meals")
+                                .font(isLandscape ? .caption2 : .caption)
                                 .fontWeight(.semibold)
                             Spacer()
                         }
-                        // "Today" on next line
-                        Text("Today")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                        // Count
-                        Text(String(mealsToday))
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
                     }
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .frame(height: 80)
-                    .padding(10)
+                    .padding(isLandscape ? 6 : 10)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
                 }
@@ -582,29 +573,26 @@ private struct QuickStatsView: View {
                 // Exercise This Week Card - Compact layout
                 NavigationLink(destination: ExerciseLogView()) {
                     VStack(alignment: .leading, spacing: 4) {
-                        // Icon + "Exercise/Xcise" on same line
                         HStack(spacing: 4) {
                             Image(systemName: "figure.walk")
-                                .font(.body)
+                                .font(isLandscape ? .caption : .body)
                                 .foregroundColor(.blue)
                             Text(isLandscape ? "Xcise" : "Exercise")
-                                .font(.caption)
+                                .font(isLandscape ? .caption2 : .caption)
                                 .fontWeight(.semibold)
                             Spacer()
                         }
-                        // "(Week)" on next line
                         Text("(Week)")
-                            .font(.caption)
+                            .font(isLandscape ? .caption2 : .caption)
                             .fontWeight(.semibold)
-                        // Minutes with abbreviated unit
                         Text("\(exerciseMinutesWeek) min")
-                            .font(.subheadline)
+                            .font(isLandscape ? .caption2 : .caption)
                             .fontWeight(.semibold)
                     }
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .frame(height: 80)
-                    .padding(10)
+                    .padding(isLandscape ? 6 : 10)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
                 }
@@ -612,55 +600,47 @@ private struct QuickStatsView: View {
             }
 
             HStack(spacing: 12) {
-                // Glucose Readings Card - Compact layout
+                // Glucose Card - Compact layout
                 NavigationLink(destination: GlucoseLogView()) {
                     VStack(alignment: .leading, spacing: 4) {
-                        // Icon + "Glucose" on same line
-                        HStack(spacing: isLandscape ? 4 : 6) {
+                        HStack(spacing: isLandscape ? 2 : 6) {
                             Image(systemName: "drop.fill")
-                                .font(isLandscape ? .caption : .body)
+                                .font(isLandscape ? .system(size: 9) : .body)
                                 .foregroundColor(.red)
                             Text("Glucose")
-                                .font(.caption)
+                                .font(isLandscape ? .caption2 : .caption)
                                 .fontWeight(.semibold)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
                             Spacer()
                         }
-                        // "Values" on next line
-                        Text("Values")
-                            .font(.caption)
-                            .fontWeight(.semibold)
                     }
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .frame(height: 80)
-                    .padding(10)
+                    .padding(isLandscape ? 6 : 10)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
                 }
                 .buttonStyle(.plain)
 
-                // User Profile Card - Compact layout
+                // User Card - Compact layout
                 NavigationLink(destination: UserProfileView()) {
                     VStack(alignment: .leading, spacing: 4) {
-                        // Icon + "User" on same line
-                        HStack(spacing: 6) {
+                        HStack(spacing: isLandscape ? 4 : 6) {
                             Image(systemName: "person.fill")
-                                .font(.body)
+                                .font(isLandscape ? .caption : .body)
                                 .foregroundColor(.green)
                             Text("User")
-                                .font(.caption)
+                                .font(isLandscape ? .caption2 : .caption)
                                 .fontWeight(.semibold)
                             Spacer()
                         }
-                        // "Profile" on next line
-                        Text("Profile")
-                            .font(.caption)
-                            .fontWeight(.semibold)
                     }
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .frame(height: 80)
-                    .padding(10)
+                    .padding(isLandscape ? 6 : 10)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
                 }
@@ -719,7 +699,10 @@ private struct MealQuickActionsView: View {
     let nextPlannedMeal: MealEntity?
     let onLogLastMeal: () -> Void
     let onPlanMeal: () -> Void
-    
+
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    private var isLandscape: Bool { verticalSizeClass == .compact }
+
     private var lastMealCarbs: Double {
         guard let meal = lastMeal,
               let macros = meal.macronutrients as? Set<MacronutrientEntity> else { return 0 }
@@ -738,89 +721,128 @@ private struct MealQuickActionsView: View {
                 .font(.headline)
                 .padding(.horizontal)
             
-            HStack(spacing: 12) {
-                // Log Last Meal Card - Compact layout
+            HStack(spacing: isLandscape ? 6 : 12) {
+                // Last Meal Card
                 Button(action: onLogLastMeal) {
                     VStack(alignment: .leading, spacing: 4) {
-                        // Icon + "Log" on same line
-                        HStack(spacing: 6) {
-                            Image(systemName: "clock.arrow.circlepath")
-                                .font(.body)
-                                .foregroundColor(.orange)
-                            Text("Log")
-                                .font(.caption)
+                        if isLandscape {
+                            // Landscape: Icon + "Last" line 1, "Meal" line 2
+                            HStack(spacing: 4) {
+                                Image(systemName: "clock.arrow.circlepath")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                                Text("Last")
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                            }
+                            Text("Meal")
+                                .font(.caption2)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.primary)
-                            Spacer()
-                        }
-                        // "Last Meal" on second line
-                        Text("Last Meal")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                        
-                        if let meal = lastMeal {
-                            // Meal name + carbs on separate lines, smaller font
-                            Text(meal.name ?? "Recent meal")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                                .lineLimit(1)
-                            Text("\(Int(lastMealCarbs)) g carbs")
-                                .font(.caption2)
-                                .foregroundColor(.orange)
                         } else {
-                            Text("What did you eat?")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
+                            // Portrait: Icon + "Last Meal" on one line
+                            HStack(spacing: 6) {
+                                Image(systemName: "clock.arrow.circlepath")
+                                    .font(.body)
+                                    .foregroundColor(.orange)
+                                Text("Last Meal")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.primary)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
+                                Spacer()
+                            }
+
+                            if let meal = lastMeal {
+                                Text(meal.name ?? "Recent meal")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                                Text("\(Int(lastMealCarbs)) g carbs")
+                                    .font(.caption2)
+                                    .foregroundColor(.orange)
+                            } else {
+                                Text("What did you eat?")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .frame(height: 80)
-                    .padding(10)
+                    .padding(isLandscape ? 6 : 10)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
 
-                // Plan Meal Card - Compact layout
+                // What if? Card
                 Button(action: onPlanMeal) {
                     VStack(alignment: .leading, spacing: 4) {
-                        // Icon + "Plan" on same line
-                        HStack(spacing: 6) {
-                            Image(systemName: "calendar.badge.plus")
-                                .font(.body)
-                                .foregroundColor(.blue)
-                            Text("Plan")
-                                .font(.caption)
+                        if isLandscape {
+                            // Landscape: 3 lines — "Icon What", "if? (Plan", "Impact)"
+                            HStack(spacing: 4) {
+                                Image(systemName: "calendar.badge.plus")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                                Text("What")
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                            }
+                            HStack(spacing: 0) {
+                                Text("if? ")
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.primary)
+                                Text("(Plan")
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.secondary)
+                            }
+                            Text("Impact)")
+                                .font(.caption2)
                                 .fontWeight(.semibold)
-                                .foregroundColor(.primary)
-                            Spacer()
-                        }
-                        // "Ahead" on second line
-                        Text("Ahead")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                        
-                        if let meal = nextPlannedMeal, let plannedDate = meal.plannedDateTime {
-                            // Meal name + time on separate lines, smaller font
-                            Text(meal.name ?? "Planned meal")
+                                .foregroundColor(.secondary)
+                        } else {
+                            // Portrait: Icon + "What if?" line 1, "(Plan Impact)" line 2
+                            HStack(spacing: 6) {
+                                Image(systemName: "calendar.badge.plus")
+                                    .font(.body)
+                                    .foregroundColor(.blue)
+                                Text("What if?")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.primary)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
+                                Spacer()
+                            }
+                            Text("(Plan Impact)")
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                                 .lineLimit(1)
-                            Text(plannedDate, style: .relative)
-                                .font(.caption2)
-                                .foregroundColor(.blue)
-                        } else {
-                            Text("Impact")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
+                                .minimumScaleFactor(0.8)
+
+                            if let meal = nextPlannedMeal, let plannedDate = meal.plannedDateTime {
+                                Text(meal.name ?? "Planned meal")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                                Text(plannedDate, style: .relative)
+                                    .font(.caption2)
+                                    .foregroundColor(.blue)
+                            }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .frame(height: 80)
-                    .padding(10)
+                    .padding(isLandscape ? 6 : 10)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
                     .contentShape(Rectangle())

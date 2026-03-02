@@ -230,6 +230,27 @@ struct UserProfileView: View {
                     convertHeightDisplay(from: oldUnit, to: newUnit)
                 }
             }
+
+            // MARK: - Section 5: About
+            Section(header: Text("About")) {
+                Link(destination: URL(string: "https://example.com/diabeteshba1c")!) {
+                    HStack {
+                        Label("About DiabetesHbA1c Prediction", systemImage: "info.circle")
+                        Spacer()
+                        Image(systemName: "arrow.up.right.square")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                HStack {
+                    Text("Version")
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Text("1.0.0 (Beta)")
+                        .foregroundColor(.secondary)
+                }
+            }
         }
         }
         .navigationTitle(isPortrait ? "User Profile" : "")
