@@ -195,10 +195,13 @@ struct GlucoseLogView: View {
                 }
                 .padding(.horizontal)
 
-                // Filter to last 30 days of readings
+                // Filter to last 30 days of glucose readings (exclude HbA1c lab results)
+                let hba1cUnits: Set<String> = ["NGSP %", "mmol/mol"]
                 let last30Days = glucoseReadings.filter { reading in
                     guard let timestamp = reading.timestamp else { return false }
-                    return Calendar.current.dateComponents([.day], from: timestamp, to: Date()).day ?? 0 <= 30
+                    let isHbA1c = hba1cUnits.contains(reading.unit ?? "")
+                    let withinWindow = Calendar.current.dateComponents([.day], from: timestamp, to: Date()).day ?? 0 <= 30
+                    return !isHbA1c && withinWindow
                 }
 
                 if !last30Days.isEmpty {
@@ -511,6 +514,8 @@ struct GlucoseLogView: View {
             return "drop.fill"
         case "healthkit":
             return "heart.fill"
+        case "hospital lab test":
+            return "cross.case.fill"
         default:
             return "questionmark.circle"
         }
@@ -612,18 +617,36 @@ enum GlucoseUnitType: String, CaseIterable {
     }
 }
 
+// MARK: - Add Reading Entry Type
+/// Segmented control options for the Add Reading sheet
+enum AddReadingEntryType: String, CaseIterable {
+    case glucose = "Glucose Reading"
+    case hba1c = "HbA1c Lab Result"
+}
+
 // MARK: - Add Glucose Reading Sheet
-/// Sheet for manually adding a new glucose reading
+/// Sheet for manually adding a new glucose reading or HbA1c lab result
+/// Uses a segmented control (Option B) to switch between the two entry forms
 struct AddGlucoseReadingSheet: View {
     @Binding var isPresented: Bool
     var moc: NSManagedObjectContext
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @ObservedObject private var hba1cProfile = HbA1cUserProfile.shared
 
+    // MARK: - Segmented tab selection
+    @State private var selectedEntryType: AddReadingEntryType = .glucose
+
+    // MARK: - Glucose Reading State
     @State private var glucoseValue: String = ""
     @State private var selectedSource = "Manual Finger Stick"
     @State private var selectedTrend = "stable"
     @State private var selectedTimestamp = Date()
     @State private var selectedUnit: GlucoseUnitType = .localeDefault
+
+    // MARK: - HbA1c Lab Result State
+    @State private var hba1cValue: String = ""
+    @State private var hba1cLabDate = Date()
+    @State private var hba1cUnitOverride: HbA1cUnit? = nil
 
     let sourceOptions = ["Manual Finger Stick", "FreeStyle Libre 2 (manual entry)"]
     let trendOptions = ["stable", "rising", "falling", "rising rapidly", "falling rapidly"]
@@ -637,59 +660,73 @@ struct AddGlucoseReadingSheet: View {
         return formatter.number(from: glucoseValue)?.doubleValue
     }
 
+    /// Parses the typed HbA1c value using the device locale
+    private var parsedHbA1cValue: Double? {
+        let formatter = NumberFormatter()
+        formatter.locale = Locale.current
+        formatter.numberStyle = .decimal
+        return formatter.number(from: hba1cValue)?.doubleValue
+    }
+
+    /// The effective HbA1c unit: local override on this sheet, or the profile default
+    private var effectiveHbA1cUnit: HbA1cUnit {
+        hba1cUnitOverride ?? hba1cProfile.effectiveUnit
+    }
+
+    /// Validates the HbA1c value falls within a clinically plausible range
+    private var isHbA1cValueValid: Bool {
+        guard let value = parsedHbA1cValue else { return false }
+        switch effectiveHbA1cUnit {
+        case .ngsp:
+            return value >= 3.0 && value <= 20.0   // % range
+        case .ifcc:
+            return value >= 9.0 && value <= 195.0   // mmol/mol range
+        }
+    }
+
+    /// How many weeks ago the selected lab date is (for the decay note)
+    private var labDateWeeksAgo: Int {
+        let days = Calendar.current.dateComponents([.day], from: hba1cLabDate, to: Date()).day ?? 0
+        return max(0, days / 7)
+    }
+
     private var isPortrait: Bool {
         verticalSizeClass != .compact
+    }
+
+    /// Whether the Save button should be enabled
+    private var isSaveDisabled: Bool {
+        switch selectedEntryType {
+        case .glucose:
+            return glucoseValue.isEmpty || parsedGlucoseValue == nil
+        case .hba1c:
+            return hba1cValue.isEmpty || !isHbA1cValueValid
+        }
     }
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if isPortrait {
-                    Text("Add Glucose Reading")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.vertical, 6)
-                }
-                Form {
-                Section("Glucose Value Units") {
-                    Picker("Unit System", selection: $selectedUnit) {
-                        ForEach(GlucoseUnitType.allCases, id: \.self) { unit in
-                            Text(unit.rawValue).tag(unit)
-                        }
+                // Segmented control
+                Picker("Entry Type", selection: $selectedEntryType) {
+                    ForEach(AddReadingEntryType.allCases, id: \.self) { type in
+                        Text(type.rawValue).tag(type)
                     }
                 }
-                
-                Section("Glucose Value") {
-                    HStack {
-                        TextField("Enter value", text: $glucoseValue)
-                            .keyboardType(.decimalPad)
-                        Text(selectedUnit.unitLabel)
-                            .foregroundColor(.secondary)
-                    }
-                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+                .padding(.top, isPortrait ? 10 : 6)
+                .padding(.bottom, 4)
 
-                Section("Source") {
-                    Picker("Source", selection: $selectedSource) {
-                        ForEach(sourceOptions, id: \.self) { source in
-                            Text(source).tag(source)
-                        }
-                    }
-                }
-
-                Section("Trend") {
-                    Picker("Trend", selection: $selectedTrend) {
-                        ForEach(trendOptions, id: \.self) { trend in
-                            Text(trend.capitalized).tag(trend)
-                        }
-                    }
-                }
-
-                Section("Timestamp") {
-                    DatePicker("Time", selection: $selectedTimestamp, in: ...Date(), displayedComponents: [.date, .hourAndMinute])
+                // Show the appropriate form based on selected segment
+                switch selectedEntryType {
+                case .glucose:
+                    glucoseForm
+                case .hba1c:
+                    hba1cForm
                 }
             }
-            }
-            .navigationTitle(isPortrait ? "" : "Add Glucose Reading")
+            .navigationTitle(isPortrait ? "" : "Add Reading")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -700,17 +737,144 @@ struct AddGlucoseReadingSheet: View {
 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
-                        saveReading()
+                        switch selectedEntryType {
+                        case .glucose:
+                            saveGlucoseReading()
+                        case .hba1c:
+                            saveHbA1cLabResult()
+                        }
                     }
-                    .disabled(glucoseValue.isEmpty || parsedGlucoseValue == nil)
+                    .disabled(isSaveDisabled)
                 }
             }
         }
     }
 
-    /// Saves the new glucose reading to Core Data
-    /// Stores the value in the selected unit system along with the unit type
-    func saveReading() {
+    // MARK: - Glucose Reading Form
+
+    private var glucoseForm: some View {
+        Form {
+            Section("Glucose Value Units") {
+                Picker("Unit System", selection: $selectedUnit) {
+                    ForEach(GlucoseUnitType.allCases, id: \.self) { unit in
+                        Text(unit.rawValue).tag(unit)
+                    }
+                }
+            }
+
+            Section("Glucose Value") {
+                HStack {
+                    TextField("Enter value", text: $glucoseValue)
+                        .keyboardType(.decimalPad)
+                    Text(selectedUnit.unitLabel)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Section("Source") {
+                Picker("Source", selection: $selectedSource) {
+                    ForEach(sourceOptions, id: \.self) { source in
+                        Text(source).tag(source)
+                    }
+                }
+            }
+
+            Section("Trend") {
+                Picker("Trend", selection: $selectedTrend) {
+                    ForEach(trendOptions, id: \.self) { trend in
+                        Text(trend.capitalized).tag(trend)
+                    }
+                }
+            }
+
+            Section("Timestamp") {
+                DatePicker("Time", selection: $selectedTimestamp, in: ...Date(),
+                           displayedComponents: [.date, .hourAndMinute])
+            }
+        }
+    }
+
+    // MARK: - HbA1c Lab Result Form
+
+    private var hba1cForm: some View {
+        Form {
+            Section {
+                HStack {
+                    Text("Unit System")
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Text(effectiveHbA1cUnit.displayName)
+                        .foregroundColor(.blue)
+                        .fontWeight(.medium)
+                }
+
+                Picker("Override Unit", selection: $hba1cUnitOverride) {
+                    Text("Auto (\(hba1cProfile.effectiveUnit.shortUnit))").tag(nil as HbA1cUnit?)
+                    ForEach(HbA1cUnit.allCases, id: \.self) { unit in
+                        Text(unit.displayName).tag(unit as HbA1cUnit?)
+                    }
+                }
+            } header: {
+                Text("HbA1c Units")
+            } footer: {
+                Text("Auto-detected from your region (\(hba1cProfile.countryName)). Override if your lab report uses a different standard.")
+            }
+
+            Section("HbA1c Value") {
+                HStack {
+                    TextField("Enter lab result", text: $hba1cValue)
+                        .keyboardType(.decimalPad)
+                    Text(effectiveHbA1cUnit.shortUnit)
+                        .foregroundColor(.secondary)
+                }
+
+                if parsedHbA1cValue != nil && !isHbA1cValueValid {
+                    Text("Value out of clinical range")
+                        .font(.caption)
+                        .foregroundColor(.red)
+                }
+            }
+
+            Section {
+                DatePicker("Lab Test Date", selection: $hba1cLabDate, in: ...Date(),
+                           displayedComponents: [.date])
+            } header: {
+                Text("Lab Test Date")
+            } footer: {
+                Text(labDateWeightDescription)
+            }
+
+            Section {
+                VStack(alignment: .leading, spacing: 6) {
+                    Label("Time-Weighted Impact", systemImage: "chart.line.downtrend.xyaxis")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Text("Lab results from the last 4 weeks have full impact on your estimated HbA1c. Impact decreases for results 1–3 months old, and results older than 3 months are excluded.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+    }
+
+    /// Describes the weight this lab result will receive based on its date
+    private var labDateWeightDescription: String {
+        let weeks = labDateWeeksAgo
+        if weeks <= 4 {
+            return "This result is within 4 weeks — it will have full weight in your HbA1c estimate."
+        } else if weeks <= 8 {
+            return "This result is \(weeks) weeks old — it will have moderate weight in your HbA1c estimate."
+        } else if weeks <= 12 {
+            return "This result is \(weeks) weeks old — it will have reduced weight in your HbA1c estimate."
+        } else {
+            return "This result is over 3 months old — it will not be included in your HbA1c estimate."
+        }
+    }
+
+    // MARK: - Save Actions
+
+    /// Saves a new glucose reading to Core Data
+    func saveGlucoseReading() {
         guard let value = parsedGlucoseValue else { return }
 
         let newReading = GlucoseReadingEntity(context: moc)
@@ -725,7 +889,35 @@ struct AddGlucoseReadingSheet: View {
             try moc.save()
             isPresented = false
         } catch {
-            print("Error saving reading: \(error.localizedDescription)")
+            print("Error saving glucose reading: \(error.localizedDescription)")
+        }
+    }
+
+    /// Saves a manual HbA1c lab result to Core Data as a GlucoseReadingEntity
+    /// Stores the value in the user's selected HbA1c unit with a special source marker
+    func saveHbA1cLabResult() {
+        guard let value = parsedHbA1cValue, isHbA1cValueValid else { return }
+
+        let newReading = GlucoseReadingEntity(context: moc)
+        newReading.id = UUID()
+        newReading.value = value
+        newReading.timestamp = hba1cLabDate
+        newReading.source = "Hospital Lab Test"
+        newReading.trend = nil
+
+        // Store with the unit label that matches what fetchPriorHbA1cReadings expects
+        switch effectiveHbA1cUnit {
+        case .ngsp:
+            newReading.unit = "NGSP %"
+        case .ifcc:
+            newReading.unit = "mmol/mol"
+        }
+
+        do {
+            try moc.save()
+            isPresented = false
+        } catch {
+            print("Error saving HbA1c lab result: \(error.localizedDescription)")
         }
     }
 }

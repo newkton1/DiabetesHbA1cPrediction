@@ -14,11 +14,13 @@ import Combine
 enum MealType: String, CaseIterable {
     case lastMeal = "lastMeal"
     case plannedMeal = "plannedMeal"
+    case feast = "feast"
     
     var displayName: String {
         switch self {
         case .lastMeal: return "Last Meal"
         case .plannedMeal: return "Planned Meal"
+        case .feast: return "Feast"
         }
     }
 }

@@ -381,14 +381,16 @@ class HbA1cPredictionEngine: ObservableObject {
         var finalConfidence = result.confidenceLevel
         var updatedFactors = result.contributingFactors
 
-        // Blend with prior HbA1c measurements if available (2–5 readings)
-        if let priorReadings = fetchPriorHbA1cReadings(from: context), priorReadings.count >= 2 {
+        // Blend with prior HbA1c measurements if available (time-decay weighted)
+        // Now supports single readings (at 50/50 blend) and 2+ readings (at 30/70 blend)
+        if let priorReadings = fetchPriorHbA1cReadings(from: context), !priorReadings.isEmpty {
             finalHbA1c = blendWithPriorHbA1c(
                 formulaPrediction: finalHbA1c,
                 priorReadings: priorReadings
             )
             finalHbA1c = max(4.0, min(14.0, finalHbA1c))
-            finalConfidence = min(1.0, finalConfidence + 0.15)
+            let confidenceBoost = priorReadings.count >= 2 ? 0.15 : 0.08
+            finalConfidence = min(1.0, finalConfidence + confidenceBoost)
             updatedFactors["Prior HbA1c Blending"] = 0.0  // marker indicating blending was applied
         }
 
@@ -736,20 +738,35 @@ class HbA1cPredictionEngine: ObservableObject {
         }
     }
 
+    /// Represents a prior HbA1c measurement with its timestamp for time-decay weighting
+    struct TimestampedHbA1c {
+        let value: Double    // NGSP percentage
+        let date: Date
+    }
+
     /// Fetches prior HbA1c measurements from GlucoseReadingEntity
-    /// Filters for manual finger stick and FreeStyle Libre measurements only
-    /// Returns up to 5 most recent readings converted to NGSP percentage
+    /// Includes Hospital Lab Test entries alongside Manual Finger Stick and FreeStyle Libre
+    /// Only returns readings within the last 12 weeks (older readings are excluded)
+    /// Returns up to 10 most recent readings converted to NGSP percentage with timestamps
     private func fetchPriorHbA1cReadings(
         from context: NSManagedObjectContext,
-        maxReadings: Int = 5
-    ) -> [Double]? {
+        maxReadings: Int = 10
+    ) -> [TimestampedHbA1c]? {
         let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "GlucoseReadingEntity")
 
         // Filter for HbA1c measurements (unit is NGSP % or mmol/mol)
-        // and valid sources (Manual Finger Stick or FreeStyle Libre manual entry)
+        // and valid sources (Manual Finger Stick, FreeStyle Libre manual entry, or Hospital Lab Test)
         let unitPredicate = NSPredicate(format: "unit IN %@", ["NGSP %", "mmol/mol"])
-        let sourcePredicate = NSPredicate(format: "source IN %@", ["Manual Finger Stick", "FreeStyle Libre 2 (manual entry)"])
-        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [unitPredicate, sourcePredicate])
+        let sourcePredicate = NSPredicate(format: "source IN %@",
+            ["Manual Finger Stick", "FreeStyle Libre 2 (manual entry)", "Hospital Lab Test"])
+
+        // Only include readings from the last 12 weeks
+        let twelveWeeksAgo = Calendar.current.date(byAdding: .weekOfYear, value: -12, to: Date()) ?? Date()
+        let datePredicate = NSPredicate(format: "timestamp >= %@", twelveWeeksAgo as NSDate)
+
+        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            unitPredicate, sourcePredicate, datePredicate
+        ])
 
         // Sort by timestamp descending to get most recent first
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
@@ -760,57 +777,88 @@ class HbA1cPredictionEngine: ObservableObject {
                 return nil
             }
 
-            let hba1cValues = results.compactMap { object -> Double? in
+            let hba1cReadings = results.compactMap { object -> TimestampedHbA1c? in
                 guard let value = object.value(forKey: "value") as? NSNumber,
-                      let unit = object.value(forKey: "unit") as? String else {
+                      let unit = object.value(forKey: "unit") as? String,
+                      let timestamp = object.value(forKey: "timestamp") as? Date else {
                     return nil
                 }
                 // Convert to NGSP percentage if stored as IFCC mmol/mol
+                let ngspValue: Double
                 if unit == "mmol/mol" {
-                    return ifccToNGSP(value.doubleValue)
+                    ngspValue = ifccToNGSP(value.doubleValue)
                 } else if unit == "NGSP %" {
-                    return value.doubleValue
+                    ngspValue = value.doubleValue
+                } else {
+                    return nil
                 }
-                return nil
+                return TimestampedHbA1c(value: ngspValue, date: timestamp)
             }
 
-            return hba1cValues.isEmpty ? nil : hba1cValues
+            return hba1cReadings.isEmpty ? nil : hba1cReadings
         } catch {
             print("Error fetching prior HbA1c readings: \(error.localizedDescription)")
             return nil
         }
     }
 
-    /// Blends formula-based prediction with prior HbA1c measurements
-    /// Uses recency-weighted averaging: most recent readings have higher weight
-    /// Minimum 2 readings required for blending, maximum 5 readings used
+    /// Blends formula-based prediction with prior HbA1c measurements using time-decay weighting
+    ///
+    /// Time-decay schedule:
+    ///   - 0–4 weeks old:  weight = 1.0 (full impact)
+    ///   - 4–12 weeks old: weight decays linearly from 1.0 → 0.2
+    ///   - > 12 weeks old: excluded (not fetched)
+    ///
+    /// Minimum 1 reading required for blending (was 2 with old index-based approach).
     /// Returns blended HbA1c in NGSP %
     private func blendWithPriorHbA1c(
         formulaPrediction: Double,
-        priorReadings: [Double]
+        priorReadings: [TimestampedHbA1c]
     ) -> Double {
-        // Require minimum 2 readings for blending
-        guard priorReadings.count >= 2 else {
+        guard !priorReadings.isEmpty else {
             return formulaPrediction
         }
 
-        // Use up to 5 most recent readings (already sorted newest first)
-        let limitedReadings = Array(priorReadings.prefix(5))
+        let now = Date()
 
-        // Recency-weighted average: newest gets highest weight
+        // Calculate time-decayed weighted average
         var weightedSum = 0.0
         var totalWeight = 0.0
-        for (index, reading) in limitedReadings.enumerated() {
-            let weight = Double(limitedReadings.count - index)
-            weightedSum += reading * weight
-            totalWeight += weight
+
+        for reading in priorReadings {
+            let ageInWeeks = now.timeIntervalSince(reading.date) / (7.0 * 24.0 * 3600.0)
+
+            let weight: Double
+            if ageInWeeks <= 4.0 {
+                // Full weight for readings within 4 weeks
+                weight = 1.0
+            } else if ageInWeeks <= 12.0 {
+                // Linear decay from 1.0 at 4 weeks to 0.2 at 12 weeks
+                weight = 1.0 - (ageInWeeks - 4.0) * (0.8 / 8.0)
+            } else {
+                // Should not reach here (filtered out by fetch), but safety net
+                weight = 0.0
+            }
+
+            if weight > 0 {
+                weightedSum += reading.value * weight
+                totalWeight += weight
+            }
+        }
+
+        guard totalWeight > 0 else {
+            return formulaPrediction
         }
 
         let priorAverage = weightedSum / totalWeight
 
-        // Blend: 30% formula-based + 70% weighted prior average
-        // Actual measurements are more reliable than formula estimates
-        let blendedValue = (formulaPrediction * 0.3) + (priorAverage * 0.7)
+        // Blend ratio depends on how many valid readings we have
+        // 1 reading:  50% formula + 50% prior (less confidence in single measurement)
+        // 2+ readings: 30% formula + 70% prior (strong confidence in repeated measurements)
+        let priorWeight = priorReadings.count >= 2 ? 0.7 : 0.5
+        let formulaWeight = 1.0 - priorWeight
+
+        let blendedValue = (formulaPrediction * formulaWeight) + (priorAverage * priorWeight)
         return blendedValue
     }
 

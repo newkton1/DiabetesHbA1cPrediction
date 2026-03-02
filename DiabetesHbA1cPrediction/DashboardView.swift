@@ -13,6 +13,9 @@ import CoreData
 /// - Orange: 6.5-7.5% (diabetic target range)
 /// - Red: > 7.5% (above target)
 struct DashboardView: View {
+    // MARK: - Navigation
+    @Binding var selectedTab: ContentView.Tab
+
     // MARK: - Environment
     @Environment(\.managedObjectContext) private var viewContext
 
@@ -45,7 +48,7 @@ struct DashboardView: View {
     @State private var showPredictionEngine = false
     @State private var isCalculatingPrediction = false
     @State private var showLastMealSheet = false
-    @State private var showPlannedMealSheet = false
+    // showPlannedMealSheet removed — Plan Meal now switches to the meals tab
     @State private var showPredictionResult = false
     @State private var predictionErrorMessage: String? = nil
     @State private var showPredictionError = false
@@ -105,7 +108,7 @@ struct DashboardView: View {
                                     lastMeal: lastLoggedMeal,
                                     nextPlannedMeal: nextPlannedMeal,
                                     onLogLastMeal: { showLastMealSheet = true },
-                                    onPlanMeal: { showPlannedMealSheet = true }
+                                    onPlanMeal: { selectedTab = .meals }
                                 )
                                 
                                 QuickStatsView(
@@ -155,7 +158,7 @@ struct DashboardView: View {
                             lastMeal: lastLoggedMeal,
                             nextPlannedMeal: nextPlannedMeal,
                             onLogLastMeal: { showLastMealSheet = true },
-                            onPlanMeal: { showPlannedMealSheet = true }
+                            onPlanMeal: { selectedTab = .meals }
                         )
 
                         // MARK: - Quick Stats Grid
@@ -203,10 +206,7 @@ struct DashboardView: View {
                 LastMealView()
                     .environment(\.managedObjectContext, viewContext)
             }
-            .sheet(isPresented: $showPlannedMealSheet) {
-                PlannedMealView()
-                    .environment(\.managedObjectContext, viewContext)
-            }
+            // Plan Meal now switches to the meals tab instead of presenting a sheet
             .alert("Prediction Complete", isPresented: $showPredictionResult) {
                 Button("OK", role: .cancel) { }
             } message: {
@@ -797,8 +797,8 @@ private struct MealQuickActionsView: View {
                                 .foregroundColor(.primary)
                             Spacer()
                         }
-                        // "Meal" on second line
-                        Text("Meal")
+                        // "Ahead" on second line
+                        Text("Ahead")
                             .font(.caption)
                             .fontWeight(.semibold)
                             .foregroundColor(.primary)
@@ -835,6 +835,6 @@ private struct MealQuickActionsView: View {
 
 // MARK: - Preview
 #Preview {
-    DashboardView()
+    DashboardView(selectedTab: .constant(.dashboard))
         .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }

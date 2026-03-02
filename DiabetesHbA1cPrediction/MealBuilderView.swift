@@ -34,7 +34,7 @@ struct MealBuilderView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 if isPortrait {
-                    Text(mealType == .lastMeal ? "Log Last Meal" : "Plan Meal/Feast")
+                    Text(mealType == .lastMeal ? "Log Last Meal" : mealType == .feast ? "Plan a Feast" : "Plan a Meal")
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.vertical, 6)
@@ -47,7 +47,14 @@ struct MealBuilderView: View {
                         .submitLabel(.done)
                         .onSubmit { isMealNameFocused = false }
                 }
-                
+                    // Feast banner
+                                    if mealType == .feast {
+                                        Section {
+                                            FeastModeBannerView()
+                                                .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                                                .listRowBackground(Color.clear)
+                                        }
+                                    }
                 // Add foods button
                 Section {
                     Button(action: { showingFoodSearch = true }) {
@@ -107,12 +114,12 @@ struct MealBuilderView: View {
                 }
 
                 // Estimated Impact section (planned meals only, always visible)
-                if mealType == .plannedMeal {
-                    Section(header: Text("Estimated Impact")) {
+                    if mealType == .plannedMeal || mealType == .feast {                    Section(header: Text("Estimated Impact")) {
                         EstimatedImpactContent(
                             mealBuilder: mealBuilder,
-                            viewContext: viewContext,
-                            predictionEngine: predictionEngine
+                                                        viewContext: viewContext,
+                                                        predictionEngine: predictionEngine,
+                                                        mealType: mealType
                         )
                     }
                 }
@@ -183,7 +190,7 @@ struct MealBuilderView: View {
             .scrollDismissesKeyboard(.interactively)
             }
             .ignoresSafeArea(.keyboard)
-            .navigationTitle(isPortrait ? "" : (mealType == .lastMeal ? "Log Last Meal" : "Plan Meal/Feast"))
+            .navigationTitle(isPortrait ? "" : (mealType == .lastMeal ? "Log Last Meal" : mealType == .feast ? "Plan a Feast" : "Plan a Meal"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -286,7 +293,8 @@ struct EstimatedImpactContent: View {
     @ObservedObject var mealBuilder: MealBuilder
     var viewContext: NSManagedObjectContext
     var predictionEngine: HbA1cPredictionEngine
-
+    var mealType: MealType = .plannedMeal
+    
     var body: some View {
         let impact = computeImpact()
         if let impact = impact {
@@ -357,16 +365,11 @@ struct EstimatedImpactContent: View {
 
             // Walk recommendation
             if let walkRec = impact.walkRecommendation {
-                HStack(alignment: .top) {
-                    Image(systemName: "figure.walk")
-                        .foregroundColor(.green)
-                        .frame(width: 24)
-                    Text(walkRec)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.top, 2)
-            }
+                           WalkRecommendationCard(recommendation: walkRec)
+                               .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                               .listRowBackground(Color.clear)
+                               .padding(.top, 4)
+                       }
         } else {
             Text("Add foods to see estimated impact")
                 .foregroundColor(.secondary)
@@ -408,15 +411,17 @@ struct EstimatedImpactContent: View {
         else { glCategory = "High" }
 
         // 5. Generate recommendation
-        var recommendation: String? = nil
-        if gl > 20 && carbs > 60 {
-            recommendation = "High carb & glycemic load. Consider smaller portions or adding protein/fiber to slow glucose absorption."
-        } else if gl > 20 {
-            recommendation = "High glycemic load. Consider lower GI alternatives to reduce glucose spike."
-        } else if carbs > 80 {
-            recommendation = "High carbs. Adding protein or healthy fats can help moderate blood sugar response."
-        }
-
+                let isFeast = (mealType == .feast)
+                var recommendation: String? = nil
+                if gl > (isFeast ? 30 : 20) && carbs > (isFeast ? 90 : 60) {
+                    recommendation = isFeast
+                        ? "Very high carb feast. A brisk post-meal walk will help significantly."
+                        : "High carb & glycemic load. Consider smaller portions or adding protein/fiber to slow glucose absorption."
+                } else if gl > (isFeast ? 30 : 20) {
+                    recommendation = "High glycemic load. Consider lower-GI alternatives to reduce glucose spike."
+                } else if carbs > (isFeast ? 100 : 80) {
+                    recommendation = "High carbs. Adding protein or healthy fats can help moderate blood sugar response."
+                }
         // 6. Estimate post-meal walk to offset glucose rise
         let walkRec = computeWalkRecommendation(estimatedGlucoseRise: estimatedGlucoseRise)
 
