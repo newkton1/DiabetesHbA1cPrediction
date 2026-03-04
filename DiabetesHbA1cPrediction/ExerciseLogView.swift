@@ -85,9 +85,9 @@ struct ExerciseLogView: View {
     // MARK: - Portrait Content
     private var portraitContent: some View {
         VStack(spacing: 0) {
-            // MARK: - This Week header with Sync Button
+            // MARK: - Last 7 Days header with Sync Button
             HStack {
-                Text("This Week")
+                Text("Last 7 Days")
                     .font(.headline)
 
                 Spacer()
@@ -153,9 +153,9 @@ struct ExerciseLogView: View {
             // Scrollable content
             ScrollView {
                 VStack(spacing: 4) {
-                    // "This Week" header with Sync Health button on right
+                    // "Last 7 Days" header with Sync Health button on right
                     HStack {
-                        Text("This Week")
+                        Text("Last 7 Days")
                             .font(.headline)
                         Spacer()
                         Button(action: syncFromHealth) {
@@ -181,7 +181,7 @@ struct ExerciseLogView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 4)
 
-                    // Weekly summary card (without "This Week" header - using NoTitle version)
+                    // Weekly summary card (without "Last 7 Days" header - using NoTitle version)
                     WeeklySummaryCardNoTitle(exercises: exercises)
                         .padding(.horizontal)
 
@@ -374,7 +374,7 @@ struct WeeklySummaryCard: View {
     var body: some View {
         VStack(spacing: 12) {
             HStack {
-                Text("This Week")
+                Text("Last 7 Days")
                     .font(.headline)
                 Spacer()
             }
@@ -484,7 +484,7 @@ struct WeeklySummaryCard: View {
 }
 
 // MARK: - Weekly Summary Card (No Title) - for Portrait mode
-/// Displays aggregated weekly exercise statistics without the "This Week" header
+/// Displays aggregated weekly exercise statistics without the "Last 7 Days" header
 struct WeeklySummaryCardNoTitle: View {
     let exercises: FetchedResults<ExerciseSessionEntity>
 

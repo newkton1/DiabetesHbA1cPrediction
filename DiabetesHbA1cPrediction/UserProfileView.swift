@@ -65,7 +65,7 @@ struct UserProfileView: View {
             // Landscape: custom header with title on left, Save button on right
             if !isPortrait {
                 HStack {
-                    Text("User Profile")
+                    Text("User")
                         .font(.system(size: 22, weight: .bold))
                     Spacer()
                     Button(action: saveProfile) {
@@ -208,26 +208,64 @@ struct UserProfileView: View {
                     }
                 }
 
-                // Weight unit picker
-                Picker(selection: $hwProfile.weightUnit,
-                       label: Label("Weight Units", systemImage: "scale.3d")) {
-                    ForEach(HeightWeightUnitProfile.WeightUnit.allCases) { unit in
-                        Text(unit.label).tag(unit)
+                // Weight unit picker — shows abbreviation in row, full name in menu
+                HStack {
+                    Label("Weight Units", systemImage: "scale.3d")
+                    Spacer()
+                    Menu {
+                        ForEach(HeightWeightUnitProfile.WeightUnit.allCases) { unit in
+                            Button(action: {
+                                let old = hwProfile.weightUnit
+                                hwProfile.weightUnit = unit
+                                convertWeightDisplay(from: old, to: unit)
+                            }) {
+                                HStack {
+                                    Text(unit.label)
+                                    if unit == hwProfile.weightUnit {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(hwProfile.weightUnit.shortLabel)
+                                .foregroundColor(.secondary)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
                     }
-                }
-                .onChange(of: hwProfile.weightUnit) { oldUnit, newUnit in
-                    convertWeightDisplay(from: oldUnit, to: newUnit)
                 }
 
-                // Height unit picker
-                Picker(selection: $hwProfile.heightUnit,
-                       label: Label("Height Units", systemImage: "figure.wave")) {
-                    ForEach(HeightWeightUnitProfile.HeightUnit.allCases) { unit in
-                        Text(unit.label).tag(unit)
+                // Height unit picker — shows abbreviation in row, full name in menu
+                HStack {
+                    Label("Height Units", systemImage: "figure.wave")
+                    Spacer()
+                    Menu {
+                        ForEach(HeightWeightUnitProfile.HeightUnit.allCases) { unit in
+                            Button(action: {
+                                let old = hwProfile.heightUnit
+                                hwProfile.heightUnit = unit
+                                convertHeightDisplay(from: old, to: unit)
+                            }) {
+                                HStack {
+                                    Text(unit.label)
+                                    if unit == hwProfile.heightUnit {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(hwProfile.heightUnit.shortLabel)
+                                .foregroundColor(.secondary)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
                     }
-                }
-                .onChange(of: hwProfile.heightUnit) { oldUnit, newUnit in
-                    convertHeightDisplay(from: oldUnit, to: newUnit)
                 }
             }
 
@@ -253,13 +291,13 @@ struct UserProfileView: View {
             }
         }
         }
-        .navigationTitle(isPortrait ? "User Profile" : "")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             // Portrait: title on left, Save button on right
             if isPortrait {
                 ToolbarItem(placement: .topBarLeading) {
-                    Text("User Profile")
+                    Text("User")
                         .font(.system(size: 22, weight: .bold))
                         .fixedSize(horizontal: true, vertical: false)
                 }

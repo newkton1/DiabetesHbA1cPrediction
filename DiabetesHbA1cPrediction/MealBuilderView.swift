@@ -192,7 +192,7 @@ struct MealBuilderView: View {
                                 .labelsHidden()
                         }
                         HStack(spacing: 8) {
-                            QuickTimeButton(title: "Just now", hours: 0, selectedHours: $mealBuilder.timeSinceLastMeal)
+                            QuickTimeButton(title: "Now", hours: 0, selectedHours: $mealBuilder.timeSinceLastMeal)
                             QuickTimeButton(title: "1 h", hours: 1, selectedHours: $mealBuilder.timeSinceLastMeal)
                             QuickTimeButton(title: "2 h", hours: 2, selectedHours: $mealBuilder.timeSinceLastMeal)
                             QuickTimeButton(title: "3 h", hours: 3, selectedHours: $mealBuilder.timeSinceLastMeal)

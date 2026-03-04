@@ -136,6 +136,14 @@ class MealBuilder: ObservableObject {
     func isSelected(_ food: FoodItem) -> Bool {
         selectedFoods.contains { $0.foodItem.id == food.id }
     }
+
+    /// Returns the current quantity for a food item, or 0 if not selected
+    func quantityFor(_ food: FoodItem) -> Int {
+        if let item = selectedFoods.first(where: { $0.foodItem.id == food.id }) {
+            return Int(item.quantity)
+        }
+        return 0
+    }
     
     /// Clear all selected foods
     func clearAll() {
