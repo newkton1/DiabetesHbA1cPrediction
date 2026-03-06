@@ -649,6 +649,8 @@ struct AddGlucoseReadingSheet: View {
     @State private var hba1cValue: String = ""
     @State private var hba1cLabDate = Date()
     @State private var hba1cUnitOverride: HbA1cUnit? = nil
+    @State private var showLabConfirmAlert = false
+    @State private var hasConfirmedLabResult = false
 
     let sourceOptions = ["Manual Finger Stick", "FreeStyle Libre 2"]
     let trendOptions = ["stable", "rising", "falling", "rising rapidly", "falling rapidly"]
@@ -719,6 +721,9 @@ struct AddGlucoseReadingSheet: View {
                 .padding(.horizontal)
                 .padding(.top, isPortrait ? 10 : 6)
                 .padding(.bottom, 4)
+                .onChange(of: selectedEntryType) { _ in
+                    hasConfirmedLabResult = false
+                }
 
                 // Show the appropriate form based on selected segment
                 switch selectedEntryType {
@@ -822,10 +827,22 @@ struct AddGlucoseReadingSheet: View {
                 Text("Auto-detected from your region (\(hba1cProfile.countryName)). Override if your lab report uses a different standard.")
             }
 
-            Section("HbA1c Value") {
+            Section {
                 HStack {
                     TextField("Enter lab result", text: $hba1cValue)
                         .keyboardType(.decimalPad)
+                        .disabled(!hasConfirmedLabResult)
+                        .overlay(
+                            Group {
+                                if !hasConfirmedLabResult {
+                                    Color.clear
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            showLabConfirmAlert = true
+                                        }
+                                }
+                            }
+                        )
                     Text(effectiveHbA1cUnit.shortUnit)
                         .foregroundColor(.secondary)
                 }
@@ -834,6 +851,13 @@ struct AddGlucoseReadingSheet: View {
                     Text("Value out of clinical range")
                         .font(.caption)
                         .foregroundColor(.red)
+                }
+            } header: {
+                HStack(spacing: 4) {
+                    Text("HbA1c")
+                    Text("Lab")
+                        .foregroundColor(.red)
+                    Text("Result")
                 }
             }
 
@@ -856,6 +880,14 @@ struct AddGlucoseReadingSheet: View {
                         .foregroundColor(.secondary)
                 }
             }
+        }
+        .alert("Confirm Lab Result", isPresented: $showLabConfirmAlert) {
+            Button("Yes, it's a lab result") {
+                hasConfirmedLabResult = true
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Is this HbA1c value from a lab blood test? Do NOT enter CGM estimate — this app's predictions require actual lab results.")
         }
     }
 

@@ -160,6 +160,17 @@ struct UserProfileView: View {
                         Text("Gestational").tag("Gestational")
                         Text("Other").tag("Other")
                     }
+
+                    if diabetesType == "Type 1" {
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.red)
+                            Text("This app is NOT for Type 1 diabetics or anyone using insulin bolus therapy. It does not calculate insulin dosage and must not be used for that purpose.")
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                        .padding(.vertical, 4)
+                    }
                 }
 
                 Toggle(isOn: $hasCOPD) {
@@ -433,6 +444,11 @@ struct UserProfileView: View {
 
     /// Validate the form input with unit-aware ranges.
     private func isFormValid() -> Bool {
+        // Block save for Type 1 diabetics — app is not designed for insulin bolus therapy
+        if hasDiabetes && diabetesType == "Type 1" {
+            return false
+        }
+
         // Check age
         if let ageInt = Int(age), ageInt < 1 || ageInt > 120 {
             return false
