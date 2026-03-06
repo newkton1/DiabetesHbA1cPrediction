@@ -286,12 +286,16 @@ class HbA1cPredictionEngine: ObservableObject {
             from: context,
             days: 90
         ) else {
+            #if DEBUG
             print("Error: Unable to fetch glucose readings")
+            #endif
             return nil
         }
 
         guard !glucoseReadings.isEmpty else {
+            #if DEBUG
             print("Error: No glucose readings available for prediction")
+            #endif
             return nil
         }
 
@@ -310,7 +314,9 @@ class HbA1cPredictionEngine: ObservableObject {
 
         // Fetch user demographics
         guard let demographics = fetchUserDemographics(from: context) else {
+            #if DEBUG
             print("Error: Unable to fetch user demographics")
+            #endif
             return nil
         }
 
@@ -371,7 +377,9 @@ class HbA1cPredictionEngine: ObservableObject {
     func runPredictionAndSave(context: NSManagedObjectContext) -> PredictionResult? {
         // Gather inputs from Core Data
         guard let input = gatherInputs(context: context) else {
+            #if DEBUG
             print("Error: Failed to gather prediction inputs")
+            #endif
             return nil
         }
 
@@ -408,10 +416,14 @@ class HbA1cPredictionEngine: ObservableObject {
         // Attempt to save context
         do {
             try context.save()
+            #if DEBUG
             print("Successfully saved prediction result to Core Data")
+            #endif
             return finalResult
         } catch {
+            #if DEBUG
             print("Error saving prediction result: \(error.localizedDescription)")
+            #endif
             return nil
         }
     }
@@ -466,7 +478,9 @@ class HbA1cPredictionEngine: ObservableObject {
             
             return (carbs: totalCarbs, glycemicLoad: totalGlycemicLoad, hoursSince: hoursSince)
         } catch {
+            #if DEBUG
             print("Error fetching last meal: \(error.localizedDescription)")
+            #endif
             return nil
         }
     }
@@ -510,7 +524,9 @@ class HbA1cPredictionEngine: ObservableObject {
                 return (carbs: totalCarbs, glycemicLoad: totalGlycemicLoad, hoursUntil: hoursUntil)
             }
         } catch {
+            #if DEBUG
             print("Error fetching planned meals: \(error.localizedDescription)")
+            #endif
             return []
         }
     }
@@ -618,7 +634,9 @@ class HbA1cPredictionEngine: ObservableObject {
 
             return glucoseValues.isEmpty ? nil : glucoseValues
         } catch {
+            #if DEBUG
             print("Error fetching glucose readings: \(error.localizedDescription)")
+            #endif
             return nil
         }
     }
@@ -637,7 +655,9 @@ class HbA1cPredictionEngine: ObservableObject {
         do {
             return try context.fetch(fetchRequest) as? [NSManagedObject]
         } catch {
+            #if DEBUG
             print("Error fetching meals: \(error.localizedDescription)")
+            #endif
             return nil
         }
     }
@@ -656,7 +676,9 @@ class HbA1cPredictionEngine: ObservableObject {
         do {
             return try context.fetch(fetchRequest) as? [NSManagedObject]
         } catch {
+            #if DEBUG
             print("Error fetching exercise sessions: \(error.localizedDescription)")
+            #endif
             return nil
         }
     }
@@ -706,7 +728,9 @@ class HbA1cPredictionEngine: ObservableObject {
 
             return (age, sex, bmi, hasDiabetes, diabetesType, tobaccoUse, alcoholUnitsPerWeek)
         } catch {
+            #if DEBUG
             print("Error fetching user demographics: \(error.localizedDescription)")
+            #endif
             return nil
         }
     }
@@ -733,7 +757,9 @@ class HbA1cPredictionEngine: ObservableObject {
 
             return conditions
         } catch {
+            #if DEBUG
             print("Error fetching health conditions: \(error.localizedDescription)")
+            #endif
             return [:]
         }
     }
@@ -758,7 +784,7 @@ class HbA1cPredictionEngine: ObservableObject {
         // and valid sources (Manual Finger Stick, FreeStyle Libre manual entry, or Hospital Lab Test)
         let unitPredicate = NSPredicate(format: "unit IN %@", ["NGSP %", "mmol/mol"])
         let sourcePredicate = NSPredicate(format: "source IN %@",
-            ["Manual Finger Stick", "FreeStyle Libre 2 (manual entry)", "Hospital Lab Test"])
+            ["Manual Finger Stick", "FreeStyle Libre 2", "Hospital Lab Test"])
 
         // Only include readings from the last 12 weeks
         let twelveWeeksAgo = Calendar.current.date(byAdding: .weekOfYear, value: -12, to: Date()) ?? Date()
@@ -797,7 +823,9 @@ class HbA1cPredictionEngine: ObservableObject {
 
             return hba1cReadings.isEmpty ? nil : hba1cReadings
         } catch {
+            #if DEBUG
             print("Error fetching prior HbA1c readings: \(error.localizedDescription)")
+            #endif
             return nil
         }
     }

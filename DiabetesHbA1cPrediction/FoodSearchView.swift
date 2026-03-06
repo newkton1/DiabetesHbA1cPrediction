@@ -94,7 +94,7 @@ struct FoodSearchView: View {
             } else {
                 // Show grouped by category when not searching
                 ForEach(sortedCategories, id: \.self) { category in
-                    Section(header: Text(category)) {
+                    Section(header: Text(MultiSelectFoodSearchView.chipLabel(for: category))) {
                         ForEach(foodsByCategory[category] ?? []) { food in
                             foodRow(for: food)
                         }

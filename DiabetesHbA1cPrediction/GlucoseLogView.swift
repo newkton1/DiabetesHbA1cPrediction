@@ -35,7 +35,7 @@ struct GlucoseLogView: View {
     @State private var selectedTrend = "stable"
     @State private var selectedTimestamp = Date()
 
-    let sourceOptions = ["Manual Finger Stick", "FreeStyle Libre 2 (manual entry)"]
+    let sourceOptions = ["Manual Finger Stick", "FreeStyle Libre 2"]
     let trendOptions = ["stable", "rising", "falling", "rising rapidly", "falling rapidly"]
 
     var body: some View {
@@ -508,7 +508,7 @@ struct GlucoseLogView: View {
     /// Returns the appropriate SF Symbol for a source value
     func sourceIcon(for source: String) -> String {
         switch source.lowercased() {
-        case "freestyle libre 2 (manual entry)":
+        case "freestyle libre 2":
             return "waveform.circle.fill"
         case "manual finger stick":
             return "drop.fill"
@@ -577,7 +577,9 @@ struct GlucoseLogView: View {
         do {
             try moc.save()
         } catch {
+            #if DEBUG
             print("Error deleting reading: \(error.localizedDescription)")
+            #endif
         }
     }
 }
@@ -648,7 +650,7 @@ struct AddGlucoseReadingSheet: View {
     @State private var hba1cLabDate = Date()
     @State private var hba1cUnitOverride: HbA1cUnit? = nil
 
-    let sourceOptions = ["Manual Finger Stick", "FreeStyle Libre 2 (manual entry)"]
+    let sourceOptions = ["Manual Finger Stick", "FreeStyle Libre 2"]
     let trendOptions = ["stable", "rising", "falling", "rising rapidly", "falling rapidly"]
 
     /// Parses the typed glucose value using the device locale so both
@@ -889,7 +891,9 @@ struct AddGlucoseReadingSheet: View {
             try moc.save()
             isPresented = false
         } catch {
+            #if DEBUG
             print("Error saving glucose reading: \(error.localizedDescription)")
+            #endif
         }
     }
 
@@ -917,7 +921,9 @@ struct AddGlucoseReadingSheet: View {
             try moc.save()
             isPresented = false
         } catch {
+            #if DEBUG
             print("Error saving HbA1c lab result: \(error.localizedDescription)")
+            #endif
         }
     }
 }

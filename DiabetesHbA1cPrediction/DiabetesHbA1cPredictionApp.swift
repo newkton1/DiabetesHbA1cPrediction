@@ -49,7 +49,9 @@ struct DiabetesHbA1cPredictionApp: App {
                     if HealthKitManager.isHealthKitAvailable() {
                         healthKitManager.requestAuthorization { success in
                             if success {
+                                #if DEBUG
                                 print("[HealthKit] Authorisation granted.")
+                                #endif
                             }
                         }
                     }

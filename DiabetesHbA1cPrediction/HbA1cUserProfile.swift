@@ -347,6 +347,8 @@ struct HbA1cOnboardingView: View {
 
 #Preview("Onboarding") {
     HbA1cOnboardingView(profile: HbA1cUserProfile.shared) {
+        #if DEBUG
         print("Onboarding complete")
+        #endif
     }
 }

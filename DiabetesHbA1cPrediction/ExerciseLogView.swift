@@ -322,10 +322,12 @@ struct ExerciseLogView: View {
         do {
             try moc.save()
         } catch {
+            #if DEBUG
             print("Error deleting exercise: \(error.localizedDescription)")
+            #endif
         }
     }
-    
+
     /// Deletes a single exercise session
     func deleteSingleExercise(_ exercise: ExerciseSessionEntity) {
         moc.delete(exercise)
@@ -333,7 +335,9 @@ struct ExerciseLogView: View {
         do {
             try moc.save()
         } catch {
+            #if DEBUG
             print("Error deleting exercise: \(error.localizedDescription)")
+            #endif
         }
     }
 }
@@ -893,7 +897,9 @@ struct AddExerciseSessionSheet: View {
             try moc.save()
             isPresented = false
         } catch {
+            #if DEBUG
             print("Error saving exercise: \(error.localizedDescription)")
+            #endif
         }
     }
 

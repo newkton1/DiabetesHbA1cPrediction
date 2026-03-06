@@ -86,7 +86,9 @@ struct DashboardView: View {
                             VStack(spacing: 12) {
                                 // HbA1c card at top
                                 HbA1cCardView(prediction: hbA1cPredictions.first)
-                                
+
+                                MedicalDisclaimerBanner()
+
                                 if !glucoseReadings.isEmpty {
                                     GlucoseTrendChartView(glucoseReadings: Array(glucoseReadings))
                                 } else {
@@ -147,6 +149,8 @@ struct DashboardView: View {
                     VStack(spacing: 20) {
                         // MARK: - HbA1c Display Card
                         HbA1cCardView(prediction: hbA1cPredictions.first)
+
+                        MedicalDisclaimerBanner()
 
                         // MARK: - HbA1c Trend Chart
                         if !glucoseReadings.isEmpty {
@@ -852,6 +856,25 @@ private struct MealQuickActionsView: View {
             .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal)
         }
+    }
+}
+
+// MARK: - Medical Disclaimer Banner
+/// A compact disclaimer banner reminding users that predictions are not medical advice.
+/// Displayed wherever HbA1c predictions or risk categories appear.
+struct MedicalDisclaimerBanner: View {
+    var body: some View {
+        HStack(alignment: .top, spacing: 6) {
+            Image(systemName: "info.circle")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            Text("For informational purposes only — not a substitute for professional medical advice.")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 6)
     }
 }
 

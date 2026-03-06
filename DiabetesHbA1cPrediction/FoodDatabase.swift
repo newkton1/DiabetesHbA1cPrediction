@@ -524,6 +524,7 @@ class FoodDatabase {
         // Japanese Side Dishes
         allFoods.append(FoodItem(name: "Edamame", category: "Asian & Japanese", servingSize: 1, servingUnit: "cup shelled", calories: 188, carbohydrates: 14, protein: 18, fat: 8, fiber: 8, glycemicIndex: 18))
         allFoods.append(FoodItem(name: "Gyoza (Pot Stickers)", category: "Asian & Japanese", servingSize: 6, servingUnit: "pieces", calories: 280, carbohydrates: 30, protein: 12, fat: 12, fiber: 1.5, glycemicIndex: 50))
+        allFoods.append(FoodItem(name: "Nikuman (Steamed Meat Bun)", category: "Asian & Japanese", servingSize: 1, servingUnit: "bun (100g)", calories: 220, carbohydrates: 28, protein: 8, fat: 8, fiber: 1.5, glycemicIndex: 68))
         allFoods.append(FoodItem(name: "Takoyaki (Octopus Balls)", category: "Asian & Japanese", servingSize: 6, servingUnit: "pieces", calories: 300, carbohydrates: 36, protein: 12, fat: 12, fiber: 1, glycemicIndex: 55))
         allFoods.append(FoodItem(name: "Okonomiyaki", category: "Asian & Japanese", servingSize: 1, servingUnit: "piece", calories: 450, carbohydrates: 48, protein: 18, fat: 20, fiber: 3, glycemicIndex: 55))
         allFoods.append(FoodItem(name: "Tamagoyaki (Rolled Omelet)", category: "Asian & Japanese", servingSize: 1, servingUnit: "serving", calories: 145, carbohydrates: 3, protein: 10, fat: 10, fiber: 0, glycemicIndex: 0))

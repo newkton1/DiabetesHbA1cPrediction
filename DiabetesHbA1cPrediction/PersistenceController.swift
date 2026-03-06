@@ -8,8 +8,15 @@
 //
 
 import CoreData
+import os.log
+
+private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "DiabetesHbA1cPrediction", category: "CoreData")
 
 struct PersistenceController {
+
+    /// Indicates whether the Core Data store failed to load.
+    /// When true, the app should present a fallback UI rather than crashing.
+    @MainActor static var storeLoadError: NSError?
 
     // MARK: - Singleton
 
@@ -58,7 +65,7 @@ struct PersistenceController {
                 // Simulate realistic glucose range 90-180 mg/dL
                 reading.value = Double.random(in: 90...180)
                 reading.unit = "mg/dL"
-                reading.trend = ["stable", "rising", "falling"].randomElement()!
+                reading.trend = ["stable", "rising", "falling"].randomElement() ?? "stable"
                 reading.source = dayOffset % 2 == 0 ? "FreeStyleLibre2" : "ManualFingerStick"
             }
         }
@@ -141,7 +148,9 @@ struct PersistenceController {
         do {
             try ctx.save()
         } catch {
-            fatalError("Preview data save error: \(error)")
+            #if DEBUG
+            print("Preview data save error: \(error)")
+            #endif
         }
         return controller
     }()
@@ -163,11 +172,26 @@ struct PersistenceController {
         let description = container.persistentStoreDescriptions.first
         description?.setOption(true as NSNumber, forKey: NSMigratePersistentStoresAutomaticallyOption)
         description?.setOption(true as NSNumber, forKey: NSInferMappingModelAutomaticallyOption)
-        
+
+        // Encrypt the Core Data store at rest using file protection.
+        // completeUntilFirstUserAuthentication keeps data encrypted until the user
+        // unlocks the device for the first time after boot, then remains accessible
+        // in the background — a good balance for health data apps.
+        if !inMemory {
+            description?.setOption(
+                FileProtectionType.completeUntilFirstUserAuthentication as NSObject,
+                forKey: NSPersistentStoreFileProtectionKey
+            )
+        }
+
         container.loadPersistentStores { _, error in
             if let error = error as NSError? {
-                // In production, handle this gracefully with user-facing error reporting.
-                fatalError("Core Data store failed to load: \(error), \(error.userInfo)")
+                logger.error("Core Data store failed to load: \(error.localizedDescription, privacy: .public)")
+                // Store the error so the app can present a user-facing alert
+                // instead of crashing.
+                Task { @MainActor in
+                    PersistenceController.storeLoadError = error
+                }
             }
         }
         // Automatically merge changes from background contexts into the view context.
@@ -184,7 +208,9 @@ struct PersistenceController {
         do {
             try ctx.save()
         } catch {
+            #if DEBUG
             print("Core Data save error: \(error)")
+            #endif
         }
     }
 }

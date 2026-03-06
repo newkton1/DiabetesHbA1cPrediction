@@ -271,14 +271,8 @@ struct UserProfileView: View {
 
             // MARK: - Section 5: About
             Section(header: Text("About")) {
-                Link(destination: URL(string: "https://example.com/diabeteshba1c")!) {
-                    HStack {
-                        Label("About DiabetesHbA1c Prediction", systemImage: "info.circle")
-                        Spacer()
-                        Image(systemName: "arrow.up.right.square")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
+                NavigationLink(destination: PrivacyPolicyView()) {
+                    Label("Privacy Policy", systemImage: "lock.shield")
                 }
 
                 HStack {

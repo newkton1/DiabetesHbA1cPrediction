@@ -47,6 +47,12 @@ struct PredictionView: View {
     /// Controls visibility of share sheet
     @State private var showShareSheet: Bool = false
 
+    /// Controls visibility of share confirmation dialog
+    @State private var showShareConfirmation: Bool = false
+
+    /// Temporarily holds the prediction result pending share confirmation
+    @State private var pendingShareResult: PredictionResult?
+
     /// Text content for export/share functionality
     @State private var shareText: String = ""
 
@@ -80,6 +86,9 @@ struct PredictionView: View {
                                 )
                             )
                         }
+
+                        // Medical Disclaimer
+                        MedicalDisclaimerBanner()
 
                         // Prediction History Section
                         if !predictionHistory.isEmpty {
@@ -142,7 +151,10 @@ struct PredictionView: View {
                                 )
                             }
                         ) {
-                            Button(action: { prepareShareContent(result: result) }) {
+                            Button(action: {
+                                pendingShareResult = result
+                                showShareConfirmation = true
+                            }) {
                                 HStack(spacing: 12) {
                                     Image(systemName: "square.and.arrow.up")
                                     Text("Export/Share Prediction")
@@ -171,6 +183,22 @@ struct PredictionView: View {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text(errorMessage)
+            }
+            .confirmationDialog(
+                "Share Health Data",
+                isPresented: $showShareConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Share") {
+                    if let result = pendingShareResult {
+                        prepareShareContent(result: result)
+                    }
+                }
+                Button("Cancel", role: .cancel) {
+                    pendingShareResult = nil
+                }
+            } message: {
+                Text("This will share your predicted HbA1c value, risk category, and contributing health factors. This data contains sensitive health information.")
             }
         }
     }
@@ -246,7 +274,9 @@ struct PredictionView: View {
                 return decoded
             }
         } catch {
+            #if DEBUG
             print("Error decoding contributing factors: \(error)")
+            #endif
         }
 
         return [:]
@@ -767,7 +797,9 @@ private struct PredictionHistoryRow: View {
                 return decoded
             }
         } catch {
+            #if DEBUG
             print("Error decoding contributing factors: \(error)")
+            #endif
         }
 
         return [:]

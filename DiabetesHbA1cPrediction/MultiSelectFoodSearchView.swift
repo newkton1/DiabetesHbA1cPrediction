@@ -202,7 +202,7 @@ private struct FoodSearchContent: View {
             // Food list
             List {
                 ForEach(groupedFoods, id: \.category) { group in
-                    Section(header: Text(group.category)) {
+                    Section(header: Text(MultiSelectFoodSearchView.chipLabel(for: group.category))) {
                         ForEach(group.foods) { food in
                             FoodSelectionRow(
                                 food: food,

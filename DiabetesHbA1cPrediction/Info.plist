@@ -10,6 +10,8 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>This app records your HbA1c readings and related health data to Apple Health so you can track your diabetes management in one place.</string>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
@@ -20,8 +22,6 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>This app reads your health data from Apple Health to provide personalized HbA1c predictions and diabetes management insights.</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>This app writes exercise and meal data to Apple Health to help track your diabetes management and predict HbA1c levels.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 </dict>

@@ -486,7 +486,9 @@ struct MealLogView: View {
         do {
             try viewContext.save()
         } catch {
+            #if DEBUG
             print("Error deleting meal: \(error.localizedDescription)")
+            #endif
         }
     }
 }
@@ -873,7 +875,9 @@ struct AddMealSheetView: View {
             try viewContext.save()
             dismiss()
         } catch {
+            #if DEBUG
             print("Error saving meal: \(error.localizedDescription)")
+            #endif
         }
     }
 }

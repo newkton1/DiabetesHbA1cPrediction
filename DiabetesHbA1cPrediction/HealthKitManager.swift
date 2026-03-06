@@ -69,14 +69,16 @@ class HealthKitManager: ObservableObject {
         }
 
         // Define the types we want to read
-        let readTypes: Set<HKSampleType> = [
-            HKQuantityType.quantityType(forIdentifier: .stepCount)!,
-            HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!,
-            HKQuantityType.quantityType(forIdentifier: .appleExerciseTime)!,
-            HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)!,
-            HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!,
-            HKWorkoutType.workoutType()
+        var readTypes: Set<HKSampleType> = [HKWorkoutType.workoutType()]
+        let quantityIdentifiers: [HKQuantityTypeIdentifier] = [
+            .stepCount, .activeEnergyBurned, .appleExerciseTime,
+            .distanceWalkingRunning, .bloodGlucose
         ]
+        for identifier in quantityIdentifiers {
+            if let type = HKQuantityType.quantityType(forIdentifier: identifier) {
+                readTypes.insert(type)
+            }
+        }
 
         do {
             try await healthStore.requestAuthorization(toShare: Set<HKSampleType>(), read: readTypes)
@@ -125,7 +127,9 @@ class HealthKitManager: ObservableObject {
                 sortDescriptors: sortDescriptors
             ) { _, samples, error in
                 if let error = error {
+                    #if DEBUG
                     print("Error fetching workouts: \(error.localizedDescription)")
+                    #endif
                     continuation.resume(returning: [])
                     return
                 }
@@ -156,11 +160,11 @@ class HealthKitManager: ObservableObject {
             return 0
         }
 
-        let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
+        guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) else { return 0 }
 
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: date)
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else { return 0 }
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: endOfDay, options: .strictStartDate)
 
         return await withCheckedContinuation { continuation in
@@ -170,7 +174,9 @@ class HealthKitManager: ObservableObject {
                 options: .cumulativeSum
             ) { _, result, error in
                 if let error = error {
+                    #if DEBUG
                     print("Error fetching step count: \(error.localizedDescription)")
+                    #endif
                     continuation.resume(returning: 0)
                     return
                 }
@@ -206,7 +212,7 @@ class HealthKitManager: ObservableObject {
             return 0
         }
 
-        let calorieType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!
+        guard let calorieType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) else { return 0 }
 
         let calendar = Calendar.current
         let startDate = calendar.date(byAdding: .day, value: -days, to: Date()) ?? Date()
@@ -219,7 +225,9 @@ class HealthKitManager: ObservableObject {
                 options: .cumulativeSum
             ) { _, result, error in
                 if let error = error {
+                    #if DEBUG
                     print("Error fetching active calories: \(error.localizedDescription)")
+                    #endif
                     continuation.resume(returning: 0)
                     return
                 }
@@ -254,7 +262,7 @@ class HealthKitManager: ObservableObject {
             return 0
         }
 
-        let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)!
+        guard let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning) else { return 0 }
 
         let calendar = Calendar.current
         let startDate = calendar.date(byAdding: .day, value: -days, to: Date()) ?? Date()
@@ -267,7 +275,9 @@ class HealthKitManager: ObservableObject {
                 options: .cumulativeSum
             ) { _, result, error in
                 if let error = error {
+                    #if DEBUG
                     print("Error fetching walking/running distance: \(error.localizedDescription)")
+                    #endif
                     continuation.resume(returning: 0)
                     return
                 }
@@ -301,7 +311,7 @@ class HealthKitManager: ObservableObject {
             return []
         }
 
-        let glucoseType = HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!
+        guard let glucoseType = HKQuantityType.quantityType(forIdentifier: .bloodGlucose) else { return [] }
 
         let calendar = Calendar.current
         let startDate = calendar.date(byAdding: .day, value: -days, to: Date()) ?? Date()
@@ -319,7 +329,9 @@ class HealthKitManager: ObservableObject {
                 sortDescriptors: sortDescriptors
             ) { _, samples, error in
                 if let error = error {
+                    #if DEBUG
                     print("Error fetching glucose readings: \(error.localizedDescription)")
+                    #endif
                     continuation.resume(returning: [])
                     return
                 }
@@ -489,7 +501,9 @@ class HealthKitManager: ObservableObject {
                             continue
                         }
                     } catch {
+                        #if DEBUG
                         print("Error checking for duplicate workout: \(error.localizedDescription)")
+                        #endif
                         continue
                     }
 
@@ -522,7 +536,9 @@ class HealthKitManager: ObservableObject {
                 do {
                     try context.save()
                 } catch {
+                    #if DEBUG
                     print("Error saving exercise data to CoreData: \(error.localizedDescription)")
+                    #endif
                 }
                 
                 continuation.resume(returning: count)
@@ -558,7 +574,9 @@ class HealthKitManager: ObservableObject {
                             continue
                         }
                     } catch {
+                        #if DEBUG
                         print("Error checking for duplicate glucose reading: \(error.localizedDescription)")
+                        #endif
                         continue
                     }
 
@@ -575,7 +593,9 @@ class HealthKitManager: ObservableObject {
                 do {
                     try context.save()
                 } catch {
+                    #if DEBUG
                     print("Error saving glucose data to CoreData: \(error.localizedDescription)")
+                    #endif
                 }
                 
                 continuation.resume(returning: count)
@@ -616,7 +636,9 @@ class HealthKitManager: ObservableObject {
                 options: .cumulativeSum
             ) { _, result, error in
                 if let error = error {
+                    #if DEBUG
                     print("Error fetching \(identifier.rawValue): \(error.localizedDescription)")
+                    #endif
                     continuation.resume(returning: 0)
                     return
                 }
@@ -743,7 +765,9 @@ class HealthKitManager: ObservableObject {
                             continue
                         }
                     } catch {
+                        #if DEBUG
                         print("Error checking for duplicate daily activity: \(error.localizedDescription)")
+                        #endif
                         continue
                     }
 
@@ -773,7 +797,9 @@ class HealthKitManager: ObservableObject {
                 do {
                     try context.save()
                 } catch {
+                    #if DEBUG
                     print("Error saving daily activity data to CoreData: \(error.localizedDescription)")
+                    #endif
                 }
 
                 continuation.resume(returning: count)

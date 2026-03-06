@@ -51,11 +51,11 @@ struct PreviewData {
         // ── 1. User Demographics ──────────────────────────────────
         let user = UserDemographicsEntity(context: context)
         user.id = UUID()
-        user.age = 52
+        user.age = 45
         user.sex = "Male"
-        user.dateOfBirth = dateFrom(year: 1974, month: 3, day: 15)
-        user.height = 175.0     // cm
-        user.weight = 82.0      // kg
+        user.dateOfBirth = dateFrom(year: 2000, month: 1, day: 1)
+        user.height = 170.0     // cm
+        user.weight = 80.0      // kg
         user.diabetesType = "Type 2"
         user.menopausalStatus = "N/A"
         user.lastUpdated = Date()
@@ -67,21 +67,21 @@ struct PreviewData {
         hc.diabetesType = "Type 2"
         hc.hasCOPD = false
         hc.hasHeartDisease = true
-        hc.tobaccoUse = "Former"
-        hc.alcoholUnitsPerWeek = 6.0
-        hc.otherConditions = "Mild hypertension"
+        hc.tobaccoUse = "Never"
+        hc.alcoholUnitsPerWeek = 0.0
+        hc.otherConditions = "None"
         hc.lastUpdated = Date()
         hc.user = user
 
         // ── 3. Glucose Readings (21 readings over 7 days) ────────
         let glucoseValues: [(day: Int, hour: Int, value: Double, source: String)] = [
-            (0, 7,  112, "FreeStyleLibre2"), (0, 12, 145, "FreeStyleLibre2"), (0, 18, 128, "FreeStyleLibre2"),
-            (1, 7,  105, "ManualFingerStick"), (1, 12, 162, "FreeStyleLibre2"), (1, 18, 138, "FreeStyleLibre2"),
-            (2, 7,  98,  "ManualFingerStick"), (2, 12, 155, "FreeStyleLibre2"), (2, 18, 119, "FreeStyleLibre2"),
-            (3, 7,  118, "FreeStyleLibre2"), (3, 12, 172, "FreeStyleLibre2"), (3, 18, 141, "ManualFingerStick"),
-            (4, 7,  95,  "ManualFingerStick"), (4, 12, 148, "FreeStyleLibre2"), (4, 18, 125, "FreeStyleLibre2"),
-            (5, 7,  108, "FreeStyleLibre2"), (5, 12, 159, "FreeStyleLibre2"), (5, 18, 132, "FreeStyleLibre2"),
-            (6, 7,  101, "ManualFingerStick"), (6, 12, 168, "FreeStyleLibre2"), (6, 18, 144, "FreeStyleLibre2"),
+            (0, 7,  112, "TestCGM"), (0, 12, 145, "TestCGM"), (0, 18, 128, "TestCGM"),
+            (1, 7,  105, "TestMeter"), (1, 12, 162, "TestCGM"), (1, 18, 138, "TestCGM"),
+            (2, 7,  98,  "TestMeter"), (2, 12, 155, "TestCGM"), (2, 18, 119, "TestCGM"),
+            (3, 7,  118, "TestCGM"), (3, 12, 172, "TestCGM"), (3, 18, 141, "TestMeter"),
+            (4, 7,  95,  "TestMeter"), (4, 12, 148, "TestCGM"), (4, 18, 125, "TestCGM"),
+            (5, 7,  108, "TestCGM"), (5, 12, 159, "TestCGM"), (5, 18, 132, "TestCGM"),
+            (6, 7,  101, "TestMeter"), (6, 12, 168, "TestCGM"), (6, 18, 144, "TestCGM"),
         ]
         for g in glucoseValues {
             let reading = GlucoseReadingEntity(context: context)
@@ -96,13 +96,13 @@ struct PreviewData {
 
         // ── 4. Meals (7 meals over the week) ─────────────────────
         let meals: [(name: String, cals: Double, carbs: Double, protein: Double, fat: Double, fiber: Double, daysAgo: Int)] = [
-            ("Oatmeal with blueberries",        310, 54, 11, 6,  8,  0),
-            ("Grilled chicken Caesar salad",     420, 18, 38, 22, 4,  0),
-            ("Spaghetti Bolognese",              680, 78, 28, 24, 6,  1),
-            ("Greek yogurt with honey & walnuts", 285, 32, 15, 12, 1,  1),
-            ("Salmon with steamed vegetables",   480, 22, 42, 24, 5,  2),
-            ("Turkey sandwich on whole wheat",   390, 42, 28, 12, 6,  3),
-            ("Vegetable stir-fry with brown rice", 520, 68, 16, 18, 7, 4),
+            ("Test Meal A – High Carb",          310, 54, 11, 6,  8,  0),
+            ("Test Meal B – Protein",            420, 18, 38, 22, 4,  0),
+            ("Test Meal C – Mixed",              680, 78, 28, 24, 6,  1),
+            ("Test Meal D – Light",              285, 32, 15, 12, 1,  1),
+            ("Test Meal E – Balanced",           480, 22, 42, 24, 5,  2),
+            ("Test Meal F – Moderate",           390, 42, 28, 12, 6,  3),
+            ("Test Meal G – High Fiber",         520, 68, 16, 18, 7,  4),
         ]
         for m in meals {
             let meal = MealEntity(context: context)
@@ -139,7 +139,7 @@ struct PreviewData {
             session.endDate = session.startDate?.addingTimeInterval(session.duration)
             session.intensity = e.intensity
             session.caloriesBurned = e.calories
-            session.notes = "Simulator test data"
+            session.notes = "Preview sample data – not real"
         }
 
         // ── 6. HbA1c Predictions ─────────────────────────────────
@@ -169,10 +169,14 @@ struct PreviewData {
         // ── Save ──────────────────────────────────────────────────
         do {
             try context.save()
+            #if DEBUG
             print("[PreviewData] Successfully seeded \(glucoseValues.count) glucose readings, "
                 + "\(meals.count) meals, \(exercises.count) exercises, \(predictions.count) predictions.")
+            #endif
         } catch {
+            #if DEBUG
             print("[PreviewData] Save failed: \(error)")
+            #endif
         }
     }
 
