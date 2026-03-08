@@ -42,7 +42,7 @@ struct MealBuilderView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
-            .scrollDismissesKeyboard(.interactively)
+            .scrollDismissesKeyboard(.immediately)
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -58,12 +58,7 @@ struct MealBuilderView: View {
                     .disabled(!mealBuilder.canSave)
                     .fontWeight(.semibold)
                 }
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") {
-                        isMealNameFocused = false
-                    }
-                }
+                // Keyboard dismiss handled by .scrollDismissesKeyboard and .onSubmit on the text field
             }
             .sheet(isPresented: $showingFoodSearch) {
                 MultiSelectFoodSearchView(mealBuilder: mealBuilder)

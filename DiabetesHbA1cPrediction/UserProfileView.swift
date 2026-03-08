@@ -47,6 +47,7 @@ struct UserProfileView: View {
     // Health Conditions
     @State private var hasDiabetes: Bool = false
     @State private var diabetesType: String = "Type 1"
+    @State private var hasDawnEffect: Bool = false
     @State private var hasCOPD: Bool = false
     @State private var hasHeartDisease: Bool = false
     @State private var tobaccoUse: String = "Never"
@@ -170,6 +171,18 @@ struct UserProfileView: View {
                                 .foregroundColor(.red)
                         }
                         .padding(.vertical, 4)
+                    }
+
+                    if diabetesType == "Type 2" {
+                        Toggle(isOn: $hasDawnEffect) {
+                            Label("Dawn Phenomenon", systemImage: "sunrise.fill")
+                        }
+
+                        if hasDawnEffect {
+                            Text("HbA1c estimate will be adjusted to reduce the impact of elevated early morning glucose (4–8am) caused by the dawn phenomenon.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
 
@@ -411,6 +424,7 @@ struct UserProfileView: View {
 
         if let healthCondition = healthConditions.first {
             hasDiabetes = healthCondition.hasDiabetes
+            hasDawnEffect = healthCondition.hasDawnEffect
             hasCOPD = healthCondition.hasCOPD
             hasHeartDisease = healthCondition.hasHeartDisease
             tobaccoUse = healthCondition.tobaccoUse ?? "Never"
@@ -571,6 +585,7 @@ struct UserProfileView: View {
 
         healthCondition.hasDiabetes = hasDiabetes
         healthCondition.diabetesType = hasDiabetes ? diabetesType : nil
+        healthCondition.hasDawnEffect = hasDiabetes && diabetesType == "Type 2" ? hasDawnEffect : false
         healthCondition.hasCOPD = hasCOPD
         healthCondition.hasHeartDisease = hasHeartDisease
         healthCondition.tobaccoUse = tobaccoUse

@@ -35,7 +35,7 @@ struct GlucoseLogView: View {
     @State private var selectedTrend = "stable"
     @State private var selectedTimestamp = Date()
 
-    let sourceOptions = ["Manual Finger Stick", "FreeStyle Libre 2"]
+    let sourceOptions = ["Manual Finger Stick", "Continuous Glucose Monitor"]
     let trendOptions = ["stable", "rising", "falling", "rising rapidly", "falling rapidly"]
 
     var body: some View {
@@ -652,7 +652,7 @@ struct AddGlucoseReadingSheet: View {
     @State private var showLabConfirmAlert = false
     @State private var hasConfirmedLabResult = false
 
-    let sourceOptions = ["Manual Finger Stick", "FreeStyle Libre 2"]
+    let sourceOptions = ["Manual Finger Stick", "Continuous Glucose Monitor"]
     let trendOptions = ["stable", "rising", "falling", "rising rapidly", "falling rapidly"]
 
     /// Parses the typed glucose value using the device locale so both
@@ -721,7 +721,7 @@ struct AddGlucoseReadingSheet: View {
                 .padding(.horizontal)
                 .padding(.top, isPortrait ? 10 : 6)
                 .padding(.bottom, 4)
-                .onChange(of: selectedEntryType) { _ in
+                .onChange(of: selectedEntryType) {
                     hasConfirmedLabResult = false
                 }
 

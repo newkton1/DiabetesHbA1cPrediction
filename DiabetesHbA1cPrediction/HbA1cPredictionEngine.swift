@@ -38,6 +38,10 @@ struct PredictionInput {
     let hasCOPD: Bool                    // Chronic Obstructive Pulmonary Disease
     let hasHeartDisease: Bool            // history of heart disease or current condition
 
+    // Dawn Effect
+    var hasDawnEffect: Bool = false      // user-confirmed dawn phenomenon
+    var dawnEffectDetected: Bool = false  // algorithmically detected dawn pattern
+
     // Lifestyle Factors
     let tobaccoUse: String               // "Never", "Former", or "Current"
     let alcoholUnitsPerWeek: Double      // standard drink units per week
@@ -68,6 +72,11 @@ struct PredictionResult {
 class HbA1cPredictionEngine: ObservableObject {
     let modelVersion = "1.0.0"
 
+    /// Set after each prediction run — true if dawn effect pattern was detected algorithmically
+    @Published var lastRunDetectedDawnEffect: Bool = UserDefaults.standard.bool(forKey: "lastRunDetectedDawnEffect")
+    /// Set after each prediction run — true if dawn compensation was applied (user-enabled or detected)
+    @Published var lastRunAppliedDawnCompensation: Bool = UserDefaults.standard.bool(forKey: "lastRunAppliedDawnCompensation")
+
     // MARK: - Public Methods
 
     /// Predicts HbA1c from comprehensive health and lifestyle inputs
@@ -82,6 +91,12 @@ class HbA1cPredictionEngine: ObservableObject {
         // Formula: HbA1c (%) = (averageGlucose + 46.7) / 28.7
         let baseHbA1c = (input.averageGlucose + 46.7) / 28.7
         var predictedHbA1c = baseHbA1c
+
+        // Note dawn effect compensation in contributing factors
+        // (The actual compensation is applied during glucose averaging, not here)
+        if input.hasDawnEffect || input.dawnEffectDetected {
+            contributingFactors["Dawn Effect Adjustment"] = 0.0  // informational — applied at averaging stage
+        }
 
         // Step 2: Apply glucose variability adjustment
         // High glucose variability (CV > 36%) indicates unstable glucose control
@@ -300,11 +315,34 @@ class HbA1cPredictionEngine: ObservableObject {
         }
 
         // Calculate glucose metrics
-        let averageGlucose = glucoseReadings.reduce(0) { $0 + $1 } / Double(glucoseReadings.count)
         let glucoseVariability = calculateCoefficientOfVariation(glucoseReadings)
 
         // Fetch meals from last 30 days
         let meals = fetchMeals(from: context, days: 30) ?? []
+
+        // Fetch health conditions early — needed for dawn effect check
+        let healthConditions = fetchHealthConditions(from: context) ?? [:]
+        let userHasDawnEffect = healthConditions["DawnEffect"] ?? false
+
+        // Calculate average glucose — use dawn-adjusted average if dawn effect is active
+        let averageGlucose: Double
+        let dawnEffectDetected: Bool
+
+        if let timestampedReadings = fetchGlucoseReadingsWithTimestamps(from: context, days: 90),
+           !timestampedReadings.isEmpty {
+            // Run dawn detection algorithm regardless of user setting
+            dawnEffectDetected = detectDawnEffect(readings: timestampedReadings, meals: meals)
+
+            // Apply dawn compensation if user has enabled it OR if detected
+            if userHasDawnEffect || dawnEffectDetected {
+                averageGlucose = calculateDawnAdjustedAverage(timestampedReadings)
+            } else {
+                averageGlucose = glucoseReadings.reduce(0, +) / Double(glucoseReadings.count)
+            }
+        } else {
+            averageGlucose = glucoseReadings.reduce(0, +) / Double(glucoseReadings.count)
+            dawnEffectDetected = false
+        }
         let (dailyCarbIntake, dailyCalories) = calculateDailyNutrition(meals)
 
         // Fetch exercise sessions from last 7 days
@@ -320,8 +358,7 @@ class HbA1cPredictionEngine: ObservableObject {
             return nil
         }
 
-        // Fetch health conditions
-        let healthConditions = fetchHealthConditions(from: context) ?? [:]
+        // Health conditions already fetched above for dawn effect check
 
         // Fetch last meal data for meal-aware prediction
         let lastMealData = fetchLastMeal(from: context)
@@ -355,6 +392,10 @@ class HbA1cPredictionEngine: ObservableObject {
         input.nonCardioMinutes = exerciseSplit.nonCardioMinutes
         input.nonCardioIntensityAvg = exerciseSplit.nonCardioIntensityAvg
 
+        // Add dawn effect flags
+        input.hasDawnEffect = userHasDawnEffect
+        input.dawnEffectDetected = dawnEffectDetected
+
         // Add last meal data
         if let lastMeal = lastMealData {
             input.lastMealCarbs = lastMeal.carbs
@@ -382,6 +423,12 @@ class HbA1cPredictionEngine: ObservableObject {
             #endif
             return nil
         }
+
+        // Update dawn effect state for UI notifications and persist for next launch
+        lastRunDetectedDawnEffect = input.dawnEffectDetected
+        lastRunAppliedDawnCompensation = input.hasDawnEffect || input.dawnEffectDetected
+        UserDefaults.standard.set(lastRunDetectedDawnEffect, forKey: "lastRunDetectedDawnEffect")
+        UserDefaults.standard.set(lastRunAppliedDawnCompensation, forKey: "lastRunAppliedDawnCompensation")
 
         // Run prediction (includes dual-pathway exercise calculation)
         let result = predict(from: input)
@@ -746,13 +793,16 @@ class HbA1cPredictionEngine: ObservableObject {
             }
 
             var conditions: [String: Bool] = [:]
-            
+
             // Get conditions from the HealthConditionEntity attributes
             if let hasCOPD = (health.value(forKey: "hasCOPD") as? NSNumber)?.boolValue {
                 conditions["COPD"] = hasCOPD
             }
             if let hasHeartDisease = (health.value(forKey: "hasHeartDisease") as? NSNumber)?.boolValue {
                 conditions["HeartDisease"] = hasHeartDisease
+            }
+            if let hasDawnEffect = (health.value(forKey: "hasDawnEffect") as? NSNumber)?.boolValue {
+                conditions["DawnEffect"] = hasDawnEffect
             }
 
             return conditions
@@ -781,10 +831,10 @@ class HbA1cPredictionEngine: ObservableObject {
         let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "GlucoseReadingEntity")
 
         // Filter for HbA1c measurements (unit is NGSP % or mmol/mol)
-        // and valid sources (Manual Finger Stick, FreeStyle Libre manual entry, or Hospital Lab Test)
+        // and valid sources (Manual Finger Stick, CGM, or Hospital Lab Test)
         let unitPredicate = NSPredicate(format: "unit IN %@", ["NGSP %", "mmol/mol"])
         let sourcePredicate = NSPredicate(format: "source IN %@",
-            ["Manual Finger Stick", "FreeStyle Libre 2", "Hospital Lab Test"])
+            ["Manual Finger Stick", "Continuous Glucose Monitor", "FreeStyle Libre 2", "Hospital Lab Test"])
 
         // Only include readings from the last 12 weeks
         let twelveWeeksAgo = Calendar.current.date(byAdding: .weekOfYear, value: -12, to: Date()) ?? Date()
@@ -901,6 +951,254 @@ class HbA1cPredictionEngine: ObservableObject {
 
         let cv = (standardDeviation / mean) * 100
         return cv
+    }
+
+    // MARK: - Dawn Effect Support
+
+    /// Represents a glucose reading with its timestamp for time-of-day analysis
+    struct TimestampedGlucoseReading {
+        let value: Double    // mg/dL
+        let timestamp: Date
+    }
+
+    /// Fetches glucose readings with timestamps from Core Data for dawn effect analysis
+    private func fetchGlucoseReadingsWithTimestamps(
+        from context: NSManagedObjectContext,
+        days: Int
+    ) -> [TimestampedGlucoseReading]? {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "GlucoseReadingEntity")
+
+        let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        fetchRequest.predicate = NSPredicate(format: "timestamp >= %@ AND (unit == %@ OR unit == %@)", cutoffDate as NSDate, "mg/dL", "mmol/L")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
+
+        do {
+            guard let results = try context.fetch(fetchRequest) as? [NSManagedObject] else {
+                return nil
+            }
+
+            let readings = results.compactMap { object -> TimestampedGlucoseReading? in
+                guard let glucoseValue = object.value(forKey: "value") as? NSNumber,
+                      let timestamp = object.value(forKey: "timestamp") as? Date else { return nil }
+                let unit = object.value(forKey: "unit") as? String ?? "mg/dL"
+                // Exclude HbA1c lab test entries — only glucose readings
+                let source = object.value(forKey: "source") as? String ?? ""
+                if source == "Hospital Lab Test" { return nil }
+
+                let mgdlValue: Double
+                if unit == "mmol/L" {
+                    mgdlValue = glucoseValue.doubleValue * 18.0182
+                } else {
+                    mgdlValue = glucoseValue.doubleValue
+                }
+                return TimestampedGlucoseReading(value: mgdlValue, timestamp: timestamp)
+            }
+
+            return readings.isEmpty ? nil : readings
+        } catch {
+            #if DEBUG
+            print("Error fetching timestamped glucose readings: \(error.localizedDescription)")
+            #endif
+            return nil
+        }
+    }
+
+    /// Calculates time-weighted average glucose with dawn effect compensation.
+    /// Divides the day into 5 windows and down-weights the dawn window (04:00–08:00)
+    /// to reduce the impact of liver-driven morning glucose spikes.
+    ///
+    /// Time windows:
+    ///   - Dawn:      04:00–08:00  (weight: 0.6 when dawn effect active)
+    ///   - Morning:   08:00–12:00  (weight: 1.0)
+    ///   - Afternoon:  12:00–18:00 (weight: 1.0)
+    ///   - Evening:   18:00–22:00  (weight: 1.0)
+    ///   - Night:     22:00–04:00  (weight: 1.0)
+    ///
+    /// The 0.6 dawn weight is a calibration starting point. It reduces the dawn spike's
+    /// contribution by ~40%, reflecting that transient liver-driven glucose elevation
+    /// contributes less to actual glycation than sustained post-meal elevations.
+    private static let dawnWeightFactor: Double = 0.6
+
+    func calculateDawnAdjustedAverage(_ readings: [TimestampedGlucoseReading]) -> Double {
+        guard !readings.isEmpty else { return 0 }
+
+        let calendar = Calendar.current
+
+        // Group readings into time windows by hour
+        var dawnReadings: [Double] = []      // 04:00–08:00
+        var morningReadings: [Double] = []   // 08:00–12:00
+        var afternoonReadings: [Double] = [] // 12:00–18:00
+        var eveningReadings: [Double] = []   // 18:00–22:00
+        var nightReadings: [Double] = []     // 22:00–04:00
+
+        for reading in readings {
+            let hour = calendar.component(.hour, from: reading.timestamp)
+            switch hour {
+            case 4..<8:
+                dawnReadings.append(reading.value)
+            case 8..<12:
+                morningReadings.append(reading.value)
+            case 12..<18:
+                afternoonReadings.append(reading.value)
+            case 18..<22:
+                eveningReadings.append(reading.value)
+            default: // 22-23 and 0-3
+                nightReadings.append(reading.value)
+            }
+        }
+
+        // Calculate average for each window that has data
+        var weightedSum = 0.0
+        var totalWeight = 0.0
+
+        let windows: [(readings: [Double], weight: Double)] = [
+            (dawnReadings, Self.dawnWeightFactor),
+            (morningReadings, 1.0),
+            (afternoonReadings, 1.0),
+            (eveningReadings, 1.0),
+            (nightReadings, 1.0)
+        ]
+
+        for window in windows {
+            if !window.readings.isEmpty {
+                let windowAvg = window.readings.reduce(0, +) / Double(window.readings.count)
+                weightedSum += windowAvg * window.weight
+                totalWeight += window.weight
+            }
+        }
+
+        return totalWeight > 0 ? weightedSum / totalWeight : 0
+    }
+
+    /// Detects dawn effect pattern from glucose readings and meal data.
+    ///
+    /// For CGM-like data (many readings): looks for 5+ days out of last 14 where
+    /// morning peak (04:00–08:00) exceeds night baseline (00:00–03:00) by 30+ mg/dL
+    /// with no meal logged in the preceding 4 hours.
+    ///
+    /// For finger stick data (fewer readings): looks for 3+ fasting morning readings
+    /// above 130 mg/dL in the last 30 days with no meal for 10+ hours prior.
+    ///
+    /// Returns true if dawn effect pattern is detected.
+    func detectDawnEffect(
+        readings: [TimestampedGlucoseReading],
+        meals: [NSManagedObject]
+    ) -> Bool {
+        let calendar = Calendar.current
+
+        // Determine if this looks like CGM data (many readings per day) or finger stick
+        let last14Days = readings.filter {
+            guard let cutoff = calendar.date(byAdding: .day, value: -14, to: Date()) else { return false }
+            return $0.timestamp >= cutoff
+        }
+
+        let uniqueDays = Set(last14Days.map { calendar.startOfDay(for: $0.timestamp) })
+        let readingsPerDay = uniqueDays.count > 0 ? Double(last14Days.count) / Double(uniqueDays.count) : 0
+
+        if readingsPerDay >= 10 {
+            // CGM-like detection: many readings per day
+            return detectDawnEffectCGM(readings: last14Days, meals: meals, calendar: calendar)
+        } else {
+            // Finger stick detection: fewer readings
+            let last30Days = readings.filter {
+                guard let cutoff = calendar.date(byAdding: .day, value: -30, to: Date()) else { return false }
+                return $0.timestamp >= cutoff
+            }
+            return detectDawnEffectFingerStick(readings: last30Days, meals: meals, calendar: calendar)
+        }
+    }
+
+    /// CGM detection: looks for rising glucose pattern 04:00–08:00 vs 00:00–03:00 baseline
+    private func detectDawnEffectCGM(
+        readings: [TimestampedGlucoseReading],
+        meals: [NSManagedObject],
+        calendar: Calendar
+    ) -> Bool {
+        // Group readings by day
+        var dayGroups: [Date: [TimestampedGlucoseReading]] = [:]
+        for reading in readings {
+            let day = calendar.startOfDay(for: reading.timestamp)
+            dayGroups[day, default: []].append(reading)
+        }
+
+        var dawnDayCount = 0
+
+        for (day, dayReadings) in dayGroups {
+            // Night baseline: 00:00–03:00
+            let nightBaseline = dayReadings
+                .filter { calendar.component(.hour, from: $0.timestamp) < 4 }
+                .map { $0.value }
+
+            // Morning peak: 04:00–08:00
+            let morningReadings = dayReadings
+                .filter {
+                    let hour = calendar.component(.hour, from: $0.timestamp)
+                    return hour >= 4 && hour < 8
+                }
+                .map { $0.value }
+
+            guard !nightBaseline.isEmpty, !morningReadings.isEmpty else { continue }
+
+            let nightAvg = nightBaseline.reduce(0, +) / Double(nightBaseline.count)
+            let morningPeak = morningReadings.max() ?? 0
+
+            // Check no meal logged between 00:00–08:00 for this day
+            let dayStart = day
+            let morningEnd = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: day) ?? day
+
+            let hasMealBefore = meals.contains { meal in
+                guard let mealTime = meal.value(forKey: "timestamp") as? Date else { return false }
+                return mealTime >= dayStart && mealTime < morningEnd
+            }
+
+            if morningPeak - nightAvg > 30 && !hasMealBefore {
+                dawnDayCount += 1
+            }
+        }
+
+        // Dawn effect detected if pattern appears 5+ days out of last 14
+        return dawnDayCount >= 5
+    }
+
+    /// Finger stick detection: looks for high fasting morning readings
+    private func detectDawnEffectFingerStick(
+        readings: [TimestampedGlucoseReading],
+        meals: [NSManagedObject],
+        calendar: Calendar
+    ) -> Bool {
+        var suspectDawnCount = 0
+
+        // Filter to morning readings before 9am
+        let morningReadings = readings.filter {
+            calendar.component(.hour, from: $0.timestamp) < 9
+        }
+
+        for reading in morningReadings {
+            guard reading.value > 130 else { continue }
+
+            // Find most recent meal before this reading
+            let lastMealBefore = meals
+                .compactMap { meal -> Date? in
+                    guard let mealTime = meal.value(forKey: "timestamp") as? Date,
+                          mealTime < reading.timestamp else { return nil }
+                    return mealTime
+                }
+                .max()
+
+            let hoursSinceMeal: Double
+            if let lastMeal = lastMealBefore {
+                hoursSinceMeal = reading.timestamp.timeIntervalSince(lastMeal) / 3600.0
+            } else {
+                hoursSinceMeal = 24 // No meal found — assume long fast
+            }
+
+            if hoursSinceMeal > 10 {
+                suspectDawnCount += 1
+            }
+        }
+
+        // Dawn effect suspected if 3+ qualifying readings in last 30 days
+        return suspectDawnCount >= 3
     }
 
     /// Calculates daily carbohydrate and calorie intake from meals

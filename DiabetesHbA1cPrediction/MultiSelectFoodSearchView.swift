@@ -15,7 +15,6 @@ struct MultiSelectFoodSearchView: View {
 
     @State private var searchText = ""
     @State private var selectedCategory: String? = nil
-    @State private var isSearchActive = false
 
     private var isPortrait: Bool {
         verticalSizeClass != .compact
@@ -87,34 +86,64 @@ struct MultiSelectFoodSearchView: View {
             .sorted { $0.category < $1.category }
     }
 
+    @FocusState private var isSearchFieldFocused: Bool
+
     var body: some View {
         NavigationStack {
-            FoodSearchContent(
-                mealBuilder: mealBuilder,
-                searchText: $searchText,
-                selectedCategory: $selectedCategory,
-                isSearchActive: $isSearchActive,
-                isPortrait: isPortrait,
-                categories: categories,
-                groupedFoods: groupedFoods
-            )
-            .navigationTitle(!isSearchActive ? (isPortrait ? "" : "Add Foods") : "")
-            .navigationBarTitleDisplayMode(.inline)
-            .searchable(
-                text: $searchText,
-                placement: .navigationBarDrawer(displayMode: .always),
-                prompt: "Search foods..."
-            )
-            .onChange(of: searchText) { _, newValue in
-                // Reset category filter when user starts searching
-                if !newValue.isEmpty {
-                    selectedCategory = nil
+            VStack(spacing: 0) {
+                // Custom search bar with + button instead of system X
+                HStack(spacing: 10) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.secondary)
+                        TextField("Search foods...", text: $searchText)
+                            .textFieldStyle(.plain)
+                            .autocorrectionDisabled()
+                            .focused($isSearchFieldFocused)
+                            .submitLabel(.search)
+                            .onSubmit {
+                                isSearchFieldFocused = false
+                            }
+                        if !searchText.isEmpty {
+                            Button {
+                                searchText = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    .padding(8)
+                    .background(Color(.systemGray5))
+                    .cornerRadius(10)
+
+                    // Large + button replaces the system Cancel X
+                    Button {
+                        if isSearchFieldFocused {
+                            isSearchFieldFocused = false
+                        }
+                        dismiss()
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title)
+                            .foregroundColor(.blue)
+                    }
                 }
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+
+                FoodSearchContentDirect(
+                    mealBuilder: mealBuilder,
+                    searchText: $searchText,
+                    selectedCategory: $selectedCategory,
+                    isSearchFieldFocused: _isSearchFieldFocused,
+                    isPortrait: isPortrait,
+                    categories: categories,
+                    groupedFoods: groupedFoods
+                )
             }
-            .onSubmit(of: .search) {
-                // Dismiss keyboard when Search key is tapped
-                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-            }
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -129,26 +158,35 @@ struct MultiSelectFoodSearchView: View {
                     .fontWeight(.semibold)
                 }
             }
+            .onChange(of: searchText) { _, newValue in
+                // Reset category filter when user starts searching
+                if !newValue.isEmpty {
+                    selectedCategory = nil
+                }
+            }
         }
     }
 }
 
-/// Inner content view that can read @Environment(\.isSearching)
-private struct FoodSearchContent: View {
+/// Inner content view using custom search bar (no .searchable dependency)
+private struct FoodSearchContentDirect: View {
     @ObservedObject var mealBuilder: MealBuilder
     @Binding var searchText: String
     @Binding var selectedCategory: String?
-    @Binding var isSearchActive: Bool
+    @FocusState var isSearchFieldFocused: Bool
     let isPortrait: Bool
     let categories: [String]
     let groupedFoods: [(category: String, foods: [FoodItem])]
 
-    @Environment(\.isSearching) private var isSearching
+    /// Show category chips when search text is empty and field is not focused
+    private var showCategoryChips: Bool {
+        searchText.isEmpty && !isSearchFieldFocused
+    }
 
     var body: some View {
         VStack(spacing: 0) {
-            // Hide headline and category chips when search is active
-            if !isSearching {
+            // Show headline and category chips when not actively searching
+            if showCategoryChips {
                 if isPortrait {
                     Text("Add Foods")
                         .font(.headline)
@@ -217,9 +255,6 @@ private struct FoodSearchContent: View {
             }
             .listStyle(.insetGrouped)
             .scrollDismissesKeyboard(.interactively)
-        }
-        .onChange(of: isSearching) { _, newValue in
-            isSearchActive = newValue
         }
     }
 }

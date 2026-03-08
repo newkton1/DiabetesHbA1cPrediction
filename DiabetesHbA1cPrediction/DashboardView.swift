@@ -52,9 +52,10 @@ struct DashboardView: View {
     @State private var showPredictionResult = false
     @State private var predictionErrorMessage: String? = nil
     @State private var showPredictionError = false
-    
+    @State private var showDawnEffectDetectedAlert = false
+
     // Prediction engine instance
-    private let predictionEngine = HbA1cPredictionEngine()
+    @StateObject private var predictionEngine = HbA1cPredictionEngine()
     
     // Environment for detecting orientation
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -71,7 +72,7 @@ struct DashboardView: View {
             ScrollView {
                 if isLandscape {
                     // MARK: - Landscape Layout
-                    VStack(spacing: 16) {
+                    VStack(spacing: 12) {
                         // Header with title on left
                         HStack {
                             Text("Dashboard")
@@ -79,16 +80,20 @@ struct DashboardView: View {
                             Spacer()
                         }
                         .padding(.horizontal)
-                        
-                        // Split section: Chart + HbA1c card on left, Action cards on right
+
+                        // Top section: Full-width HbA1c card with notices
+                        HbA1cCardView(prediction: hbA1cPredictions.first)
+
+                        if predictionEngine.lastRunAppliedDawnCompensation {
+                            DawnEffectNoticeBanner()
+                        }
+
+                        MedicalDisclaimerBanner()
+
+                        // Bottom section: Chart on left, Action cards on right
                         HStack(alignment: .top, spacing: 8) {
-                            // Left side: HbA1c Card + Glucose Trend Chart
+                            // Left side: Glucose Trend Chart
                             VStack(spacing: 12) {
-                                // HbA1c card at top
-                                HbA1cCardView(prediction: hbA1cPredictions.first)
-
-                                MedicalDisclaimerBanner()
-
                                 if !glucoseReadings.isEmpty {
                                     GlucoseTrendChartView(glucoseReadings: Array(glucoseReadings))
                                 } else {
@@ -103,7 +108,7 @@ struct DashboardView: View {
                                 }
                             }
                             .frame(maxWidth: .infinity)
-                            
+
                             // Right side: Action Cards
                             VStack(spacing: 12) {
                                 MealQuickActionsView(
@@ -112,7 +117,7 @@ struct DashboardView: View {
                                     onLogLastMeal: { showLastMealSheet = true },
                                     onPlanMeal: { selectedTab = .meals }
                                 )
-                                
+
                                 QuickStatsView(
                                     mealsToday: mealsLoggedToday(),
                                     exerciseMinutesWeek: exerciseMinutesThisWeek(),
@@ -122,7 +127,7 @@ struct DashboardView: View {
                             .frame(maxWidth: .infinity)
                         }
                         .padding(.horizontal)
-                        
+
                         // Full-width Run New Prediction button
                         Button(action: {
                             runNewPrediction()
@@ -140,7 +145,7 @@ struct DashboardView: View {
                         }
                         .disabled(isCalculatingPrediction)
                         .padding(.horizontal)
-                        
+
                         Spacer(minLength: 20)
                     }
                     .padding(.vertical)
@@ -149,6 +154,10 @@ struct DashboardView: View {
                     VStack(spacing: 20) {
                         // MARK: - HbA1c Display Card
                         HbA1cCardView(prediction: hbA1cPredictions.first)
+
+                        if predictionEngine.lastRunAppliedDawnCompensation {
+                            DawnEffectNoticeBanner()
+                        }
 
                         MedicalDisclaimerBanner()
 
@@ -226,6 +235,17 @@ struct DashboardView: View {
             } message: {
                 Text(predictionErrorMessage ?? "An unknown error occurred.")
             }
+            .alert("Dawn Phenomenon Detected", isPresented: $showDawnEffectDetectedAlert) {
+                Button("Enable adjustment") {
+                    // Save dawn effect preference — user should also enable in profile
+                    UserDefaults.standard.set(true, forKey: "dawnEffectAlertDismissed")
+                }
+                Button("Dismiss", role: .cancel) {
+                    UserDefaults.standard.set(true, forKey: "dawnEffectAlertDismissed")
+                }
+            } message: {
+                Text("Your early morning readings appear consistently elevated without meals. This pattern is sometimes called the dawn phenomenon and affects about 20% of Type 2 diabetics. The app has adjusted your HbA1c estimate to account for this. We recommend discussing this with your endocrinologist. You can enable or disable this in your profile under Health Conditions.")
+            }
         }
     }
     
@@ -285,6 +305,11 @@ struct DashboardView: View {
         if let _ = result {
             // Success - the FetchRequest will automatically update the UI
             showPredictionResult = true
+
+            // Show dawn effect detection alert if pattern found but user hasn't explicitly enabled it in profile
+            if predictionEngine.lastRunDetectedDawnEffect && predictionEngine.lastRunAppliedDawnCompensation && !UserDefaults.standard.bool(forKey: "dawnEffectAlertDismissed") {
+                showDawnEffectDetectedAlert = true
+            }
         } else {
             // Error - show alert with helpful message
             predictionErrorMessage = "Unable to run prediction. Please ensure you have:\n• At least one glucose reading\n• User profile information set up"
@@ -418,6 +443,9 @@ private struct HbA1cCardView: View {
 private struct GlucoseTrendChartView: View {
     let glucoseReadings: [GlucoseReadingEntity]
 
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    private var isLandscape: Bool { verticalSizeClass == .compact }
+
     /// True when device region is USA or Japan — display NGSP %
     private var isNgspRegion: Bool {
         let region = Locale.current.region?.identifier ?? ""
@@ -485,6 +513,7 @@ private struct GlucoseTrendChartView: View {
             Text("30-Day HbA1c Trend")
                 .font(.headline)
                 .padding(.horizontal)
+                .padding(.bottom, isLandscape ? 8 : 0)
 
             Chart {
                 ForEach(dailyPoints, id: \.day) { item in
@@ -514,10 +543,10 @@ private struct GlucoseTrendChartView: View {
                 AxisMarks(values: .automatic(desiredCount: 5)) { _ in
                     AxisGridLine()
                     AxisValueLabel(format: .dateTime.month(.twoDigits).day(.twoDigits))
-                        .font(.system(size: 9))
+                        .font(.system(size: isLandscape ? 10 : 9))
                 }
             }
-            .frame(height: 120)
+            .frame(height: isLandscape ? 160 : 120)
             .padding()
             .background(Color(.systemGray6))
             .cornerRadius(12)
@@ -856,6 +885,25 @@ private struct MealQuickActionsView: View {
             .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal)
         }
+    }
+}
+
+// MARK: - Dawn Effect Notice Banner
+/// An orange notice displayed when dawn phenomenon compensation is active.
+/// Shown between the HbA1c card and the medical disclaimer.
+private struct DawnEffectNoticeBanner: View {
+    var body: some View {
+        HStack(alignment: .top, spacing: 6) {
+            Image(systemName: "sunrise.fill")
+                .font(.caption2)
+                .foregroundColor(.orange)
+            Text("Dawn effect adjustment applied — morning readings weighted at 60%")
+                .font(.caption2)
+                .foregroundColor(.orange)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 4)
     }
 }
 
