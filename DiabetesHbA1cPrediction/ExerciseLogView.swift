@@ -581,6 +581,11 @@ struct ExerciseRowView: View {
         return "\(value)"
     }
 
+    /// Color for the flame icon — red when intensity bar is red (7+), otherwise secondary
+    private var flameColor: Color {
+        Int(exercise.intensity) > 6 ? .red : .secondary
+    }
+
     /// Duration displayed in minutes only for both portrait and landscape
     var durationText: String {
         let totalMinutes = Int(exercise.duration)
@@ -625,7 +630,7 @@ struct ExerciseRowView: View {
 
                     Label("\(Int(exercise.caloriesBurned)) cal", systemImage: "flame.fill")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(flameColor)
                 }
             }
 
@@ -677,7 +682,7 @@ struct ExerciseRowView: View {
 
                     Label("\(formatNoComma(Int(exercise.caloriesBurned))) cal", systemImage: "flame.fill")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(flameColor)
                 }
             }
 

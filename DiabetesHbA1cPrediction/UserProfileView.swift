@@ -53,6 +53,9 @@ struct UserProfileView: View {
     @State private var tobaccoUse: String = "Never"
     @State private var alcoholUnitsPerWeek: Int = 0
 
+    // Exercise offset preference
+    @State private var preferredExerciseType: ExerciseOffsetType = .walk
+
     // UI State
     @State private var showValidationError = false
     @State private var validationErrorMessage = ""
@@ -223,6 +226,14 @@ struct UserProfileView: View {
 
             // MARK: - Section 4: Settings
             Section(header: Text("Settings")) {
+                // Preferred exercise type for post-meal offset recommendation
+                Picker(selection: $preferredExerciseType,
+                       label: Label("Offset Exercise", systemImage: "figure.run.circle.fill")) {
+                    ForEach(ExerciseOffsetType.allCases) { type in
+                        Text(type.label).tag(type)
+                    }
+                }
+
                 NavigationLink(destination: HbA1cSettingsView(profile: HbA1cUserProfile.shared)) {
                     HStack {
                         Label("HbA1c Units", systemImage: "globe")
@@ -292,6 +303,16 @@ struct UserProfileView: View {
                     }
                 }
             }
+
+            // MARK: - DEBUG: Data Export (excluded from release builds)
+            #if DEBUG
+            Section(header: Text("Developer Tools")) {
+                NavigationLink(destination: DataExportView()) {
+                    Label("Export All Data", systemImage: "square.and.arrow.up")
+                        .foregroundColor(.orange)
+                }
+            }
+            #endif
 
             // MARK: - Section 5: About
             Section(header: Text("About")) {
@@ -433,6 +454,12 @@ struct UserProfileView: View {
             if let diabetesTypeValue = healthCondition.diabetesType {
                 diabetesType = diabetesTypeValue
             }
+        }
+
+        // Load exercise offset preference
+        if let saved = UserDefaults.standard.string(forKey: "preferredExerciseType"),
+           let type = ExerciseOffsetType(rawValue: saved) {
+            preferredExerciseType = type
         }
     }
 
@@ -590,6 +617,9 @@ struct UserProfileView: View {
         healthCondition.hasHeartDisease = hasHeartDisease
         healthCondition.tobaccoUse = tobaccoUse
         healthCondition.alcoholUnitsPerWeek = Double(alcoholUnitsPerWeek)
+
+        // Save exercise offset preference
+        UserDefaults.standard.set(preferredExerciseType.rawValue, forKey: "preferredExerciseType")
 
         do {
             try viewContext.save()

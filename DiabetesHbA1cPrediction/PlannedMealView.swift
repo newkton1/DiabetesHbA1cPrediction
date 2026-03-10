@@ -6,17 +6,32 @@ struct PlannedMealView: View {
     @Binding var selectedTab: ContentView.Tab
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.verticalSizeClass) private var verticalSizeClass
-    @State private var showingStandardPlanner = false
-    @State private var showingFeastPlanner    = false
+    @State private var showingFeastPlanner = false
+    @State private var showFeastWarning = false
+    @State private var feastWarningMessage = ""
 
     private var isLandscape: Bool { verticalSizeClass == .compact }
 
-    /// Builds the multi-colored "Before You Eat" description without using deprecated Text `+` operator
+    // MARK: - Feast Frequency Limits
+
+    /// Number of feasts in the rolling 7-day window
+    private var feastsThisWeek: Int {
+        let calendar = Calendar.current
+        let weekAgo = calendar.date(byAdding: .day, value: -7, to: Date()) ?? Date()
+        let request: NSFetchRequest<MealEntity> = MealEntity.fetchRequest()
+        request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            NSPredicate(format: "mealType == %@", "feast"),
+            NSPredicate(format: "timestamp >= %@", weekAgo as NSDate)
+        ])
+        return (try? viewContext.count(for: request)) ?? 0
+    }
+
+    /// Builds the multi-colored "Before You Eat" description
     private static var beforeYouEatDescription: AttributedString {
-        var part1 = AttributedString("Build your planned meal or Feast treat and see the predicted impact on your glucose and HbA1c ")
+        var part1 = AttributedString("Build your feast treat and see the predicted impact on your glucose and HbA1c ")
         part1.foregroundColor = .secondary
 
-        var part2 = AttributedString("as well as how to prevent the worst effects")
+        var part2 = AttributedString("as well as how to offset it")
         part2.foregroundColor = .orange
 
         var part3 = AttributedString(", before taking a single bite.")
@@ -58,34 +73,52 @@ struct PlannedMealView: View {
                     // Feature highlights
                     VStack(alignment: .leading, spacing: 12) {
                         Text("What you'll see").font(.headline).padding(.horizontal, 4)
-                        PlanFeatureRow(icon: "waveform.path.ecg",         color: .orange,     title: "Estimated glucose rise",        detail: "Predicted mg/dL spike from this meal")
-                        PlanFeatureRow(icon: "chart.line.uptrend.xyaxis", color: .red,        title: "HbA1c impact",                 detail: "How this meal shifts your 3-month average")
-                        PlanFeatureRow(icon: "figure.walk.circle.fill",   color: .green,      title: "Personalised walk plan",        detail: "Minutes & distance based on your walking history")
-                        PlanFeatureRow(icon: "arrow.left.arrow.right",    color: .planAccent, title: "Compared to your typical meal", detail: "Ranks this meal against your last 30 days")
+                        PlanFeatureRow(icon: "waveform.path.ecg",         color: .orange,     title: "Estimated glucose rise",        detail: "Predicted mg/dL spike from this feast")
+                        PlanFeatureRow(icon: "chart.line.uptrend.xyaxis", color: .red,        title: "HbA1c impact",                 detail: "How this feast shifts your 3-month average")
+                        PlanFeatureRow(icon: ExerciseOffsetType.current.iconName, color: .green, title: "Personalised exercise plan",   detail: "Minutes & distance for your chosen activity")
+                        PlanFeatureRow(icon: "arrow.left.arrow.right",    color: .planAccent, title: "Compared to your typical meal", detail: "Ranks this feast against your last 30 days")
                     }
                     .padding(14)
                     .background(Color(.secondarySystemGroupedBackground))
                     .cornerRadius(14).padding(.horizontal)
 
-                    // Action buttons
-                    VStack(spacing: 12) {
-                        Button(action: { showingStandardPlanner = true }) {
-                            Label("Plan Meal", systemImage: "calendar.badge.plus")
-                                .frame(maxWidth: .infinity).padding()
-                                .background(Color.planAccent).foregroundColor(.white)
-                                .cornerRadius(12).font(.headline)
-                        }.buttonStyle(.plain)
+                    // Feast frequency notice (shown inline when 2+ feasts this week)
+                    if feastsThisWeek >= 2 {
+                        HStack(spacing: 8) {
+                            Image(systemName: feastsThisWeek >= 3 ? "exclamationmark.triangle.fill" : "info.circle.fill")
+                                .foregroundColor(feastsThisWeek >= 3 ? .red : .orange)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(feastsThisWeek >= 3
+                                     ? "Feast frequency is high"
+                                     : "Second feast this week")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(feastsThisWeek >= 3 ? .red : .orange)
+                                Text(feastsThisWeek >= 3
+                                     ? "You have planned \(feastsThisWeek) feasts in the last 7 days. Frequent feasts may impact your glucose management goals."
+                                     : "This will be your \(ordinal(feastsThisWeek + 1)) feast in 7 days. Occasional treats are fine — just stay mindful.")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                        }
+                        .padding(12)
+                        .background(feastsThisWeek >= 3
+                                    ? Color.red.opacity(0.08)
+                                    : Color.orange.opacity(0.08))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                    }
 
-                        Button(action: { showingFeastPlanner = true }) {
-                            Label("Plan Feast Treat", systemImage: "party.popper.fill")
-                                .frame(maxWidth: .infinity).padding()
-                                .background(Color.feastAccent.opacity(0.13))
-                                .foregroundColor(.feastAccent)
-                                .cornerRadius(12).font(.headline)
-                                .overlay(RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.feastAccent.opacity(0.40), lineWidth: 1))
-                        }.buttonStyle(.plain)
-                    }.padding(.horizontal)
+                    // Action button — single feast-focused function
+                    Button(action: { handlePlanFeast() }) {
+                        Label("Plan Feast Treat", systemImage: "party.popper.fill")
+                            .frame(maxWidth: .infinity).padding()
+                            .background(Color.feastAccent).foregroundColor(.white)
+                            .cornerRadius(12).font(.headline)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal)
 
                     Spacer(minLength: 24)
                 }
@@ -94,14 +127,50 @@ struct PlannedMealView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
-            .sheet(isPresented: $showingStandardPlanner) {
-                MealBuilderView(mealType: .plannedMeal)
-                    .environment(\.managedObjectContext, viewContext)
-            }
             .sheet(isPresented: $showingFeastPlanner) {
                 MealBuilderView(mealType: .feast)
                     .environment(\.managedObjectContext, viewContext)
             }
+            .alert("Feast Frequency Warning", isPresented: $showFeastWarning) {
+                Button("Continue Anyway") { showingFeastPlanner = true }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text(feastWarningMessage)
+            }
+    }
+
+    // MARK: - Feast Frequency Logic
+
+    /// Decides whether to show a warning alert or open the planner directly
+    private func handlePlanFeast() {
+        let count = feastsThisWeek
+        if count >= 3 {
+            feastWarningMessage = "You have already planned \(count) feasts in the last 7 days. Frequent feast meals may work against your glucose management goals. Consider spacing your treats out more."
+            showFeastWarning = true
+        } else if count >= 2 {
+            feastWarningMessage = "This will be your \(ordinal(count + 1)) feast in the last 7 days. Occasional treats are part of a healthy plan, but try to keep feasts to once or twice a week."
+            showFeastWarning = true
+        } else {
+            showingFeastPlanner = true
+        }
+    }
+
+    /// Returns ordinal string for a number (1st, 2nd, 3rd, etc.)
+    private func ordinal(_ n: Int) -> String {
+        let suffix: String
+        let ones = n % 10
+        let tens = (n / 10) % 10
+        if tens == 1 {
+            suffix = "th"
+        } else {
+            switch ones {
+            case 1: suffix = "st"
+            case 2: suffix = "nd"
+            case 3: suffix = "rd"
+            default: suffix = "th"
+            }
+        }
+        return "\(n)\(suffix)"
     }
 }
 

@@ -42,10 +42,102 @@ class HealthKitManager: ObservableObject {
     /// The HKHealthStore instance for all HealthKit operations
     private let healthStore = HKHealthStore()
 
+    /// Active observer query for glucose data (kept alive for the app's lifetime)
+    private var glucoseObserverQuery: HKObserverQuery?
+
+    /// Tracks whether the glucose observer has already been started
+    private var isGlucoseObserverRunning = false
+
     // MARK: - Initialization
 
     private init() {
         // Private initializer to enforce singleton pattern
+    }
+
+    // MARK: - Glucose Background Observer
+
+    /// Starts an HKObserverQuery for blood glucose data so the app is notified
+    /// whenever new readings land in HealthKit (e.g. from Zukka / Dexcom).
+    ///
+    /// On each notification the observer automatically syncs new readings into
+    /// Core Data, which causes any @FetchRequest (e.g. in DashboardView) to
+    /// refresh and the stale-data banner to clear.
+    ///
+    /// Also enables background delivery so iOS wakes the app for updates even
+    /// when it is suspended.
+    ///
+    /// - Parameter context: The NSManagedObjectContext to import readings into.
+    /// - Note: Safe to call multiple times — subsequent calls are no-ops.
+    func startGlucoseObserver(context: NSManagedObjectContext) {
+        guard !isGlucoseObserverRunning else { return }
+        guard let glucoseType = HKQuantityType.quantityType(forIdentifier: .bloodGlucose) else { return }
+
+        isGlucoseObserverRunning = true
+
+        // Enable background delivery so iOS wakes us for new glucose samples
+        healthStore.enableBackgroundDelivery(for: glucoseType, frequency: .immediate) { success, error in
+            #if DEBUG
+            if success {
+                print("[HealthKit] Background delivery enabled for blood glucose.")
+            } else if let error = error {
+                print("[HealthKit] Failed to enable background delivery: \(error.localizedDescription)")
+            }
+            #endif
+        }
+
+        // Create observer query — fires whenever glucose samples are added/deleted
+        let query = HKObserverQuery(sampleType: glucoseType, predicate: nil) { [weak self] _, completionHandler, error in
+            if let error = error {
+                #if DEBUG
+                print("[HealthKit] Observer query error: \(error.localizedDescription)")
+                #endif
+                completionHandler()
+                return
+            }
+
+            #if DEBUG
+            print("[HealthKit] Observer triggered — syncing new glucose data.")
+            #endif
+
+            // completionHandler is safe to call from any context but Apple's
+            // HealthKit headers don't mark it @Sendable, so silence the warning.
+            nonisolated(unsafe) let finish = completionHandler
+
+            // Sync new readings into Core Data on the main actor
+            Task { @MainActor [weak self] in
+                guard let self = self else {
+                    finish()
+                    return
+                }
+                let count = await self.syncGlucoseToCorData(context: context, days: 1)
+                #if DEBUG
+                if count > 0 {
+                    print("[HealthKit] Auto-synced \(count) new glucose reading(s).")
+                }
+                #endif
+                // Tell HealthKit we're done processing
+                finish()
+            }
+        }
+
+        glucoseObserverQuery = query
+        healthStore.execute(query)
+
+        #if DEBUG
+        print("[HealthKit] Glucose observer query started.")
+        #endif
+    }
+
+    /// Stops the glucose observer query if running.
+    func stopGlucoseObserver() {
+        if let query = glucoseObserverQuery {
+            healthStore.stop(query)
+            glucoseObserverQuery = nil
+            isGlucoseObserverRunning = false
+            #if DEBUG
+            print("[HealthKit] Glucose observer query stopped.")
+            #endif
+        }
     }
 
     // MARK: - Authorization
@@ -341,14 +433,36 @@ class HealthKitManager: ObservableObject {
                     return
                 }
 
-                let glucoseReadings = samples.map { sample in
-                    let value = sample.quantity.doubleValue(for: HKUnit.moleUnit(with: .milli, molarMass: HKUnitMolarMassBloodGlucose).unitDivided(by: HKUnit.liter()))
-                    // Convert mmol/L to mg/dL: mg/dL = mmol/L × 18
-                    let mgdL = value * 18.0
-                    return (date: sample.startDate, value: mgdL)
+                // Determine locale-appropriate glucose unit
+                let region = Locale.current.region?.identifier ?? ""
+                let isMgdlRegion = (region == "US" || region == "JP")
+
+                let allReadings = samples.map { sample in
+                    let mmolL = sample.quantity.doubleValue(for: HKUnit.moleUnit(with: .milli, molarMass: HKUnitMolarMassBloodGlucose).unitDivided(by: HKUnit.liter()))
+                    // Store in locale-appropriate unit: mg/dL for US/Japan, mmol/L elsewhere
+                    let displayValue = isMgdlRegion ? mmolL * 18.0 : mmolL
+                    return (date: sample.startDate, value: displayValue)
                 }
 
-                continuation.resume(returning: glucoseReadings)
+                // Sample CGM data to one reading per 15 minutes to avoid flooding
+                // the database with thousands of readings from high-frequency CGMs
+                var lastKeptDate: Date?
+                let sampledReadings = allReadings
+                    .sorted { $0.date < $1.date }
+                    .filter { reading in
+                        guard let last = lastKeptDate else {
+                            lastKeptDate = reading.date
+                            return true
+                        }
+                        let interval = reading.date.timeIntervalSince(last)
+                        if interval >= 15 * 60 { // 15 minutes
+                            lastKeptDate = reading.date
+                            return true
+                        }
+                        return false
+                    }
+
+                continuation.resume(returning: sampledReadings)
             }
 
             self.healthStore.execute(query)
@@ -438,6 +552,7 @@ class HealthKitManager: ObservableObject {
     private struct GlucoseData: Sendable {
         let date: Date
         let value: Double
+        let unit: String
     }
 
     /// Syncs blood glucose readings from HealthKit to CoreData.
@@ -460,9 +575,11 @@ class HealthKitManager: ObservableObject {
 
         let glucoseReadings = await fetchGlucoseReadings(days: days)
         
-        // Convert to Sendable struct
+        // Convert to Sendable struct with locale-appropriate unit
+        let region = Locale.current.region?.identifier ?? ""
+        let unitLabel = (region == "US" || region == "JP") ? "mg/dL" : "mmol/L"
         let glucoseDataList: [GlucoseData] = glucoseReadings.map { reading in
-            GlucoseData(date: reading.date, value: reading.value)
+            GlucoseData(date: reading.date, value: reading.value, unit: unitLabel)
         }
 
         return await Self.importGlucoseToCoreData(glucoseDataList: glucoseDataList, context: context)
@@ -582,8 +699,10 @@ class HealthKitManager: ObservableObject {
 
                     // Create new GlucoseReadingEntity
                     let entity = GlucoseReadingEntity(context: context)
+                    entity.id = UUID()
                     entity.timestamp = glucoseData.date
                     entity.value = glucoseData.value
+                    entity.unit = glucoseData.unit
                     entity.source = "HealthKit"
 
                     count += 1

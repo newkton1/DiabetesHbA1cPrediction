@@ -5,14 +5,17 @@ struct WalkRecommendationCard: View {
     let recommendation: String
     var onTap: (() -> Void)? = nil
 
+    /// Reads the user's preferred exercise type for dynamic icon & title
+    private var exerciseType: ExerciseOffsetType { .current }
+
     var body: some View {
         Button(action: { onTap?() }) {
             HStack(alignment: .top, spacing: 14) {
-                Image(systemName: "figure.walk.circle.fill")
+                Image(systemName: exerciseType.iconName)
                     .font(.system(size: 40))
                     .foregroundColor(.white)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Post-Meal Walk")
+                    Text("Post-Meal \(exerciseType.label)")
                         .font(.subheadline).fontWeight(.bold)
                         .foregroundColor(.white)
                     Text(recommendation)

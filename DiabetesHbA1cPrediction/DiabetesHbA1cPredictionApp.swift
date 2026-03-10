@@ -44,7 +44,8 @@ struct DiabetesHbA1cPredictionApp: App {
                 // Make the HealthKit manager available as an environment object
                 // so views can observe authorisation state and trigger syncs.
                 .environmentObject(healthKitManager)
-                // Request HealthKit permissions on first appearance.
+                // Request HealthKit permissions on first appearance,
+                // then start the glucose observer for live sync.
                 .onAppear {
                     if HealthKitManager.isHealthKitAvailable() {
                         healthKitManager.requestAuthorization { success in
@@ -52,6 +53,12 @@ struct DiabetesHbA1cPredictionApp: App {
                                 #if DEBUG
                                 print("[HealthKit] Authorisation granted.")
                                 #endif
+                                // Start observing HealthKit for new glucose data
+                                // so readings auto-sync into Core Data and the
+                                // stale-data banner clears without manual sync.
+                                healthKitManager.startGlucoseObserver(
+                                    context: persistenceController.container.viewContext
+                                )
                             }
                         }
                     }

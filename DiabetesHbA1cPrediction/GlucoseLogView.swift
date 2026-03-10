@@ -2,6 +2,19 @@ import SwiftUI
 import Charts
 import CoreData
 
+/// Returns a display-friendly source name, shortening long labels for the UI
+/// while keeping the stored Core Data value unchanged
+private func sourceDisplayName(_ source: String) -> String {
+    switch source {
+    case "Manual Finger Stick":
+        return "Finger\nStick"
+    case "Continuous Glucose Monitor":
+        return "CGM"
+    default:
+        return source
+    }
+}
+
 /// GlucoseLogView displays glucose readings with a 30-day chart and management capabilities
 /// Features include:
 /// - Line chart with color-coded segments based on glucose values
@@ -361,8 +374,10 @@ struct GlucoseLogView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack(spacing: 8) {
                                 Text(formatGlucoseValue(reading.value, unit: reading.unit))
-                                    .font(.headline)
+                                    .font(isPortrait ? .headline : .subheadline)
                                     .foregroundColor(glucoseColor(for: reading.value, unit: reading.unit))
+                                    .lineLimit(1)
+                                    .fixedSize(horizontal: true, vertical: false)
 
                                 // Trend arrow
                                 if let trend = reading.trend {
@@ -382,15 +397,19 @@ struct GlucoseLogView: View {
 
                         Spacer()
 
-                        // Source icon
+                        // Source icon and label
                         HStack(spacing: 8) {
-                            Image(systemName: sourceIcon(for: reading.source ?? ""))
-                                .font(.headline)
-                                .foregroundColor(.blue)
+                            if isPortrait {
+                                Image(systemName: sourceIcon(for: reading.source ?? ""))
+                                    .font(.headline)
+                                    .foregroundColor(.blue)
+                            }
 
-                            Text(reading.source ?? "Unknown")
+                            Text(sourceDisplayName(reading.source ?? "Unknown"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.trailing)
                         }
                     }
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -781,7 +800,7 @@ struct AddGlucoseReadingSheet: View {
             Section("Source") {
                 Picker("Source", selection: $selectedSource) {
                     ForEach(sourceOptions, id: \.self) { source in
-                        Text(source).tag(source)
+                        Text(sourceDisplayName(source)).tag(source)
                     }
                 }
             }

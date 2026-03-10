@@ -14,10 +14,17 @@ struct MultiSelectFoodSearchView: View {
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     @State private var searchText = ""
+    @State private var committedSearchText = ""
     @State private var selectedCategory: String? = nil
 
     private var isPortrait: Bool {
         verticalSizeClass != .compact
+    }
+
+    /// In landscape, only filter after user taps Search to dismiss keyboard;
+    /// in portrait, live-filter as the user types.
+    private var activeSearchText: String {
+        isPortrait ? searchText : committedSearchText
     }
 
     private let foodDatabase = FoodDatabase.shared
@@ -68,11 +75,11 @@ struct MultiSelectFoodSearchView: View {
             foods = foods.filter { $0.category == category }
         }
 
-        // Filter by search text
-        if !searchText.isEmpty {
+        // Filter by search text (live in portrait, on-submit in landscape)
+        if !activeSearchText.isEmpty {
             foods = foods.filter { food in
-                food.name.localizedCaseInsensitiveContains(searchText) ||
-                food.category.localizedCaseInsensitiveContains(searchText)
+                food.name.localizedCaseInsensitiveContains(activeSearchText) ||
+                food.category.localizedCaseInsensitiveContains(activeSearchText)
             }
         }
 
@@ -102,11 +109,13 @@ struct MultiSelectFoodSearchView: View {
                             .focused($isSearchFieldFocused)
                             .submitLabel(.search)
                             .onSubmit {
+                                committedSearchText = searchText
                                 isSearchFieldFocused = false
                             }
                         if !searchText.isEmpty {
                             Button {
                                 searchText = ""
+                                committedSearchText = ""
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundColor(.secondary)
@@ -158,8 +167,8 @@ struct MultiSelectFoodSearchView: View {
                     .fontWeight(.semibold)
                 }
             }
-            .onChange(of: searchText) { _, newValue in
-                // Reset category filter when user starts searching
+            .onChange(of: activeSearchText) { _, newValue in
+                // Reset category filter when user searches
                 if !newValue.isEmpty {
                     selectedCategory = nil
                 }

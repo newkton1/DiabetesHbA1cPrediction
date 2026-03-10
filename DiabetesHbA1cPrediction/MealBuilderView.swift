@@ -21,6 +21,8 @@ struct MealBuilderView: View {
     @State private var showingError = false
     @State private var errorMessage = ""
     @State private var isReady = false          // defer heavy content until sheet animates in
+    @State private var showResults = false       // after save, show impact results instead of form
+    @State private var savedImpact: MealImpactResult?  // cached impact from save
     let mealType: MealType
     @State private var predictionEngine = HbA1cPredictionEngine()
 
@@ -34,7 +36,9 @@ struct MealBuilderView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if isReady {
+                if showResults {
+                    resultsContent
+                } else if isReady {
                     formContent
                 } else {
                     // Lightweight placeholder while sheet animates in
@@ -46,17 +50,26 @@ struct MealBuilderView: View {
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(action: { dismiss() }) {
-                        Text("Cancel")
+                if showResults {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(action: { dismiss() }) {
+                            Text("Done")
+                        }
+                        .fontWeight(.semibold)
                     }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(action: { saveMeal() }) {
-                        Text("Save")
+                } else {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(action: { dismiss() }) {
+                            Text("Cancel")
+                        }
                     }
-                    .disabled(!mealBuilder.canSave)
-                    .fontWeight(.semibold)
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(action: { saveMeal() }) {
+                            Text("Save")
+                        }
+                        .disabled(!mealBuilder.canSave)
+                        .fontWeight(.semibold)
+                    }
                 }
                 // Keyboard dismiss handled by .scrollDismissesKeyboard and .onSubmit on the text field
             }
@@ -77,6 +90,126 @@ struct MealBuilderView: View {
         }
     }
 
+    // MARK: - Results Content (shown after save)
+
+    @ViewBuilder
+    private var resultsContent: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                // Header
+                VStack(spacing: 6) {
+                    Image(systemName: mealType == .feast ? "party.popper.fill" : "checkmark.circle.fill")
+                        .font(.largeTitle)
+                        .foregroundColor(mealType == .feast ? .feastAccent : .green)
+                    Text(mealType == .feast ? "Feast Saved" : "Meal Saved")
+                        .font(.title2).fontWeight(.bold)
+                    if !mealBuilder.mealName.isEmpty {
+                        Text(mealBuilder.mealName)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .padding(.top, 12)
+
+                // Estimated Impact
+                if let impact = savedImpact {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("Estimated Impact")
+                            .font(.headline)
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 8)
+
+                        VStack(spacing: 12) {
+                            // Glucose spike estimate
+                            HStack {
+                                Image(systemName: "waveform.path.ecg")
+                                    .foregroundColor(impact.glucoseColor)
+                                    .frame(width: 24)
+                                Text("Est. glucose rise")
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text("+\(Int(impact.estimatedGlucoseRise)) mg/dL")
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(impact.glucoseColor)
+                            }
+
+                            Divider()
+
+                            // HbA1c impact
+                            HStack {
+                                Image(systemName: "chart.line.uptrend.xyaxis")
+                                    .foregroundColor(impact.hba1cColor)
+                                    .frame(width: 24)
+                                Text("HbA1c impact")
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(impact.hba1cDelta >= 0.05 ? String(format: "+%.1f%%", impact.hba1cDelta) : "Minimal")
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(impact.hba1cColor)
+                            }
+
+                            Divider()
+
+                            // Comparison with typical meals
+                            HStack {
+                                Image(systemName: "arrow.left.arrow.right")
+                                    .foregroundColor(.blue)
+                                    .frame(width: 24)
+                                Text("vs. your typical meal")
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(impact.comparisonText)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(impact.comparisonColor)
+                            }
+
+                            Divider()
+
+                            // Glycemic load indicator
+                            HStack {
+                                Image(systemName: impact.glCategory == "Low" ? "checkmark.circle.fill" : impact.glCategory == "Moderate" ? "exclamationmark.circle.fill" : "xmark.circle.fill")
+                                    .foregroundColor(impact.glColor)
+                                    .frame(width: 24)
+                                Text("Glycemic load")
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text("\(Int(impact.glycemicLoad)) (\(impact.glCategory))")
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(impact.glColor)
+                            }
+
+                            // Recommendation
+                            if let recommendation = impact.recommendation {
+                                Divider()
+                                HStack(alignment: .top) {
+                                    Image(systemName: "lightbulb.fill")
+                                        .foregroundColor(.yellow)
+                                        .frame(width: 24)
+                                    Text(recommendation)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+
+                            // Exercise recommendation
+                            if let walkRec = impact.walkRecommendation {
+                                Divider()
+                                WalkRecommendationCard(recommendation: walkRec)
+                            }
+                        }
+                        .padding(16)
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .cornerRadius(14)
+                        .padding(.horizontal, 16)
+                    }
+                }
+
+                Spacer(minLength: 24)
+            }
+        }
+        .background(Color(.systemGroupedBackground))
+    }
+
     // MARK: - Form Content (deferred)
 
     @ViewBuilder
@@ -94,15 +227,6 @@ struct MealBuilderView: View {
                     .focused($isMealNameFocused)
                     .submitLabel(.done)
                     .onSubmit { isMealNameFocused = false }
-            }
-
-            // Feast banner
-            if mealType == .feast {
-                Section {
-                    FeastModeBannerView()
-                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
-                        .listRowBackground(Color.clear)
-                }
             }
 
             // Add foods button
@@ -159,8 +283,8 @@ struct MealBuilderView: View {
                 }
             }
 
-            // Estimated Impact section (planned meals only)
-            if mealType == .plannedMeal || mealType == .feast {
+            // Estimated Impact section (feast only)
+            if mealType == .feast {
                 Section(header: Text("Estimated Impact")) {
                     EstimatedImpactContent(
                         mealBuilder: mealBuilder,
@@ -236,12 +360,127 @@ struct MealBuilderView: View {
 
     private func saveMeal() {
         do {
-            try mealBuilder.save(to: viewContext)
-            dismiss()
+            if mealType == .feast {
+                // Compute impact before saving so we have it for the results view
+                let impact = computeImpactForResults()
+                try mealBuilder.save(to: viewContext)
+                savedImpact = impact
+                withAnimation { showResults = true }
+            } else {
+                // Regular meals: just save and dismiss — no impact results
+                try mealBuilder.save(to: viewContext)
+                dismiss()
+            }
         } catch {
             errorMessage = error.localizedDescription
             showingError = true
         }
+    }
+
+    /// Computes meal impact for the post-save results display
+    private func computeImpactForResults() -> MealImpactResult? {
+        guard !mealBuilder.selectedFoods.isEmpty else { return nil }
+
+        let carbs = mealBuilder.totalCarbohydrates
+        let gi = mealBuilder.averageGlycemicIndex
+        let gl = mealBuilder.totalGlycemicLoad
+        let hoursUntil = max(0, mealBuilder.plannedDateTime.timeIntervalSince(Date()) / 3600.0)
+
+        // 1. Estimate post-meal glucose rise
+        let estimatedGlucoseRise = min(120, gl * 2.5)
+
+        // 2. Calculate HbA1c impact
+        var hba1cDelta = 0.0
+        if let input = predictionEngine.gatherInputs(context: viewContext) {
+            let currentResult = predictionEngine.predict(from: input)
+            let adjusted = predictionEngine.predictWithPlannedMeal(
+                currentPrediction: currentResult,
+                plannedMealCarbs: carbs,
+                plannedMealGI: gi,
+                hoursUntilMeal: hoursUntil
+            )
+            hba1cDelta = adjusted.predictedHbA1c - currentResult.predictedHbA1c
+        }
+
+        // 3. Compare with typical meal from history (same logic as fetchAverageCarbs)
+        let mealFetchRequest: NSFetchRequest<MealEntity> = MealEntity.fetchRequest()
+        let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        mealFetchRequest.predicate = NSPredicate(
+            format: "timestamp >= %@ AND (mealType != %@ OR mealType == nil)",
+            cutoff as NSDate, "plannedMeal"
+        )
+        mealFetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \MealEntity.timestamp, ascending: false)]
+        let recentMeals = (try? viewContext.fetch(mealFetchRequest)) ?? []
+        var totalHistoryCarbs = 0.0
+        for meal in recentMeals {
+            if let items = meal.foodItems as? Set<MealFoodItemEntity>, !items.isEmpty {
+                for item in items {
+                    totalHistoryCarbs += item.carbsPerServing * item.quantity
+                }
+            } else if let macros = meal.macronutrients as? Set<MacronutrientEntity> {
+                totalHistoryCarbs += macros
+                    .filter { $0.type == "carbohydrates" || $0.type == "carbs" }
+                    .reduce(0) { $0 + $1.amount }
+            }
+        }
+        let avgCarbs: Double = recentMeals.isEmpty ? 0 : totalHistoryCarbs / Double(recentMeals.count)
+        let comparisonPct: Double = avgCarbs > 0 ? ((carbs - avgCarbs) / avgCarbs) * 100 : 0
+
+        // 4. Categorize glycemic load
+        let glCategory: String
+        if gl < 10 { glCategory = "Low" }
+        else if gl < 20 { glCategory = "Moderate" }
+        else { glCategory = "High" }
+
+        // 5. Generate recommendation
+        let isFeast = (mealType == .feast)
+        var recommendation: String? = nil
+        if gl > (isFeast ? 30 : 20) && carbs > (isFeast ? 90 : 60) {
+            recommendation = isFeast
+                ? "Very high carb feast. A brisk post-meal \(ExerciseOffsetType.current.actionVerb) will help significantly."
+                : "High carb & glycemic load. Consider smaller portions or adding protein/fiber to slow glucose absorption."
+        } else if gl > (isFeast ? 30 : 20) {
+            recommendation = "High glycemic load. Consider lower-GI alternatives to reduce glucose spike."
+        } else if carbs > (isFeast ? 100 : 80) {
+            recommendation = "High carbs. Adding protein or healthy fats can help moderate blood glucose response."
+        }
+
+        // 6. Exercise recommendation (same logic as EstimatedImpactContent)
+        let walkRec: String? = {
+            guard estimatedGlucoseRise > 15 else { return nil }
+            let exerciseType = ExerciseOffsetType.current
+            let walkMET = 3.5
+            let reductionPerMinute = 1.5 * (exerciseType.metValue / walkMET)
+            let targetReduction = estimatedGlucoseRise * 0.5
+            let rawMinutes = targetReduction / reductionPerMinute
+            let exerciseMinutes = min(60, max(5, rawMinutes))
+            let roundedMinutes = Int((exerciseMinutes / 5).rounded()) * 5
+            let hitCap = rawMinutes > 60
+            let pace = exerciseType.defaultPace
+            let rawDistance = Double(roundedMinutes) * pace
+            let formattedDistance: String
+            if exerciseType == .swim {
+                let metres = Int((rawDistance / 50).rounded()) * 50
+                formattedDistance = "\(metres) \(exerciseType.distanceUnit)"
+            } else {
+                formattedDistance = String(format: "%.1f \(exerciseType.distanceUnit)", rawDistance)
+            }
+            let durationText = hitCap
+                ? "at least \(roundedMinutes) min / \(formattedDistance)"
+                : "\(roundedMinutes) min / \(formattedDistance)"
+            return "If you eat this planned meal, also consider a good \(exerciseType.actionVerb) after the meal of \(durationText) to help quickly reduce the estimated glucose rise."
+        }()
+
+        return MealImpactResult(
+            estimatedGlucoseRise: estimatedGlucoseRise,
+            hba1cDelta: hba1cDelta,
+            glycemicLoad: gl,
+            glCategory: glCategory,
+            comparisonPct: comparisonPct,
+            hasHistory: !recentMeals.isEmpty,
+            recommendation: recommendation,
+            walkRecommendation: walkRec
+        )
     }
 
 }
@@ -387,6 +626,8 @@ struct EstimatedImpactContent: View {
                     .foregroundColor(.secondary)
             }
         }
+        // Compute on first appearance (handles lazy loading in landscape)
+        .onAppear { scheduleCompute() }
         // Recompute impact asynchronously when foods or planned time change
         .onChange(of: mealBuilder.foodCount) { _, _ in scheduleCompute() }
         .onChange(of: mealBuilder.plannedDateTime) { _, _ in scheduleCompute() }
@@ -442,7 +683,7 @@ struct EstimatedImpactContent: View {
                 var recommendation: String? = nil
                 if gl > (isFeast ? 30 : 20) && carbs > (isFeast ? 90 : 60) {
                     recommendation = isFeast
-                        ? "Very high carb feast. A brisk post-meal walk will help significantly."
+                        ? "Very high carb feast. A brisk post-meal \(ExerciseOffsetType.current.actionVerb) will help significantly."
                         : "High carb & glycemic load. Consider smaller portions or adding protein/fiber to slow glucose absorption."
                 } else if gl > (isFeast ? 30 : 20) {
                     recommendation = "High glycemic load. Consider lower-GI alternatives to reduce glucose spike."
@@ -495,43 +736,63 @@ struct EstimatedImpactContent: View {
         }
     }
 
-    /// Estimate post-meal walk duration/distance to help reduce glucose rise.
-    /// Based on clinical research: a 15-min brisk post-meal walk typically reduces
-    /// the glucose peak by ~20-30 mg/dL. The user's personal walking pace from
-    /// exercise history is used to adjust the distance estimate.
+    /// Estimate post-meal exercise duration/distance to help reduce glucose rise.
+    ///
+    /// Uses the user's preferred exercise type (Walk/Run/Cycle/Swim) set in the
+    /// User view. The calculation is MET-based: higher MET activities burn glucose
+    /// faster, so running needs fewer minutes than walking for the same offset.
+    ///
+    /// Clinical basis: a brisk 15-min walk (~3.5 METs) typically reduces the
+    /// glucose peak by ~20-30 mg/dL. We scale this for other exercise types
+    /// proportionally to their MET values.
     private func computeWalkRecommendation(estimatedGlucoseRise: Double) -> String? {
         guard estimatedGlucoseRise > 15 else { return nil } // Only suggest if meaningful rise
 
-        // Clinical acute post-meal walking effect:
-        // ~1.5 mg/dL reduction per minute of brisk walking (based on studies showing
-        // 15-min walks reduce glucose peaks by 20-30 mg/dL)
-        let reductionPerMinute = 1.5
+        let exerciseType = ExerciseOffsetType.current
+
+        // Base clinical effect: ~1.5 mg/dL reduction per minute of brisk walking (3.5 METs).
+        // Scale for other activities: reductionPerMin = 1.5 × (activityMET / 3.5)
+        let walkMET = 3.5
+        let reductionPerMinute = 1.5 * (exerciseType.metValue / walkMET)
 
         // Target reducing ~50% of the estimated glucose rise
         let targetReduction = estimatedGlucoseRise * 0.5
         let rawMinutes = targetReduction / reductionPerMinute
-        let walkMinutes = min(60, max(10, rawMinutes))
-        let roundedMinutes = Int((walkMinutes / 5).rounded()) * 5 // Round to nearest 5
-        let hitCap = rawMinutes > 60 // True when the walk time was capped
+        let exerciseMinutes = min(60, max(5, rawMinutes))
+        let roundedMinutes = Int((exerciseMinutes / 5).rounded()) * 5 // Round to nearest 5
+        let hitCap = rawMinutes > 60
 
-        // Use personal walking pace if available, otherwise default 5 km/hr
-        let personalPace = fetchWalkingPace() // km per minute
-        let paceKmPerMin = personalPace > 0 ? personalPace : (5.0 / 60.0)
-        let walkDistanceKm = Double(roundedMinutes) * paceKmPerMin
-        let formattedDistance = String(format: "%.1f", walkDistanceKm)
+        // Use personal pace if available, otherwise fall back to type default
+        let personalPace = fetchExercisePace(for: exerciseType)
+        let pace = personalPace > 0 ? personalPace : exerciseType.defaultPace
 
-        let duration = hitCap ? "at least \(roundedMinutes) min / \(formattedDistance) km" : "\(roundedMinutes) min / \(formattedDistance) km"
-        return "If you eat this planned meal, also consider a good walk after the meal of \(duration) to help quickly reduce the estimated glucose rise."
+        // Calculate distance
+        let rawDistance = Double(roundedMinutes) * pace
+        let formattedDistance: String
+        if exerciseType == .swim {
+            // Swim: display in whole metres
+            let metres = Int((rawDistance / 50).rounded()) * 50  // Round to nearest 50 m
+            formattedDistance = "\(metres) \(exerciseType.distanceUnit)"
+        } else {
+            formattedDistance = String(format: "%.1f \(exerciseType.distanceUnit)", rawDistance)
+        }
+
+        let durationText = hitCap
+            ? "at least \(roundedMinutes) min / \(formattedDistance)"
+            : "\(roundedMinutes) min / \(formattedDistance)"
+
+        return "If you eat this planned meal, also consider a good \(exerciseType.actionVerb) after the meal of \(durationText) to help quickly reduce the estimated glucose rise."
     }
 
-    /// Query walking exercise history to get the user's typical walking pace (km/min).
-    /// Looks at walking sessions from the last 30 days that have distance data.
-    private func fetchWalkingPace() -> Double {
+    /// Query exercise history to get the user's typical pace for a given exercise type.
+    /// Returns pace in km/min for walk/run/cycle, or metres/min for swim.
+    /// Looks at sessions from the last 30 days that have distance data.
+    private func fetchExercisePace(for exerciseType: ExerciseOffsetType) -> Double {
         let fetchRequest: NSFetchRequest<ExerciseSessionEntity> = ExerciseSessionEntity.fetchRequest()
         let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
         fetchRequest.predicate = NSPredicate(
             format: "type == %@ AND startDate >= %@ AND distance > 0",
-            "Walking", cutoff as NSDate
+            exerciseType.coreDataType, cutoff as NSDate
         )
         fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \ExerciseSessionEntity.startDate, ascending: false)]
 
@@ -548,7 +809,7 @@ struct EstimatedImpactContent: View {
             }
             guard totalMinutes > 0 && totalDistance > 0 else { return 0 }
 
-            // Return personal walking pace in km/min
+            // Return personal pace (km/min for walk/run/cycle, m/min for swim)
             return totalDistance / totalMinutes
         } catch {
             return 0

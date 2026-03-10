@@ -1,5 +1,6 @@
 import SwiftUI
 import Charts
+import Combine
 import CoreData
 
 /// Dashboard view for the Diabetes HbA1c Prediction App
@@ -54,6 +55,16 @@ struct DashboardView: View {
     @State private var showPredictionError = false
     @State private var showDawnEffectDetectedAlert = false
 
+    // Timer-driven state for stale data detection
+    @State private var currentTime = Date()
+    private let staleDataTimer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
+
+    /// True when glucose readings exist but the most recent is older than 30 minutes
+    private var isGlucoseDataStale: Bool {
+        guard let latestTimestamp = glucoseReadings.first?.timestamp else { return false }
+        return currentTime.timeIntervalSince(latestTimestamp) > 30 * 60
+    }
+
     // Prediction engine instance
     @StateObject private var predictionEngine = HbA1cPredictionEngine()
     
@@ -88,6 +99,10 @@ struct DashboardView: View {
                             DawnEffectNoticeBanner()
                         }
 
+                        if isGlucoseDataStale {
+                            StaleDataWarningBanner()
+                        }
+
                         MedicalDisclaimerBanner()
 
                         // Bottom section: Chart on left, Action cards on right
@@ -112,10 +127,8 @@ struct DashboardView: View {
                             // Right side: Action Cards
                             VStack(spacing: 12) {
                                 MealQuickActionsView(
-                                    lastMeal: lastLoggedMeal,
-                                    nextPlannedMeal: nextPlannedMeal,
-                                    onLogLastMeal: { showLastMealSheet = true },
-                                    onPlanMeal: { selectedTab = .meals }
+                                    onAddMeal: { showLastMealSheet = true },
+                                    onPlanFeast: { selectedTab = .meals }
                                 )
 
                                 QuickStatsView(
@@ -159,6 +172,10 @@ struct DashboardView: View {
                             DawnEffectNoticeBanner()
                         }
 
+                        if isGlucoseDataStale {
+                            StaleDataWarningBanner()
+                        }
+
                         MedicalDisclaimerBanner()
 
                         // MARK: - HbA1c Trend Chart
@@ -168,10 +185,8 @@ struct DashboardView: View {
                         
                         // MARK: - Quick Action Cards for Meals
                         MealQuickActionsView(
-                            lastMeal: lastLoggedMeal,
-                            nextPlannedMeal: nextPlannedMeal,
-                            onLogLastMeal: { showLastMealSheet = true },
-                            onPlanMeal: { selectedTab = .meals }
+                            onAddMeal: { showLastMealSheet = true },
+                            onPlanFeast: { selectedTab = .meals }
                         )
 
                         // MARK: - Quick Stats Grid
@@ -245,6 +260,9 @@ struct DashboardView: View {
                 }
             } message: {
                 Text("Your early morning readings appear consistently elevated without meals. This pattern is sometimes called the dawn phenomenon and affects about 20% of Type 2 diabetics. The app has adjusted your HbA1c estimate to account for this. We recommend discussing this with your endocrinologist. You can enable or disable this in your profile under Health Conditions.")
+            }
+            .onReceive(staleDataTimer) { time in
+                currentTime = time
             }
         }
     }
@@ -581,16 +599,18 @@ private struct QuickStatsView: View {
     var body: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                // Meals Card - Compact layout
-                NavigationLink(destination: MealLogView()) {
+                // Glucose Card - Compact layout
+                NavigationLink(destination: GlucoseLogView()) {
                     VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: isLandscape ? 4 : 6) {
-                            Image(systemName: "fork.knife")
-                                .font(isLandscape ? .caption : .body)
-                                .foregroundColor(.orange)
-                            Text("Meals")
+                        HStack(spacing: isLandscape ? 2 : 6) {
+                            Image(systemName: "drop.fill")
+                                .font(isLandscape ? .system(size: 9) : .body)
+                                .foregroundColor(.red)
+                            Text("Glucose")
                                 .font(isLandscape ? .caption2 : .caption)
                                 .fontWeight(.semibold)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
                             Spacer()
                         }
                     }
@@ -633,18 +653,16 @@ private struct QuickStatsView: View {
             }
 
             HStack(spacing: 12) {
-                // Glucose Card - Compact layout
-                NavigationLink(destination: GlucoseLogView()) {
+                // Meals History Card - Compact layout
+                NavigationLink(destination: MealLogView()) {
                     VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: isLandscape ? 2 : 6) {
-                            Image(systemName: "drop.fill")
-                                .font(isLandscape ? .system(size: 9) : .body)
-                                .foregroundColor(.red)
-                            Text("Glucose")
+                        HStack(spacing: isLandscape ? 4 : 6) {
+                            Image(systemName: "fork.knife")
+                                .font(isLandscape ? .caption : .body)
+                                .foregroundColor(.orange)
+                            Text("Meals History")
                                 .font(isLandscape ? .caption2 : .caption)
                                 .fontWeight(.semibold)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.75)
                             Spacer()
                         }
                     }
@@ -726,61 +744,53 @@ private struct StatCard: View {
 }
 
 // MARK: - MealQuickActionsView Component
-/// Quick action cards for logging and planning meals
+/// Quick action cards for adding meals and planning feasts
 private struct MealQuickActionsView: View {
-    let lastMeal: MealEntity?
-    let nextPlannedMeal: MealEntity?
-    let onLogLastMeal: () -> Void
-    let onPlanMeal: () -> Void
+    let onAddMeal: () -> Void
+    let onPlanFeast: () -> Void
 
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     private var isLandscape: Bool { verticalSizeClass == .compact }
 
-    private var lastMealCarbs: Double {
-        guard let meal = lastMeal,
-              let macros = meal.macronutrients as? Set<MacronutrientEntity> else { return 0 }
-        return macros.filter { $0.type == "carbohydrates" || $0.type == "carbs" }.reduce(0) { $0 + $1.amount }
-    }
-    
-    private var plannedMealCarbs: Double {
-        guard let meal = nextPlannedMeal,
-              let macros = meal.macronutrients as? Set<MacronutrientEntity> else { return 0 }
-        return macros.filter { $0.type == "carbohydrates" || $0.type == "carbs" }.reduce(0) { $0 + $1.amount }
-    }
-    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Actions")
                 .font(.headline)
                 .padding(.horizontal)
-            
+
             HStack(spacing: isLandscape ? 6 : 12) {
-                // Last Meal Card
-                Button(action: onLogLastMeal) {
+                // Add Meal Card — simple quick-action, no meal history
+                Button(action: onAddMeal) {
                     VStack(alignment: .leading, spacing: 4) {
                         if isLandscape {
-                            // Landscape: Icon + "Last" line 1, "Meal" line 2
                             HStack(spacing: 4) {
-                                Image(systemName: "clock.arrow.circlepath")
+                                Image(systemName: "plus.circle.fill")
                                     .font(.caption)
                                     .foregroundColor(.orange)
-                                Text("Last")
+                                Text("Add")
                                     .font(.caption2)
                                     .fontWeight(.semibold)
                                     .foregroundColor(.primary)
                                 Spacer()
                             }
-                            Text("Meal")
+                            HStack(spacing: 4) {
+                                Text("Meal")
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.primary)
+                                Text("What")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            Text("u just ate")
                                 .font(.caption2)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.primary)
+                                .foregroundColor(.secondary)
                         } else {
-                            // Portrait: Icon + "Last Meal" on one line
                             HStack(spacing: 6) {
-                                Image(systemName: "clock.arrow.circlepath")
+                                Image(systemName: "plus.circle.fill")
                                     .font(.body)
                                     .foregroundColor(.orange)
-                                Text("Last Meal")
+                                Text("Add Meal")
                                     .font(.caption)
                                     .fontWeight(.semibold)
                                     .foregroundColor(.primary)
@@ -788,20 +798,9 @@ private struct MealQuickActionsView: View {
                                     .minimumScaleFactor(0.8)
                                 Spacer()
                             }
-
-                            if let meal = lastMeal {
-                                Text(meal.name ?? "Recent meal")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                                    .lineLimit(1)
-                                Text("\(Int(lastMealCarbs)) g carbs")
-                                    .font(.caption2)
-                                    .foregroundColor(.orange)
-                            } else {
-                                Text("What did you eat?")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                            }
+                            Text("Log what you just ate")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -813,13 +812,12 @@ private struct MealQuickActionsView: View {
                 }
                 .buttonStyle(.plain)
 
-                // What if? Card
-                Button(action: onPlanMeal) {
+                // What if? Card — navigates to the feast planning tab
+                Button(action: onPlanFeast) {
                     VStack(alignment: .leading, spacing: 4) {
                         if isLandscape {
-                            // Landscape: 3 lines — "Icon What", "if? (Plan", "Impact)"
                             HStack(spacing: 4) {
-                                Image(systemName: "calendar.badge.plus")
+                                Image(systemName: "party.popper.fill")
                                     .font(.caption)
                                     .foregroundColor(.blue)
                                 Text("What")
@@ -828,24 +826,13 @@ private struct MealQuickActionsView: View {
                                     .foregroundColor(.primary)
                                 Spacer()
                             }
-                            HStack(spacing: 0) {
-                                Text("if? ")
-                                    .font(.caption2)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.primary)
-                                Text("(Plan")
-                                    .font(.caption2)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.secondary)
-                            }
-                            Text("Impact)")
+                            Text("if?")
                                 .font(.caption2)
                                 .fontWeight(.semibold)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.primary)
                         } else {
-                            // Portrait: Icon + "What if?" line 1, "(Plan Impact)" line 2
                             HStack(spacing: 6) {
-                                Image(systemName: "calendar.badge.plus")
+                                Image(systemName: "party.popper.fill")
                                     .font(.body)
                                     .foregroundColor(.blue)
                                 Text("What if?")
@@ -856,21 +843,11 @@ private struct MealQuickActionsView: View {
                                     .minimumScaleFactor(0.8)
                                 Spacer()
                             }
-                            Text("(Plan Impact)")
+                            Text("Plan Feast Treat")
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
-
-                            if let meal = nextPlannedMeal, let plannedDate = meal.plannedDateTime {
-                                Text(meal.name ?? "Planned meal")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                                    .lineLimit(1)
-                                Text(plannedDate, style: .relative)
-                                    .font(.caption2)
-                                    .foregroundColor(.blue)
-                            }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -900,6 +877,25 @@ private struct DawnEffectNoticeBanner: View {
             Text("Dawn effect adjustment applied — morning readings weighted at 60%")
                 .font(.caption2)
                 .foregroundColor(.orange)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 4)
+    }
+}
+
+// MARK: - Stale Data Warning Banner
+/// Warning banner displayed when the most recent glucose reading is older than 30 minutes.
+/// Alerts the user to check their CGM Bluetooth connection and bridge app.
+private struct StaleDataWarningBanner: View {
+    var body: some View {
+        HStack(alignment: .top, spacing: 6) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.caption2)
+                .foregroundColor(.red)
+            Text("No glucose data received in the last 30 minutes. Check your CGM Bluetooth connection and bridge app (e.g. Zukka).")
+                .font(.caption2)
+                .foregroundColor(.red)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal)

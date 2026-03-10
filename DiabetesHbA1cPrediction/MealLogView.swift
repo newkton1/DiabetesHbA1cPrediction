@@ -1,11 +1,7 @@
 import SwiftUI
 import CoreData
 
-/// Segment options for meal log view
-enum MealLogSegment: String, CaseIterable {
-    case logged = "Logged"
-    case planned = "Planned"
-}
+// MealLogView — displays chronological meal history
 
 /// MealLogView displays a chronological list of logged meals grouped by date.
 /// Users can add new meals, delete existing ones, and view nutritional summaries.
@@ -28,41 +24,23 @@ struct MealLogView: View {
         ]
     ) private var allMeals: FetchedResults<MealEntity>
 
-    @State private var showAddMealSheet = false
-    @State private var showLastMealSheet = false
-    @State private var showPlannedMealSheet = false
-    @State private var selectedFood: FoodItem?
-    @State private var selectedSegment: MealLogSegment = .logged
     @State private var expandedMealId: UUID? = nil
 
-    // MARK: - Filtered Meals
-    
-    /// Meals filtered by segment (logged vs planned)
-    private var filteredMeals: [MealEntity] {
-        switch selectedSegment {
-        case .logged:
-            return allMeals.filter { $0.mealType != "plannedMeal" }
-        case .planned:
-            return allMeals.filter { $0.mealType == "plannedMeal" }
-        }
+    // MARK: - Meals (logged only, excludes planned/feast)
+
+    /// All logged meals (not planned meals — feasts appear after they are saved)
+    private var loggedMeals: [MealEntity] {
+        allMeals.filter { $0.mealType != "plannedMeal" }
     }
-    
-    /// Groups filtered meals by date
-    private var filteredMealsByDate: [Date: [MealEntity]] {
+
+    /// Groups logged meals by date
+    private var mealsByDate: [Date: [MealEntity]] {
         var grouped: [Date: [MealEntity]] = [:]
         let calendar = Calendar.current
 
-        for meal in filteredMeals {
-            let dateToUse: Date
-            if selectedSegment == .planned, let plannedDate = meal.plannedDateTime {
-                dateToUse = plannedDate
-            } else if let timestamp = meal.timestamp {
-                dateToUse = timestamp
-            } else {
-                continue
-            }
-            
-            let dateComponent = calendar.startOfDay(for: dateToUse)
+        for meal in loggedMeals {
+            guard let timestamp = meal.timestamp else { continue }
+            let dateComponent = calendar.startOfDay(for: timestamp)
 
             if grouped[dateComponent] != nil {
                 grouped[dateComponent]?.append(meal)
@@ -88,12 +66,7 @@ struct MealLogView: View {
     // MARK: - Portrait Layout (List-based)
     private var portraitBody: some View {
         List {
-            // Segmented control as first row
-            Section {
-                segmentPicker
-            }
-
-            if filteredMeals.isEmpty {
+            if loggedMeals.isEmpty {
                 Section {
                     emptyStateView
                 }
@@ -106,70 +79,35 @@ struct MealLogView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Text("Meal Builder")
+                Text("Meals")
                     .font(.system(size: 22, weight: .bold))
                     .fixedSize(horizontal: true, vertical: false)
             }
-            toolbarContent
-        }
-        .sheet(isPresented: $showAddMealSheet) {
-            AddMealSheetView(selectedFood: $selectedFood)
-                .environment(\.managedObjectContext, viewContext)
-        }
-        .sheet(isPresented: $showLastMealSheet) {
-            LastMealView()
-                .environment(\.managedObjectContext, viewContext)
-        }
-        .sheet(isPresented: $showPlannedMealSheet) {
-            PlannedMealView(selectedTab: .constant(.meals))
-                .environment(\.managedObjectContext, viewContext)
         }
     }
 
     // MARK: - Landscape Layout (ScrollView-based for proper scrolling)
     private var landscapeBody: some View {
         VStack(spacing: 0) {
-            // Header: title on left, + button on right
+            // Header
             HStack {
-                Text("Meal Builder")
+                Text("Meals")
                     .font(.system(size: 22, weight: .bold))
 
                 Spacer()
-
-                Menu {
-                    Button(action: { showLastMealSheet = true }) {
-                        Label("Log Last Meal", systemImage: "clock.arrow.circlepath")
-                    }
-                    Button(action: { showPlannedMealSheet = true }) {
-                        Label("Plan Meal/Feast", systemImage: "calendar.badge.plus")
-                    }
-                    Divider()
-                    Button(action: { showAddMealSheet = true }) {
-                        Label("Quick Add (Manual)", systemImage: "square.and.pencil")
-                    }
-                } label: {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.blue)
-                }
             }
             .padding(.horizontal)
             .padding(.top, 6)
             .padding(.bottom, 2)
 
-            // Segmented control pinned at top
-            segmentPicker
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-
             // Scrollable meal content
             ScrollView {
-                if filteredMeals.isEmpty {
+                if loggedMeals.isEmpty {
                     emptyStateView
                         .padding(.vertical, 20)
                 } else {
                     LazyVStack(spacing: 0) {
-                        ForEach(filteredMealsByDate.keys.sorted(by: selectedSegment == .planned ? (<) : (>)), id: \.self) { date in
+                        ForEach(mealsByDate.keys.sorted(by: >), id: \.self) { date in
                             // Section header
                             HStack {
                                 Text(sectionHeader(for: date))
@@ -184,7 +122,7 @@ struct MealLogView: View {
                             .padding(.bottom, 4)
 
                             // Meal rows
-                            ForEach(filteredMealsByDate[date] ?? []) { meal in
+                            ForEach(mealsByDate[date] ?? []) { meal in
                                 MealRowView(
                                     meal: meal,
                                     isExpanded: expandedMealId == meal.id,
@@ -219,58 +157,21 @@ struct MealLogView: View {
             }
         }
         .navigationBarHidden(true)
-        .sheet(isPresented: $showAddMealSheet) {
-            AddMealSheetView(selectedFood: $selectedFood)
-                .environment(\.managedObjectContext, viewContext)
-        }
-        .sheet(isPresented: $showLastMealSheet) {
-            LastMealView()
-                .environment(\.managedObjectContext, viewContext)
-        }
-        .sheet(isPresented: $showPlannedMealSheet) {
-            PlannedMealView(selectedTab: .constant(.meals))
-                .environment(\.managedObjectContext, viewContext)
-        }
     }
 
     // MARK: - Shared Components
 
-    private var segmentPicker: some View {
-        Picker("Meal Type", selection: $selectedSegment) {
-            ForEach(MealLogSegment.allCases, id: \.self) { segment in
-                Text(segment.rawValue).tag(segment)
-            }
-        }
-        .pickerStyle(.segmented)
-    }
-
     private var emptyStateView: some View {
         VStack(spacing: 12) {
-            Image(systemName: selectedSegment == .logged ? "fork.knife" : "calendar")
+            Image(systemName: "fork.knife")
                 .font(.system(size: 40))
                 .foregroundColor(.gray)
-            Text(selectedSegment == .logged ? "No Meals Logged" : "No Planned Meals")
+            Text("No Meals Logged")
                 .font(.headline)
-            Text(selectedSegment == .logged ? "Log your meals to track nutrition" : "Plan future meals to see their impact")
+            Text("Use the Add Meal card on the Dashboard to log meals")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-
-            Button(action: {
-                if selectedSegment == .logged {
-                    showLastMealSheet = true
-                } else {
-                    showPlannedMealSheet = true
-                }
-            }) {
-                HStack(spacing: 6) {
-                    Image(systemName: "plus.circle.fill")
-                    Text(selectedSegment == .logged ? "Build Meal" : "Plan Meal/Feast")
-                }
-                .font(.headline)
-            }
-            .buttonStyle(.borderedProminent)
-            .padding(.top, 4)
         }
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(.vertical, 20)
@@ -278,9 +179,9 @@ struct MealLogView: View {
 
     @ViewBuilder
     private var mealSections: some View {
-        ForEach(filteredMealsByDate.keys.sorted(by: selectedSegment == .planned ? (<) : (>)), id: \.self) { date in
+        ForEach(mealsByDate.keys.sorted(by: >), id: \.self) { date in
             Section(header: Text(sectionHeader(for: date))) {
-                ForEach(filteredMealsByDate[date] ?? []) { meal in
+                ForEach(mealsByDate[date] ?? []) { meal in
                     MealRowView(
                         meal: meal,
                         isExpanded: expandedMealId == meal.id,
@@ -303,28 +204,6 @@ struct MealLogView: View {
         }
     }
 
-    @ToolbarContentBuilder
-    private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .primaryAction) {
-            Menu {
-                Button(action: { showLastMealSheet = true }) {
-                    Label("Log Last Meal", systemImage: "clock.arrow.circlepath")
-                }
-                Button(action: { showPlannedMealSheet = true }) {
-                    Label("Plan Meal/Feast", systemImage: "calendar.badge.plus")
-                }
-                Divider()
-                Button(action: { showAddMealSheet = true }) {
-                    Label("Quick Add (Manual)", systemImage: "square.and.pencil")
-                }
-            } label: {
-                Image(systemName: "plus.circle.fill")
-                    .font(.title2)
-                    .foregroundColor(.blue)
-            }
-        }
-    }
-    
     /// Generate section header text
     private func sectionHeader(for date: Date) -> String {
         let calendar = Calendar.current
@@ -340,25 +219,6 @@ struct MealLogView: View {
     }
 
     // MARK: - Computed Properties
-
-    /// Groups meals by calendar date (ignoring time component)
-    private var mealsByDate: [Date: [MealEntity]] {
-        var grouped: [Date: [MealEntity]] = [:]
-        let calendar = Calendar.current
-
-        for meal in allMeals {
-            guard let timestamp = meal.timestamp else { continue }
-            let dateComponent = calendar.startOfDay(for: timestamp)
-
-            if grouped[dateComponent] != nil {
-                grouped[dateComponent]?.append(meal)
-            } else {
-                grouped[dateComponent] = [meal]
-            }
-        }
-
-        return grouped
-    }
 
     /// Date formatter for section headers (e.g., "Today", "December 15, 2024")
     private var dateFormatter: DateFormatter {
@@ -476,7 +336,7 @@ struct MealLogView: View {
 
     /// Deletes meals at specified indices for a given date
     private func deleteMeals(at offsets: IndexSet, for date: Date) {
-        guard let mealsForDate = filteredMealsByDate[date] else { return }
+        guard let mealsForDate = mealsByDate[date] else { return }
 
         for index in offsets {
             let mealToDelete = mealsForDate[index]

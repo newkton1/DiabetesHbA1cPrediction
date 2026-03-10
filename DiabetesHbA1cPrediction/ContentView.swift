@@ -10,7 +10,7 @@ struct ContentView: View {
         case meals     = "What if?"
         case glucose   = "Glucose"
         case exercise  = "Exercise"
-        case profile   = "Profile"
+        case profile   = "User"
 
         var iconName: String {
             switch self {
