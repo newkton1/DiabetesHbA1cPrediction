@@ -11260,12 +11260,36 @@
     "category": "European Foods",
     "servingSize": 1.0,
     "servingUnit": "serving",
-    "calories": 220.0,
+    "calories": 250.0,
+    "carbohydrates": 2.4,
+    "protein": 16.0,
+    "fat": 19.0,
+    "fiber": 0.4,
+    "glycemicIndex": 0
+  },
+  {
+    "name": "Pollo al Ajillo",
+    "category": "European Foods",
+    "servingSize": 1.0,
+    "servingUnit": "serving",
+    "calories": 430.0,
+    "carbohydrates": 4.0,
+    "protein": 32.0,
+    "fat": 30.0,
+    "fiber": 0.5,
+    "glycemicIndex": 0
+  },
+  {
+    "name": "Champiñones al Ajillo",
+    "category": "European Foods",
+    "servingSize": 1.0,
+    "servingUnit": "serving",
+    "calories": 175.0,
     "carbohydrates": 6.0,
-    "protein": 26.0,
-    "fat": 11.0,
-    "fiber": 0.0,
-    "glycemicIndex": 30
+    "protein": 4.0,
+    "fat": 15.0,
+    "fiber": 1.0,
+    "glycemicIndex": 5
   },
   {
     "name": "Pimientos de Padrón",

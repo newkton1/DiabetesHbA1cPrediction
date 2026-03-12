@@ -783,10 +783,10 @@ class HealthKitManager: ObservableObject {
     /// - Parameters:
     ///   - context: NSManagedObjectContext for CoreData operations
     ///   - days: Number of days back to sync (default: 30)
-    /// - Returns: Count of newly imported daily activity records
-    func syncDailyActivityToCorData(context: NSManagedObjectContext, days: Int = 30) async -> Int {
+    /// - Returns: Tuple of (new entries created, existing entries updated)
+    func syncDailyActivityToCorData(context: NSManagedObjectContext, days: Int = 30) async -> (new: Int, updated: Int) {
         guard isAuthorized else {
-            return 0
+            return (0, 0)
         }
 
         let calendar = Calendar.current
@@ -838,16 +838,18 @@ class HealthKitManager: ObservableObject {
             ))
         }
 
-        guard !dailyDataList.isEmpty else { return 0 }
+        guard !dailyDataList.isEmpty else { return (0, 0) }
 
         return await Self.importDailyActivityToCoreData(dailyDataList: dailyDataList, context: context)
     }
 
     /// Imports daily activity data to CoreData (nonisolated to work with context.perform)
-    private static nonisolated func importDailyActivityToCoreData(dailyDataList: [DailyActivityData], context: NSManagedObjectContext) async -> Int {
+    /// Returns a tuple: (newCount, updatedCount)
+    private static nonisolated func importDailyActivityToCoreData(dailyDataList: [DailyActivityData], context: NSManagedObjectContext) async -> (new: Int, updated: Int) {
         await withCheckedContinuation { continuation in
             context.perform {
-                var count = 0
+                var newCount = 0
+                var updatedCount = 0
                 let calendar = Calendar.current
 
                 for activityData in dailyDataList {
@@ -871,6 +873,7 @@ class HealthKitManager: ObservableObject {
                             if let entity = existing.first {
                                 entity.duration = activityData.estimatedMinutes
                                 entity.caloriesBurned = activityData.calories
+                                entity.distance = activityData.distanceKm
                                 entity.notes = String(format: "DailyActivity | Steps: %.0f | Distance: %.2f km", activityData.steps, activityData.distanceKm)
                                 // Intensity based on steps: light (<5000), moderate (5000-10000), vigorous (>10000)
                                 if activityData.steps >= 10000 {
@@ -880,6 +883,7 @@ class HealthKitManager: ObservableObject {
                                 } else {
                                     entity.intensity = 3
                                 }
+                                updatedCount += 1
                             }
                             continue
                         }
@@ -898,6 +902,7 @@ class HealthKitManager: ObservableObject {
                     entity.type = "Walking"
                     entity.duration = activityData.estimatedMinutes
                     entity.caloriesBurned = activityData.calories
+                    entity.distance = activityData.distanceKm
                     entity.notes = String(format: "DailyActivity | Steps: %.0f | Distance: %.2f km", activityData.steps, activityData.distanceKm)
 
                     // Intensity based on step count
@@ -909,7 +914,7 @@ class HealthKitManager: ObservableObject {
                         entity.intensity = 3
                     }
 
-                    count += 1
+                    newCount += 1
                 }
 
                 // Save to CoreData
@@ -921,7 +926,7 @@ class HealthKitManager: ObservableObject {
                     #endif
                 }
 
-                continuation.resume(returning: count)
+                continuation.resume(returning: (new: newCount, updated: updatedCount))
             }
         }
     }

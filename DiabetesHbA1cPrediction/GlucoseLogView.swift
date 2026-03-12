@@ -108,7 +108,7 @@ struct GlucoseLogView: View {
         VStack(spacing: 0) {
             // Fixed header: title on left, + button on right
             HStack {
-                Text("Instant Blood Glucose")
+                Text("Glucose Readings")
                     .font(.system(size: 22, weight: .bold))
 
                 Spacer()
@@ -120,7 +120,7 @@ struct GlucoseLogView: View {
                 }
             }
             .padding(.horizontal)
-            .padding(.top, 6)
+            .padding(.top, 14)
             .padding(.bottom, 2)
 
             // Side-by-side: chart on left, readings list on right
@@ -221,108 +221,146 @@ struct GlucoseLogView: View {
                     // Determine the predominant unit type for scale
                     let chartUnitType = predominantUnitType(for: Array(last30Days))
                     let yAxisRange = yAxisRange(for: chartUnitType)
+                    let sortedLine = last30Days.sorted { ($0.timestamp ?? Date()) < ($1.timestamp ?? Date()) }
 
-                    Chart {
-                        // Horizontal reference lines based on unit type
-                        if chartUnitType == "NGSP %" {
-                            RuleMark(y: .value("Target", 6.5))
-                                .foregroundStyle(Color.green.opacity(0.5))
-                                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+                    // Calculate chart width: minimum screen width, expand when dense
+                    // Show ~50 points per screen width; wider = more data = wider chart
+                    let screenWidth = UIScreen.main.bounds.width - 64
+                    let pointsPerScreen: CGFloat = 50
+                    let calculatedWidth = max(screenWidth, CGFloat(sortedLine.count) / pointsPerScreen * screenWidth)
+                    let needsScroll = calculatedWidth > screenWidth
 
-                            RuleMark(y: .value("Warning", 7.0))
-                                .foregroundStyle(Color.red.opacity(0.5))
-                                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
-                        } else if chartUnitType == "mmol/mol" {
-                            RuleMark(y: .value("Target", 47))
-                                .foregroundStyle(Color.green.opacity(0.5))
-                                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+                    let yStride: Double = {
+                        if chartUnitType == "NGSP %" { return 1 }
+                        if chartUnitType == "mmol/mol" { return 20 }
+                        if chartUnitType == "mmol/L" { return 1 }
+                        return 20  // mg/dL
+                    }()
+                    let chartHeight: CGFloat = isPortrait ? 180 : 160
+                    let plotHeight: CGFloat = isPortrait ? 140 : 120
 
-                            RuleMark(y: .value("Warning", 53))
-                                .foregroundStyle(Color.red.opacity(0.5))
-                                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
-                        } else if chartUnitType == "mmol/L" {
-                            // mmol/L reference lines
-                            RuleMark(y: .value("Hypo", 3.9))
-                                .foregroundStyle(Color.red.opacity(0.5))
-                                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
-
-                            RuleMark(y: .value("Normal", 5.6))
-                                .foregroundStyle(Color.green.opacity(0.5))
-                                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
-
-                            RuleMark(y: .value("Warning", 7.8))
-                                .foregroundStyle(Color.orange.opacity(0.5))
-                                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
-                        } else {
-                            // mg/dL reference lines
-                            RuleMark(y: .value("Target Min", 70))
-                                .foregroundStyle(Color.green.opacity(0.5))
-                                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
-
-                            RuleMark(y: .value("Safe Max", 100))
-                                .foregroundStyle(Color.yellow.opacity(0.5))
-                                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
-
-                            RuleMark(y: .value("Warning", 126))
-                                .foregroundStyle(Color.orange.opacity(0.5))
-                                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
-
-                            RuleMark(y: .value("Critical", 180))
-                                .foregroundStyle(Color.red.opacity(0.5))
-                                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+                    VStack(alignment: .leading, spacing: 4) {
+                        // Scroll hint
+                        if needsScroll {
+                            Text("Swipe to scroll timeline")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 16)
                         }
 
-                        // Connecting line — single series so SwiftUI Charts joins all points
-                        let sortedLine = last30Days.sorted { ($0.timestamp ?? Date()) < ($1.timestamp ?? Date()) }
-                        ForEach(Array(sortedLine.enumerated()), id: \.element.id) { _, reading in
-                            if let value = reading.value as Double?, let timestamp = reading.timestamp {
-                                LineMark(
-                                    x: .value("Time", timestamp),
-                                    y: .value("Glucose", value)
-                                )
-                                .foregroundStyle(Color.blue.opacity(0.45))
-                                .lineStyle(StrokeStyle(lineWidth: 1.5))
+                        HStack(spacing: 0) {
+                            // Scrollable chart area
+                            ScrollView(.horizontal, showsIndicators: true) {
+                                Chart {
+                                    // Horizontal reference lines based on unit type
+                                    if chartUnitType == "NGSP %" {
+                                        RuleMark(y: .value("Target", 6.5))
+                                            .foregroundStyle(Color.green.opacity(0.5))
+                                            .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+
+                                        RuleMark(y: .value("Warning", 7.0))
+                                            .foregroundStyle(Color.red.opacity(0.5))
+                                            .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+                                    } else if chartUnitType == "mmol/mol" {
+                                        RuleMark(y: .value("Target", 47))
+                                            .foregroundStyle(Color.green.opacity(0.5))
+                                            .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+
+                                        RuleMark(y: .value("Warning", 53))
+                                            .foregroundStyle(Color.red.opacity(0.5))
+                                            .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+                                    } else if chartUnitType == "mmol/L" {
+                                        RuleMark(y: .value("Hypo", 3.9))
+                                            .foregroundStyle(Color.red.opacity(0.5))
+                                            .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+
+                                        RuleMark(y: .value("Normal", 5.6))
+                                            .foregroundStyle(Color.green.opacity(0.5))
+                                            .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+
+                                        RuleMark(y: .value("Warning", 7.8))
+                                            .foregroundStyle(Color.orange.opacity(0.5))
+                                            .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+                                    } else {
+                                        RuleMark(y: .value("Target Min", 70))
+                                            .foregroundStyle(Color.green.opacity(0.5))
+                                            .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+
+                                        RuleMark(y: .value("Safe Max", 100))
+                                            .foregroundStyle(Color.yellow.opacity(0.5))
+                                            .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+
+                                        RuleMark(y: .value("Warning", 126))
+                                            .foregroundStyle(Color.orange.opacity(0.5))
+                                            .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+
+                                        RuleMark(y: .value("Critical", 180))
+                                            .foregroundStyle(Color.red.opacity(0.5))
+                                            .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+                                    }
+
+                                    // Connecting line
+                                    ForEach(Array(sortedLine.enumerated()), id: \.element.id) { _, reading in
+                                        if let value = reading.value as Double?, let timestamp = reading.timestamp {
+                                            LineMark(
+                                                x: .value("Time", timestamp),
+                                                y: .value("Glucose", value)
+                                            )
+                                            .foregroundStyle(Color.blue.opacity(0.45))
+                                            .lineStyle(StrokeStyle(lineWidth: 1.5))
+                                        }
+                                    }
+
+                                    // Colour-coded data points
+                                    ForEach(Array(sortedLine.enumerated()), id: \.element.id) { _, reading in
+                                        if let value = reading.value as Double?, let timestamp = reading.timestamp {
+                                            let color = glucoseColor(for: value, unit: reading.unit)
+                                            PointMark(
+                                                x: .value("Time", timestamp),
+                                                y: .value("Glucose", value)
+                                            )
+                                            .foregroundStyle(color)
+                                            .symbolSize(50)
+                                        }
+                                    }
+                                }
+                                .chartYScale(domain: yAxisRange.min...yAxisRange.max)
+                                .chartYAxis(.hidden)
+                                .chartXAxis {
+                                    AxisMarks(position: .bottom, values: .automatic(desiredCount: max(4, sortedLine.count / 20))) { _ in
+                                        AxisGridLine()
+                                        AxisValueLabel(format: .dateTime.month(.twoDigits).day(.twoDigits))
+                                            .font(.system(size: isPortrait ? 10 : 9))
+                                    }
+                                }
+                                .chartPlotStyle { plotArea in
+                                    plotArea
+                                        .frame(height: plotHeight)
+                                }
+                                .frame(width: calculatedWidth, height: chartHeight)
                             }
-                        }
+                            .defaultScrollAnchor(.trailing)
 
-                        // Colour-coded data points on top of the line
-                        ForEach(Array(sortedLine.enumerated()), id: \.element.id) { _, reading in
-                            if let value = reading.value as Double?, let timestamp = reading.timestamp {
-                                let color = glucoseColor(for: value, unit: reading.unit)
-                                PointMark(
-                                    x: .value("Time", timestamp),
-                                    y: .value("Glucose", value)
-                                )
-                                .foregroundStyle(color)
-                                .symbolSize(50)
+                            // Pinned Y-axis on the right — stays fixed while chart scrolls
+                            Chart {
+                                // Invisible point to establish the same Y domain
+                                RuleMark(y: .value("", yAxisRange.min))
+                                    .foregroundStyle(.clear)
                             }
+                            .chartYScale(domain: yAxisRange.min...yAxisRange.max)
+                            .chartYAxis {
+                                AxisMarks(position: .trailing, values: .stride(by: yStride)) { _ in
+                                    AxisValueLabel()
+                                }
+                            }
+                            .chartXAxis(.hidden)
+                            .chartPlotStyle { plotArea in
+                                plotArea
+                                    .frame(width: 0, height: plotHeight)
+                            }
+                            .frame(width: 40, height: chartHeight)
                         }
                     }
-                    .chartYScale(domain: yAxisRange.min...yAxisRange.max)
-                    .chartYAxis {
-                        let stride: Double = {
-                            if chartUnitType == "NGSP %" { return 1 }
-                            if chartUnitType == "mmol/mol" { return 20 }
-                            if chartUnitType == "mmol/L" { return 1 }
-                            return 20  // mg/dL
-                        }()
-                        AxisMarks(position: .leading, values: .stride(by: stride)) { value in
-                            AxisGridLine()
-                            AxisValueLabel()
-                        }
-                    }
-                    .chartXAxis {
-                        AxisMarks(position: .bottom, values: .automatic(desiredCount: isPortrait ? 4 : 5)) { _ in
-                            AxisGridLine()
-                            AxisValueLabel(format: .dateTime.month(.twoDigits).day(.twoDigits))
-                                .font(.system(size: isPortrait ? 10 : 9))
-                        }
-                    }
-                    .chartPlotStyle { plotArea in
-                        plotArea
-                            .frame(height: isPortrait ? 140 : 120)
-                    }
-                    .frame(height: isPortrait ? 180 : 160)
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
                     .padding(.bottom, isPortrait ? 8 : 16)
@@ -331,7 +369,7 @@ struct GlucoseLogView: View {
                             .fill(Color(.systemGray6))
                     )
                     .overlay(alignment: .leading) {
-                        // Vertical y-axis label — shown in both portrait and landscape
+                        // Vertical y-axis label — stays pinned on left
                         let yLabel = "Glucose Level \(chartUnitType)"
                         VStack(spacing: 0) {
                             ForEach(Array(yLabel.enumerated()), id: \.offset) { _, char in
@@ -532,7 +570,7 @@ struct GlucoseLogView: View {
         case "manual finger stick":
             return "drop.fill"
         case "healthkit":
-            return "heart.fill"
+            return "cross.circle.fill"
         case "hospital lab test":
             return "cross.case.fill"
         default:
@@ -730,13 +768,31 @@ struct AddGlucoseReadingSheet: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Segmented control
-                Picker("Entry Type", selection: $selectedEntryType) {
+                // Segmented control (custom to support red "Lab" text)
+                HStack(spacing: 0) {
                     ForEach(AddReadingEntryType.allCases, id: \.self) { type in
-                        Text(type.rawValue).tag(type)
+                        Button {
+                            selectedEntryType = type
+                        } label: {
+                            Group {
+                                if type == .hba1c {
+                                    Text("HbA1c ") + Text("Lab").foregroundColor(.red) + Text(" Result")
+                                } else {
+                                    Text(type.rawValue)
+                                }
+                            }
+                            .font(.footnote.weight(selectedEntryType == type ? .semibold : .regular))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(selectedEntryType == type ? Color(.systemBackground) : Color.clear)
+                            .cornerRadius(7)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
-                .pickerStyle(.segmented)
+                .padding(2)
+                .background(Color(.systemGray5))
+                .cornerRadius(9)
                 .padding(.horizontal)
                 .padding(.top, isPortrait ? 10 : 6)
                 .padding(.bottom, 4)

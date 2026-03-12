@@ -23,6 +23,9 @@ struct MealBuilderView: View {
     @State private var isReady = false          // defer heavy content until sheet animates in
     @State private var showResults = false       // after save, show impact results instead of form
     @State private var savedImpact: MealImpactResult?  // cached impact from save
+    @State private var showGlycemicWarning = false      // auto-dismissing high GL warning
+    @State private var showGlucoseElevatedWarning = false  // auto-dismissing warning for regular meals
+    @State private var glBeforeFoodSearch: Double = 0      // GL snapshot before opening food search
     let mealType: MealType
     @State private var predictionEngine = HbA1cPredictionEngine()
 
@@ -73,13 +76,57 @@ struct MealBuilderView: View {
                 }
                 // Keyboard dismiss handled by .scrollDismissesKeyboard and .onSubmit on the text field
             }
-            .sheet(isPresented: $showingFoodSearch) {
+            .sheet(isPresented: $showingFoodSearch, onDismiss: {
+                checkGlucoseElevation()
+            }) {
                 MultiSelectFoodSearchView(mealBuilder: mealBuilder)
             }
             .alert("Error", isPresented: $showingError) {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text(errorMessage)
+            }
+            .overlay {
+                if showGlycemicWarning {
+                    VStack(spacing: 10) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.title)
+                            .foregroundColor(.orange)
+                        Text("High Glycemic Load")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Text("The app will calculate a personalised exercise offset to help manage the glucose impact. Review the results carefully.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(24)
+                    .frame(maxWidth: 300)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(16)
+                    .shadow(radius: 10)
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                }
+                if showGlucoseElevatedWarning {
+                    VStack(spacing: 10) {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                            .font(.title)
+                            .foregroundColor(.red)
+                        Text("Elevated Blood Glucose")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Text("Adding this food significantly increases the meal's glucose impact. Consider balancing with lower-GI foods or reducing portions.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(24)
+                    .frame(maxWidth: 300)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(16)
+                    .shadow(radius: 10)
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                }
             }
             .onAppear {
                 // Defer heavy form rendering until after the sheet animation completes
@@ -231,7 +278,10 @@ struct MealBuilderView: View {
 
             // Add foods button
             Section {
-                Button(action: { showingFoodSearch = true }) {
+                Button(action: {
+                    glBeforeFoodSearch = mealBuilder.totalGlycemicLoad
+                    showingFoodSearch = true
+                }) {
                     HStack {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.blue)
@@ -365,7 +415,17 @@ struct MealBuilderView: View {
                 let impact = computeImpactForResults()
                 try mealBuilder.save(to: viewContext)
                 savedImpact = impact
-                withAnimation { showResults = true }
+
+                // Show auto-dismissing warning for high glycemic load feasts
+                if let impact = impact, impact.glycemicLoad >= 50 {
+                    withAnimation(.easeInOut(duration: 0.3)) { showGlycemicWarning = true }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                        withAnimation(.easeInOut(duration: 0.3)) { showGlycemicWarning = false }
+                        withAnimation { showResults = true }
+                    }
+                } else {
+                    withAnimation { showResults = true }
+                }
             } else {
                 // Regular meals: just save and dismiss — no impact results
                 try mealBuilder.save(to: viewContext)
@@ -374,6 +434,25 @@ struct MealBuilderView: View {
         } catch {
             errorMessage = error.localizedDescription
             showingError = true
+        }
+    }
+
+    /// Checks if adding foods during the search significantly elevated the meal's glycemic load.
+    /// Only triggers for non-feast meals when GL jumps by ≥15 and the newest item has GI ≥55.
+    private func checkGlucoseElevation() {
+        guard mealType != .feast else { return }  // Feast has its own warning on Save
+
+        let currentGL = mealBuilder.totalGlycemicLoad
+        let delta = currentGL - glBeforeFoodSearch
+
+        // Check if the most recently added food has a high GI
+        let hasHighGIItem = mealBuilder.selectedFoods.contains { $0.foodItem.glycemicIndex >= 55 }
+
+        if delta >= 15 && hasHighGIItem {
+            withAnimation(.easeInOut(duration: 0.3)) { showGlucoseElevatedWarning = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                withAnimation(.easeInOut(duration: 0.3)) { showGlucoseElevatedWarning = false }
+            }
         }
     }
 

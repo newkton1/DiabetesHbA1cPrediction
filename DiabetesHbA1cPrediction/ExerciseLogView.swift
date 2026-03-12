@@ -278,7 +278,7 @@ struct ExerciseLogView: View {
             let exerciseCount = await healthKitManager.syncExerciseToCorData(context: moc, days: 30)
 
             // Sync daily walking/step activity (ambient data from casual walking)
-            let activityCount = await healthKitManager.syncDailyActivityToCorData(context: moc, days: 30)
+            let activityResult = await healthKitManager.syncDailyActivityToCorData(context: moc, days: 30)
 
             // Also sync glucose data while we're at it
             let glucoseCount = await healthKitManager.syncGlucoseToCorData(context: moc, days: 30)
@@ -288,8 +288,11 @@ struct ExerciseLogView: View {
             if exerciseCount > 0 {
                 messageParts.append("\(exerciseCount) new workout\(exerciseCount == 1 ? "" : "s")")
             }
-            if activityCount > 0 {
-                messageParts.append("\(activityCount) day\(activityCount == 1 ? "" : "s") of walking activity")
+            if activityResult.new > 0 {
+                messageParts.append("\(activityResult.new) day\(activityResult.new == 1 ? "" : "s") of walking activity")
+            }
+            if activityResult.updated > 0 {
+                messageParts.append("\(activityResult.updated) day\(activityResult.updated == 1 ? "" : "s") of walking updated")
             }
             if glucoseCount > 0 {
                 messageParts.append("\(glucoseCount) new glucose reading\(glucoseCount == 1 ? "" : "s")")
@@ -298,7 +301,7 @@ struct ExerciseLogView: View {
             if messageParts.isEmpty {
                 syncMessage = "Sync completed. No new data found in HealthKit for the last 30 days."
             } else {
-                syncMessage = "Sync completed successfully! Imported \(messageParts.joined(separator: ", "))."
+                syncMessage = "Sync completed successfully! \(messageParts.joined(separator: ", "))."
             }
 
             showSyncAlert = true
