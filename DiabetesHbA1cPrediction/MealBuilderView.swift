@@ -419,7 +419,7 @@ struct MealBuilderView: View {
                 // Show auto-dismissing warning for high glycemic load feasts
                 if let impact = impact, impact.glycemicLoad >= 50 {
                     withAnimation(.easeInOut(duration: 0.3)) { showGlycemicWarning = true }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
                         withAnimation(.easeInOut(duration: 0.3)) { showGlycemicWarning = false }
                         withAnimation { showResults = true }
                     }
@@ -450,7 +450,7 @@ struct MealBuilderView: View {
 
         if delta >= 15 && hasHighGIItem {
             withAnimation(.easeInOut(duration: 0.3)) { showGlucoseElevatedWarning = true }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
                 withAnimation(.easeInOut(duration: 0.3)) { showGlucoseElevatedWarning = false }
             }
         }

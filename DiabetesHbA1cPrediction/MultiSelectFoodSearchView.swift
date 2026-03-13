@@ -6,16 +6,22 @@
 //
 
 import SwiftUI
+import CoreData
+
+/// Sentinel value for the "Recent" pseudo-category
+private let recentCategoryKey = "__recent__"
 
 /// View for searching and selecting multiple food items
 struct MultiSelectFoodSearchView: View {
     @ObservedObject var mealBuilder: MealBuilder
     @Environment(\.dismiss) private var dismiss
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.managedObjectContext) private var viewContext
 
     @State private var searchText = ""
     @State private var committedSearchText = ""
     @State private var selectedCategory: String? = nil
+    @State private var recentMeals: [RecentMeal] = []
 
     private var isPortrait: Bool {
         verticalSizeClass != .compact
@@ -70,8 +76,8 @@ struct MultiSelectFoodSearchView: View {
     private var filteredFoods: [FoodItem] {
         var foods = foodDatabase.allFoods
 
-        // Filter by category if selected
-        if let category = selectedCategory {
+        // Filter by category if selected (skip for the Recent pseudo-category)
+        if let category = selectedCategory, category != recentCategoryKey {
             foods = foods.filter { $0.category == category }
         }
 
@@ -148,11 +154,15 @@ struct MultiSelectFoodSearchView: View {
                     isSearchFieldFocused: _isSearchFieldFocused,
                     isPortrait: isPortrait,
                     categories: categories,
-                    groupedFoods: groupedFoods
+                    groupedFoods: groupedFoods,
+                    recentMeals: recentMeals
                 )
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                recentMeals = RecentMealsProvider.fetchRecentMeals(context: viewContext, limit: 30)
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -186,6 +196,12 @@ private struct FoodSearchContentDirect: View {
     let isPortrait: Bool
     let categories: [String]
     let groupedFoods: [(category: String, foods: [FoodItem])]
+    let recentMeals: [RecentMeal]
+
+    /// Whether the "Recent" pseudo-category is active
+    private var isRecentSelected: Bool {
+        selectedCategory == recentCategoryKey
+    }
 
     /// Show category chips when search text is empty and field is not focused
     private var showCategoryChips: Bool {
@@ -211,6 +227,15 @@ private struct FoodSearchContentDirect: View {
                             isSelected: selectedCategory == nil,
                             action: { selectedCategory = nil }
                         )
+
+                        // Recent meals chip — only show if there are saved meals
+                        if !recentMeals.isEmpty {
+                            CategoryFilterChip(
+                                title: "Recent",
+                                isSelected: isRecentSelected,
+                                action: { selectedCategory = recentCategoryKey }
+                            )
+                        }
 
                         ForEach(categories, id: \.self) { category in
                             CategoryFilterChip(
@@ -246,25 +271,156 @@ private struct FoodSearchContentDirect: View {
                 .background(Color.blue.opacity(0.1))
             }
 
-            // Food list
-            List {
-                ForEach(groupedFoods, id: \.category) { group in
-                    Section(header: Text(MultiSelectFoodSearchView.chipLabel(for: group.category))) {
-                        ForEach(group.foods) { food in
-                            FoodSelectionRow(
-                                food: food,
-                                quantity: mealBuilder.quantityFor(food),
-                                onTap: {
-                                    mealBuilder.addFood(food)
-                                }
-                            )
+            if isRecentSelected {
+                // Recent meals list
+                RecentMealsList(recentMeals: recentMeals, mealBuilder: mealBuilder)
+            } else {
+                // Food list
+                List {
+                    ForEach(groupedFoods, id: \.category) { group in
+                        Section(header: Text(MultiSelectFoodSearchView.chipLabel(for: group.category))) {
+                            ForEach(group.foods) { food in
+                                FoodSelectionRow(
+                                    food: food,
+                                    quantity: mealBuilder.quantityFor(food),
+                                    onTap: {
+                                        mealBuilder.addFood(food)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
+                .listStyle(.insetGrouped)
+                .scrollDismissesKeyboard(.interactively)
             }
-            .listStyle(.insetGrouped)
-            .scrollDismissesKeyboard(.interactively)
         }
+    }
+}
+
+/// Displays the list of recent meals as tappable cards
+private struct RecentMealsList: View {
+    let recentMeals: [RecentMeal]
+    @ObservedObject var mealBuilder: MealBuilder
+    @State private var loadedMealId: String? = nil
+
+    var body: some View {
+        List {
+            Section(header: Text("Tap a meal to add all its foods")) {
+                ForEach(recentMeals) { meal in
+                    RecentMealRow(
+                        meal: meal,
+                        isLoaded: loadedMealId == meal.id,
+                        onTap: {
+                            loadRecentMeal(meal)
+                        }
+                    )
+                }
+            }
+        }
+        .listStyle(.insetGrouped)
+    }
+
+    /// Load all foods from a recent meal into the MealBuilder
+    private func loadRecentMeal(_ meal: RecentMeal) {
+        let foodDatabase = FoodDatabase.shared
+        for food in meal.foods {
+            // Try to match against the live FoodDatabase for full FoodItem data
+            if let dbFood = foodDatabase.allFoods.first(where: {
+                $0.name == food.name && $0.category == food.category
+            }) {
+                // Add with the original quantity from the saved meal
+                for _ in 0..<max(1, Int(food.quantity)) {
+                    if !mealBuilder.isSelected(dbFood) {
+                        mealBuilder.addFood(dbFood)
+                        // Set quantity to match the original (addFood starts at 1)
+                        if food.quantity > 1,
+                           let idx = mealBuilder.selectedFoods.firstIndex(where: { $0.foodItem.id == dbFood.id }) {
+                            mealBuilder.updateQuantity(at: idx, quantity: food.quantity)
+                        }
+                        break  // Only add once, then set quantity
+                    } else {
+                        // Already selected — just set the quantity from the recent meal
+                        if let idx = mealBuilder.selectedFoods.firstIndex(where: { $0.foodItem.id == dbFood.id }) {
+                            mealBuilder.updateQuantity(at: idx, quantity: food.quantity)
+                        }
+                        break
+                    }
+                }
+            } else {
+                // Food not found in current database — build a FoodItem from stored data
+                let reconstructed = FoodItem(
+                    name: food.name, category: food.category,
+                    servingSize: food.servingSize, servingUnit: food.servingUnit,
+                    calories: food.calories, carbohydrates: food.carbs,
+                    protein: food.protein, fat: food.fat,
+                    fiber: food.fiber, glycemicIndex: food.glycemicIndex
+                )
+                mealBuilder.addFood(reconstructed)
+                if food.quantity > 1,
+                   let idx = mealBuilder.selectedFoods.firstIndex(where: { $0.foodItem.id == reconstructed.id }) {
+                    mealBuilder.updateQuantity(at: idx, quantity: food.quantity)
+                }
+            }
+        }
+        // Brief visual feedback
+        withAnimation { loadedMealId = meal.id }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            withAnimation { loadedMealId = nil }
+        }
+    }
+}
+
+/// Row displaying a recent meal with its food composition and frequency
+private struct RecentMealRow: View {
+    let meal: RecentMeal
+    let isLoaded: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    // Food names
+                    Text(meal.displayName)
+                        .font(.body)
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+
+                    HStack(spacing: 8) {
+                        Text("\(Int(meal.totalCarbs)) g carbs")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+
+                        Text("\(Int(meal.totalCalories)) cal")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+
+                        Text("\(meal.foods.count) item\(meal.foods.count == 1 ? "" : "s")")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    // Frequency badge
+                    Text("Eaten \(meal.frequency) time\(meal.frequency == 1 ? "" : "s")")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                }
+
+                Spacer()
+
+                if isLoaded {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                        .font(.title2)
+                } else {
+                    Image(systemName: "plus.circle")
+                        .foregroundColor(.blue)
+                        .font(.title2)
+                }
+            }
+        }
+        .buttonStyle(.plain)
     }
 }
 

@@ -302,9 +302,10 @@ struct GlucoseLogView: View {
                                     // Connecting line
                                     ForEach(Array(sortedLine.enumerated()), id: \.element.id) { _, reading in
                                         if let value = reading.value as Double?, let timestamp = reading.timestamp {
+                                            let displayVal = convertToLocaleUnit(value, from: reading.unit)
                                             LineMark(
                                                 x: .value("Time", timestamp),
-                                                y: .value("Glucose", value)
+                                                y: .value("Glucose", displayVal)
                                             )
                                             .foregroundStyle(Color.blue.opacity(0.45))
                                             .lineStyle(StrokeStyle(lineWidth: 1.5))
@@ -314,10 +315,11 @@ struct GlucoseLogView: View {
                                     // Colour-coded data points
                                     ForEach(Array(sortedLine.enumerated()), id: \.element.id) { _, reading in
                                         if let value = reading.value as Double?, let timestamp = reading.timestamp {
-                                            let color = glucoseColor(for: value, unit: reading.unit)
+                                            let displayVal = convertToLocaleUnit(value, from: reading.unit)
+                                            let color = glucoseColor(for: displayVal, unit: localeGlucoseUnit)
                                             PointMark(
                                                 x: .value("Time", timestamp),
-                                                y: .value("Glucose", value)
+                                                y: .value("Glucose", displayVal)
                                             )
                                             .foregroundStyle(color)
                                             .symbolSize(50)
@@ -408,12 +410,16 @@ struct GlucoseLogView: View {
             List {
                 ForEach(glucoseReadings, id: \.id) { reading in
                     HStack(spacing: 12) {
-                        // Glucose value with color coding
+                        // Glucose value with color coding (converted to locale unit)
+                        // HbA1c readings (NGSP %, mmol/mol) keep their original unit
+                        let isHbA1c = (reading.unit == "NGSP %" || reading.unit == "mmol/mol")
+                        let displayVal = isHbA1c ? reading.value : convertToLocaleUnit(reading.value, from: reading.unit)
+                        let displayUnit = isHbA1c ? (reading.unit ?? localeGlucoseUnit) : localeGlucoseUnit
                         VStack(alignment: .leading, spacing: 4) {
                             HStack(spacing: 8) {
-                                Text(formatGlucoseValue(reading.value, unit: reading.unit))
+                                Text(formatGlucoseValue(displayVal, unit: displayUnit))
                                     .font(isPortrait ? .headline : .subheadline)
-                                    .foregroundColor(glucoseColor(for: reading.value, unit: reading.unit))
+                                    .foregroundColor(glucoseColor(for: displayVal, unit: displayUnit))
                                     .lineLimit(1)
                                     .fixedSize(horizontal: true, vertical: false)
 
@@ -421,7 +427,7 @@ struct GlucoseLogView: View {
                                 if let trend = reading.trend {
                                     Image(systemName: trendIcon(for: trend))
                                         .font(.caption2)
-                                        .foregroundColor(glucoseColor(for: reading.value, unit: reading.unit))
+                                        .foregroundColor(glucoseColor(for: displayVal, unit: displayUnit))
                                 }
                             }
 
@@ -466,15 +472,46 @@ struct GlucoseLogView: View {
 
     // MARK: - Helper Methods
 
-    /// Determines the predominant unit type from a collection of readings
-    /// Used to set appropriate chart scale
-    func predominantUnitType(for readings: [GlucoseReadingEntity]) -> String {
-        var unitCounts: [String: Int] = [:]
-        for reading in readings {
-            let unit = reading.unit ?? "mg/dL"
-            unitCounts[unit, default: 0] += 1
+    /// Returns the locale-appropriate glucose display unit string
+    /// Used to unify all readings into a single unit for chart and list display
+    var localeGlucoseUnit: String {
+        GlucoseUnitType.localeDefault.unitLabel
+    }
+
+    /// Converts a stored glucose value to the locale-appropriate display unit
+    /// Handles cross-unit conversion between mg/dL and mmol/L on the fly
+    /// HbA1c units (NGSP %, mmol/mol) are returned as-is since they have separate handling
+    func convertToLocaleUnit(_ value: Double, from storedUnit: String?) -> Double {
+        let stored = storedUnit ?? "mg/dL"
+        let target = localeGlucoseUnit
+
+        // Same unit — no conversion needed
+        if stored == target { return value }
+
+        // Cross-convert between mg/dL and mmol/L
+        switch (stored, target) {
+        case ("mmol/L", "mg/dL"):
+            return value * 18.0182
+        case ("mg/dL", "mmol/L"):
+            return value / 18.0182
+        default:
+            // HbA1c units or unknown — return as-is
+            return value
         }
-        return unitCounts.max(by: { $0.value < $1.value })?.key ?? "mg/dL"
+    }
+
+    /// Determines the predominant unit type from a collection of readings
+    /// Now returns the locale-appropriate unit for glucose readings (mg/dL or mmol/L)
+    /// so that mixed-unit data is always displayed on a unified scale
+    func predominantUnitType(for readings: [GlucoseReadingEntity]) -> String {
+        // Check if readings contain HbA1c data
+        let hba1cUnits: Set<String> = ["NGSP %", "mmol/mol"]
+        let hasOnlyHbA1c = readings.allSatisfy { hba1cUnits.contains($0.unit ?? "") }
+        if hasOnlyHbA1c, let first = readings.first?.unit {
+            return first
+        }
+        // For glucose readings, always use the locale unit so mixed data unifies
+        return localeGlucoseUnit
     }
     
     /// Returns the appropriate Y-axis range based on unit type and locale

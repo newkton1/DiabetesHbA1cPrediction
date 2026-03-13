@@ -54,6 +54,7 @@ struct DashboardView: View {
     @State private var predictionErrorMessage: String? = nil
     @State private var showPredictionError = false
     @State private var showDawnEffectDetectedAlert = false
+    @State private var lastPredictionDate: Date? = nil
 
     // Timer-driven state for stale data detection
     @State private var currentTime = Date()
@@ -109,8 +110,9 @@ struct DashboardView: View {
                         HStack(alignment: .top, spacing: 8) {
                             // Left side: Glucose Trend Chart
                             VStack(spacing: 12) {
-                                if !glucoseReadings.isEmpty {
-                                    GlucoseTrendChartView(glucoseReadings: Array(glucoseReadings))
+                                if !hbA1cPredictions.isEmpty {
+                                    GlucoseTrendChartView(predictions: Array(hbA1cPredictions))
+                                        .id(hbA1cPredictions.count)
                                 } else {
                                     RoundedRectangle(cornerRadius: 12)
                                         .fill(Color(.systemGray6))
@@ -179,8 +181,9 @@ struct DashboardView: View {
                         MedicalDisclaimerBanner()
 
                         // MARK: - HbA1c Trend Chart
-                        if !glucoseReadings.isEmpty {
-                            GlucoseTrendChartView(glucoseReadings: Array(glucoseReadings))
+                        if !hbA1cPredictions.isEmpty {
+                            GlucoseTrendChartView(predictions: Array(hbA1cPredictions))
+                                .id(hbA1cPredictions.count)
                         }
                         
                         // MARK: - Quick Action Cards for Meals
@@ -313,8 +316,13 @@ struct DashboardView: View {
     /// This method calls the prediction engine and saves the result
     /// to Core Data as a new HbA1cPredictionEntity.
     private func runNewPrediction() {
+        // Cooldown guard — ignore repeated taps within 5 minutes
+        if let last = lastPredictionDate, Date().timeIntervalSince(last) < 300 {
+            return
+        }
+
         isCalculatingPrediction = true
-        
+
         // Run prediction on main thread (Core Data context is main queue bound)
         let result = predictionEngine.runPredictionAndSave(context: viewContext)
         
@@ -322,6 +330,7 @@ struct DashboardView: View {
         
         if let _ = result {
             // Success - the FetchRequest will automatically update the UI
+            lastPredictionDate = Date()
             showPredictionResult = true
 
             // Show dawn effect detection alert if pattern found but user hasn't explicitly enabled it in profile
@@ -453,52 +462,38 @@ private struct HbA1cCardView: View {
 }
 
 // MARK: - GlucoseTrendChartView Component
-/// A chart displaying the 30-day HbA1c trend using glucose reading dates.
-/// US/Japan: converts readings to NGSP % via eAG inverse (Nathan et al. 2008),
-///   scale 3–11, tick marks 3,5,7,9,11, legend "NGSP %"
-/// Other regions: converts readings to IFCC mmol/mol via eAG inverse then NGSP→IFCC,
-///   scale 20–60, tick marks 20,40,60, legend "IFCC mmol/mol"
+/// A chart displaying HbA1c predictions over a rolling 12-week (84-day) window.
+/// Plots one data point per week — the latest stored HbA1cPredictionEntity for each
+/// 7-day period — so the chart and the headline figure always agree.
+/// Data fills from the left as weeks accumulate; once all 12 weeks are populated
+/// the oldest week drops off the left edge as new weeks arrive.
+/// Y-axis values on the right; unit legend on the left (matching blood glucose chart style).
+/// US/Japan: displays NGSP %, scale 3–11
+/// Other regions: displays IFCC mmol/mol, scale 20–60
 private struct GlucoseTrendChartView: View {
-    let glucoseReadings: [GlucoseReadingEntity]
+    let predictions: [HbA1cPredictionEntity]
 
+    @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @ObservedObject private var profile = HbA1cUserProfile.shared
     private var isLandscape: Bool { verticalSizeClass == .compact }
 
-    /// True when device region is USA or Japan — display NGSP %
-    private var isNgspRegion: Bool {
-        let region = Locale.current.region?.identifier ?? ""
-        return region == "US" || region == "JP"
-    }
-
-    /// Convert any stored glucose unit to mg/dL
-    private func toMgdl(_ value: Double, unit: String?) -> Double {
-        switch unit ?? "mg/dL" {
-        case "mmol/L":  return value * 18.0182
-        case "NGSP %":  return (value * 28.7) - 46.7
-        case "mmol/mol": return (ifccToNGSP(value) * 28.7) - 46.7
-        default:        return value  // already mg/dL
-        }
-    }
-
-    /// Convert mg/dL to chart display value (NGSP % or IFCC mmol/mol)
-    private func toDisplayValue(_ mgdl: Double) -> Double {
-        let ngsp = (mgdl + 46.7) / 28.7
-        return isNgspRegion ? ngsp : ngspToIFCC(ngsp)
-    }
+    /// Use the user's effective unit preference for display
+    private var isNgsp: Bool { profile.effectiveUnit == .ngsp }
 
     /// Y-axis label string
-    private var yAxisLabel: String { isNgspRegion ? "NGSP %" : "IFCC mmol/mol" }
+    private var yAxisLabel: String { isNgsp ? "NGSP %" : "IFCC mmol/mol" }
 
     /// Y-axis domain
-    private var yAxisDomain: ClosedRange<Double> { isNgspRegion ? 3.0...11.0 : 20.0...60.0 }
+    private var yAxisDomain: ClosedRange<Double> { isNgsp ? 3.0...11.0 : 20.0...60.0 }
 
     /// Explicit y-axis tick values
     private var yAxisTicks: [Double] {
-        isNgspRegion ? [3.0, 5.0, 7.0, 9.0, 11.0] : [20.0, 40.0, 60.0]
+        isNgsp ? [3.0, 5.0, 7.0, 9.0, 11.0] : [20.0, 40.0, 60.0]
     }
 
     /// Color based on IFCC thresholds (unit-independent)
-    private func lineColor(forIfcc ifcc: Double) -> Color {
+    private func pointColor(forIfcc ifcc: Double) -> Color {
         switch ifcc {
         case ..<39:   return .green
         case 39..<48: return .yellow
@@ -507,78 +502,198 @@ private struct GlucoseTrendChartView: View {
         }
     }
 
-    /// Group readings by day, average within last 30 days, return as display values
-    private var dailyPoints: [(day: Date, display: Double, ifcc: Double)] {
+    /// Convert a stored IFCC value to the display unit
+    private func displayValue(forIfcc ifcc: Double) -> Double {
+        isNgsp ? ifccToNGSP(ifcc) : ifcc
+    }
+
+    /// The start of the 12-week rolling window (84 days back from today)
+    private var windowStart: Date {
+        Calendar.current.date(byAdding: .day, value: -84, to: Date()) ?? Date()
+    }
+
+    /// Generate every-other-week boundary dates for the x-axis (7 labels across 12 weeks)
+    private var weekBoundaries: [Date] {
         let calendar = Calendar.current
-        let cutoff = calendar.date(byAdding: .day, value: -30, to: Date()) ?? Date()
-        var groupedByDay: [Date: [Double]] = [:]
-        for reading in glucoseReadings {
-            guard let date = reading.timestamp, date >= cutoff else { continue }
-            let day = calendar.startOfDay(for: date)
-            let mgdl = toMgdl(reading.value, unit: reading.unit)
-            groupedByDay[day, default: []].append(mgdl)
+        let start = calendar.startOfDay(for: windowStart)
+        return stride(from: 0, through: 12, by: 2).compactMap { week in
+            calendar.date(byAdding: .day, value: week * 7, to: start)
         }
-        return groupedByDay.map { day, mgdlValues in
-            let avgMgdl = mgdlValues.reduce(0, +) / Double(mgdlValues.count)
-            let ngsp = (avgMgdl + 46.7) / 28.7
-            let ifcc = ngspToIFCC(ngsp)
-            return (day: day, display: toDisplayValue(avgMgdl), ifcc: ifcc)
-        }.sorted { $0.day < $1.day }
+    }
+
+    /// Chart data: one point per week — the latest prediction within each 7-day bucket.
+    /// Weeks with no prediction are simply absent, so the line connects only populated weeks.
+    private var weeklyPoints: [(weekStart: Date, display: Double, ifcc: Double)] {
+        let calendar = Calendar.current
+        let start = calendar.startOfDay(for: windowStart)
+
+        // Build weekly buckets (12 full weeks + current partial week at index 12)
+        var buckets: [Int: (latest: Date, ifcc: Double)] = [:]
+        for prediction in predictions {
+            guard let date = prediction.predictionDate, date >= start else { continue }
+            let daysSinceStart = calendar.dateComponents([.day], from: start, to: date).day ?? 0
+            let weekIndex = daysSinceStart / 7
+            guard weekIndex >= 0 && weekIndex <= 12 else { continue }
+
+            if let existing = buckets[weekIndex] {
+                if date > existing.latest {
+                    buckets[weekIndex] = (latest: date, ifcc: prediction.predictedValue)
+                }
+            } else {
+                buckets[weekIndex] = (latest: date, ifcc: prediction.predictedValue)
+            }
+        }
+
+        // Convert buckets to chart points, using the week's start date for even spacing
+        return buckets.compactMap { weekIndex, data in
+            guard let weekStart = calendar.date(byAdding: .day, value: weekIndex * 7, to: start) else {
+                return nil
+            }
+            return (weekStart: weekStart, display: displayValue(forIfcc: data.ifcc), ifcc: data.ifcc)
+        }.sorted { $0.weekStart < $1.weekStart }
+    }
+
+    /// Actual Lab HbA1c results recorded within the 12-week window.
+    /// Fetched from GlucoseReadingEntity where source == "Hospital Lab Test"
+    /// and unit is "NGSP %" or "mmol/mol". Plotted as blue diamonds on the chart.
+    private var labPoints: [(date: Date, display: Double)] {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "GlucoseReadingEntity")
+
+        let unitPredicate = NSPredicate(format: "unit IN %@", ["NGSP %", "mmol/mol"])
+        let sourcePredicate = NSPredicate(format: "source == %@", "Hospital Lab Test")
+        let datePredicate = NSPredicate(format: "timestamp >= %@", windowStart as NSDate)
+
+        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            unitPredicate, sourcePredicate, datePredicate
+        ])
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
+
+        do {
+            guard let results = try viewContext.fetch(fetchRequest) as? [NSManagedObject] else {
+                return []
+            }
+            return results.compactMap { object in
+                guard let value = object.value(forKey: "value") as? NSNumber,
+                      let unit = object.value(forKey: "unit") as? String,
+                      let timestamp = object.value(forKey: "timestamp") as? Date else {
+                    return nil
+                }
+                // Convert to IFCC mmol/mol first (canonical), then to display unit
+                let ifccValue: Double
+                if unit == "NGSP %" {
+                    ifccValue = ngspToIFCC(value.doubleValue)
+                } else {
+                    ifccValue = value.doubleValue
+                }
+                return (date: timestamp, display: displayValue(forIfcc: ifccValue))
+            }
+        } catch {
+            #if DEBUG
+            print("Error fetching Lab HbA1c readings for chart: \(error.localizedDescription)")
+            #endif
+            return []
+        }
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("30-Day HbA1c Trend")
-                .font(.headline)
-                .padding(.horizontal)
-                .padding(.bottom, isLandscape ? 8 : 0)
+            HStack {
+                Text("12-Week HbA1c Trend")
+                    .font(.headline)
 
-            Chart {
-                ForEach(dailyPoints, id: \.day) { item in
-                    LineMark(
-                        x: .value("Day", item.day, unit: .day),
-                        y: .value(yAxisLabel, item.display)
-                    )
-                    .foregroundStyle(lineColor(forIfcc: item.ifcc))
-                    .lineStyle(StrokeStyle(lineWidth: 2))
+                Spacer()
 
-                    PointMark(
-                        x: .value("Day", item.day, unit: .day),
-                        y: .value(yAxisLabel, item.display)
-                    )
-                    .foregroundStyle(lineColor(forIfcc: item.ifcc))
-                    .symbolSize(40)
-                }
-            }
-            .chartYScale(domain: yAxisDomain)
-            .chartYAxis {
-                AxisMarks(position: .leading, values: yAxisTicks) { _ in
-                    AxisGridLine()
-                    AxisValueLabel()
-                }
-            }
-            .chartXAxis {
-                AxisMarks(values: .automatic(desiredCount: 5)) { _ in
-                    AxisGridLine()
-                    AxisValueLabel(format: .dateTime.month(.twoDigits).day(.twoDigits))
-                        .font(.system(size: isLandscape ? 10 : 9))
-                }
-            }
-            .frame(height: isLandscape ? 160 : 120)
-            .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(12)
-            .overlay(alignment: .leading) {
-                VStack(spacing: 0) {
-                    ForEach(Array(yAxisLabel.enumerated()), id: \.offset) { _, char in
-                        Text(String(char))
-                            .font(.system(size: 9, weight: .semibold))
-                            .foregroundColor(.secondary)
+                // Legend: prediction circle (color matches latest point) + lab diamond
+                if !labPoints.isEmpty {
+                    HStack(spacing: 8) {
+                        HStack(spacing: 3) {
+                            Circle()
+                                .fill(weeklyPoints.last.map { pointColor(forIfcc: $0.ifcc) } ?? Color.yellow)
+                                .frame(width: 7, height: 7)
+                            Text("Predicted")
+                                .font(.system(size: 9))
+                                .foregroundColor(.secondary)
+                        }
+                        HStack(spacing: 3) {
+                            Image(systemName: "diamond.fill")
+                                .font(.system(size: 7))
+                                .foregroundColor(.blue)
+                            Text("Lab")
+                                .font(.system(size: 9))
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
-                .offset(x: 4)
             }
             .padding(.horizontal)
+            .padding(.bottom, isLandscape ? 8 : 0)
+
+            if weeklyPoints.isEmpty {
+                Text("Run predictions over time to see your trend here.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+            } else {
+                Chart {
+                    ForEach(weeklyPoints, id: \.weekStart) { item in
+                        LineMark(
+                            x: .value("Week", item.weekStart, unit: .day),
+                            y: .value(yAxisLabel, item.display)
+                        )
+                        .foregroundStyle(pointColor(forIfcc: item.ifcc))
+                        .lineStyle(StrokeStyle(lineWidth: 2))
+
+                        PointMark(
+                            x: .value("Week", item.weekStart, unit: .day),
+                            y: .value(yAxisLabel, item.display)
+                        )
+                        .foregroundStyle(pointColor(forIfcc: item.ifcc))
+                        .symbolSize(40)
+                    }
+
+                    // Lab HbA1c results — blue diamonds overlaid on the trend line
+                    ForEach(labPoints, id: \.date) { lab in
+                        PointMark(
+                            x: .value("Week", lab.date, unit: .day),
+                            y: .value(yAxisLabel, lab.display)
+                        )
+                        .foregroundStyle(Color.blue)
+                        .symbol(.diamond)
+                        .symbolSize(70)
+                    }
+                }
+                .chartXScale(domain: windowStart...Date())
+                .chartYScale(domain: yAxisDomain)
+                .chartYAxis {
+                    AxisMarks(position: .trailing, values: yAxisTicks) { _ in
+                        AxisGridLine()
+                        AxisValueLabel()
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(values: weekBoundaries) { _ in
+                        AxisGridLine()
+                        AxisValueLabel(format: .dateTime.month(.twoDigits).day(.twoDigits))
+                            .font(.system(size: isLandscape ? 10 : 9))
+                    }
+                }
+                .frame(height: isLandscape ? 160 : 120)
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+                .overlay(alignment: .leading) {
+                    VStack(spacing: 0) {
+                        ForEach(Array(yAxisLabel.enumerated()), id: \.offset) { _, char in
+                            Text(String(char))
+                                .font(.system(size: 9, weight: .semibold))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .offset(x: 4)
+                }
+                .padding(.horizontal)
+            }
         }
     }
 }
