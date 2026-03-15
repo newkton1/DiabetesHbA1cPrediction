@@ -4,6 +4,9 @@ import CoreData
 
 struct ContentView: View {
     @State private var selectedTab: Tab = .dashboard
+    @Environment(\.scenePhase) private var scenePhase
+    /// Tracks whether we've already reset the tab this launch cycle
+    @State private var hasResetOnLaunch = false
 
     enum Tab: String, CaseIterable {
         case dashboard = "Dashboard"
@@ -50,6 +53,19 @@ struct ContentView: View {
                 .tag(Tab.profile)
         }
         .tint(selectedTab == .meals ? .planAccent : .blue)
+        .onChange(of: scenePhase) { _, newPhase in
+            // Reset to dashboard once per launch cycle when the app becomes active.
+            // After the first reset, hasResetOnLaunch prevents the tab from snapping
+            // back every time the user briefly switches away (e.g. Control Centre).
+            if newPhase == .active && !hasResetOnLaunch {
+                selectedTab = .dashboard
+                hasResetOnLaunch = true
+            }
+            // When the app moves to the background, arm the reset for the next launch.
+            if newPhase == .background {
+                hasResetOnLaunch = false
+            }
+        }
     }
 }
 

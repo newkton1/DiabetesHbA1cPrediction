@@ -39,7 +39,7 @@ struct PredictionInput {
     let hasHeartDisease: Bool            // history of heart disease or current condition
 
     // Dawn Effect
-    var hasDawnEffect: Bool = false      // user-confirmed dawn phenomenon
+    var hasDawnEffect: Bool = false      // user-confirmed dawn effect
     var dawnEffectDetected: Bool = false  // algorithmically detected dawn pattern
 
     // Lifestyle Factors

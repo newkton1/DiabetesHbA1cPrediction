@@ -22,7 +22,7 @@ extension HealthConditionEntity {
     // --- Known health problems ---
     @NSManaged public var hasDiabetes: Bool
     @NSManaged public var diabetesType: String?      // "Type 1", "Type 2", "Gestational", "Pre-diabetes"
-    @NSManaged public var hasDawnEffect: Bool         // Dawn phenomenon — elevated fasting glucose 4-8am
+    @NSManaged public var hasDawnEffect: Bool         // Dawn effect — elevated fasting glucose 4-8am
     @NSManaged public var hasCOPD: Bool
     @NSManaged public var hasHeartDisease: Bool
     @NSManaged public var otherConditions: String?    // Free-text for any additional conditions

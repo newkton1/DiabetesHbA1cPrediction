@@ -253,7 +253,7 @@ struct DashboardView: View {
             } message: {
                 Text(predictionErrorMessage ?? "An unknown error occurred.")
             }
-            .alert("Dawn Phenomenon Detected", isPresented: $showDawnEffectDetectedAlert) {
+            .alert("Dawn Effect Detected", isPresented: $showDawnEffectDetectedAlert) {
                 Button("Enable adjustment") {
                     // Save dawn effect preference — user should also enable in profile
                     UserDefaults.standard.set(true, forKey: "dawnEffectAlertDismissed")
@@ -262,7 +262,7 @@ struct DashboardView: View {
                     UserDefaults.standard.set(true, forKey: "dawnEffectAlertDismissed")
                 }
             } message: {
-                Text("Your early morning readings appear consistently elevated without meals. This pattern is sometimes called the dawn phenomenon and affects about 20% of Type 2 diabetics. The app has adjusted your HbA1c estimate to account for this. We recommend discussing this with your endocrinologist. You can enable or disable this in your profile under Health Conditions.")
+                Text("Your early morning readings appear consistently elevated without meals. This pattern is sometimes called the dawn effect and affects about 20% of Type 2 diabetics. The app has adjusted your HbA1c estimate to account for this. We recommend discussing this with your endocrinologist. You can enable or disable this in your profile under Health Conditions.")
             }
             .onReceive(staleDataTimer) { time in
                 currentTime = time
@@ -981,7 +981,7 @@ private struct MealQuickActionsView: View {
 }
 
 // MARK: - Dawn Effect Notice Banner
-/// An orange notice displayed when dawn phenomenon compensation is active.
+/// An orange notice displayed when dawn effect compensation is active.
 /// Shown between the HbA1c card and the medical disclaimer.
 private struct DawnEffectNoticeBanner: View {
     var body: some View {

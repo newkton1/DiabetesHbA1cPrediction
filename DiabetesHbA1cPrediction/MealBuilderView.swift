@@ -175,7 +175,7 @@ struct MealBuilderView: View {
                                 Text("Est. glucose rise")
                                     .foregroundColor(.secondary)
                                 Spacer()
-                                Text("+\(Int(impact.estimatedGlucoseRise)) mg/dL")
+                                Text(impact.formattedGlucoseRise)
                                     .fontWeight(.semibold)
                                     .foregroundColor(impact.glucoseColor)
                             }
@@ -190,7 +190,7 @@ struct MealBuilderView: View {
                                 Text("HbA1c impact")
                                     .foregroundColor(.secondary)
                                 Spacer()
-                                Text(impact.hba1cDelta >= 0.05 ? String(format: "+%.1f%%", impact.hba1cDelta) : "Minimal")
+                                Text(impact.formattedHbA1cDelta)
                                     .fontWeight(.semibold)
                                     .foregroundColor(impact.hba1cColor)
                             }
@@ -544,9 +544,17 @@ struct MealBuilderView: View {
             } else {
                 formattedDistance = String(format: "%.1f \(exerciseType.distanceUnit)", rawDistance)
             }
-            let durationText = hitCap
-                ? "at least \(roundedMinutes) min / \(formattedDistance)"
-                : "\(roundedMinutes) min / \(formattedDistance)"
+            let durationText: String
+            if exerciseType == .swim {
+                // Swimming: show duration only, distance is not meaningful to display
+                durationText = hitCap
+                    ? "at least \(roundedMinutes) min"
+                    : "\(roundedMinutes) min"
+            } else {
+                durationText = hitCap
+                    ? "at least \(roundedMinutes) min / \(formattedDistance)"
+                    : "\(roundedMinutes) min / \(formattedDistance)"
+            }
             return "If you eat this planned meal, also consider a good \(exerciseType.actionVerb) after the meal of \(durationText) to help quickly reduce the estimated glucose rise."
         }()
 
@@ -585,6 +593,36 @@ struct MealImpactResult {
         if hba1cDelta < 0.05 { return .green }
         else if hba1cDelta < 0.1 { return .orange }
         else { return .red }
+    }
+
+    // MARK: - Unit-Aware Display Helpers
+
+    /// Glucose rise formatted for the user's effective unit system
+    /// Internal value is always in mg/dL; converts to mmol/L for IFCC users
+    var formattedGlucoseRise: String {
+        let unit = HbA1cUserProfile.shared.effectiveUnit
+        switch unit {
+        case .ngsp:
+            return "+\(Int(estimatedGlucoseRise)) mg/dL"
+        case .ifcc:
+            let mmolL = estimatedGlucoseRise / 18.0182
+            return String(format: "+%.1f mmol/L", mmolL)
+        }
+    }
+
+    /// HbA1c delta formatted for the user's effective unit system
+    /// Internal value is always in NGSP %; converts to IFCC mmol/mol for IFCC users
+    var formattedHbA1cDelta: String {
+        let unit = HbA1cUserProfile.shared.effectiveUnit
+        switch unit {
+        case .ngsp:
+            return hba1cDelta >= 0.05 ? String(format: "+%.1f%%", hba1cDelta) : "Minimal"
+        case .ifcc:
+            // delta_IFCC = delta_NGSP × 10.929
+            let ifccDelta = hba1cDelta * 10.929
+            // Threshold: 0.05% NGSP ≈ 0.55 mmol/mol IFCC
+            return ifccDelta >= 0.55 ? String(format: "+%.0f mmol/mol", ifccDelta) : "Minimal"
+        }
     }
 
     var glColor: Color {
@@ -636,7 +674,7 @@ struct EstimatedImpactContent: View {
                     Text("Est. glucose rise")
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text("+\(Int(impact.estimatedGlucoseRise)) mg/dL")
+                    Text(impact.formattedGlucoseRise)
                         .fontWeight(.semibold)
                         .foregroundColor(impact.glucoseColor)
                 }
@@ -649,7 +687,7 @@ struct EstimatedImpactContent: View {
                     Text("HbA1c impact")
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text(impact.hba1cDelta >= 0.05 ? String(format: "+%.1f%%", impact.hba1cDelta) : "Minimal")
+                    Text(impact.formattedHbA1cDelta)
                         .fontWeight(.semibold)
                         .foregroundColor(impact.hba1cColor)
                 }
@@ -856,9 +894,17 @@ struct EstimatedImpactContent: View {
             formattedDistance = String(format: "%.1f \(exerciseType.distanceUnit)", rawDistance)
         }
 
-        let durationText = hitCap
-            ? "at least \(roundedMinutes) min / \(formattedDistance)"
-            : "\(roundedMinutes) min / \(formattedDistance)"
+        let durationText: String
+        if exerciseType == .swim {
+            // Swimming: show duration only, distance is not meaningful to display
+            durationText = hitCap
+                ? "at least \(roundedMinutes) min"
+                : "\(roundedMinutes) min"
+        } else {
+            durationText = hitCap
+                ? "at least \(roundedMinutes) min / \(formattedDistance)"
+                : "\(roundedMinutes) min / \(formattedDistance)"
+        }
 
         return "If you eat this planned meal, also consider a good \(exerciseType.actionVerb) after the meal of \(durationText) to help quickly reduce the estimated glucose rise."
     }

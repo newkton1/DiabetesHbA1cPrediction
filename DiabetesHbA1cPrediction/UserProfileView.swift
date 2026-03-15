@@ -178,11 +178,11 @@ struct UserProfileView: View {
 
                     if diabetesType == "Type 2" {
                         Toggle(isOn: $hasDawnEffect) {
-                            Label("Dawn Phenomenon", systemImage: "sunrise.fill")
+                            Label("Dawn Effect", systemImage: "sunrise.fill")
                         }
 
                         if hasDawnEffect {
-                            Text("HbA1c estimate will be adjusted to reduce the impact of elevated early morning glucose (4–8am) caused by the dawn phenomenon.")
+                            Text("HbA1c estimate will be adjusted to reduce the impact of elevated early morning glucose (4–8am) caused by the dawn effect.")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
