@@ -14,6 +14,16 @@ struct SelectedFoodRow: View {
     let onDecrement: () -> Void
     let onDelete: () -> Void
 
+    /// Whether the quantity is at the minimum allowed value (0.25)
+    private var isAtMin: Bool {
+        selectedFood.quantity <= 0.25 + 0.01
+    }
+
+    /// Whether the quantity is at the maximum allowed value (4.0)
+    private var isAtMax: Bool {
+        selectedFood.quantity >= 4.0 - 0.01
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             // Food info
@@ -36,12 +46,12 @@ struct SelectedFoodRow: View {
                     .foregroundColor(.secondary)
             }
 
-            // Quantity stepper (matches Exercise Duration style)
+            // Quantity stepper with fractional support
             Stepper(
-                onIncrement: onIncrement,
-                onDecrement: selectedFood.quantity <= 1 ? nil : onDecrement
+                onIncrement: isAtMax ? nil : onIncrement,
+                onDecrement: isAtMin ? nil : onDecrement
             ) {
-                Text("\(Int(selectedFood.quantity)) serving\(Int(selectedFood.quantity) == 1 ? "" : "s")")
+                Text("\(ServingFormatter.displayString(for: selectedFood.quantity)) serving")
                     .font(.body)
                     .fontWeight(.semibold)
             }
@@ -77,7 +87,7 @@ struct SelectedFoodCompactRow: View {
             
             Spacer()
             
-            Text("\(Int(selectedFood.quantity))x")
+            Text(ServingFormatter.displayString(for: selectedFood.quantity))
                 .font(.caption)
                 .foregroundColor(.secondary)
             

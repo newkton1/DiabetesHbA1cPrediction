@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>DiabetesHbA1cPrediction</string>
+	<string>Diabetes Feast</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -21,7 +21,7 @@
 	<key>NSHealthShareUsageDescription</key>
 	<string>This app reads your health data from Apple Health to provide personalized HbA1c predictions and diabetes management insights.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>This app records your HbA1c readings and related health data to Apple Health so you can track your diabetes management in one place.</string>
+	<string>This app does not currently write data to Apple Health. This permission is reserved for potential future features.</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.diabetesfeast.healthkit.refresh</string>
@@ -41,6 +41,9 @@
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 </dict>
 </plist>

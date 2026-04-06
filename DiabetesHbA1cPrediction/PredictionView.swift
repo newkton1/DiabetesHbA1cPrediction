@@ -19,6 +19,9 @@ struct PredictionView: View {
     /// The Core Data managed object context for fetching and saving data
     @Environment(\.managedObjectContext) private var managedObjectContext
 
+    /// HbA1c unit profile for locale-aware display
+    @ObservedObject private var hba1cProfile = HbA1cUserProfile.shared
+
     /// Fetches all HbA1cPredictionEntity objects sorted by date in descending order
     @FetchRequest(
         entity: HbA1cPredictionEntity.entity(),
@@ -101,8 +104,9 @@ struct PredictionView: View {
                             // Empty State
                             VStack(spacing: 16) {
                                 Image(systemName: "chart.line.uptrend.xyaxis")
-                                    .font(.system(size: 48))
+                                    .font(.largeTitle)
                                     .foregroundColor(.gray)
+                                    .accessibilityHidden(true)
 
                                 Text("No Predictions Yet")
                                     .font(.headline)
@@ -137,6 +141,7 @@ struct PredictionView: View {
                             .cornerRadius(12)
                         }
                         .disabled(isGeneratingPrediction)
+                        .accessibilityLabel(isGeneratingPrediction ? "Generating prediction" : "Generate new HbA1c prediction")
                         .padding(.horizontal)
 
                         // Export/Share Button
@@ -166,6 +171,7 @@ struct PredictionView: View {
                                 .foregroundColor(.blue)
                                 .cornerRadius(12)
                             }
+                            .accessibilityLabel("Export or share prediction results")
                             .padding(.horizontal)
                         }
 
@@ -235,11 +241,15 @@ struct PredictionView: View {
         dateFormatter.timeStyle = .short
         let dateString = dateFormatter.string(from: Date())
 
+        // Convert engine NGSP result to canonical IFCC, then display in user's preferred unit
+        let ifccValue = ngspToIFCC(result.predictedHbA1c)
+        let displayHbA1c = hba1cProfile.formatHbA1c(ifccValue)
+
         var summary = """
         HbA1c Prediction Report
         Generated: \(dateString)
 
-        Predicted HbA1c: \(String(format: "%.1f", result.predictedHbA1c))%
+        Predicted HbA1c: \(displayHbA1c)
         Confidence Level: \(String(format: "%.0f", result.confidenceLevel * 100))%
         Risk Category: \(result.riskCategory)
 
@@ -282,19 +292,21 @@ struct PredictionView: View {
         return [:]
     }
 
-    /// Determines risk category based on HbA1c value
-    /// Uses ADA diagnostic criteria thresholds
-    private func determineRiskCategory(hbA1c: Double) -> String {
-        if hbA1c < 5.7 {
-            return "Normal"
-        } else if hbA1c < 6.5 {
-            return "Pre-diabetes"
-        } else if hbA1c <= 7.0 {
-            return "Diabetes - Well Controlled"
-        } else if hbA1c <= 8.0 {
-            return "Diabetes - Needs Attention"
+    /// Determines range category based on HbA1c value in IFCC mmol/mol
+    /// Uses ADA-referenced thresholds converted to IFCC:
+    /// Normal Range: < 39, Above Typical Range: 39-47,
+    /// Moderately Elevated: 48-53, Elevated: 54-64, Significantly Elevated: > 64
+    private func determineRiskCategory(hbA1c ifccValue: Double) -> String {
+        if ifccValue < HbA1cThresholds.normalUpperBound {           // < 39 mmol/mol
+            return "Normal Range"
+        } else if ifccValue < HbA1cThresholds.diabetesLowerBound {  // 39-47
+            return "Above Typical Range"
+        } else if ifccValue <= HbA1cThresholds.goodControlTarget {  // 48-53
+            return "Moderately Elevated"
+        } else if ifccValue <= 64.0 {                               // 54-64 (~8.0%)
+            return "Elevated"
         } else {
-            return "Diabetes - High Risk"
+            return "Significantly Elevated"
         }
     }
 }
@@ -304,6 +316,26 @@ struct PredictionView: View {
 /// Displays the current or most recent prediction with detailed visualizations
 private struct CurrentPredictionSection: View {
     let result: PredictionResult
+    @ObservedObject private var profile = HbA1cUserProfile.shared
+
+    /// The predicted value converted to canonical IFCC for threshold comparisons
+    private var ifccValue: Double {
+        ngspToIFCC(result.predictedHbA1c)
+    }
+
+    /// The display value in the user's preferred unit
+    private var displayValue: String {
+        let val = fromCanonicalIFCC(value: ifccValue, to: profile.effectiveUnit)
+        switch profile.effectiveUnit {
+        case .ngsp: return String(format: "%.1f", val)
+        case .ifcc: return String(format: "%.0f", val)
+        }
+    }
+
+    /// The unit suffix for display
+    private var unitSuffix: String {
+        profile.effectiveUnit.shortUnit
+    }
 
     var body: some View {
         VStack(spacing: 24) {
@@ -322,19 +354,21 @@ private struct CurrentPredictionSection: View {
 
             // HbA1c Value with Gauge
             VStack(spacing: 20) {
-                // Semicircular Gauge
+                // Semicircular Gauge — always uses NGSP for the 4-10% scale
                 GaugeVisualization(value: result.predictedHbA1c)
                     .frame(height: 180)
+                    .accessibilityLabel("HbA1c gauge visualization showing value of \(String(format: "%.1f", result.predictedHbA1c)) percent")
+                    .accessibilityHidden(false)
 
-                // HbA1c Value and Unit
+                // HbA1c Value and Unit (unit-aware)
                 HStack(alignment: .top, spacing: 4) {
-                    Text(String(format: "%.1f", result.predictedHbA1c))
-                        .font(.system(size: 48, weight: .bold, design: .default))
-                        .foregroundColor(hbA1cValueColor(result.predictedHbA1c))
+                    Text(displayValue)
+                        .font(.largeTitle.bold())
+                        .foregroundColor(hbA1cValueColor(ifccValue))
 
-                    Text("%")
-                        .font(.system(size: 24, weight: .semibold, design: .default))
-                        .foregroundColor(hbA1cValueColor(result.predictedHbA1c))
+                    Text(unitSuffix)
+                        .font(.title3.weight(.semibold))
+                        .foregroundColor(hbA1cValueColor(ifccValue))
                         .padding(.top, 4)
                 }
                 .frame(maxWidth: .infinity)
@@ -343,6 +377,8 @@ private struct CurrentPredictionSection: View {
             .background(Color(.systemBackground))
             .cornerRadius(16)
             .padding(.horizontal, 20)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Predicted HbA1c: \(displayValue) \(unitSuffix)")
 
             // Confidence Level Progress
             VStack(spacing: 12) {
@@ -366,6 +402,8 @@ private struct CurrentPredictionSection: View {
             .background(Color(.systemBackground))
             .cornerRadius(12)
             .padding(.horizontal, 20)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Confidence level: \(String(format: "%.0f", result.confidenceLevel * 100)) percent")
 
             // Risk Category Badge
             HStack(spacing: 12) {
@@ -397,6 +435,8 @@ private struct CurrentPredictionSection: View {
             .background(Color(.systemBackground))
             .cornerRadius(12)
             .padding(.horizontal, 20)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Risk category: \(result.riskCategory)")
 
             // Contributing Factors Chart
             if !result.contributingFactors.isEmpty {
@@ -413,6 +453,8 @@ private struct CurrentPredictionSection: View {
                 .background(Color(.systemBackground))
                 .cornerRadius(12)
                 .padding(.horizontal, 20)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Contributing factors: \(result.contributingFactors.sorted(by: { $0.value > $1.value }).map { "\($0.key): \(String(format: "%.2f", $0.value))" }.joined(separator: ", "))")
             }
 
             // Recommendations
@@ -447,15 +489,17 @@ private struct CurrentPredictionSection: View {
         }
     }
 
-    /// Returns the appropriate color for the HbA1c value based on health zones
-    private func hbA1cValueColor(_ value: Double) -> Color {
-        if value < 5.7 {
+    /// Returns the appropriate color for the HbA1c value in IFCC mmol/mol
+    /// Thresholds: Green < 39, Yellow 39-47, Orange 48-58, Red > 58
+    private func hbA1cValueColor(_ ifccValue: Double) -> Color {
+        switch ifccValue {
+        case ..<HbA1cThresholds.normalUpperBound:
             return .green
-        } else if value < 6.4 {
+        case HbA1cThresholds.normalUpperBound..<HbA1cThresholds.diabetesLowerBound:
             return .yellow
-        } else if value < 7.5 {
+        case HbA1cThresholds.diabetesLowerBound...58.0:
             return .orange
-        } else {
+        default:
             return .red
         }
     }
@@ -603,6 +647,21 @@ private struct PredictionHistoryRow: View {
     let prediction: HbA1cPredictionEntity
     let isExpanded: Bool
     let onTap: () -> Void
+    @ObservedObject private var profile = HbA1cUserProfile.shared
+
+    /// The display value in the user's preferred unit (predictedValue is stored as IFCC)
+    private var displayValue: String {
+        let val = fromCanonicalIFCC(value: prediction.predictedValue, to: profile.effectiveUnit)
+        switch profile.effectiveUnit {
+        case .ngsp: return String(format: "%.1f", val)
+        case .ifcc: return String(format: "%.0f", val)
+        }
+    }
+
+    /// The unit suffix for display
+    private var unitSuffix: String {
+        profile.effectiveUnit.shortUnit
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -625,15 +684,15 @@ private struct PredictionHistoryRow: View {
 
                     Spacer()
 
-                    // HbA1c Value
+                    // HbA1c Value (unit-aware)
                     VStack(alignment: .trailing, spacing: 4) {
                         HStack(spacing: 4) {
-                            Text(String(format: "%.1f", prediction.predictedValue))
+                            Text(displayValue)
                                 .font(.headline)
                                 .fontWeight(.bold)
                                 .foregroundColor(hbA1cValueColor(prediction.predictedValue))
 
-                            Text("%")
+                            Text(unitSuffix)
                                 .font(.subheadline)
                                 .foregroundColor(hbA1cValueColor(prediction.predictedValue))
                         }
@@ -660,6 +719,7 @@ private struct PredictionHistoryRow: View {
                         .font(.subheadline)
                         .foregroundColor(.gray)
                         .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        .accessibilityHidden(true)
                 }
                 .padding(16)
                 .background(Color(.systemBackground))
@@ -720,15 +780,17 @@ private struct PredictionHistoryRow: View {
         }
     }
 
-    /// Returns the appropriate color for the HbA1c value
-    private func hbA1cValueColor(_ value: Double) -> Color {
-        if value < 5.7 {
+    /// Returns the appropriate color for the HbA1c value in IFCC mmol/mol
+    /// Thresholds: Green < 39, Yellow 39-47, Orange 48-58, Red > 58
+    private func hbA1cValueColor(_ ifccValue: Double) -> Color {
+        switch ifccValue {
+        case ..<HbA1cThresholds.normalUpperBound:
             return .green
-        } else if value < 6.4 {
+        case HbA1cThresholds.normalUpperBound..<HbA1cThresholds.diabetesLowerBound:
             return .yellow
-        } else if value < 7.5 {
+        case HbA1cThresholds.diabetesLowerBound...58.0:
             return .orange
-        } else {
+        default:
             return .red
         }
     }
@@ -765,18 +827,18 @@ private struct PredictionHistoryRow: View {
         }
     }
 
-    /// Computes risk category based on HbA1c value
-    private func computeRiskCategory(hbA1c: Double) -> String {
-        if hbA1c < 5.7 {
-            return "Normal"
-        } else if hbA1c < 6.5 {
-            return "Pre-diabetes"
-        } else if hbA1c <= 7.0 {
-            return "Well Controlled"
-        } else if hbA1c <= 8.0 {
-            return "Needs Attention"
+    /// Computes range category based on HbA1c value in IFCC mmol/mol
+    private func computeRiskCategory(hbA1c ifccValue: Double) -> String {
+        if ifccValue < HbA1cThresholds.normalUpperBound {           // < 39
+            return "Normal Range"
+        } else if ifccValue < HbA1cThresholds.diabetesLowerBound {  // 39-47
+            return "Above Typical Range"
+        } else if ifccValue <= HbA1cThresholds.goodControlTarget {  // 48-53
+            return "Moderately Elevated"
+        } else if ifccValue <= 64.0 {                               // 54-64 (~8.0%)
+            return "Elevated"
         } else {
-            return "High Risk"
+            return "Significantly Elevated"
         }
     }
 

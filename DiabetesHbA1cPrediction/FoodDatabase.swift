@@ -68,6 +68,9 @@ class FoodDatabase {
     /// Data is loaded from FoodDatabase.json bundled with the app
     private(set) var allFoods: [FoodItem] = []
 
+    /// Error message if the food database failed to load
+    private(set) var loadError: String?
+
     /// Private initializer ensures only one instance of FoodDatabase exists
     private init() {
         populateDatabase()
@@ -77,14 +80,14 @@ class FoodDatabase {
     /// The JSON file contains 1,576 food items across 34 categories
     private func populateDatabase() {
         guard let url = Bundle.main.url(forResource: "FoodDatabase", withExtension: "json") else {
-            print("FoodDatabase.json not found in bundle")
+            loadError = "Food database file is missing. Please reinstall the app."
             return
         }
         do {
             let data = try Data(contentsOf: url)
             allFoods = try JSONDecoder().decode([FoodItem].self, from: data)
         } catch {
-            print("Failed to load food database: \(error)")
+            loadError = "Food database could not be loaded. Please reinstall the app."
         }
     }
 

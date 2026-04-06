@@ -30,6 +30,12 @@ struct DiabetesHbA1cPredictionApp: App {
     /// state is visible across the app.
     @StateObject private var healthKitManager = HealthKitManager.shared
 
+    // MARK: - Welcome Sheet
+
+    /// Controls whether the first-launch welcome sheet is visible.
+    /// Initialised from UserDefaults so it only shows once.
+    @State private var showWelcomeSheet = WelcomeSheetView.shouldPresent
+
     // MARK: - Body
 
     var body: some Scene {
@@ -44,6 +50,10 @@ struct DiabetesHbA1cPredictionApp: App {
                 // Make the HealthKit manager available as an environment object
                 // so views can observe authorisation state and trigger syncs.
                 .environmentObject(healthKitManager)
+                // Show the one-time welcome sheet on first launch.
+                .sheet(isPresented: $showWelcomeSheet) {
+                    WelcomeSheetView()
+                }
                 // Request HealthKit permissions on first appearance,
                 // then start the glucose observer for live sync.
                 .onAppear {

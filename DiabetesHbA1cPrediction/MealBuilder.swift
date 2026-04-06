@@ -112,24 +112,38 @@ class MealBuilder: ObservableObject {
         selectedFoods.removeAll { $0.id == id }
     }
     
+    // MARK: - Serving Size Sequence
+
+    /// Allowed serving quantities: fractional (0.25 steps) below 1, whole units above 1
+    static let servingSteps: [Double] = [0.25, 0.50, 0.75, 1.0, 2.0, 3.0, 4.0]
+
     /// Update the quantity of a food item at the specified index
     func updateQuantity(at index: Int, quantity: Double) {
         guard index >= 0 && index < selectedFoods.count else { return }
-        let newQuantity = max(1, quantity) // Minimum 1 serving
+        let newQuantity = max(0.25, quantity) // Minimum 1/4 serving
         selectedFoods[index].quantity = newQuantity
     }
 
-    /// Increment quantity by 1
+    /// Increment quantity to the next step in the serving sequence (max 4)
     func incrementQuantity(at index: Int) {
         guard index >= 0 && index < selectedFoods.count else { return }
-        selectedFoods[index].quantity += 1
+        let current = selectedFoods[index].quantity
+        // Find the next step above the current quantity
+        if let nextStep = MealBuilder.servingSteps.first(where: { $0 > current + 0.001 }) {
+            selectedFoods[index].quantity = nextStep
+        }
+        // If already at max (4.0), do nothing
     }
 
-    /// Decrement quantity by 1 (minimum 1)
+    /// Decrement quantity to the previous step in the serving sequence (min 0.25)
     func decrementQuantity(at index: Int) {
         guard index >= 0 && index < selectedFoods.count else { return }
-        let newQuantity = max(1, selectedFoods[index].quantity - 1)
-        selectedFoods[index].quantity = newQuantity
+        let current = selectedFoods[index].quantity
+        // Find the previous step below the current quantity
+        if let prevStep = MealBuilder.servingSteps.last(where: { $0 < current - 0.001 }) {
+            selectedFoods[index].quantity = prevStep
+        }
+        // If already at min (0.25), do nothing
     }
     
     /// Check if a food item is already selected
@@ -138,9 +152,9 @@ class MealBuilder: ObservableObject {
     }
 
     /// Returns the current quantity for a food item, or 0 if not selected
-    func quantityFor(_ food: FoodItem) -> Int {
+    func quantityFor(_ food: FoodItem) -> Double {
         if let item = selectedFoods.first(where: { $0.foodItem.id == food.id }) {
-            return Int(item.quantity)
+            return item.quantity
         }
         return 0
     }
@@ -161,7 +175,13 @@ class MealBuilder: ObservableObject {
         mealEntity.id = UUID()
         mealEntity.name = mealName.isEmpty ? generateMealName() : mealName
         mealEntity.calories = totalCalories
-        mealEntity.timestamp = Date()
+        // Use the actual meal time: subtract timeSinceLastMeal hours from now
+        // so retroactively logged meals are inserted in correct chronological order
+        if mealType == .lastMeal && timeSinceLastMeal > 0 {
+            mealEntity.timestamp = Date().addingTimeInterval(-timeSinceLastMeal * 3600)
+        } else {
+            mealEntity.timestamp = Date()
+        }
         mealEntity.mealType = mealType.rawValue
         mealEntity.timeSinceLastMeal = timeSinceLastMeal
         mealEntity.plannedDateTime = mealType == .plannedMeal ? plannedDateTime : nil
@@ -219,8 +239,15 @@ class MealBuilder: ObservableObject {
     }
     
     /// Generate a default meal name based on time of day
+    /// Uses actual meal time (accounting for timeSinceLastMeal) for correct naming
     private func generateMealName() -> String {
-        let hour = Calendar.current.component(.hour, from: Date())
+        let mealTime: Date
+        if mealType == .lastMeal && timeSinceLastMeal > 0 {
+            mealTime = Date().addingTimeInterval(-timeSinceLastMeal * 3600)
+        } else {
+            mealTime = Date()
+        }
+        let hour = Calendar.current.component(.hour, from: mealTime)
         switch hour {
         case 5..<11: return "Breakfast"
         case 11..<14: return "Lunch"

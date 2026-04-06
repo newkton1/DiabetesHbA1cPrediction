@@ -15,6 +15,7 @@ struct FoodSearchView: View {
 
     @State private var searchText = ""
     @State private var isSearching = false
+    @State private var showFoodDbError = false
 
     // MARK: - Body
     var body: some View {
@@ -43,6 +44,16 @@ struct FoodSearchView: View {
             .onChange(of: searchText) { _, _ in
                 // Update search state
                 isSearching = !searchText.isEmpty
+            }
+            .onAppear {
+                if FoodDatabase.shared.loadError != nil {
+                    showFoodDbError = true
+                }
+            }
+            .alert("Food Database Error", isPresented: $showFoodDbError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(FoodDatabase.shared.loadError ?? "The food database could not be loaded.")
             }
         }
     }
@@ -110,8 +121,9 @@ struct FoodSearchView: View {
     private var emptyState: some View {
         VStack(spacing: 16) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 48))
+                .font(.largeTitle)
                 .foregroundColor(.gray)
+                .accessibilityHidden(true)
             Text("No Foods Found")
                 .font(.headline)
             Text("Try searching with a different keyword")

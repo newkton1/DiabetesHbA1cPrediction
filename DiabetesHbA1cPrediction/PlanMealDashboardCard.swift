@@ -21,14 +21,15 @@ struct PlanMealDashboardCard: View {
                         .frame(width: 52, height: 52)
                     Image(systemName: nextMeal != nil
                           ? "calendar.badge.clock" : "calendar.badge.plus")
-                        .font(.system(size: 24))
+                        .font(.title2)
                         .foregroundColor(.planAccent)
+                        .accessibilityHidden(true)
                 }
                 VStack(alignment: .leading, spacing: 3) {
                     if let meal = nextMeal, let time = meal.timestamp {
                         Text("Next Planned Meal").font(.headline)
                         HStack(spacing: 4) {
-                            Image(systemName: "clock").font(.caption)
+                            Image(systemName: "clock").font(.caption).accessibilityHidden(true)
                                 .foregroundColor(.planAccent)
                             Text(time, style: .relative).font(.caption)
                                 .foregroundColor(.planAccent)
@@ -40,7 +41,7 @@ struct PlanMealDashboardCard: View {
                     }
                 }
                 Spacer()
-                Image(systemName: "chevron.right").foregroundColor(.secondary)
+                Image(systemName: "chevron.right").foregroundColor(.secondary).accessibilityHidden(true)
             }
             .padding(14)
             .background(Color(.systemBackground))

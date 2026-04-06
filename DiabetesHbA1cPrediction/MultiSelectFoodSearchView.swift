@@ -22,6 +22,7 @@ struct MultiSelectFoodSearchView: View {
     @State private var committedSearchText = ""
     @State private var selectedCategory: String? = nil
     @State private var recentMeals: [RecentMeal] = []
+    @State private var showFoodDbError = false
 
     private var isPortrait: Bool {
         verticalSizeClass != .compact
@@ -109,6 +110,7 @@ struct MultiSelectFoodSearchView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.secondary)
+                            .accessibilityHidden(true)
                         TextField("Search foods...", text: $searchText)
                             .textFieldStyle(.plain)
                             .autocorrectionDisabled()
@@ -125,6 +127,7 @@ struct MultiSelectFoodSearchView: View {
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundColor(.secondary)
+                                    .accessibilityLabel("Clear search")
                             }
                         }
                     }
@@ -142,6 +145,7 @@ struct MultiSelectFoodSearchView: View {
                         Image(systemName: "plus.circle.fill")
                             .font(.title)
                             .foregroundColor(.blue)
+                            .accessibilityLabel("Done adding foods")
                     }
                 }
                 .padding(.horizontal)
@@ -162,6 +166,14 @@ struct MultiSelectFoodSearchView: View {
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 recentMeals = RecentMealsProvider.fetchRecentMeals(context: viewContext, limit: 30)
+                if FoodDatabase.shared.loadError != nil {
+                    showFoodDbError = true
+                }
+            }
+            .alert("Food Database Error", isPresented: $showFoodDbError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(FoodDatabase.shared.loadError ?? "The food database could not be loaded.")
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -256,6 +268,7 @@ private struct FoodSearchContentDirect: View {
                 HStack {
                     Image(systemName: "cart.fill")
                         .foregroundColor(.blue)
+                        .accessibilityHidden(true)
 
                     Text("\(mealBuilder.foodCount) item\(mealBuilder.foodCount == 1 ? "" : "s") selected")
                         .font(.subheadline)
@@ -285,6 +298,16 @@ private struct FoodSearchContentDirect: View {
                                     quantity: mealBuilder.quantityFor(food),
                                     onTap: {
                                         mealBuilder.addFood(food)
+                                    },
+                                    onIncrement: {
+                                        if let index = mealBuilder.selectedFoods.firstIndex(where: { $0.foodItem.id == food.id }) {
+                                            mealBuilder.incrementQuantity(at: index)
+                                        }
+                                    },
+                                    onDecrement: {
+                                        if let index = mealBuilder.selectedFoods.firstIndex(where: { $0.foodItem.id == food.id }) {
+                                            mealBuilder.decrementQuantity(at: index)
+                                        }
                                     }
                                 )
                             }
@@ -413,10 +436,12 @@ private struct RecentMealRow: View {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(.green)
                         .font(.title2)
+                        .accessibilityLabel("Already added")
                 } else {
                     Image(systemName: "plus.circle")
                         .foregroundColor(.blue)
                         .font(.title2)
+                        .accessibilityLabel("Add this meal")
                 }
             }
         }
@@ -424,60 +449,132 @@ private struct RecentMealRow: View {
     }
 }
 
-/// Row for displaying a food item with quantity and +1 action
+/// Row for displaying a food item with quantity and up/down stepper
 struct FoodSelectionRow: View {
     let food: FoodItem
-    let quantity: Int
+    let quantity: Double
     let onTap: () -> Void
+    let onIncrement: () -> Void
+    let onDecrement: () -> Void
+
+    /// Display carbs adjusted for quantity
+    private var displayCarbs: Int {
+        if quantity > 0 {
+            return Int(food.carbohydrates * quantity)
+        }
+        return Int(food.carbohydrates)
+    }
+
+    /// The food info column (name, carbs, GI, serving)
+    private var foodInfoColumn: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(food.name)
+                .font(.body)
+                .foregroundColor(.primary)
+
+            HStack(spacing: 8) {
+                Text("\(displayCarbs) g carbs")
+                    .font(.caption)
+                    .foregroundColor(.orange)
+
+                Text("GI: \(food.glycemicIndex)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Text("\(food.servingSize, specifier: "%.0f") \(food.servingUnit)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    /// The vertical stepper control (+ on top, – on bottom)
+    private var servingStepper: some View {
+        VStack(spacing: 0) {
+            Button(action: onIncrement) {
+                Image(systemName: "plus")
+                    .font(.footnote)
+                    .fontWeight(.bold)
+                    .frame(width: 36, height: 28)
+                    .foregroundColor(quantity >= 4.0 ? .gray : .blue)
+                    .accessibilityLabel("Increase serving")
+            }
+            .buttonStyle(.borderless)
+            .disabled(quantity >= 4.0)
+
+            Divider()
+                .frame(width: 36)
+
+            Button(action: onDecrement) {
+                Image(systemName: "minus")
+                    .font(.footnote)
+                    .fontWeight(.bold)
+                    .frame(width: 36, height: 28)
+                    .foregroundColor(quantity <= 0.25 ? .gray : .blue)
+                    .accessibilityLabel("Decrease serving")
+            }
+            .buttonStyle(.borderless)
+            .disabled(quantity <= 0.25)
+        }
+        .background(Color(.systemGray5))
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color(.systemGray3), lineWidth: 0.5)
+        )
+    }
 
     var body: some View {
-        Button(action: onTap) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(food.name)
-                        .font(.body)
-                        .foregroundColor(.primary)
-
-                    HStack(spacing: 8) {
-                        Text("\(Int(food.carbohydrates)) g carbs")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-
-                        Text("GI: \(food.glycemicIndex)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-
-                        Text("\(food.servingSize, specifier: "%.0f") \(food.servingUnit)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+        HStack {
+            // Food info area — tappable to add when not yet selected.
+            // onTapGesture is scoped here so it never competes with
+            // the stepper Buttons on the trailing side.
+            foodInfoColumn
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    if quantity <= 0 {
+                        onTap()
                     }
                 }
 
-                Spacer()
+            if quantity > 0 {
+                HStack(spacing: 8) {
+                    // Green serving size display
+                    Text(ServingFormatter.displayString(for: quantity))
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.green)
 
-                if quantity > 0 {
-                    HStack(spacing: 6) {
-                        Text("\(quantity)x")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.green)
-                        Text("+1")
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.blue)
-                            .cornerRadius(12)
-                    }
-                } else {
+                    servingStepper
+                }
+            } else {
+                Button(action: onTap) {
                     Image(systemName: "plus.circle")
                         .foregroundColor(.blue)
                         .font(.title2)
+                        .accessibilityLabel("Add food")
                 }
+                .buttonStyle(.borderless)
             }
         }
-        .buttonStyle(.plain)
+    }
+}
+
+/// Shared utility for formatting serving quantities as fractions
+enum ServingFormatter {
+    /// Returns a display string like "1/4x", "1/2x", "3/4x", "1x", "2x", etc.
+    static func displayString(for quantity: Double) -> String {
+        // Handle common fractional values
+        if abs(quantity - 0.25) < 0.01 { return "¼x" }
+        if abs(quantity - 0.50) < 0.01 { return "½x" }
+        if abs(quantity - 0.75) < 0.01 { return "¾x" }
+        // Whole numbers
+        if abs(quantity - quantity.rounded()) < 0.01 {
+            return "\(Int(quantity.rounded()))x"
+        }
+        // Fallback for unexpected values
+        return String(format: "%.2gx", quantity)
     }
 }
 

@@ -47,18 +47,19 @@ struct PlannedMealView: View {
                     HStack {
                         Button(action: { selectedTab = .dashboard }) {
                             Image(systemName: "chevron.left")
-                                .font(.system(size: 18, weight: .semibold))
+                                .font(.callout.weight(.semibold))
                                 .foregroundColor(.white)
+                                .accessibilityLabel("Back to dashboard")
                         }
                         Text("What If?")
-                            .font(.system(size: 22, weight: .bold))
+                            .font(.title3.bold())
                         Spacer()
                     }
                     .padding(.horizontal)
                     // Explainer banner
                     VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 6) {
-                            Image(systemName: "sparkles").foregroundColor(.planAccent)
+                            Image(systemName: "sparkles").foregroundColor(.planAccent).accessibilityHidden(true)
                             Text("Before You Eat")
                                 .font(.title3).fontWeight(.bold)
                                 .foregroundColor(.planAccent)
@@ -87,6 +88,7 @@ struct PlannedMealView: View {
                         HStack(spacing: 8) {
                             Image(systemName: feastsThisWeek >= 3 ? "exclamationmark.triangle.fill" : "info.circle.fill")
                                 .foregroundColor(feastsThisWeek >= 3 ? .red : .orange)
+                                .accessibilityHidden(true)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(feastsThisWeek >= 3
                                      ? "Feast frequency is high"
@@ -178,7 +180,7 @@ private struct PlanFeatureRow: View {
     let icon: String; let color: Color; let title: String; let detail: String
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: icon).foregroundColor(color).frame(width: 28, alignment: .center)
+            Image(systemName: icon).foregroundColor(color).frame(width: 28, alignment: .center).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.subheadline).fontWeight(.medium)
                 Text(detail).font(.caption).foregroundColor(.secondary)

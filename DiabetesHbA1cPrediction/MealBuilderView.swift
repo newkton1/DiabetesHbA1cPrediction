@@ -106,6 +106,8 @@ struct MealBuilderView: View {
                     .cornerRadius(16)
                     .shadow(radius: 10)
                     .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Warning: High glycemic load. The app will calculate a personalised exercise offset.")
                 }
                 if showGlucoseElevatedWarning {
                     VStack(spacing: 10) {
@@ -126,6 +128,8 @@ struct MealBuilderView: View {
                     .cornerRadius(16)
                     .shadow(radius: 10)
                     .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Warning: Elevated blood glucose. Adding this food significantly increases glucose impact.")
                 }
             }
             .onAppear {
@@ -148,6 +152,7 @@ struct MealBuilderView: View {
                     Image(systemName: mealType == .feast ? "party.popper.fill" : "checkmark.circle.fill")
                         .font(.largeTitle)
                         .foregroundColor(mealType == .feast ? .feastAccent : .green)
+                        .accessibilityHidden(true)
                     Text(mealType == .feast ? "Feast Saved" : "Meal Saved")
                         .font(.title2).fontWeight(.bold)
                     if !mealBuilder.mealName.isEmpty {
@@ -172,6 +177,7 @@ struct MealBuilderView: View {
                                 Image(systemName: "waveform.path.ecg")
                                     .foregroundColor(impact.glucoseColor)
                                     .frame(width: 24)
+                                    .accessibilityHidden(true)
                                 Text("Est. glucose rise")
                                     .foregroundColor(.secondary)
                                 Spacer()
@@ -187,6 +193,7 @@ struct MealBuilderView: View {
                                 Image(systemName: "chart.line.uptrend.xyaxis")
                                     .foregroundColor(impact.hba1cColor)
                                     .frame(width: 24)
+                                    .accessibilityHidden(true)
                                 Text("HbA1c impact")
                                     .foregroundColor(.secondary)
                                 Spacer()
@@ -202,6 +209,7 @@ struct MealBuilderView: View {
                                 Image(systemName: "arrow.left.arrow.right")
                                     .foregroundColor(.blue)
                                     .frame(width: 24)
+                                    .accessibilityHidden(true)
                                 Text("vs. your typical meal")
                                     .foregroundColor(.secondary)
                                 Spacer()
@@ -217,6 +225,7 @@ struct MealBuilderView: View {
                                 Image(systemName: impact.glCategory == "Low" ? "checkmark.circle.fill" : impact.glCategory == "Moderate" ? "exclamationmark.circle.fill" : "xmark.circle.fill")
                                     .foregroundColor(impact.glColor)
                                     .frame(width: 24)
+                                    .accessibilityHidden(true)
                                 Text("Glycemic load")
                                     .foregroundColor(.secondary)
                                 Spacer()
@@ -232,6 +241,7 @@ struct MealBuilderView: View {
                                     Image(systemName: "lightbulb.fill")
                                         .foregroundColor(.yellow)
                                         .frame(width: 24)
+                                        .accessibilityHidden(true)
                                     Text(recommendation)
                                         .font(.caption)
                                         .foregroundColor(.secondary)
@@ -285,6 +295,7 @@ struct MealBuilderView: View {
                     HStack {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.blue)
+                            .accessibilityHidden(true)
                         Text("Search & Add Foods")
                             .foregroundColor(.blue)
                         Spacer()
@@ -671,6 +682,7 @@ struct EstimatedImpactContent: View {
                     Image(systemName: "waveform.path.ecg")
                         .foregroundColor(impact.glucoseColor)
                         .frame(width: 24)
+                        .accessibilityHidden(true)
                     Text("Est. glucose rise")
                         .foregroundColor(.secondary)
                     Spacer()
@@ -684,6 +696,7 @@ struct EstimatedImpactContent: View {
                     Image(systemName: "chart.line.uptrend.xyaxis")
                         .foregroundColor(impact.hba1cColor)
                         .frame(width: 24)
+                        .accessibilityHidden(true)
                     Text("HbA1c impact")
                         .foregroundColor(.secondary)
                     Spacer()
@@ -697,6 +710,7 @@ struct EstimatedImpactContent: View {
                     Image(systemName: "arrow.left.arrow.right")
                         .foregroundColor(.blue)
                         .frame(width: 24)
+                        .accessibilityHidden(true)
                     Text("vs. your typical meal")
                         .foregroundColor(.secondary)
                     Spacer()
@@ -710,6 +724,7 @@ struct EstimatedImpactContent: View {
                     Image(systemName: impact.glCategory == "Low" ? "checkmark.circle.fill" : impact.glCategory == "Moderate" ? "exclamationmark.circle.fill" : "xmark.circle.fill")
                         .foregroundColor(impact.glColor)
                         .frame(width: 24)
+                        .accessibilityHidden(true)
                     Text("Glycemic load")
                         .foregroundColor(.secondary)
                     Spacer()
@@ -724,6 +739,7 @@ struct EstimatedImpactContent: View {
                         Image(systemName: "lightbulb.fill")
                             .foregroundColor(.yellow)
                             .frame(width: 24)
+                            .accessibilityHidden(true)
                         Text(recommendation)
                             .font(.caption)
                             .foregroundColor(.secondary)

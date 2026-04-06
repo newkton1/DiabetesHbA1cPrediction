@@ -25,6 +25,8 @@ struct MealLogView: View {
     ) private var allMeals: FetchedResults<MealEntity>
 
     @State private var expandedMealId: UUID? = nil
+    @State private var showSaveError = false
+    @State private var saveErrorMessage = ""
 
     // MARK: - Meals (logged only, excludes planned/feast)
 
@@ -80,9 +82,14 @@ struct MealLogView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Text("Meals")
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.title3.bold())
                     .fixedSize(horizontal: true, vertical: false)
             }
+        }
+        .alert("Save Error", isPresented: $showSaveError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(saveErrorMessage)
         }
     }
 
@@ -92,7 +99,7 @@ struct MealLogView: View {
             // Header
             HStack {
                 Text("Meals")
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.title3.bold())
 
                 Spacer()
             }
@@ -140,7 +147,12 @@ struct MealLogView: View {
                                 .contextMenu {
                                     Button(role: .destructive) {
                                         viewContext.delete(meal)
-                                        try? viewContext.save()
+                                        do {
+                                            try viewContext.save()
+                                        } catch {
+                                            saveErrorMessage = "Could not delete meal. Please try again."
+                                            showSaveError = true
+                                        }
                                     } label: {
                                         Label("Delete", systemImage: "trash")
                                     }
@@ -157,6 +169,11 @@ struct MealLogView: View {
             }
         }
         .navigationBarHidden(true)
+        .alert("Save Error", isPresented: $showSaveError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(saveErrorMessage)
+        }
     }
 
     // MARK: - Shared Components
@@ -164,8 +181,9 @@ struct MealLogView: View {
     private var emptyStateView: some View {
         VStack(spacing: 12) {
             Image(systemName: "fork.knife")
-                .font(.system(size: 40))
+                .font(.largeTitle)
                 .foregroundColor(.gray)
+                .accessibilityHidden(true)
             Text("No Meals Logged")
                 .font(.headline)
             Text("Use the Add Meal card on the Dashboard to log meals")
@@ -346,9 +364,8 @@ struct MealLogView: View {
         do {
             try viewContext.save()
         } catch {
-            #if DEBUG
-            print("Error deleting meal: \(error.localizedDescription)")
-            #endif
+            saveErrorMessage = "Could not delete meal. Please try again."
+            showSaveError = true
         }
     }
 }
@@ -487,7 +504,7 @@ struct MealRowView: View {
                             
                             Spacer()
                             
-                            Text("\(Int(item.quantity))x")
+                            Text(ServingFormatter.displayString(for: item.quantity))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             
@@ -566,6 +583,8 @@ struct AddMealSheetView: View {
     @State private var servingMultiplier: Int = 1
     @State private var selectedDate = Date()
     @State private var showFoodSearchView = false
+    @State private var showSaveError = false
+    @State private var saveErrorMessage = ""
 
     // MARK: - Body
     var body: some View {
@@ -699,6 +718,11 @@ struct AddMealSheetView: View {
                     }
                 }
             }
+            .alert("Save Error", isPresented: $showSaveError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(saveErrorMessage)
+            }
         }
     }
 
@@ -735,9 +759,8 @@ struct AddMealSheetView: View {
             try viewContext.save()
             dismiss()
         } catch {
-            #if DEBUG
-            print("Error saving meal: \(error.localizedDescription)")
-            #endif
+            saveErrorMessage = "Could not save meal. Please try again."
+            showSaveError = true
         }
     }
 }

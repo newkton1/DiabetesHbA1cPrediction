@@ -88,7 +88,7 @@ struct DashboardView: View {
                         // Header with title on left
                         HStack {
                             Text("Dashboard")
-                                .font(.system(size: 22, weight: .bold))
+                                .font(.title3.bold())
                             Spacer()
                         }
                         .padding(.horizontal)
@@ -159,6 +159,7 @@ struct DashboardView: View {
                             .cornerRadius(10)
                         }
                         .disabled(isCalculatingPrediction)
+                        .accessibilityLabel("Run new HbA1c prediction")
                         .padding(.horizontal)
 
                         Spacer(minLength: 20)
@@ -215,6 +216,7 @@ struct DashboardView: View {
                             .cornerRadius(10)
                         }
                         .disabled(isCalculatingPrediction)
+                        .accessibilityLabel("Run new HbA1c prediction")
                         .padding(.horizontal)
 
                         Spacer(minLength: 20)
@@ -228,7 +230,7 @@ struct DashboardView: View {
                 if !isLandscape {
                     ToolbarItem(placement: .topBarLeading) {
                         Text("Dashboard")
-                            .font(.system(size: 22, weight: .bold))
+                            .font(.title3.bold())
                             .fixedSize(horizontal: true, vertical: false)
                     }
                 }
@@ -430,7 +432,7 @@ private struct HbA1cCardView: View {
             if let prediction = prediction {
                 HStack(alignment: .center, spacing: 4) {
                     Text(displayValue)
-                        .font(.system(size: 56, weight: .bold))
+                        .font(.largeTitle.bold())
                     Text(unitSuffix)
                         .font(.title2)
                         .foregroundColor(.secondary)
@@ -451,6 +453,8 @@ private struct HbA1cCardView: View {
         .background(Color(.systemGray6))
         .cornerRadius(12)
         .padding(.horizontal)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(prediction != nil ? "Estimated HbA1c: \(displayValue) \(unitSuffix), \(riskCategoryText)" : "No prediction data available")
     }
 
     /// Format a date for display.
@@ -516,7 +520,7 @@ private struct GlucoseTrendChartView: View {
     private var weekBoundaries: [Date] {
         let calendar = Calendar.current
         let start = calendar.startOfDay(for: windowStart)
-        return stride(from: 0, through: 12, by: 2).compactMap { week in
+        return stride(from: 0, through: 12, by: 3).compactMap { week in
             calendar.date(byAdding: .day, value: week * 7, to: start)
         }
     }
@@ -611,15 +615,16 @@ private struct GlucoseTrendChartView: View {
                                 .fill(weeklyPoints.last.map { pointColor(forIfcc: $0.ifcc) } ?? Color.yellow)
                                 .frame(width: 7, height: 7)
                             Text("Predicted")
-                                .font(.system(size: 9))
+                                .font(.caption2)
                                 .foregroundColor(.secondary)
                         }
                         HStack(spacing: 3) {
                             Image(systemName: "diamond.fill")
-                                .font(.system(size: 7))
+                                .font(.caption2)
                                 .foregroundColor(.blue)
+                                .accessibilityHidden(true)
                             Text("Lab")
-                                .font(.system(size: 9))
+                                .font(.caption2)
                                 .foregroundColor(.secondary)
                         }
                     }
@@ -675,7 +680,7 @@ private struct GlucoseTrendChartView: View {
                     AxisMarks(values: weekBoundaries) { _ in
                         AxisGridLine()
                         AxisValueLabel(format: .dateTime.month(.twoDigits).day(.twoDigits))
-                            .font(.system(size: isLandscape ? 10 : 9))
+                            .font(.caption2)
                     }
                 }
                 .frame(height: isLandscape ? 160 : 120)
@@ -683,16 +688,15 @@ private struct GlucoseTrendChartView: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
                 .overlay(alignment: .leading) {
-                    VStack(spacing: 0) {
-                        ForEach(Array(yAxisLabel.enumerated()), id: \.offset) { _, char in
-                            Text(String(char))
-                                .font(.system(size: 9, weight: .semibold))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .offset(x: 4)
+                    Text(yAxisLabel)
+                        .font(.system(size: 9.5, weight: .semibold))
+                        .foregroundColor(.secondary)
+                        .rotationEffect(.degrees(-90))
+                        .fixedSize()
+                        .offset(x: -12)
                 }
                 .padding(.horizontal)
+                .accessibilityLabel("12-week HbA1c trend chart with \(weeklyPoints.count) data points")
             }
         }
     }
@@ -719,8 +723,9 @@ private struct QuickStatsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: isLandscape ? 2 : 6) {
                             Image(systemName: "drop.fill")
-                                .font(isLandscape ? .system(size: 9) : .body)
+                                .font(isLandscape ? .caption2 : .body)
                                 .foregroundColor(.red)
+                                .accessibilityHidden(true)
                             Text("Glucose")
                                 .font(isLandscape ? .caption2 : .caption)
                                 .fontWeight(.semibold)
@@ -745,6 +750,7 @@ private struct QuickStatsView: View {
                             Image(systemName: "figure.walk")
                                 .font(isLandscape ? .caption : .body)
                                 .foregroundColor(.blue)
+                                .accessibilityHidden(true)
                             Text(isLandscape ? "Xcise" : "Exercise")
                                 .font(isLandscape ? .caption2 : .caption)
                                 .fontWeight(.semibold)
@@ -775,6 +781,7 @@ private struct QuickStatsView: View {
                             Image(systemName: "fork.knife")
                                 .font(isLandscape ? .caption : .body)
                                 .foregroundColor(.orange)
+                                .accessibilityHidden(true)
                             Text("Meals History")
                                 .font(isLandscape ? .caption2 : .caption)
                                 .fontWeight(.semibold)
@@ -797,6 +804,7 @@ private struct QuickStatsView: View {
                             Image(systemName: "person.fill")
                                 .font(isLandscape ? .caption : .body)
                                 .foregroundColor(.green)
+                                .accessibilityHidden(true)
                             Text("User")
                                 .font(isLandscape ? .caption2 : .caption)
                                 .fontWeight(.semibold)
@@ -882,6 +890,7 @@ private struct MealQuickActionsView: View {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.caption)
                                     .foregroundColor(.orange)
+                                    .accessibilityHidden(true)
                                 Text("Add")
                                     .font(.caption2)
                                     .fontWeight(.semibold)
@@ -905,6 +914,7 @@ private struct MealQuickActionsView: View {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.body)
                                     .foregroundColor(.orange)
+                                    .accessibilityHidden(true)
                                 Text("Add Meal")
                                     .font(.caption)
                                     .fontWeight(.semibold)
@@ -935,6 +945,7 @@ private struct MealQuickActionsView: View {
                                 Image(systemName: "party.popper.fill")
                                     .font(.caption)
                                     .foregroundColor(.blue)
+                                    .accessibilityHidden(true)
                                 Text("What")
                                     .font(.caption2)
                                     .fontWeight(.semibold)
@@ -950,6 +961,7 @@ private struct MealQuickActionsView: View {
                                 Image(systemName: "party.popper.fill")
                                     .font(.body)
                                     .foregroundColor(.blue)
+                                    .accessibilityHidden(true)
                                 Text("What if?")
                                     .font(.caption)
                                     .fontWeight(.semibold)
@@ -996,6 +1008,8 @@ private struct DawnEffectNoticeBanner: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Dawn effect adjustment applied. Morning readings weighted at 60 percent.")
     }
 }
 
@@ -1015,6 +1029,8 @@ private struct StaleDataWarningBanner: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Warning: No glucose data received in the last 30 minutes. Check your CGM Bluetooth connection.")
     }
 }
 
@@ -1034,6 +1050,7 @@ struct MedicalDisclaimerBanner: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 6)
+        .accessibilityElement(children: .combine)
     }
 }
 

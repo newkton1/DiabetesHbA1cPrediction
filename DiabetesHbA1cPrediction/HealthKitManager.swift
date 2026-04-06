@@ -36,6 +36,9 @@ class HealthKitManager: ObservableObject {
     /// Stores any authorization error messages for debugging/UI feedback
     @Published var authorizationError: String?
 
+    /// Error message from the most recent sync operation's Core Data save
+    @Published var lastSyncError: String?
+
     /// Shared singleton instance
     static let shared = HealthKitManager()
 
@@ -109,10 +112,10 @@ class HealthKitManager: ObservableObject {
                     finish()
                     return
                 }
-                let count = await self.syncGlucoseToCorData(context: context, days: 1)
+                let result = await self.syncGlucoseToCorData(context: context, days: 1)
                 #if DEBUG
-                if count > 0 {
-                    print("[HealthKit] Auto-synced \(count) new glucose reading(s).")
+                if result.newImported > 0 {
+                    print("[HealthKit] Auto-synced \(result.newImported) new glucose reading(s).")
                 }
                 #endif
                 // Tell HealthKit we're done processing
@@ -218,10 +221,7 @@ class HealthKitManager: ObservableObject {
                 limit: HKObjectQueryNoLimit,
                 sortDescriptors: sortDescriptors
             ) { _, samples, error in
-                if let error = error {
-                    #if DEBUG
-                    print("Error fetching workouts: \(error.localizedDescription)")
-                    #endif
+                if error != nil {
                     continuation.resume(returning: [])
                     return
                 }
@@ -233,7 +233,7 @@ class HealthKitManager: ObservableObject {
             self.healthStore.execute(query)
         }
     }
-    
+
     /// Legacy completion-based workout fetching for backward compatibility
     func fetchRecentWorkouts(days: Int = 30, completion: @escaping ([HKWorkout]) -> Void) {
         Task {
@@ -265,10 +265,7 @@ class HealthKitManager: ObservableObject {
                 quantitySamplePredicate: predicate,
                 options: .cumulativeSum
             ) { _, result, error in
-                if let error = error {
-                    #if DEBUG
-                    print("Error fetching step count: \(error.localizedDescription)")
-                    #endif
+                if error != nil {
                     continuation.resume(returning: 0)
                     return
                 }
@@ -285,7 +282,7 @@ class HealthKitManager: ObservableObject {
             self.healthStore.execute(query)
         }
     }
-    
+
     /// Legacy completion-based step count fetching for backward compatibility
     func fetchStepCount(for date: Date, completion: @escaping (Double) -> Void) {
         Task {
@@ -316,10 +313,7 @@ class HealthKitManager: ObservableObject {
                 quantitySamplePredicate: predicate,
                 options: .cumulativeSum
             ) { _, result, error in
-                if let error = error {
-                    #if DEBUG
-                    print("Error fetching active calories: \(error.localizedDescription)")
-                    #endif
+                if error != nil {
                     continuation.resume(returning: 0)
                     return
                 }
@@ -336,7 +330,7 @@ class HealthKitManager: ObservableObject {
             self.healthStore.execute(query)
         }
     }
-    
+
     /// Legacy completion-based calorie fetching for backward compatibility
     func fetchActiveCalories(days: Int = 30, completion: @escaping (Double) -> Void) {
         Task {
@@ -366,10 +360,7 @@ class HealthKitManager: ObservableObject {
                 quantitySamplePredicate: predicate,
                 options: .cumulativeSum
             ) { _, result, error in
-                if let error = error {
-                    #if DEBUG
-                    print("Error fetching walking/running distance: \(error.localizedDescription)")
-                    #endif
+                if error != nil {
                     continuation.resume(returning: 0)
                     return
                 }
@@ -420,10 +411,7 @@ class HealthKitManager: ObservableObject {
                 limit: HKObjectQueryNoLimit,
                 sortDescriptors: sortDescriptors
             ) { _, samples, error in
-                if let error = error {
-                    #if DEBUG
-                    print("Error fetching glucose readings: \(error.localizedDescription)")
-                    #endif
+                if error != nil {
                     continuation.resume(returning: [])
                     return
                 }
@@ -537,9 +525,14 @@ class HealthKitManager: ObservableObject {
             )
         }
 
-        return await Self.importWorkoutsToCoreData(workoutDataList: workoutDataList, context: context)
+        let count = await Self.importWorkoutsToCoreData(workoutDataList: workoutDataList, context: context)
+        if count < 0 {
+            self.lastSyncError = "Failed to save exercise data. Please try syncing again."
+            return 0
+        }
+        return count
     }
-    
+
     /// Legacy completion-based exercise sync for backward compatibility
     func syncExerciseToCorData(context: NSManagedObjectContext, days: Int = 30, completion: @escaping (Int) -> Void) {
         Task {
@@ -566,15 +559,16 @@ class HealthKitManager: ObservableObject {
     /// - Parameters:
     ///   - context: NSManagedObjectContext for CoreData operations
     ///   - days: Number of days back to sync (default: 30)
-    /// - Returns: Count of newly imported glucose readings
+    /// - Returns: Tuple of (totalFound: readings found in HealthKit, newImported: newly imported count)
     /// - Note: Deduplication uses timestamp matching (within 1 second tolerance)
-    func syncGlucoseToCorData(context: NSManagedObjectContext, days: Int = 30) async -> Int {
+    func syncGlucoseToCorData(context: NSManagedObjectContext, days: Int = 30) async -> (totalFound: Int, newImported: Int) {
         guard isAuthorized else {
-            return 0
+            return (0, 0)
         }
 
         let glucoseReadings = await fetchGlucoseReadings(days: days)
-        
+        let totalFound = glucoseReadings.count
+
         // Convert to Sendable struct with locale-appropriate unit
         let region = Locale.current.region?.identifier ?? ""
         let unitLabel = (region == "US" || region == "JP") ? "mg/dL" : "mmol/L"
@@ -582,14 +576,19 @@ class HealthKitManager: ObservableObject {
             GlucoseData(date: reading.date, value: reading.value, unit: unitLabel)
         }
 
-        return await Self.importGlucoseToCoreData(glucoseDataList: glucoseDataList, context: context)
+        let count = await Self.importGlucoseToCoreData(glucoseDataList: glucoseDataList, context: context)
+        if count < 0 {
+            self.lastSyncError = "Failed to save glucose data. Please try syncing again."
+            return (totalFound, 0)
+        }
+        return (totalFound, count)
     }
-    
+
     /// Legacy completion-based glucose sync for backward compatibility
     func syncGlucoseToCorData(context: NSManagedObjectContext, days: Int = 30, completion: @escaping (Int) -> Void) {
         Task {
-            let count = await syncGlucoseToCorData(context: context, days: days)
-            completion(count)
+            let result = await syncGlucoseToCorData(context: context, days: days)
+            completion(result.newImported)
         }
     }
 
@@ -632,6 +631,7 @@ class HealthKitManager: ObservableObject {
                     entity.type = workoutData.type
                     entity.duration = workoutData.duration
                     entity.caloriesBurned = workoutData.caloriesBurned
+                    entity.distance = workoutData.distanceKm
                     // Estimate intensity from calories and duration (moderate = 5)
                     if workoutData.duration > 0 {
                         let calPerMin = workoutData.caloriesBurned / workoutData.duration
@@ -653,11 +653,10 @@ class HealthKitManager: ObservableObject {
                 do {
                     try context.save()
                 } catch {
-                    #if DEBUG
-                    print("Error saving exercise data to CoreData: \(error.localizedDescription)")
-                    #endif
+                    continuation.resume(returning: -1)
+                    return
                 }
-                
+
                 continuation.resume(returning: count)
             }
         }
@@ -712,11 +711,10 @@ class HealthKitManager: ObservableObject {
                 do {
                     try context.save()
                 } catch {
-                    #if DEBUG
-                    print("Error saving glucose data to CoreData: \(error.localizedDescription)")
-                    #endif
+                    continuation.resume(returning: -1)
+                    return
                 }
-                
+
                 continuation.resume(returning: count)
             }
         }
@@ -792,6 +790,10 @@ class HealthKitManager: ObservableObject {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
 
+        // Fetch all recent HealthKit workouts so we can skip days that already
+        // have formal workout records (prevents duplicate exercise entries)
+        let recentWorkouts = await fetchRecentWorkouts(days: days)
+
         var dailyDataList: [DailyActivityData] = []
 
         // Fetch daily stats for each day
@@ -811,6 +813,15 @@ class HealthKitManager: ObservableObject {
 
             // Skip days with minimal activity (less than 500 steps)
             guard steps >= 500 else { continue }
+
+            // Skip days that have any formal HealthKit workouts recorded.
+            // Those workouts are already imported by syncExerciseToCorData,
+            // and their steps/distance/calories are included in the daily
+            // aggregates, so creating a daily activity entry would duplicate them.
+            let hasWorkoutOnDay = recentWorkouts.contains { workout in
+                workout.startDate >= dayStart && workout.startDate < dayEnd
+            }
+            guard !hasWorkoutOnDay else { continue }
 
             let distanceKm = await fetchDailyStatistic(
                 identifier: .distanceWalkingRunning,
@@ -840,7 +851,12 @@ class HealthKitManager: ObservableObject {
 
         guard !dailyDataList.isEmpty else { return (0, 0) }
 
-        return await Self.importDailyActivityToCoreData(dailyDataList: dailyDataList, context: context)
+        let result = await Self.importDailyActivityToCoreData(dailyDataList: dailyDataList, context: context)
+        if result.new < 0 {
+            self.lastSyncError = "Failed to save daily activity data. Please try syncing again."
+            return (new: 0, updated: 0)
+        }
+        return result
     }
 
     /// Imports daily activity data to CoreData (nonisolated to work with context.perform)
@@ -869,17 +885,16 @@ class HealthKitManager: ObservableObject {
                     do {
                         let existing = try context.fetch(fetchRequest)
                         if !existing.isEmpty {
-                            // Already have this day's data — update it with latest values
+                            // Already have this day's data — update with latest values
                             if let entity = existing.first {
                                 entity.duration = activityData.estimatedMinutes
                                 entity.caloriesBurned = activityData.calories
                                 entity.distance = activityData.distanceKm
                                 entity.notes = String(format: "DailyActivity | Steps: %.0f | Distance: %.2f km", activityData.steps, activityData.distanceKm)
-                                // Intensity based on steps: light (<5000), moderate (5000-10000), vigorous (>10000)
-                                if activityData.steps >= 10000 {
-                                    entity.intensity = 7
-                                } else if activityData.steps >= 5000 {
-                                    entity.intensity = 5
+                                // Intensity from calories/minute (same formula as formal workouts)
+                                if activityData.estimatedMinutes > 0 {
+                                    let calPerMin = activityData.calories / activityData.estimatedMinutes
+                                    entity.intensity = min(10, max(1, calPerMin / 2.0))
                                 } else {
                                     entity.intensity = 3
                                 }
@@ -894,7 +909,8 @@ class HealthKitManager: ObservableObject {
                         continue
                     }
 
-                    // Create new ExerciseSessionEntity for this day's walking activity
+                    // Create new ExerciseSessionEntity for this day's ambient walking activity
+                    // (workout contributions already subtracted by the caller)
                     let entity = ExerciseSessionEntity(context: context)
                     entity.id = UUID()
                     entity.startDate = activityData.date
@@ -905,11 +921,10 @@ class HealthKitManager: ObservableObject {
                     entity.distance = activityData.distanceKm
                     entity.notes = String(format: "DailyActivity | Steps: %.0f | Distance: %.2f km", activityData.steps, activityData.distanceKm)
 
-                    // Intensity based on step count
-                    if activityData.steps >= 10000 {
-                        entity.intensity = 7
-                    } else if activityData.steps >= 5000 {
-                        entity.intensity = 5
+                    // Intensity from calories/minute (same formula as formal workouts)
+                    if activityData.estimatedMinutes > 0 {
+                        let calPerMin = activityData.calories / activityData.estimatedMinutes
+                        entity.intensity = min(10, max(1, calPerMin / 2.0))
                     } else {
                         entity.intensity = 3
                     }
@@ -921,9 +936,8 @@ class HealthKitManager: ObservableObject {
                 do {
                     try context.save()
                 } catch {
-                    #if DEBUG
-                    print("Error saving daily activity data to CoreData: \(error.localizedDescription)")
-                    #endif
+                    continuation.resume(returning: (new: -1, updated: 0))
+                    return
                 }
 
                 continuation.resume(returning: (new: newCount, updated: updatedCount))

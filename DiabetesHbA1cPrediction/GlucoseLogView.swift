@@ -41,6 +41,9 @@ struct GlucoseLogView: View {
     @State private var syncMessage = ""
     @State private var isSyncing = false
     @State private var syncSuccess = false
+    @State private var showSaveError = false
+    @State private var saveErrorMessage = ""
+    @State private var showHealthKitError = false
 
     // Manual entry state
     @State private var glucoseValue: String = ""
@@ -90,6 +93,7 @@ struct GlucoseLogView: View {
                     Image(systemName: "plus.circle.fill")
                         .font(.title2)
                         .foregroundColor(.blue)
+                        .accessibilityLabel("Add glucose reading")
                 }
             }
         }
@@ -101,6 +105,21 @@ struct GlucoseLogView: View {
         } message: {
             Text(syncMessage)
         }
+        .alert("Save Error", isPresented: $showSaveError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(saveErrorMessage)
+        }
+        .alert("HealthKit Error", isPresented: $showHealthKitError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(HealthKitManager.shared.authorizationError ?? "HealthKit could not be authorized. Check Settings > Health > Data Access & Devices.")
+        }
+        .onAppear {
+            if let error = HealthKitManager.shared.authorizationError, !error.isEmpty {
+                showHealthKitError = true
+            }
+        }
     }
 
     // MARK: - Landscape Body
@@ -109,14 +128,15 @@ struct GlucoseLogView: View {
             // Fixed header: title on left, + button on right
             HStack {
                 Text("Glucose Readings")
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.title3.bold())
 
                 Spacer()
-                
+
                 Button(action: { showAddSheet = true }) {
                     Image(systemName: "plus.circle.fill")
                         .font(.title2)
                         .foregroundColor(.blue)
+                        .accessibilityLabel("Add glucose reading")
                 }
             }
             .padding(.horizontal)
@@ -142,7 +162,7 @@ struct GlucoseLogView: View {
                                     Image(systemName: syncSuccess ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
                                 }
                                 Text("Sync Health")
-                                    .font(.system(size: 12))
+                                    .font(.caption2)
                             }
                             .foregroundColor(syncSuccess ? .green : .blue)
                             .padding(.horizontal, 10)
@@ -152,6 +172,7 @@ struct GlucoseLogView: View {
                             .animation(.easeInOut(duration: 0.3), value: syncSuccess)
                         }
                         .disabled(isSyncing)
+                        .accessibilityLabel(isSyncing ? "Syncing with Apple Health" : syncSuccess ? "Health data synced successfully" : "Sync from Apple Health")
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 8)
@@ -169,6 +190,11 @@ struct GlucoseLogView: View {
             Button("OK") { }
         } message: {
             Text(syncMessage)
+        }
+        .alert("Save Error", isPresented: $showSaveError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(saveErrorMessage)
         }
     }
 
@@ -194,7 +220,7 @@ struct GlucoseLogView: View {
                                     Image(systemName: syncSuccess ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
                                 }
                                 Text("Sync Health")
-                                    .font(.system(size: 13.2))
+                                    .font(.caption)
                             }
                             .foregroundColor(syncSuccess ? .green : .blue)
                             .padding(.horizontal, 13.2)
@@ -204,6 +230,7 @@ struct GlucoseLogView: View {
                             .animation(.easeInOut(duration: 0.3), value: syncSuccess)
                         }
                         .disabled(isSyncing)
+                        .accessibilityLabel(isSyncing ? "Syncing with Apple Health" : syncSuccess ? "Health data synced successfully" : "Sync from Apple Health")
                     }
                 }
                 .padding(.horizontal)
@@ -250,6 +277,7 @@ struct GlucoseLogView: View {
 
                         HStack(spacing: 0) {
                             // Scrollable chart area
+                            ScrollViewReader { scrollProxy in
                             ScrollView(.horizontal, showsIndicators: true) {
                                 Chart {
                                     // Horizontal reference lines based on unit type
@@ -322,7 +350,7 @@ struct GlucoseLogView: View {
                                                 y: .value("Glucose", displayVal)
                                             )
                                             .foregroundStyle(color)
-                                            .symbolSize(50)
+                                            .symbolSize(25)
                                         }
                                     }
                                 }
@@ -332,7 +360,7 @@ struct GlucoseLogView: View {
                                     AxisMarks(position: .bottom, values: .automatic(desiredCount: max(4, sortedLine.count / 20))) { _ in
                                         AxisGridLine()
                                         AxisValueLabel(format: .dateTime.month(.twoDigits).day(.twoDigits))
-                                            .font(.system(size: isPortrait ? 10 : 9))
+                                            .font(.caption2)
                                     }
                                 }
                                 .chartPlotStyle { plotArea in
@@ -340,8 +368,17 @@ struct GlucoseLogView: View {
                                         .frame(height: plotHeight)
                                 }
                                 .frame(width: calculatedWidth, height: chartHeight)
+                                .id("glucoseChartTrailing")
                             }
                             .defaultScrollAnchor(.trailing)
+                            .onAppear {
+                                // Explicit scroll to trailing edge as fallback
+                                // when .defaultScrollAnchor is unreliable
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    scrollProxy.scrollTo("glucoseChartTrailing", anchor: .trailing)
+                                }
+                            }
+                            }
 
                             // Pinned Y-axis on the right — stays fixed while chart scrolls
                             Chart {
@@ -372,17 +409,15 @@ struct GlucoseLogView: View {
                     )
                     .overlay(alignment: .leading) {
                         // Vertical y-axis label — stays pinned on left
-                        let yLabel = "Glucose Level \(chartUnitType)"
-                        VStack(spacing: 0) {
-                            ForEach(Array(yLabel.enumerated()), id: \.offset) { _, char in
-                                Text(String(char))
-                                    .font(.system(size: 7, weight: .semibold))
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .offset(x: -2)
+                        Text("Glucose Level \(chartUnitType)")
+                            .font(.system(size: 9.5, weight: .semibold))
+                            .foregroundColor(.secondary)
+                            .rotationEffect(.degrees(-90))
+                            .fixedSize()
+                            .offset(x: -46)
                     }
                     .padding(.horizontal)
+                    .accessibilityLabel("Glucose readings chart showing last 30 days of data")
                 }
             }
         }
@@ -394,8 +429,9 @@ struct GlucoseLogView: View {
         if glucoseReadings.isEmpty {
             VStack(alignment: .center, spacing: 12) {
                 Image(systemName: "drop.fill")
-                    .font(.system(size: 40))
+                    .font(.largeTitle)
                     .foregroundColor(.gray)
+                    .accessibilityHidden(true)
 
                 Text("No Glucose Readings")
                     .font(.headline)
@@ -428,6 +464,7 @@ struct GlucoseLogView: View {
                                     Image(systemName: trendIcon(for: trend))
                                         .font(.caption2)
                                         .foregroundColor(glucoseColor(for: displayVal, unit: displayUnit))
+                                        .accessibilityLabel("Glucose trend: \(trend)")
                                 }
                             }
 
@@ -447,6 +484,7 @@ struct GlucoseLogView: View {
                                 Image(systemName: sourceIcon(for: reading.source ?? ""))
                                     .font(.headline)
                                     .foregroundColor(.blue)
+                                    .accessibilityHidden(true)
                             }
 
                             Text(sourceDisplayName(reading.source ?? "Unknown"))
@@ -459,7 +497,12 @@ struct GlucoseLogView: View {
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
                             moc.delete(reading)
-                            try? moc.save()
+                            do {
+                                try moc.save()
+                            } catch {
+                                saveErrorMessage = "Could not delete reading. Please try again."
+                                showSaveError = true
+                            }
                         } label: {
                             Label("Delete", systemImage: "trash")
                         }
@@ -641,17 +684,23 @@ struct GlucoseLogView: View {
             }
 
             // Sync glucose readings from HealthKit to CoreData (includes FreeStyle Libre 2 data)
-            let glucoseCount = await healthKitManager.syncGlucoseToCorData(context: moc, days: 30)
+            let syncResult = await healthKitManager.syncGlucoseToCorData(context: moc, days: 30)
 
             await MainActor.run {
-                if glucoseCount > 0 {
-                    syncMessage = "Sync completed successfully! Imported \(glucoseCount) new glucose reading\(glucoseCount == 1 ? "" : "s") from HealthKit."
+                // Check for sync save errors
+                if let syncError = healthKitManager.lastSyncError {
+                    syncMessage = "Sync encountered an error: \(syncError)"
+                    healthKitManager.lastSyncError = nil
+                } else if syncResult.newImported > 0 {
+                    syncMessage = "Sync completed successfully! Imported \(syncResult.newImported) new glucose reading\(syncResult.newImported == 1 ? "" : "s") from HealthKit."
+                } else if syncResult.totalFound > 0 {
+                    syncMessage = "Sync completed. Your glucose readings are already up to date (\(syncResult.totalFound) reading\(syncResult.totalFound == 1 ? "" : "s") in HealthKit, all previously synced)."
                 } else {
-                    syncMessage = "Sync completed. No new glucose readings found in HealthKit for the last 30 days."
+                    syncMessage = "Sync completed. No glucose readings found in HealthKit for the last 30 days."
                 }
                 showSyncAlert = true
                 isSyncing = false
-                syncSuccess = true
+                syncSuccess = healthKitManager.lastSyncError == nil
 
                 // Reset success indicator after 10 seconds
                 DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
@@ -671,9 +720,8 @@ struct GlucoseLogView: View {
         do {
             try moc.save()
         } catch {
-            #if DEBUG
-            print("Error deleting reading: \(error.localizedDescription)")
-            #endif
+            saveErrorMessage = "Could not delete reading. Please try again."
+            showSaveError = true
         }
     }
 }
@@ -728,6 +776,9 @@ struct AddGlucoseReadingSheet: View {
     var moc: NSManagedObjectContext
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @ObservedObject private var hba1cProfile = HbA1cUserProfile.shared
+
+    @State private var showSaveError = false
+    @State private var saveErrorMessage = ""
 
     // MARK: - Segmented tab selection
     @State private var selectedEntryType: AddReadingEntryType = .glucose
@@ -1001,6 +1052,11 @@ struct AddGlucoseReadingSheet: View {
         } message: {
             Text("Is this HbA1c value from a lab blood test? Do NOT enter CGM estimate — this app's predictions require actual lab results.")
         }
+        .alert("Save Error", isPresented: $showSaveError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(saveErrorMessage)
+        }
     }
 
     /// Describes the weight this lab result will receive based on its date
@@ -1035,9 +1091,8 @@ struct AddGlucoseReadingSheet: View {
             try moc.save()
             isPresented = false
         } catch {
-            #if DEBUG
-            print("Error saving glucose reading: \(error.localizedDescription)")
-            #endif
+            saveErrorMessage = "Could not save glucose reading. Please try again."
+            showSaveError = true
         }
     }
 
@@ -1065,9 +1120,8 @@ struct AddGlucoseReadingSheet: View {
             try moc.save()
             isPresented = false
         } catch {
-            #if DEBUG
-            print("Error saving HbA1c lab result: \(error.localizedDescription)")
-            #endif
+            saveErrorMessage = "Could not save HbA1c lab result. Please try again."
+            showSaveError = true
         }
     }
 }

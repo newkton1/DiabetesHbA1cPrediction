@@ -13,6 +13,7 @@ struct UserProfileView: View {
     // MARK: - Environment
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
@@ -70,7 +71,7 @@ struct UserProfileView: View {
             if !isPortrait {
                 HStack {
                     Text("User")
-                        .font(.system(size: 22, weight: .bold))
+                        .font(.title3.bold())
                     Spacer()
                     Button(action: saveProfile) {
                         if isSaving {
@@ -210,6 +211,7 @@ struct UserProfileView: View {
                         Text("\(alcoholUnitsPerWeek)")
                             .frame(width: 40)
                     }
+                    .accessibilityValue(Text("\(alcoholUnitsPerWeek) units per week"))
                 }
             }
 
@@ -269,6 +271,7 @@ struct UserProfileView: View {
                             Image(systemName: "chevron.up.chevron.down")
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
+                                .accessibilityHidden(true)
                         }
                     }
                 }
@@ -299,6 +302,7 @@ struct UserProfileView: View {
                             Image(systemName: "chevron.up.chevron.down")
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
+                                .accessibilityHidden(true)
                         }
                     }
                 }
@@ -316,6 +320,40 @@ struct UserProfileView: View {
 
             // MARK: - Section 5: About
             Section(header: Text("About")) {
+                Button {
+                    if let url = URL(string: "https://www.youtube.com/watch?v=4XrTVFx0jwc&list=PLEMcKQpcQpgup74VYGWHEFwembOmnPt_U") {
+                        openURL(url)
+                    }
+                } label: {
+                    Label("Watch Onboarding Guide", systemImage: "play.circle")
+                }
+
+                Button {
+                    if let url = URL(string: "https://discord.gg/DWtt7vPQkb") {
+                        openURL(url)
+                    }
+                } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Label("Join the Discord Community", systemImage: "bubble.left.and.bubble.right.fill")
+                        Text("Requires free Discord app for iPhone. Community can also be accessed on desktop from a browser.")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Button {
+                    if let url = URL(string: "https://chat.whatsapp.com/JicFbQNtyYaFILacW1MAxu") {
+                        openURL(url)
+                    }
+                } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Label("Join the WhatsApp Community", systemImage: "message.fill")
+                        Text("Requires free WhatsApp app for iPhone.")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
                 NavigationLink(destination: PrivacyPolicyView()) {
                     Label("Privacy Policy", systemImage: "lock.shield")
                 }
@@ -337,7 +375,7 @@ struct UserProfileView: View {
             if isPortrait {
                 ToolbarItem(placement: .topBarLeading) {
                     Text("User")
-                        .font(.system(size: 22, weight: .bold))
+                        .font(.title3.bold())
                         .fixedSize(horizontal: true, vertical: false)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {

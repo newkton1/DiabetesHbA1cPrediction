@@ -25,12 +25,9 @@ struct ContentView: View {
             }
         }
 
-        /// Shorter label for the tab bar to prevent truncation
+        /// Label for the tab bar
         var tabLabel: String {
-            switch self {
-            case .exercise: return "Xcise"
-            default: return rawValue
-            }
+            return rawValue
         }
     }
 
@@ -54,16 +51,16 @@ struct ContentView: View {
         }
         .tint(selectedTab == .meals ? .planAccent : .blue)
         .onChange(of: scenePhase) { _, newPhase in
-            // Reset to dashboard once per launch cycle when the app becomes active.
-            // After the first reset, hasResetOnLaunch prevents the tab from snapping
-            // back every time the user briefly switches away (e.g. Control Centre).
+            // Reset to dashboard exactly once per cold launch.
+            // @State already initialises hasResetOnLaunch to false on a fresh
+            // process launch, so we do NOT clear it when the app backgrounds.
+            // Clearing it on .background was causing an intermittent glitch:
+            // a brief system event (notification, HealthKit sync, Control Centre)
+            // would cycle the scene phase through .background → .active and
+            // snap the user back to the Dashboard mid-session.
             if newPhase == .active && !hasResetOnLaunch {
                 selectedTab = .dashboard
                 hasResetOnLaunch = true
-            }
-            // When the app moves to the background, arm the reset for the next launch.
-            if newPhase == .background {
-                hasResetOnLaunch = false
             }
         }
     }

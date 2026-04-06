@@ -12,7 +12,7 @@ struct WalkRecommendationCard: View {
         Button(action: { onTap?() }) {
             HStack(alignment: .top, spacing: 14) {
                 Image(systemName: exerciseType.iconName)
-                    .font(.system(size: 40))
+                    .font(.largeTitle)
                     .foregroundColor(.white)
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Post-Meal \(exerciseType.label)")
@@ -29,6 +29,7 @@ struct WalkRecommendationCard: View {
                     Image(systemName: "chevron.right")
                         .foregroundColor(.white.opacity(0.6))
                         .padding(.top, 4)
+                        .accessibilityHidden(true)
                 }
             }
             .padding(14)
@@ -43,6 +44,8 @@ struct WalkRecommendationCard: View {
             .shadow(color: .green.opacity(0.25), radius: 6, x: 0, y: 3)
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Post-meal \(exerciseType.label) recommendation: \(recommendation)")
     }
 }
 

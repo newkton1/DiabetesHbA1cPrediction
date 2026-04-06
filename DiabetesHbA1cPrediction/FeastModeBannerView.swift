@@ -7,6 +7,7 @@ struct FeastModeBannerView: View {
             Image(systemName: "party.popper.fill")
                 .font(.title2)
                 .foregroundColor(.feastAccent)
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
                 Text("Feast Mode")
                     .font(.subheadline).fontWeight(.bold)
@@ -24,6 +25,7 @@ struct FeastModeBannerView: View {
             RoundedRectangle(cornerRadius: 10)
                 .stroke(Color.feastAccent.opacity(0.30), lineWidth: 1)
         )
+        .accessibilityElement(children: .combine)
     }
 }
 

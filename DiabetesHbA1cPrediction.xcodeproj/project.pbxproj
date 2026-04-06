@@ -33,6 +33,7 @@
 		932B8B0B2F50F8830076353B /* Exceptions for "DiabetesHbA1cPrediction" folder in "DiabetesHbA1cPrediction" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				index.html,
 				Info.plist,
 			);
 			target = 93CC102C2F400B20003B36A4 /* DiabetesHbA1cPrediction */;
@@ -411,12 +412,12 @@
 				CODE_SIGN_ENTITLEMENTS = DiabetesHbA1cPrediction/DiabetesHbA1cPrediction.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 19;
 				DEVELOPMENT_TEAM = QN365Z622F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DiabetesHbA1cPrediction/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = PredictHbA1c;
+				INFOPLIST_KEY_CFBundleDisplayName = "Display Feast";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "This app reads your health data from ​Apple ​Health to provide personalized ​Hb​A1c predictions and diabetes insights. ";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -455,12 +456,12 @@
 				CODE_SIGN_ENTITLEMENTS = DiabetesHbA1cPrediction/DiabetesHbA1cPrediction.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 19;
 				DEVELOPMENT_TEAM = QN365Z622F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DiabetesHbA1cPrediction/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = PredictHbA1c;
+				INFOPLIST_KEY_CFBundleDisplayName = "Display Feast";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "This app reads your health data from ​Apple ​Health to provide personalized ​Hb​A1c predictions and diabetes insights. ";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

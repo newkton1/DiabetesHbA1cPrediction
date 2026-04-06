@@ -25,6 +25,9 @@ struct ExerciseLogView: View {
     @State private var syncSuccess = false
     @State private var showDeleteConfirmation = false
     @State private var exerciseToDelete: ExerciseSessionEntity?
+    @State private var showSaveError = false
+    @State private var saveErrorMessage = ""
+    @State private var showHealthKitError = false
 
     private var isPortrait: Bool {
         verticalSizeClass == .regular && horizontalSizeClass == .compact
@@ -46,7 +49,7 @@ struct ExerciseLogView: View {
                 if isPortrait {
                     ToolbarItem(placement: .topBarLeading) {
                         Text("Exercise Log")
-                            .font(.system(size: 22, weight: .bold))
+                            .font(.title3.bold())
                             .fixedSize(horizontal: true, vertical: false)
                     }
                     ToolbarItem(placement: .topBarTrailing) {
@@ -78,6 +81,21 @@ struct ExerciseLogView: View {
                 }
             } message: {
                 Text("Are you sure you want to delete this exercise session?")
+            }
+            .alert("Save Error", isPresented: $showSaveError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(saveErrorMessage)
+            }
+            .alert("HealthKit Error", isPresented: $showHealthKitError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(HealthKitManager.shared.authorizationError ?? "HealthKit could not be authorized. Check Settings > Health > Data Access & Devices.")
+            }
+            .onAppear {
+                if let error = HealthKitManager.shared.authorizationError, !error.isEmpty {
+                    showHealthKitError = true
+                }
             }
         }
     }
@@ -138,12 +156,13 @@ struct ExerciseLogView: View {
             // Fixed header: title on left, + button on right
             HStack {
                 Text("Exercise Log")
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.title3.bold())
                 Spacer()
                 Button(action: { showAddSheet = true }) {
                     Image(systemName: "plus.circle.fill")
                         .font(.title2)
                         .foregroundColor(.blue)
+                        .accessibilityLabel("Add exercise session")
                 }
             }
             .padding(.horizontal)
@@ -167,7 +186,7 @@ struct ExerciseLogView: View {
                                     Image(systemName: syncSuccess ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
                                 }
                                 Text("Sync Health")
-                                    .font(.system(size: 12))
+                                    .font(.caption2)
                             }
                             .foregroundColor(syncSuccess ? .green : .blue)
                             .padding(.horizontal, 10)
@@ -227,7 +246,7 @@ struct ExerciseLogView: View {
                     Image(systemName: syncSuccess ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
                 }
                 Text("Sync Health")
-                    .font(.system(size: 13.2))
+                    .font(.caption)
             }
             .foregroundColor(syncSuccess ? .green : .blue)
             .padding(.horizontal, 13.2)
@@ -237,13 +256,15 @@ struct ExerciseLogView: View {
             .animation(.easeInOut(duration: 0.3), value: syncSuccess)
         }
         .disabled(isSyncing)
+        .accessibilityLabel(isSyncing ? "Syncing with Apple Health" : syncSuccess ? "Health data synced" : "Sync from Apple Health")
     }
 
     private var emptyStateView: some View {
         VStack(alignment: .center, spacing: 12) {
             Image(systemName: "figure.walk")
-                .font(.system(size: 40))
+                .font(.largeTitle)
                 .foregroundColor(.gray)
+                .accessibilityHidden(true)
 
             Text("No Exercise Sessions")
                 .font(.headline)
@@ -281,7 +302,7 @@ struct ExerciseLogView: View {
             let activityResult = await healthKitManager.syncDailyActivityToCorData(context: moc, days: 30)
 
             // Also sync glucose data while we're at it
-            let glucoseCount = await healthKitManager.syncGlucoseToCorData(context: moc, days: 30)
+            let glucoseResult = await healthKitManager.syncGlucoseToCorData(context: moc, days: 30)
 
             // Build a descriptive sync message
             var messageParts: [String] = []
@@ -294,11 +315,15 @@ struct ExerciseLogView: View {
             if activityResult.updated > 0 {
                 messageParts.append("\(activityResult.updated) day\(activityResult.updated == 1 ? "" : "s") of walking updated")
             }
-            if glucoseCount > 0 {
-                messageParts.append("\(glucoseCount) new glucose reading\(glucoseCount == 1 ? "" : "s")")
+            if glucoseResult.newImported > 0 {
+                messageParts.append("\(glucoseResult.newImported) new glucose reading\(glucoseResult.newImported == 1 ? "" : "s")")
             }
 
-            if messageParts.isEmpty {
+            // Check for sync save errors
+            if let syncError = healthKitManager.lastSyncError {
+                syncMessage = "Sync encountered an error: \(syncError)"
+                healthKitManager.lastSyncError = nil
+            } else if messageParts.isEmpty {
                 syncMessage = "Sync completed. No new data found in HealthKit for the last 30 days."
             } else {
                 syncMessage = "Sync completed successfully! \(messageParts.joined(separator: ", "))."
@@ -306,7 +331,7 @@ struct ExerciseLogView: View {
 
             showSyncAlert = true
             isSyncing = false
-            syncSuccess = true
+            syncSuccess = healthKitManager.lastSyncError == nil
 
             // Reset sync success indicator after 10 seconds
             DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
@@ -325,22 +350,20 @@ struct ExerciseLogView: View {
         do {
             try moc.save()
         } catch {
-            #if DEBUG
-            print("Error deleting exercise: \(error.localizedDescription)")
-            #endif
+            saveErrorMessage = "Could not delete exercise. Please try again."
+            showSaveError = true
         }
     }
 
     /// Deletes a single exercise session
     func deleteSingleExercise(_ exercise: ExerciseSessionEntity) {
         moc.delete(exercise)
-        
+
         do {
             try moc.save()
         } catch {
-            #if DEBUG
-            print("Error deleting exercise: \(error.localizedDescription)")
-            #endif
+            saveErrorMessage = "Could not delete exercise. Please try again."
+            showSaveError = true
         }
     }
 }
@@ -639,9 +662,9 @@ struct ExerciseRowView: View {
 
             Spacer()
 
-            // Vertical intensity bar on far right, closely matching label height
+            // Vertical intensity bar on far right with rotated label
             HStack(alignment: .center, spacing: 3) {
-                // Bar with fixed segment heights to match label
+                // Bar with fixed segment heights
                 VStack(spacing: 0.5) {
                     ForEach((1...10).reversed(), id: \.self) { level in
                         Rectangle()
@@ -650,14 +673,12 @@ struct ExerciseRowView: View {
                     }
                 }
 
-                // Vertical letter label
-                VStack(spacing: 0) {
-                    ForEach(Array("Intensity"), id: \.self) { char in
-                        Text(String(char))
-                            .font(.system(size: 7))
-                            .foregroundColor(.secondary)
-                    }
-                }
+                // Rotated label
+                Text("Intensity")
+                    .font(.system(size: 9.5))
+                    .foregroundColor(.secondary)
+                    .rotationEffect(.degrees(-90))
+                    .fixedSize()
             }
         }
         .padding(.vertical, 8)
@@ -757,6 +778,8 @@ struct ExerciseRowView: View {
 struct AddExerciseSessionSheet: View {
     @Binding var isPresented: Bool
     var moc: NSManagedObjectContext
+    @State private var showSaveError = false
+    @State private var saveErrorMessage = ""
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     @State private var selectedType = "Walking"
@@ -882,6 +905,11 @@ struct AddExerciseSessionSheet: View {
                     .disabled(selectedType.isEmpty || durationMinutes == 0)
                 }
             }
+            .alert("Save Error", isPresented: $showSaveError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(saveErrorMessage)
+            }
         }
     }
 
@@ -905,9 +933,8 @@ struct AddExerciseSessionSheet: View {
             try moc.save()
             isPresented = false
         } catch {
-            #if DEBUG
-            print("Error saving exercise: \(error.localizedDescription)")
-            #endif
+            saveErrorMessage = "Could not save exercise session. Please try again."
+            showSaveError = true
         }
     }
 

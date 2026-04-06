@@ -4248,6 +4248,18 @@
     "glycemicIndex": 55
   },
   {
+    "name": "Nagasaki Sara Udon (皿うどん)",
+    "category": "Asian & Japanese",
+    "servingSize": 1.0,
+    "servingUnit": "plate",
+    "calories": 586.0,
+    "carbohydrates": 58.3,
+    "protein": 21.4,
+    "fat": 32.4,
+    "fiber": 6.2,
+    "glycemicIndex": 70
+  },
+  {
     "name": "Somen Noodles",
     "category": "Asian & Japanese",
     "servingSize": 1.0,

@@ -146,6 +146,7 @@ struct CountryPickerView: View {
                             if country.code == profile.countryCode {
                                 Image(systemName: "checkmark")
                                     .foregroundStyle(.blue)
+                                    .accessibilityHidden(true)
                             }
                         }
                     }
@@ -183,6 +184,7 @@ struct HbA1cSettingsView: View {
                         Image(systemName: "chevron.right")
                             .font(.caption)
                             .foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
                     }
                 }
                 .foregroundStyle(.primary)
@@ -272,8 +274,9 @@ struct HbA1cOnboardingView: View {
             Spacer()
             
             Image(systemName: "globe")
-                .font(.system(size: 60))
+                .font(.largeTitle)
                 .foregroundStyle(.blue)
+                .accessibilityHidden(true)
             
             Text("HbA1c Units")
                 .font(.largeTitle)
@@ -294,6 +297,7 @@ struct HbA1cOnboardingView: View {
                         Text(profile.countryName)
                         Image(systemName: "chevron.right")
                             .font(.caption)
+                            .accessibilityHidden(true)
                     }
                     .padding()
                     .background(Color(.secondarySystemBackground))

@@ -89,33 +89,35 @@ func fromCanonicalIFCC(value ifccValue: Double, to unit: HbA1cUnit) -> Double {
     }
 }
 
-// MARK: - Diagnostic Thresholds
+// MARK: - Range Thresholds
 
-/// HbA1c diagnostic thresholds (stored in IFCC mmol/mol)
+/// HbA1c range thresholds (stored in IFCC mmol/mol)
+/// Based on commonly referenced clinical thresholds for informational purposes
 struct HbA1cThresholds {
-    /// Normal: < 39 mmol/mol (< 5.7%)
+    /// Normal range: < 39 mmol/mol (< 5.7%)
     static let normalUpperBound: Double = 39.0
-    
-    /// Prediabetes: 39-47 mmol/mol (5.7-6.4%)
+
+    /// Above typical range: 39-47 mmol/mol (5.7-6.4%)
     static let prediabetesLowerBound: Double = 39.0
     static let prediabetesUpperBound: Double = 47.0
-    
-    /// Diabetes: ≥ 48 mmol/mol (≥ 6.5%)
+
+    /// Elevated range: ≥ 48 mmol/mol (≥ 6.5%)
     static let diabetesLowerBound: Double = 48.0
-    
-    /// Good control target: < 53 mmol/mol (< 7.0%)
+
+    /// Moderately elevated target: < 53 mmol/mol (< 7.0%)
     static let goodControlTarget: Double = 53.0
     
-    /// Returns the risk category for a given IFCC value
+    /// Returns the range category for a given IFCC value
+    /// NOTE: Labels are deliberately non-diagnostic to comply with Apple Guideline 5.1.1(ix)
     static func riskCategory(forIFCC value: Double) -> String {
         if value < normalUpperBound {
-            return "Normal"
+            return "Normal Range"
         } else if value < diabetesLowerBound {
-            return "Prediabetes"
+            return "Above Typical Range"
         } else if value < goodControlTarget {
-            return "Diabetes - Good Control"
+            return "Moderately Elevated"
         } else {
-            return "Diabetes - Needs Improvement"
+            return "Elevated"
         }
     }
     
