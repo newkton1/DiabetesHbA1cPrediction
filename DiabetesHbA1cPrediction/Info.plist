@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.diabetesfeast.healthkit.refresh</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Diabetes Feast</string>
 	<key>CFBundleExecutable</key>
@@ -19,13 +23,9 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>This app reads your health data from Apple Health to provide personalized HbA1c predictions and diabetes management insights.</string>
+	<string>Diabetes Feast reads your glucose and activity data from Apple Health to show wellness trends between your lab results. This is a wellness app — not a medical device.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>This app does not currently write data to Apple Health. This permission is reserved for potential future features.</string>
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>com.diabetesfeast.healthkit.refresh</string>
-	</array>
+	<string>Diabetes Feast does not write data to Apple Health.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>processing</string>

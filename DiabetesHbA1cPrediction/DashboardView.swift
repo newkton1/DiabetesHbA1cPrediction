@@ -264,7 +264,7 @@ struct DashboardView: View {
                     UserDefaults.standard.set(true, forKey: "dawnEffectAlertDismissed")
                 }
             } message: {
-                Text("Your early morning readings appear consistently elevated without meals. This pattern is sometimes called the dawn effect and affects about 20% of Type 2 diabetics. The app has adjusted your HbA1c estimate to account for this. We recommend discussing this with your endocrinologist. You can enable or disable this in your profile under Health Conditions.")
+                Text("Your early morning readings appear consistently elevated without meals. This pattern is sometimes called the dawn effect. The app has noted this in your wellness estimate. You may find it interesting to share this observation with your healthcare provider. You can enable or disable this in your profile under Health Conditions.")
             }
             .onReceive(staleDataTimer) { time in
                 currentTime = time
@@ -1034,16 +1034,16 @@ private struct StaleDataWarningBanner: View {
     }
 }
 
-// MARK: - Medical Disclaimer Banner
-/// A compact disclaimer banner reminding users that predictions are not medical advice.
-/// Displayed wherever HbA1c predictions or risk categories appear.
+// MARK: - Wellness Disclaimer Banner
+/// A compact disclaimer banner reminding users that this is a wellness app providing estimates only.
+/// Displayed wherever HbA1c estimates or trend categories appear.
 struct MedicalDisclaimerBanner: View {
     var body: some View {
         HStack(alignment: .top, spacing: 6) {
             Image(systemName: "info.circle")
                 .font(.caption2)
                 .foregroundColor(.secondary)
-            Text("For informational purposes only — not a substitute for professional medical advice.")
+            Text("Diabetes Feast is a wellness app. Estimates shown are for personal tracking only — not medical diagnoses or treatment advice.")
                 .font(.caption2)
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

@@ -92,7 +92,7 @@ struct DataExportView: View {
     private func exportAllData() {
         let export: [String: Any] = [
             "exportDate": iso8601.string(from: Date()),
-            "appVersion": "1.0.0 (Beta)",
+            "appVersion": "1.0",
             "userProfile": exportUserProfiles(),
             "healthConditions": exportHealthConditions(),
             "glucoseReadings": exportGlucoseReadings(),

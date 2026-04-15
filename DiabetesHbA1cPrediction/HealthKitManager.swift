@@ -387,14 +387,14 @@ class HealthKitManager: ObservableObject {
     /// - Manual glucose entries by the user
     ///
     /// - Parameter days: Number of days back to query (default: 30)
-    /// - Returns: Array of tuples containing (date, glucose value in mg/dL)
+    /// - Returns: Tuple of (sampled readings array, raw HealthKit sample count before filtering)
     /// - Note: Glucose values are in mg/dL (standard unit for HealthKit blood glucose data)
-    func fetchGlucoseReadings(days: Int = 30) async -> [(date: Date, value: Double)] {
+    func fetchGlucoseReadings(days: Int = 30) async -> (readings: [(date: Date, value: Double)], rawCount: Int) {
         guard isAuthorized else {
-            return []
+            return (readings: [], rawCount: 0)
         }
 
-        guard let glucoseType = HKQuantityType.quantityType(forIdentifier: .bloodGlucose) else { return [] }
+        guard let glucoseType = HKQuantityType.quantityType(forIdentifier: .bloodGlucose) else { return (readings: [], rawCount: 0) }
 
         let calendar = Calendar.current
         let startDate = calendar.date(byAdding: .day, value: -days, to: Date()) ?? Date()
@@ -412,14 +412,16 @@ class HealthKitManager: ObservableObject {
                 sortDescriptors: sortDescriptors
             ) { _, samples, error in
                 if error != nil {
-                    continuation.resume(returning: [])
+                    continuation.resume(returning: (readings: [], rawCount: 0))
                     return
                 }
 
                 guard let samples = samples as? [HKQuantitySample] else {
-                    continuation.resume(returning: [])
+                    continuation.resume(returning: (readings: [], rawCount: 0))
                     return
                 }
+
+                let rawCount = samples.count
 
                 // Determine locale-appropriate glucose unit
                 let region = Locale.current.region?.identifier ?? ""
@@ -450,7 +452,7 @@ class HealthKitManager: ObservableObject {
                         return false
                     }
 
-                continuation.resume(returning: sampledReadings)
+                continuation.resume(returning: (readings: sampledReadings, rawCount: rawCount))
             }
 
             self.healthStore.execute(query)
@@ -460,8 +462,8 @@ class HealthKitManager: ObservableObject {
     /// Legacy completion-based glucose fetching for backward compatibility
     func fetchGlucoseReadings(days: Int = 30, completion: @escaping ([(date: Date, value: Double)]) -> Void) {
         Task {
-            let readings = await fetchGlucoseReadings(days: days)
-            completion(readings)
+            let result = await fetchGlucoseReadings(days: days)
+            completion(result.readings)
         }
     }
 
@@ -566,13 +568,13 @@ class HealthKitManager: ObservableObject {
             return (0, 0)
         }
 
-        let glucoseReadings = await fetchGlucoseReadings(days: days)
-        let totalFound = glucoseReadings.count
+        let fetchResult = await fetchGlucoseReadings(days: days)
+        let totalFound = fetchResult.rawCount
 
         // Convert to Sendable struct with locale-appropriate unit
         let region = Locale.current.region?.identifier ?? ""
         let unitLabel = (region == "US" || region == "JP") ? "mg/dL" : "mmol/L"
-        let glucoseDataList: [GlucoseData] = glucoseReadings.map { reading in
+        let glucoseDataList: [GlucoseData] = fetchResult.readings.map { reading in
             GlucoseData(date: reading.date, value: reading.value, unit: unitLabel)
         }
 

@@ -61,6 +61,27 @@ struct WelcomeSheetView: View {
             .multilineTextAlignment(.center)
             .foregroundStyle(AppTheme.textSecondary)
 
+            // Wellness disclaimer — shown prominently on first launch
+            VStack(spacing: 4) {
+                Image(systemName: "heart.text.square")
+                    .font(.title3)
+                    .foregroundStyle(.orange)
+                Text("Wellness App")
+                    .font(.footnote)
+                    .fontWeight(.semibold)
+                Text("This app provides estimates for personal wellness tracking only. It does not diagnose conditions or replace laboratory tests. Always consult your healthcare provider for medical advice.")
+                    .font(.caption2)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(AppTheme.textSecondary)
+            }
+            .padding(.horizontal, 32)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.orange.opacity(0.08))
+            )
+            .padding(.horizontal, 24)
+
             Spacer()
 
             // MARK: Action Buttons

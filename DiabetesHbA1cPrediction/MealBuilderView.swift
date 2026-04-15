@@ -95,7 +95,7 @@ struct MealBuilderView: View {
                         Text("High Glycemic Load")
                             .font(.headline)
                             .foregroundColor(.primary)
-                        Text("The app will calculate a personalised exercise offset to help manage the glucose impact. Review the results carefully.")
+                        Text("This wellness feature estimates how exercise might relate to the glucose impact of this meal. These are estimates for personal tracking only — not medical diagnoses or treatment advice.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -107,7 +107,7 @@ struct MealBuilderView: View {
                     .shadow(radius: 10)
                     .transition(.opacity.combined(with: .scale(scale: 0.9)))
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Warning: High glycemic load. The app will calculate a personalised exercise offset.")
+                    .accessibilityLabel("Note: High glycemic load. The app will estimate how exercise may relate to the glucose impact.")
                 }
                 if showGlucoseElevatedWarning {
                     VStack(spacing: 10) {
@@ -117,7 +117,7 @@ struct MealBuilderView: View {
                         Text("Elevated Blood Glucose")
                             .font(.headline)
                             .foregroundColor(.primary)
-                        Text("Adding this food significantly increases the meal's glucose impact. Consider balancing with lower-GI foods or reducing portions.")
+                        Text("Adding this food significantly increases the meal's estimated glucose impact. Some people choose to pair high-GI foods with lower-GI options.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -527,12 +527,12 @@ struct MealBuilderView: View {
         var recommendation: String? = nil
         if gl > (isFeast ? 30 : 20) && carbs > (isFeast ? 90 : 60) {
             recommendation = isFeast
-                ? "Very high carb feast. A brisk post-meal \(ExerciseOffsetType.current.actionVerb) will help significantly."
-                : "High carb & glycemic load. Consider smaller portions or adding protein/fiber to slow glucose absorption."
+                ? "Very high carb feast. Some people find a post-meal \(ExerciseOffsetType.current.actionVerb) helpful after meals like this."
+                : "High carb & glycemic load. Some people choose smaller portions or pair with protein/fiber."
         } else if gl > (isFeast ? 30 : 20) {
-            recommendation = "High glycemic load. Consider lower-GI alternatives to reduce glucose spike."
+            recommendation = "High glycemic load. Lower-GI alternatives tend to produce a smaller glucose response."
         } else if carbs > (isFeast ? 100 : 80) {
-            recommendation = "High carbs. Adding protein or healthy fats can help moderate blood glucose response."
+            recommendation = "High carbs. Protein or healthy fats are sometimes paired with high-carb meals."
         }
 
         // 6. Exercise recommendation (same logic as EstimatedImpactContent)
@@ -566,7 +566,7 @@ struct MealBuilderView: View {
                     ? "at least \(roundedMinutes) min / \(formattedDistance)"
                     : "\(roundedMinutes) min / \(formattedDistance)"
             }
-            return "If you eat this planned meal, also consider a good \(exerciseType.actionVerb) after the meal of \(durationText) to help quickly reduce the estimated glucose rise."
+            return "For reference, a \(exerciseType.actionVerb) of \(durationText) after a meal like this is sometimes associated with a smaller glucose response."
         }()
 
         return MealImpactResult(
@@ -816,12 +816,12 @@ struct EstimatedImpactContent: View {
                 var recommendation: String? = nil
                 if gl > (isFeast ? 30 : 20) && carbs > (isFeast ? 90 : 60) {
                     recommendation = isFeast
-                        ? "Very high carb feast. A brisk post-meal \(ExerciseOffsetType.current.actionVerb) will help significantly."
-                        : "High carb & glycemic load. Consider smaller portions or adding protein/fiber to slow glucose absorption."
+                        ? "Very high carb feast. Some people find a post-meal \(ExerciseOffsetType.current.actionVerb) helpful after meals like this."
+                        : "High carb & glycemic load. Some people choose smaller portions or pair with protein/fiber."
                 } else if gl > (isFeast ? 30 : 20) {
-                    recommendation = "High glycemic load. Consider lower-GI alternatives to reduce glucose spike."
+                    recommendation = "High glycemic load. Lower-GI alternatives tend to produce a smaller glucose response."
                 } else if carbs > (isFeast ? 100 : 80) {
-                    recommendation = "High carbs. Adding protein or healthy fats can help moderate blood glucose response."
+                    recommendation = "High carbs. Protein or healthy fats are sometimes paired with high-carb meals."
                 }
         // 6. Estimate post-meal walk to offset glucose rise
         let walkRec = computeWalkRecommendation(estimatedGlucoseRise: estimatedGlucoseRise)
@@ -922,7 +922,7 @@ struct EstimatedImpactContent: View {
                 : "\(roundedMinutes) min / \(formattedDistance)"
         }
 
-        return "If you eat this planned meal, also consider a good \(exerciseType.actionVerb) after the meal of \(durationText) to help quickly reduce the estimated glucose rise."
+        return "For reference, a \(exerciseType.actionVerb) of \(durationText) after a meal like this is sometimes associated with a smaller glucose response."
     }
 
     /// Query exercise history to get the user's typical pace for a given exercise type.

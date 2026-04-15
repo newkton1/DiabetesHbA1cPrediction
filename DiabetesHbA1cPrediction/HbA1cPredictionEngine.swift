@@ -629,11 +629,11 @@ class HbA1cPredictionEngine: ObservableObject {
         var updatedRecommendations = currentPrediction.recommendations
         
         if glycemicLoad > 20 {
-            updatedRecommendations.insert("Consider reducing portion size or choosing lower GI alternatives for your planned meal", at: 0)
+            updatedRecommendations.insert("This planned meal has a high glycemic load. Lower-GI alternatives tend to produce a smaller glucose response.", at: 0)
         }
         
         if plannedMealCarbs > 80 {
-            updatedRecommendations.insert("Your planned meal is high in carbohydrates. Consider adding protein or fiber to slow glucose absorption", at: 0)
+            updatedRecommendations.insert("This planned meal is high in carbohydrates. Protein or fiber is sometimes associated with a slower glucose response.", at: 0)
         }
         
         // Determine updated risk category
@@ -1332,7 +1332,7 @@ class HbA1cPredictionEngine: ObservableObject {
         }
     }
 
-    /// Generates clinical recommendations based on prediction results and contributing factors
+    /// Generates wellness observations based on estimate results and contributing factors
     private func generateRecommendations(
         input: PredictionInput,
         predictedHbA1c: Double,
@@ -1341,66 +1341,66 @@ class HbA1cPredictionEngine: ObservableObject {
     ) -> [String] {
         var recommendations: [String] = []
 
-        // Category-based informational guidance
-        // NOTE: All recommendations use educational, non-directive language to avoid
-        // appearing to provide medical advice (Apple Guideline 5.1.1(ix)).
+        // Category-based wellness observations
+        // NOTE: All observations use educational, non-directive language. This is a
+        // wellness app — not a diagnostic tool (Apple Guideline 5.1.1(ix)).
         if riskCategory == "Significantly Elevated" {
-            recommendations.append("People in this range often discuss their results with an endocrinologist or diabetes specialist.")
-            recommendations.append("Continuous glucose monitoring (CGM) systems are commonly used at this level to help track patterns.")
-            recommendations.append("Regular lab work, including metabolic panels and kidney function tests, is typical for people in this range.")
+            recommendations.append("This wellness estimate is in a higher range. You may find it interesting to share these trends with your healthcare provider.")
+            recommendations.append("Continuous glucose monitoring (CGM) is one way some people observe patterns at this level.")
+            recommendations.append("People in this range often have regular lab work, including metabolic panels and kidney function tests.")
         } else if riskCategory == "Elevated" {
-            recommendations.append("Many people in this range work with their diabetes care team to review their current approach.")
-            recommendations.append("More frequent blood glucose monitoring can help identify patterns and trends.")
+            recommendations.append("This wellness estimate is above typical levels. Sharing these trends with your healthcare provider may be interesting.")
+            recommendations.append("More frequent blood glucose checks can help reveal patterns and trends.")
         } else if riskCategory == "Above Typical Range" {
-            recommendations.append("Research suggests lifestyle changes can be helpful for people in this range.")
-            recommendations.append("Studies show that modest weight management may support better glucose levels.")
+            recommendations.append("Research suggests lifestyle factors can be associated with changes in this range.")
+            recommendations.append("Studies show that modest weight changes may be associated with different glucose levels.")
         }
 
         // Factor-specific recommendations
         if contributingFactors["Glucose Variability"] ?? 0 > 0.1 {
-            recommendations.append("Glucose variability is a factor here. Consistent meal timing may help support more stable levels.")
-            recommendations.append("Tracking which foods are associated with glucose spikes can provide useful insights.")
+            recommendations.append("Glucose variability is a factor here. Some people observe more stable levels with consistent meal timing.")
+            recommendations.append("Tracking which foods are associated with glucose changes can provide useful insights.")
         }
 
         if contributingFactors["High Carb Intake"] ?? 0 > 0.05 {
-            recommendations.append("Current carbohydrate intake appears high. Many people find that aiming for under 250g per day helps with glucose management.")
-            recommendations.append("Low glycemic index foods (whole grains, vegetables) tend to have less impact on blood glucose.")
+            recommendations.append("Current carbohydrate intake appears high. Research associates lower daily carbohydrate intake with different glucose patterns.")
+            recommendations.append("Low glycemic index foods (whole grains, vegetables) tend to be associated with smaller glucose responses.")
         }
 
         if (contributingFactors["Exercise Benefits"] ?? 0) == 0 && input.weeklyExerciseMinutes < 150 {
-            recommendations.append("Guidelines from the ADA suggest 150 minutes of aerobic exercise per week may support glucose management.")
-            recommendations.append("Resistance training 2\u{2013}3 times per week is also commonly suggested alongside aerobic activity.")
+            recommendations.append("The ADA notes that 150 minutes of aerobic exercise per week is associated with better glucose levels in research studies.")
+            recommendations.append("Research also associates resistance training 2\u{2013}3 times per week with improved metabolic markers.")
         }
 
         if input.bmi >= 30.0 {
-            recommendations.append("BMI is in a range where weight management may support better glucose levels. Speak with your healthcare provider about options.")
+            recommendations.append("BMI is in a range that research associates with higher glucose levels. Your healthcare provider can offer personalised context.")
         } else if input.bmi >= 25.0 {
-            recommendations.append("BMI is slightly above the typical range. Maintaining a healthy weight can support overall metabolic health.")
+            recommendations.append("BMI is slightly above the typical range. Research associates weight with metabolic health markers.")
         }
 
         if input.hasCOPD {
-            recommendations.append("COPD can contribute to systemic inflammation, which may affect glucose levels. Regular follow-up with your pulmonologist is common practice.")
+            recommendations.append("COPD is associated with systemic inflammation, which research links to glucose levels.")
         }
 
         if input.hasHeartDisease {
-            recommendations.append("Heart disease and glucose management are closely linked. Regular cardiology follow-up is typical for people in this situation.")
+            recommendations.append("Research shows heart disease and glucose levels are closely linked.")
         }
 
         if input.tobaccoUse == "Current" {
-            recommendations.append("Research shows a strong link between smoking and impaired glucose metabolism. Tobacco cessation programs are widely available.")
+            recommendations.append("Research shows a strong link between smoking and glucose metabolism.")
         } else if input.tobaccoUse == "Former" {
             recommendations.append("Continued tobacco abstinence supports better long-term metabolic health.")
         }
 
         if input.alcoholUnitsPerWeek > 14.0 {
-            recommendations.append("Current alcohol intake is above levels typically associated with good glucose management. Guidelines generally suggest moderation.")
+            recommendations.append("Current alcohol intake is above levels that research typically associates with stable glucose patterns.")
         }
 
         // General informational guidance
         if recommendations.count < 5 {
             recommendations.append("Regular health check-ups (typically every 3 months) help track trends over time.")
             recommendations.append("Periodic HbA1c monitoring can provide a useful longer-term picture of glucose levels.")
-            recommendations.append("Consistent routines around medication, diet, and exercise tend to support stable glucose management.")
+            recommendations.append("Research associates consistent routines around diet and exercise with more stable glucose patterns.")
         }
 
         return recommendations

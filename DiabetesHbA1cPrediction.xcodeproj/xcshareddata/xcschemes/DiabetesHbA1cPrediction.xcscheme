@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "93CC102C2F400B20003B36A4"
-               BuildableName = "DiabetesHbA1cPrediction.app"
+               BuildableName = "DiabetesFeast.app"
                BlueprintName = "DiabetesHbA1cPrediction"
                ReferencedContainer = "container:DiabetesHbA1cPrediction.xcodeproj">
             </BuildableReference>
@@ -69,7 +69,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "93CC102C2F400B20003B36A4"
-            BuildableName = "DiabetesHbA1cPrediction.app"
+            BuildableName = "DiabetesFeast.app"
             BlueprintName = "DiabetesHbA1cPrediction"
             ReferencedContainer = "container:DiabetesHbA1cPrediction.xcodeproj">
          </BuildableReference>
@@ -86,7 +86,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "93CC102C2F400B20003B36A4"
-            BuildableName = "DiabetesHbA1cPrediction.app"
+            BuildableName = "DiabetesFeast.app"
             BlueprintName = "DiabetesHbA1cPrediction"
             ReferencedContainer = "container:DiabetesHbA1cPrediction.xcodeproj">
          </BuildableReference>

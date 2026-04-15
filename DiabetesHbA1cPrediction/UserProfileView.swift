@@ -362,7 +362,7 @@ struct UserProfileView: View {
                     Text("Version")
                         .foregroundColor(.primary)
                     Spacer()
-                    Text("1.0.0 (Beta)")
+                    Text("1.0")
                         .foregroundColor(.secondary)
                 }
             }

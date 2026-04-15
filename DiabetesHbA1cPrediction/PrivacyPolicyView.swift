@@ -48,8 +48,8 @@ struct PrivacyPolicyView: View {
                 .font(.subheadline)
             }
 
-            Section(header: Text("Medical Disclaimer")) {
-                Text("This app provides predictions for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider with questions about your health.")
+            Section(header: Text("Wellness App Disclaimer")) {
+                Text("Diabetes Feast is a wellness application that provides estimates for personal tracking and educational purposes only. It does not diagnose medical conditions, prescribe treatments, or replace laboratory tests. This app is not a medical device. Always consult a qualified healthcare provider for medical advice about your health.")
                     .font(.subheadline)
             }
 

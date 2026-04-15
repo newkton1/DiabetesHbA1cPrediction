@@ -267,7 +267,7 @@ struct PredictionView: View {
             }
         }
 
-        summary += "\n\nNote: This prediction is for informational purposes only and should not replace professional medical advice."
+        summary += "\n\nNote: Diabetes Feast is a wellness app. This estimate is for personal tracking only — it is not a medical diagnosis and should not replace professional medical advice or laboratory tests."
 
         shareText = summary
         showShareSheet = true

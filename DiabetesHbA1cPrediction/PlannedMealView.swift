@@ -97,8 +97,8 @@ struct PlannedMealView: View {
                                     .fontWeight(.semibold)
                                     .foregroundColor(feastsThisWeek >= 3 ? .red : .orange)
                                 Text(feastsThisWeek >= 3
-                                     ? "You have planned \(feastsThisWeek) feasts in the last 7 days. Frequent feasts may impact your glucose management goals."
-                                     : "This will be your \(ordinal(feastsThisWeek + 1)) feast in 7 days. Occasional treats are fine — just stay mindful.")
+                                     ? "You have planned \(feastsThisWeek) feasts in the last 7 days. Frequent feasts may affect your glucose trends."
+                                     : "This will be your \(ordinal(feastsThisWeek + 1)) feast in 7 days. The app will show how this may relate to your trends.")
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -147,10 +147,10 @@ struct PlannedMealView: View {
     private func handlePlanFeast() {
         let count = feastsThisWeek
         if count >= 3 {
-            feastWarningMessage = "You have already planned \(count) feasts in the last 7 days. Frequent feast meals may work against your glucose management goals. Consider spacing your treats out more."
+            feastWarningMessage = "You have already planned \(count) feasts in the last 7 days. Frequent feast meals may affect your glucose trends. You may want to space your treats out more."
             showFeastWarning = true
         } else if count >= 2 {
-            feastWarningMessage = "This will be your \(ordinal(count + 1)) feast in the last 7 days. Occasional treats are part of a healthy plan, but try to keep feasts to once or twice a week."
+            feastWarningMessage = "This will be your \(ordinal(count + 1)) feast in the last 7 days. The app will show how this may relate to your glucose and HbA1c trends."
             showFeastWarning = true
         } else {
             showingFeastPlanner = true
