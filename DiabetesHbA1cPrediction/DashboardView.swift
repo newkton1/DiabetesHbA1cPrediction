@@ -93,8 +93,8 @@ struct DashboardView: View {
                         }
                         .padding(.horizontal)
 
-                        // Top section: Full-width HbA1c card with notices
-                        HbA1cCardView(prediction: hbA1cPredictions.first)
+                        // Top section: GMI card (from glucose data), notices and disclaimer
+                        GMICardView(glucoseReadings: Array(glucoseReadings))
 
                         if predictionEngine.lastRunAppliedDawnCompensation {
                             DawnEffectNoticeBanner()
@@ -108,21 +108,13 @@ struct DashboardView: View {
 
                         // Bottom section: Chart on left, Action cards on right
                         HStack(alignment: .top, spacing: 8) {
-                            // Left side: Glucose Trend Chart
+                            // Left side: HbA1c Records Chart
                             VStack(spacing: 12) {
-                                if !hbA1cPredictions.isEmpty {
-                                    GlucoseTrendChartView(predictions: Array(hbA1cPredictions))
-                                        .id(hbA1cPredictions.count)
-                                } else {
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color(.systemGray6))
-                                        .frame(height: 200)
-                                        .overlay(
-                                            Text("No glucose data")
-                                                .foregroundColor(.secondary)
-                                        )
-                                        .padding(.horizontal)
-                                }
+                                GlucoseTrendChartView(
+                                    meals: Array(meals),
+                                    exerciseSessions: Array(exerciseSessions)
+                                )
+                                .id(meals.count + exerciseSessions.count)
                             }
                             .frame(maxWidth: .infinity)
 
@@ -168,8 +160,8 @@ struct DashboardView: View {
                 } else {
                     // MARK: - Portrait Layout (Original)
                     VStack(spacing: 20) {
-                        // MARK: - HbA1c Display Card
-                        HbA1cCardView(prediction: hbA1cPredictions.first)
+                        // MARK: - GMI (Glucose Management Indicator) Card
+                        GMICardView(glucoseReadings: Array(glucoseReadings))
 
                         if predictionEngine.lastRunAppliedDawnCompensation {
                             DawnEffectNoticeBanner()
@@ -181,11 +173,12 @@ struct DashboardView: View {
 
                         MedicalDisclaimerBanner()
 
-                        // MARK: - HbA1c Trend Chart
-                        if !hbA1cPredictions.isEmpty {
-                            GlucoseTrendChartView(predictions: Array(hbA1cPredictions))
-                                .id(hbA1cPredictions.count)
-                        }
+                        // MARK: - HbA1c Records Chart
+                        GlucoseTrendChartView(
+                            meals: Array(meals),
+                            exerciseSessions: Array(exerciseSessions)
+                        )
+                        .id(meals.count + exerciseSessions.count)
                         
                         // MARK: - Quick Action Cards for Meals
                         MealQuickActionsView(
@@ -368,84 +361,144 @@ struct DashboardView: View {
     }
 }
 
-// MARK: - HbA1cCardView Component
-/// A prominent card displaying the current estimated HbA1c value
-/// with color coding based on risk level.
-/// Uses IFCC (mmol/mol) internally and displays in user's preferred unit.
-private struct HbA1cCardView: View {
-    let prediction: HbA1cPredictionEntity?
+// MARK: - GMI (Glucose Management Indicator) Computation
+
+/// Implements the Bergenstal et al. 2018 GMI formula.
+///
+/// Reference: Bergenstal RM, Beck RW, Close KL, et al.
+/// Glucose Management Indicator (GMI): A New Term for Estimating A1C From Continuous Glucose Monitoring.
+/// Diabetes Care. 2018;41(11):2275-2280.
+///
+/// GMI is a glucose-derived metric whose FDA-endorsed naming deliberately distinguishes it
+/// from a laboratory HbA1c result. It is computed from mean glucose over a rolling window
+/// and takes no behavioural inputs.
+private struct GMIComputer {
+    /// GMI (NGSP %) = 3.31 + 0.02392 × mean_mg/dL
+    static func gmiPercent(meanMgDl: Double) -> Double {
+        return 3.31 + 0.02392 * meanMgDl
+    }
+
+    /// GMI (IFCC mmol/mol) = 12.71 + 4.70587 × mean_mmol/L
+    static func gmiMmol(meanMmolL: Double) -> Double {
+        return 12.71 + 4.70587 * meanMmolL
+    }
+
+    /// mg/dL → mmol/L
+    static func mmolPerL(fromMgDl mg: Double) -> Double {
+        return mg / 18.0182
+    }
+}
+
+/// Result bundle returned when GMI can be computed from a glucose window.
+private struct GMIResult {
+    let gmiNgsp: Double          // %
+    let gmiIfcc: Double          // mmol/mol
+    let meanMgDl: Double
+    let readingCount: Int
+    let windowDays: Int
+}
+
+// MARK: - GMICardView Component
+
+/// Dashboard card displaying GMI computed from the user's own glucose readings
+/// over a rolling 14-day window. Intentionally labelled "GMI," not "HbA1c," to
+/// match Dexcom / FreeStyle Libre precedent and FDA guidance on terminology.
+private struct GMICardView: View {
+    let glucoseReadings: [GlucoseReadingEntity]
     @ObservedObject private var profile = HbA1cUserProfile.shared
 
-    /// Determine the color based on HbA1c value (using IFCC thresholds).
-    /// Thresholds in IFCC mmol/mol:
-    /// - Green: < 39 (non-diabetic, <5.7%)
-    /// - Yellow: 39-47 (prediabetic, 5.7-6.4%)
-    /// - Orange: 48-58 (diabetic controlled, 6.5-7.5%)
-    /// - Red: > 58 (above target, >7.5%)
-    private var hbA1cColor: Color {
-        guard let prediction = prediction else { return .gray }
-        let ifccValue = prediction.predictedValue
+    /// Rolling window length used for GMI computation.
+    /// Bergenstal 2018 validates the formula on 10–14 day CGM windows.
+    private static let windowDays: Int = 14
 
-        switch ifccValue {
-        case ..<39:
-            return .green
-        case 39..<48:
-            return .yellow
-        case 48...58:
-            return .orange
-        default:
-            return .red
+    /// Minimum reading count before we consider GMI informative.
+    /// Below this we render a "not enough data" placeholder instead.
+    private static let minReadings: Int = 20
+
+    private var isNgsp: Bool { profile.effectiveUnit == .ngsp }
+
+    /// Compute GMI from mg/dL readings within the last `windowDays` days.
+    /// Returns nil when there is insufficient glucose data.
+    private var gmi: GMIResult? {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -Self.windowDays, to: Date()) ?? Date()
+        let windowReadings = glucoseReadings.filter { reading in
+            guard let ts = reading.timestamp, let unit = reading.unit else { return false }
+            // Only mg/dL glucose points — ignore lab HbA1c entries ("NGSP %" / "mmol/mol").
+            return unit == "mg/dL" && ts >= cutoff
+        }
+        guard windowReadings.count >= Self.minReadings else { return nil }
+
+        let mean = windowReadings.reduce(0.0) { $0 + $1.value } / Double(windowReadings.count)
+        let meanMmol = GMIComputer.mmolPerL(fromMgDl: mean)
+        return GMIResult(
+            gmiNgsp: GMIComputer.gmiPercent(meanMgDl: mean),
+            gmiIfcc: GMIComputer.gmiMmol(meanMmolL: meanMmol),
+            meanMgDl: mean,
+            readingCount: windowReadings.count,
+            windowDays: Self.windowDays
+        )
+    }
+
+    /// Soft reference-range colour. Uses the same IFCC thresholds as elsewhere
+    /// in the app but is rendered as a gentle hue — this is a glucose-management
+    /// indicator, not a diagnostic classifier.
+    private func rangeColor(forIfcc ifcc: Double) -> Color {
+        switch ifcc {
+        case ..<39: return .green
+        case 39..<48: return .yellow
+        case 48...58: return .orange
+        default: return .red
         }
     }
 
-    /// Get the risk category text for the current HbA1c value (using IFCC thresholds).
-    private var riskCategoryText: String {
-        guard let prediction = prediction else { return "No Data" }
-        return HbA1cThresholds.riskCategory(forIFCC: prediction.predictedValue)
-    }
-    
-    /// Get the display value in the user's preferred unit
-    private var displayValue: String {
-        guard let prediction = prediction else { return "--" }
-        let ifccValue = prediction.predictedValue
-        let displayVal = fromCanonicalIFCC(value: ifccValue, to: profile.effectiveUnit)
-        
-        switch profile.effectiveUnit {
-        case .ngsp:
-            return String(format: "%.1f", displayVal)
-        case .ifcc:
-            return String(format: "%.0f", displayVal)
+    private func formatDisplayValue(_ gmi: GMIResult) -> String {
+        if isNgsp {
+            return String(format: "%.1f", gmi.gmiNgsp)
+        } else {
+            return String(format: "%.0f", gmi.gmiIfcc)
         }
     }
-    
-    /// Get the unit suffix for display
-    private var unitSuffix: String {
-        profile.effectiveUnit.shortUnit
-    }
+
+    private var unitSuffix: String { profile.effectiveUnit.shortUnit }
 
     var body: some View {
         VStack(spacing: 8) {
-            Text("Estimated HbA1c")
+            Text("Glucose Management Indicator")
                 .font(.headline)
                 .foregroundColor(.secondary)
 
-            if let prediction = prediction {
+            if let gmi = gmi {
                 HStack(alignment: .center, spacing: 4) {
-                    Text(displayValue)
+                    Text(formatDisplayValue(gmi))
                         .font(.largeTitle.bold())
                     Text(unitSuffix)
                         .font(.title2)
                         .foregroundColor(.secondary)
                 }
-                .foregroundColor(hbA1cColor)
+                .foregroundColor(rangeColor(forIfcc: gmi.gmiIfcc))
 
-                Text("Last updated: \(formatDate(prediction.predictionDate ?? Date()))")
+                Text("Based on \(gmi.readingCount) glucose readings · last \(gmi.windowDays) days")
                     .font(.caption)
                     .foregroundColor(.secondary)
+
+                Text("Mean glucose: \(Int(gmi.meanMgDl.rounded())) mg/dL")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+
+                Text("GMI is a glucose-based indicator, not a laboratory HbA1c result.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 2)
             } else {
-                Text("No prediction data")
+                Text("Not enough glucose data yet")
                     .font(.body)
                     .foregroundColor(.secondary)
+                Text("Log at least \(Self.minReadings) glucose readings in the last \(Self.windowDays) days to see your GMI.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
             }
         }
         .frame(maxWidth: .infinity)
@@ -454,28 +507,32 @@ private struct HbA1cCardView: View {
         .cornerRadius(12)
         .padding(.horizontal)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(prediction != nil ? "Estimated HbA1c: \(displayValue) \(unitSuffix), \(riskCategoryText)" : "No prediction data available")
-    }
-
-    /// Format a date for display.
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MM/dd"
-        return formatter.string(from: date)
+        .accessibilityLabel({
+            if let gmi = gmi {
+                return "Glucose Management Indicator: \(formatDisplayValue(gmi)) \(unitSuffix), based on \(gmi.readingCount) readings over the last \(gmi.windowDays) days."
+            } else {
+                return "Not enough glucose data yet to compute Glucose Management Indicator."
+            }
+        }())
     }
 }
 
 // MARK: - GlucoseTrendChartView Component
-/// A chart displaying HbA1c predictions over a rolling 12-week (84-day) window.
-/// Plots one data point per week — the latest stored HbA1cPredictionEntity for each
-/// 7-day period — so the chart and the headline figure always agree.
-/// Data fills from the left as weeks accumulate; once all 12 weeks are populated
-/// the oldest week drops off the left edge as new weeks arrive.
-/// Y-axis values on the right; unit legend on the left (matching blood glucose chart style).
+/// A chart displaying the user's own HbA1c records over a rolling 12-week (84-day) window.
+///
+/// The chart shows the user's actual lab HbA1c results (blue diamonds), connected by
+/// a dashed straight-line interpolation between adjacent results. The line ends at the
+/// most recent lab result — it does not extend past the user's last real measurement.
+/// Meal and exercise log entries appear as small icons on a separate event strip below
+/// the chart. They are displayed as contextual events alongside the records — they are
+/// not inputs to the line.
+///
+/// Y-axis values on the right; unit legend on the left.
 /// US/Japan: displays NGSP %, scale 3–11
 /// Other regions: displays IFCC mmol/mol, scale 20–60
 private struct GlucoseTrendChartView: View {
-    let predictions: [HbA1cPredictionEntity]
+    let meals: [MealEntity]
+    let exerciseSessions: [ExerciseSessionEntity]
 
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.verticalSizeClass) private var verticalSizeClass
@@ -496,19 +553,26 @@ private struct GlucoseTrendChartView: View {
         isNgsp ? [3.0, 5.0, 7.0, 9.0, 11.0] : [20.0, 40.0, 60.0]
     }
 
-    /// Color based on IFCC thresholds (unit-independent)
-    private func pointColor(forIfcc ifcc: Double) -> Color {
-        switch ifcc {
-        case ..<39:   return .green
-        case 39..<48: return .yellow
-        case 48...58: return .orange
-        default:      return .red
-        }
-    }
-
     /// Convert a stored IFCC value to the display unit
     private func displayValue(forIfcc ifcc: Double) -> Double {
         isNgsp ? ifccToNGSP(ifcc) : ifcc
+    }
+
+    /// Format a lab HbA1c display value with its unit suffix.
+    /// NGSP uses 1 decimal place, IFCC uses 0 decimal places.
+    private func formatLabValue(_ value: Double) -> String {
+        if isNgsp {
+            return String(format: "%.1f %%", value)
+        } else {
+            return String(format: "%.0f mmol/mol", value)
+        }
+    }
+
+    /// Format a lab result date as "02 Apr 2026".
+    private func formatLabDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd MMM yyyy"
+        return formatter.string(from: date)
     }
 
     /// The start of the 12-week rolling window (84 days back from today)
@@ -523,38 +587,6 @@ private struct GlucoseTrendChartView: View {
         return stride(from: 0, through: 12, by: 3).compactMap { week in
             calendar.date(byAdding: .day, value: week * 7, to: start)
         }
-    }
-
-    /// Chart data: one point per week — the latest prediction within each 7-day bucket.
-    /// Weeks with no prediction are simply absent, so the line connects only populated weeks.
-    private var weeklyPoints: [(weekStart: Date, display: Double, ifcc: Double)] {
-        let calendar = Calendar.current
-        let start = calendar.startOfDay(for: windowStart)
-
-        // Build weekly buckets (12 full weeks + current partial week at index 12)
-        var buckets: [Int: (latest: Date, ifcc: Double)] = [:]
-        for prediction in predictions {
-            guard let date = prediction.predictionDate, date >= start else { continue }
-            let daysSinceStart = calendar.dateComponents([.day], from: start, to: date).day ?? 0
-            let weekIndex = daysSinceStart / 7
-            guard weekIndex >= 0 && weekIndex <= 12 else { continue }
-
-            if let existing = buckets[weekIndex] {
-                if date > existing.latest {
-                    buckets[weekIndex] = (latest: date, ifcc: prediction.predictedValue)
-                }
-            } else {
-                buckets[weekIndex] = (latest: date, ifcc: prediction.predictedValue)
-            }
-        }
-
-        // Convert buckets to chart points, using the week's start date for even spacing
-        return buckets.compactMap { weekIndex, data in
-            guard let weekStart = calendar.date(byAdding: .day, value: weekIndex * 7, to: start) else {
-                return nil
-            }
-            return (weekStart: weekStart, display: displayValue(forIfcc: data.ifcc), ifcc: data.ifcc)
-        }.sorted { $0.weekStart < $1.weekStart }
     }
 
     /// Actual Lab HbA1c results recorded within the 12-week window.
@@ -599,31 +631,74 @@ private struct GlucoseTrendChartView: View {
         }
     }
 
+    /// Meal events within the visible window, used for the event strip below the chart.
+    /// Meals are displayed only as contextual markers on the time axis — they are not
+    /// inputs to the line and do not affect any displayed value.
+    private var mealEvents: [(date: Date, id: NSManagedObjectID)] {
+        let lastDate = labPoints.last?.date ?? Date()
+        return meals.compactMap { meal in
+            guard let timestamp = meal.timestamp,
+                  timestamp >= windowStart,
+                  timestamp <= lastDate else { return nil }
+            return (date: timestamp, id: meal.objectID)
+        }
+    }
+
+    /// Exercise events within the visible window, used for the event strip below the chart.
+    /// Exercise sessions are displayed only as contextual markers on the time axis —
+    /// they are not inputs to the line and do not affect any displayed value.
+    private var exerciseEvents: [(date: Date, id: NSManagedObjectID)] {
+        let lastDate = labPoints.last?.date ?? Date()
+        return exerciseSessions.compactMap { session in
+            guard let timestamp = session.startDate,
+                  timestamp >= windowStart,
+                  timestamp <= lastDate else { return nil }
+            return (date: timestamp, id: session.objectID)
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("12-Week HbA1c Trend")
-                    .font(.headline)
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Your HbA1c Records")
+                        .font(.headline)
+
+                    if let latest = labPoints.last {
+                        Text("Most recent: \(formatLabValue(latest.display)) · \(formatLabDate(latest.date))")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .accessibilityLabel("Most recent HbA1c result: \(formatLabValue(latest.display)) on \(formatLabDate(latest.date))")
+                    }
+                }
 
                 Spacer()
 
-                // Legend: prediction circle (color matches latest point) + lab diamond
+                // Legend: lab diamond + dashed connector
                 if !labPoints.isEmpty {
                     HStack(spacing: 8) {
-                        HStack(spacing: 3) {
-                            Circle()
-                                .fill(weeklyPoints.last.map { pointColor(forIfcc: $0.ifcc) } ?? Color.yellow)
-                                .frame(width: 7, height: 7)
-                            Text("Predicted")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                        }
                         HStack(spacing: 3) {
                             Image(systemName: "diamond.fill")
                                 .font(.caption2)
                                 .foregroundColor(.blue)
                                 .accessibilityHidden(true)
-                            Text("Lab")
+                            Text("Lab result")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        HStack(spacing: 3) {
+                            // Small dashed-line glyph for the legend
+                            Rectangle()
+                                .fill(Color.secondary.opacity(0.6))
+                                .frame(width: 14, height: 1)
+                                .overlay(
+                                    HStack(spacing: 2) {
+                                        Rectangle().fill(Color(.systemGray6)).frame(width: 3, height: 1)
+                                        Spacer()
+                                        Rectangle().fill(Color(.systemGray6)).frame(width: 3, height: 1)
+                                    }
+                                )
+                            Text("Between results")
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                         }
@@ -633,34 +708,30 @@ private struct GlucoseTrendChartView: View {
             .padding(.horizontal)
             .padding(.bottom, isLandscape ? 8 : 0)
 
-            if weeklyPoints.isEmpty {
-                Text("Run predictions over time to see your trend here.")
+            if labPoints.isEmpty {
+                Text("Enter a lab HbA1c result to see your records here.")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding()
             } else {
                 Chart {
-                    ForEach(weeklyPoints, id: \.weekStart) { item in
+                    // Dashed line connecting adjacent lab results.
+                    // The line stops at the most recent lab — it does not extend
+                    // past the user's last real measurement.
+                    ForEach(labPoints, id: \.date) { lab in
                         LineMark(
-                            x: .value("Week", item.weekStart, unit: .day),
-                            y: .value(yAxisLabel, item.display)
+                            x: .value("Date", lab.date, unit: .day),
+                            y: .value(yAxisLabel, lab.display)
                         )
-                        .foregroundStyle(pointColor(forIfcc: item.ifcc))
-                        .lineStyle(StrokeStyle(lineWidth: 2))
-
-                        PointMark(
-                            x: .value("Week", item.weekStart, unit: .day),
-                            y: .value(yAxisLabel, item.display)
-                        )
-                        .foregroundStyle(pointColor(forIfcc: item.ifcc))
-                        .symbolSize(40)
+                        .foregroundStyle(Color.secondary.opacity(0.6))
+                        .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
                     }
 
-                    // Lab HbA1c results — blue diamonds overlaid on the trend line
+                    // Lab HbA1c results — solid blue diamonds at the actual measurement dates
                     ForEach(labPoints, id: \.date) { lab in
                         PointMark(
-                            x: .value("Week", lab.date, unit: .day),
+                            x: .value("Date", lab.date, unit: .day),
                             y: .value(yAxisLabel, lab.display)
                         )
                         .foregroundStyle(Color.blue)
@@ -696,8 +767,88 @@ private struct GlucoseTrendChartView: View {
                         .offset(x: -12)
                 }
                 .padding(.horizontal)
-                .accessibilityLabel("12-week HbA1c trend chart with \(weeklyPoints.count) data points")
+                .accessibilityLabel("Your HbA1c records chart with \(labPoints.count) lab results")
+
+                // Event strip — meals and exercise as contextual markers on the same time axis.
+                // These are not inputs to the line; they are shown only for context.
+                EventStripView(
+                    windowStart: windowStart,
+                    windowEnd: labPoints.last?.date ?? Date(),
+                    weekBoundaries: weekBoundaries,
+                    mealEvents: mealEvents,
+                    exerciseEvents: exerciseEvents
+                )
+                .padding(.horizontal)
             }
+        }
+    }
+}
+
+// MARK: - EventStripView Component
+/// A thin strip showing meal and exercise log entries as small icons on the same
+/// time axis as the records chart above. Purely contextual — not an analytic display.
+private struct EventStripView: View {
+    let windowStart: Date
+    let windowEnd: Date
+    let weekBoundaries: [Date]
+    let mealEvents: [(date: Date, id: NSManagedObjectID)]
+    let exerciseEvents: [(date: Date, id: NSManagedObjectID)]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                HStack(spacing: 3) {
+                    Image(systemName: "fork.knife")
+                        .font(.caption2)
+                        .foregroundColor(.orange)
+                    Text("Meal")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                HStack(spacing: 3) {
+                    Image(systemName: "figure.walk")
+                        .font(.caption2)
+                        .foregroundColor(.green)
+                    Text("Exercise")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+            }
+
+            Chart {
+                ForEach(mealEvents, id: \.id) { event in
+                    PointMark(
+                        x: .value("Date", event.date, unit: .day),
+                        y: .value("Type", "Meal")
+                    )
+                    .symbol(.circle)
+                    .symbolSize(28)
+                    .foregroundStyle(Color.orange.opacity(0.85))
+                }
+                ForEach(exerciseEvents, id: \.id) { event in
+                    PointMark(
+                        x: .value("Date", event.date, unit: .day),
+                        y: .value("Type", "Exercise")
+                    )
+                    .symbol(.circle)
+                    .symbolSize(28)
+                    .foregroundStyle(Color.green.opacity(0.85))
+                }
+            }
+            .chartXScale(domain: windowStart...Date())
+            .chartXAxis {
+                AxisMarks(values: weekBoundaries) { _ in
+                    AxisGridLine()
+                }
+            }
+            .chartYAxis {
+                AxisMarks(position: .leading) { _ in
+                    AxisValueLabel().font(.caption2)
+                }
+            }
+            .frame(height: 44)
+            .accessibilityLabel("Meal and exercise events on the same timeline as your HbA1c records, shown for context only")
         }
     }
 }

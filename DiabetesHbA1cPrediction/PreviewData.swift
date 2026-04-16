@@ -73,46 +73,105 @@ struct PreviewData {
         hc.lastUpdated = Date()
         hc.user = user
 
-        // ── 3. Glucose Readings (21 readings over 7 days) ────────
-        let glucoseValues: [(day: Int, hour: Int, value: Double, source: String)] = [
-            (0, 7,  112, "TestCGM"), (0, 12, 145, "TestCGM"), (0, 18, 128, "TestCGM"),
-            (1, 7,  105, "TestMeter"), (1, 12, 162, "TestCGM"), (1, 18, 138, "TestCGM"),
-            (2, 7,  98,  "TestMeter"), (2, 12, 155, "TestCGM"), (2, 18, 119, "TestCGM"),
-            (3, 7,  118, "TestCGM"), (3, 12, 172, "TestCGM"), (3, 18, 141, "TestMeter"),
-            (4, 7,  95,  "TestMeter"), (4, 12, 148, "TestCGM"), (4, 18, 125, "TestCGM"),
-            (5, 7,  108, "TestCGM"), (5, 12, 159, "TestCGM"), (5, 18, 132, "TestCGM"),
-            (6, 7,  101, "TestMeter"), (6, 12, 168, "TestCGM"), (6, 18, 144, "TestCGM"),
+        // ── 3. Lab HbA1c Results (10 results over 12 weeks) ──────
+        // Stored as GlucoseReadingEntity with source "Hospital Lab Test",
+        // alternating between NGSP % (US/JP) and IFCC mmol/mol (EU) units
+        // so the dashboard chart can be visually verified in both modes.
+        let labResults: [(daysAgo: Int, ngspPercent: Double, ifccMmol: Double, useIfcc: Bool)] = [
+            (83, 7.4, 57, false),
+            (74, 7.3, 56, true),
+            (65, 7.2, 55, false),
+            (56, 7.1, 54, true),
+            (47, 7.0, 53, false),
+            (38, 6.9, 52, true),
+            (29, 6.9, 52, false),
+            (20, 6.8, 51, true),
+            (11, 6.7, 50, false),
+            ( 2, 6.6, 49, true),
         ]
-        for g in glucoseValues {
+        for lab in labResults {
             let reading = GlucoseReadingEntity(context: context)
             reading.id = UUID()
-            reading.timestamp = Calendar.current.date(byAdding: .day, value: -g.day,
-                to: Calendar.current.date(bySettingHour: g.hour, minute: 0, second: 0, of: Date())!)
-            reading.value = g.value
-            reading.unit = "mg/dL"
-            reading.trend = g.value > 150 ? "rising" : (g.value < 100 ? "falling" : "stable")
-            reading.source = g.source
+            reading.timestamp = Calendar.current.date(byAdding: .day, value: -lab.daysAgo,
+                to: Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: Date())!)
+            reading.value = lab.useIfcc ? lab.ifccMmol : lab.ngspPercent
+            reading.unit = lab.useIfcc ? "mmol/mol" : "NGSP %"
+            reading.trend = "stable"
+            reading.source = "Hospital Lab Test"
         }
 
-        // ── 4. Meals (7 meals over the week) ─────────────────────
-        let meals: [(name: String, cals: Double, carbs: Double, protein: Double, fat: Double, fiber: Double, daysAgo: Int)] = [
-            ("Test Meal A – High Carb",          310, 54, 11, 6,  8,  0),
-            ("Test Meal B – Protein",            420, 18, 38, 22, 4,  0),
-            ("Test Meal C – Mixed",              680, 78, 28, 24, 6,  1),
-            ("Test Meal D – Light",              285, 32, 15, 12, 1,  1),
-            ("Test Meal E – Balanced",           480, 22, 42, 24, 5,  2),
-            ("Test Meal F – Moderate",           390, 42, 28, 12, 6,  3),
-            ("Test Meal G – High Fiber",         520, 68, 16, 18, 7,  4),
+        // ── 4. CGM / Finger-Stick Readings (12 weeks) ────────────
+        // Sparse coverage (1/day) for prior 70 days, dense (3/day) for
+        // last 14 days. Values are deterministic (based on index) so
+        // screenshots stay reproducible across runs.
+        //
+        // Sparse: days 14..83 → ~70 readings
+        var cgmIndex = 0
+        for d in 14...83 {
+            let hour = [7, 12, 18][d % 3]
+            // 110–170 mg/dL oscillation around a gently-declining mean
+            let trendBase = 150.0 - Double(83 - d) * 0.3
+            let value = trendBase + sin(Double(d) * 0.7) * 20
+            let source = (d % 4 == 0) ? "TestMeter" : "TestCGM"
+            let reading = GlucoseReadingEntity(context: context)
+            reading.id = UUID()
+            reading.timestamp = Calendar.current.date(byAdding: .day, value: -d,
+                to: Calendar.current.date(bySettingHour: hour, minute: 0, second: 0, of: Date())!)
+            reading.value = value.rounded()
+            reading.unit = "mg/dL"
+            reading.trend = value > 150 ? "rising" : (value < 100 ? "falling" : "stable")
+            reading.source = source
+            cgmIndex += 1
+        }
+
+        // Dense: last 14 days at 07:00, 12:00, 18:00 → 42 readings
+        let denseHours = [7, 12, 18]
+        for d in 0...13 {
+            for (hi, hour) in denseHours.enumerated() {
+                // Morning lower, post-meal peaks higher
+                let hourAdj: Double = (hi == 0) ? -15 : (hi == 1) ? 25 : 5
+                let value = 125.0 + hourAdj + sin(Double(d * 3 + hi) * 0.5) * 18
+                let source = (d + hi) % 5 == 0 ? "TestMeter" : "TestCGM"
+                let reading = GlucoseReadingEntity(context: context)
+                reading.id = UUID()
+                reading.timestamp = Calendar.current.date(byAdding: .day, value: -d,
+                    to: Calendar.current.date(bySettingHour: hour, minute: 0, second: 0, of: Date())!)
+                reading.value = value.rounded()
+                reading.unit = "mg/dL"
+                reading.trend = value > 150 ? "rising" : (value < 100 ? "falling" : "stable")
+                reading.source = source
+                cgmIndex += 1
+            }
+        }
+
+        // ── 5. Meals (30 meals across 12 weeks) ──────────────────
+        let mealTemplates: [(name: String, cals: Double, carbs: Double, protein: Double, fat: Double, fiber: Double)] = [
+            ("Rice bowl with salmon",       520, 68, 28, 14,  4),
+            ("Miso soup and grilled fish",  380, 18, 32, 18,  3),
+            ("Soba noodles with tempura",   610, 82, 18, 20,  5),
+            ("Chicken salad",               420, 22, 38, 22,  6),
+            ("Oatmeal with berries",        310, 54, 10,  6,  8),
+            ("Mixed vegetable curry",       560, 64, 14, 22,  9),
+            ("Omelette and toast",          450, 32, 24, 24,  3),
+            ("Udon with egg",               510, 76, 20, 12,  4),
+            ("Grilled pork and rice",       680, 72, 34, 24,  5),
+            ("Tofu and vegetables",         380, 28, 26, 18,  7),
         ]
-        for m in meals {
+        // Spread 30 meals evenly across 84 days (roughly every 2.8 days)
+        for i in 0..<30 {
+            let daysAgo = Int(Double(i) * (83.0 / 29.0))
+            let template = mealTemplates[i % mealTemplates.count]
+            let hour = [7, 12, 18][i % 3]
             let meal = MealEntity(context: context)
             meal.id = UUID()
-            meal.name = m.name
-            meal.calories = m.cals
-            meal.timestamp = Calendar.current.date(byAdding: .day, value: -m.daysAgo, to: Date())
+            meal.name = template.name
+            meal.calories = template.cals
+            meal.timestamp = Calendar.current.date(byAdding: .day, value: -daysAgo,
+                to: Calendar.current.date(bySettingHour: hour, minute: 30, second: 0, of: Date())!)
             meal.unitString = "kcal"
 
-            for (type, amount) in [("carbohydrates", m.carbs), ("protein", m.protein), ("fat", m.fat), ("fiber", m.fiber)] {
+            for (type, amount) in [("carbohydrates", template.carbs), ("protein", template.protein),
+                                   ("fat", template.fat), ("fiber", template.fiber)] {
                 let macro = MacronutrientEntity(context: context)
                 macro.type = type
                 macro.amount = amount
@@ -121,24 +180,29 @@ struct PreviewData {
             }
         }
 
-        // ── 5. Exercise Sessions ──────────────────────────────────
-        let exercises: [(type: String, daysAgo: Int, durationMin: Double, intensity: Double, calories: Double)] = [
-            ("Walking",           0, 35, 4.0, 180),
-            ("Cycling",           1, 45, 6.5, 320),
-            ("Strength Training", 2, 40, 7.0, 250),
-            ("Swimming",          3, 30, 6.0, 280),
-            ("Running",           5, 25, 8.0, 310),
+        // ── 6. Exercise Sessions (20 sessions across 12 weeks) ───
+        let exerciseTemplates: [(type: String, durationMin: Double, intensity: Double, calories: Double)] = [
+            ("Walking",           35, 4.0, 180),
+            ("Cycling",           45, 6.5, 320),
+            ("Strength Training", 40, 7.0, 250),
+            ("Swimming",          30, 6.0, 280),
+            ("Running",           25, 8.0, 310),
+            ("Yoga",              50, 3.0, 140),
+            ("Hiking",            60, 5.0, 360),
         ]
-        for e in exercises {
+        // Spread 20 sessions evenly across 84 days (roughly every 4.2 days)
+        for i in 0..<20 {
+            let daysAgo = Int(Double(i) * (83.0 / 19.0))
+            let template = exerciseTemplates[i % exerciseTemplates.count]
             let session = ExerciseSessionEntity(context: context)
             session.id = UUID()
-            session.type = e.type
-            session.startDate = Calendar.current.date(byAdding: .day, value: -e.daysAgo,
+            session.type = template.type
+            session.startDate = Calendar.current.date(byAdding: .day, value: -daysAgo,
                 to: Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: Date())!)
-            session.duration = e.durationMin * 60  // stored in seconds
+            session.duration = template.durationMin * 60  // stored in seconds
             session.endDate = session.startDate?.addingTimeInterval(session.duration)
-            session.intensity = e.intensity
-            session.caloriesBurned = e.calories
+            session.intensity = template.intensity
+            session.caloriesBurned = template.calories
             session.notes = "Preview sample data – not real"
         }
 
@@ -170,8 +234,8 @@ struct PreviewData {
         do {
             try context.save()
             #if DEBUG
-            print("[PreviewData] Successfully seeded \(glucoseValues.count) glucose readings, "
-                + "\(meals.count) meals, \(exercises.count) exercises, \(predictions.count) predictions.")
+            print("[PreviewData] Successfully seeded \(labResults.count) lab HbA1c results, "
+                + "\(cgmIndex) CGM/meter readings, 30 meals, 20 exercises, \(predictions.count) predictions.")
             #endif
         } catch {
             #if DEBUG

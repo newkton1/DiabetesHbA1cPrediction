@@ -41,6 +41,8 @@ struct DataExportView: View {
     @State private var showShareSheet = false
     @State private var exportURL: URL?
     @State private var exportSummary = ""
+    @State private var seedSummary = ""
+    @State private var showSeedConfirm = false
 
     private let iso8601: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
@@ -69,6 +71,28 @@ struct DataExportView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
+            }
+
+            Section(header: Text("Seed Demo Data")) {
+                Button(action: { showSeedConfirm = true }) {
+                    Label("Seed 12 Weeks of Demo Data", systemImage: "wand.and.stars")
+                }
+
+                if !seedSummary.isEmpty {
+                    Text(seedSummary)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Text("Adds 10 lab HbA1c results, ~110 CGM/meter readings, 30 meals, and 20 exercise sessions spanning the last 12 weeks. Safe on top of existing data but will add duplicates if tapped twice.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            .alert("Seed demo data?", isPresented: $showSeedConfirm) {
+                Button("Cancel", role: .cancel) {}
+                Button("Seed") { seedDemoData() }
+            } message: {
+                Text("This adds 12 weeks of sample data for simulator testing. It does not delete anything, but repeated taps will create duplicates.")
             }
 
             Section(header: Text("Info")) {
@@ -119,6 +143,15 @@ struct DataExportView: View {
         } catch {
             exportSummary = "Export failed: \(error.localizedDescription)"
         }
+    }
+
+    // MARK: - Seed Demo Data
+
+    private func seedDemoData() {
+        PreviewData.populate(context: viewContext)
+        let df = DateFormatter()
+        df.timeStyle = .medium
+        seedSummary = "Seeded at \(df.string(from: Date())). Pull to refresh dashboard."
     }
 
     // MARK: - Entity Serialization
