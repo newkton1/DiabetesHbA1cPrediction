@@ -22,12 +22,12 @@ struct MealBuilderView: View {
     @State private var errorMessage = ""
     @State private var isReady = false          // defer heavy content until sheet animates in
     @State private var showResults = false       // after save, show impact results instead of form
-    @State private var savedImpact: MealImpactResult?  // cached impact from save
+    // savedImpact removed — post-save screen no longer shows impact block (Option B)
     @State private var showGlycemicWarning = false      // auto-dismissing high GL warning
     @State private var showGlucoseElevatedWarning = false  // auto-dismissing warning for regular meals
     @State private var glBeforeFoodSearch: Double = 0      // GL snapshot before opening food search
     let mealType: MealType
-    @State private var predictionEngine = HbA1cPredictionEngine()
+    // predictionEngine removed — historical pattern mode uses HistoricalPatternSummary instead
 
     init(mealType: MealType) {
         self.mealType = mealType
@@ -92,7 +92,7 @@ struct MealBuilderView: View {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.title)
                             .foregroundColor(.orange)
-                        Text("High Glycemic Load")
+                        Text("High Carb Impact")
                             .font(.headline)
                             .foregroundColor(.primary)
                         Text("This wellness feature estimates how exercise might relate to the glucose impact of this meal. These are estimates for personal tracking only — not medical diagnoses or treatment advice.")
@@ -107,7 +107,7 @@ struct MealBuilderView: View {
                     .shadow(radius: 10)
                     .transition(.opacity.combined(with: .scale(scale: 0.9)))
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Note: High glycemic load. The app will estimate how exercise may relate to the glucose impact.")
+                    .accessibilityLabel("Note: High carb impact. The app will estimate how exercise may relate to the glucose impact.")
                 }
                 if showGlucoseElevatedWarning {
                     VStack(spacing: 10) {
@@ -163,102 +163,38 @@ struct MealBuilderView: View {
                 }
                 .padding(.top, 12)
 
-                // Estimated Impact
-                if let impact = savedImpact {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("Estimated Impact")
-                            .font(.headline)
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 8)
+                // Glycemic load summary — descriptive property of the
+                // saved meal. No forward projections on the post-save
+                // screen (historical pattern is shown pre-save only).
+                if !mealBuilder.selectedFoods.isEmpty {
+                    let gl = mealBuilder.totalGlycemicLoad
+                    let glCategory = gl < 10 ? "Low" : gl < 20 ? "Moderate" : "High"
+                    let glColor: Color = glCategory == "Low" ? .green : glCategory == "Moderate" ? .orange : .red
+                    let glIcon = glCategory == "Low" ? "checkmark.circle.fill" : glCategory == "Moderate" ? "exclamationmark.circle.fill" : "xmark.circle.fill"
 
-                        VStack(spacing: 12) {
-                            // Glucose spike estimate
-                            HStack {
-                                Image(systemName: "waveform.path.ecg")
-                                    .foregroundColor(impact.glucoseColor)
-                                    .frame(width: 24)
-                                    .accessibilityHidden(true)
-                                Text("Est. glucose rise")
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text(impact.formattedGlucoseRise)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(impact.glucoseColor)
-                            }
-
-                            Divider()
-
-                            // HbA1c impact
-                            HStack {
-                                Image(systemName: "chart.line.uptrend.xyaxis")
-                                    .foregroundColor(impact.hba1cColor)
-                                    .frame(width: 24)
-                                    .accessibilityHidden(true)
-                                Text("HbA1c impact")
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text(impact.formattedHbA1cDelta)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(impact.hba1cColor)
-                            }
-
-                            Divider()
-
-                            // Comparison with typical meals
-                            HStack {
-                                Image(systemName: "arrow.left.arrow.right")
-                                    .foregroundColor(.blue)
-                                    .frame(width: 24)
-                                    .accessibilityHidden(true)
-                                Text("vs. your typical meal")
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text(impact.comparisonText)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(impact.comparisonColor)
-                            }
-
-                            Divider()
-
-                            // Glycemic load indicator
-                            HStack {
-                                Image(systemName: impact.glCategory == "Low" ? "checkmark.circle.fill" : impact.glCategory == "Moderate" ? "exclamationmark.circle.fill" : "xmark.circle.fill")
-                                    .foregroundColor(impact.glColor)
-                                    .frame(width: 24)
-                                    .accessibilityHidden(true)
-                                Text("Glycemic load")
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text("\(Int(impact.glycemicLoad)) (\(impact.glCategory))")
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(impact.glColor)
-                            }
-
-                            // Recommendation
-                            if let recommendation = impact.recommendation {
-                                Divider()
-                                HStack(alignment: .top) {
-                                    Image(systemName: "lightbulb.fill")
-                                        .foregroundColor(.yellow)
-                                        .frame(width: 24)
-                                        .accessibilityHidden(true)
-                                    Text(recommendation)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-
-                            // Exercise recommendation
-                            if let walkRec = impact.walkRecommendation {
-                                Divider()
-                                WalkRecommendationCard(recommendation: walkRec)
-                            }
+                    VStack(spacing: 12) {
+                        HStack {
+                            Image(systemName: glIcon)
+                                .foregroundColor(glColor)
+                                .frame(width: 24)
+                                .accessibilityHidden(true)
+                            Text("Carb impact")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("\(Int(gl)) (\(glCategory))")
+                                .fontWeight(.semibold)
+                                .foregroundColor(glColor)
                         }
-                        .padding(16)
-                        .background(Color(.secondarySystemGroupedBackground))
-                        .cornerRadius(14)
-                        .padding(.horizontal, 16)
+
+                        Text("Log glucose readings over the next 2 hours to build your historical pattern for similar meals.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
+                    .padding(16)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(14)
+                    .padding(.horizontal, 16)
                 }
 
                 Spacer(minLength: 24)
@@ -344,13 +280,12 @@ struct MealBuilderView: View {
                 }
             }
 
-            // Estimated Impact section (feast only)
+            // Historical pattern section (feast only)
             if mealType == .feast {
-                Section(header: Text("Estimated Impact")) {
-                    EstimatedImpactContent(
+                Section(header: Text("Your Pattern with Similar Meals")) {
+                    HistoricalPatternContent(
                         mealBuilder: mealBuilder,
                         viewContext: viewContext,
-                        predictionEngine: predictionEngine,
                         mealType: mealType
                     )
                 }
@@ -422,13 +357,10 @@ struct MealBuilderView: View {
     private func saveMeal() {
         do {
             if mealType == .feast {
-                // Compute impact before saving so we have it for the results view
-                let impact = computeImpactForResults()
                 try mealBuilder.save(to: viewContext)
-                savedImpact = impact
 
                 // Show auto-dismissing warning for high glycemic load feasts
-                if let impact = impact, impact.glycemicLoad >= 50 {
+                if mealBuilder.totalGlycemicLoad >= 50 {
                     withAnimation(.easeInOut(duration: 0.3)) { showGlycemicWarning = true }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
                         withAnimation(.easeInOut(duration: 0.3)) { showGlycemicWarning = false }
@@ -467,173 +399,35 @@ struct MealBuilderView: View {
         }
     }
 
-    /// Computes meal impact for the post-save results display
-    private func computeImpactForResults() -> MealImpactResult? {
-        guard !mealBuilder.selectedFoods.isEmpty else { return nil }
-
-        let carbs = mealBuilder.totalCarbohydrates
-        let gi = mealBuilder.averageGlycemicIndex
-        let gl = mealBuilder.totalGlycemicLoad
-        let hoursUntil = max(0, mealBuilder.plannedDateTime.timeIntervalSince(Date()) / 3600.0)
-
-        // 1. Estimate post-meal glucose rise
-        let estimatedGlucoseRise = min(120, gl * 2.5)
-
-        // 2. Calculate HbA1c impact
-        var hba1cDelta = 0.0
-        if let input = predictionEngine.gatherInputs(context: viewContext) {
-            let currentResult = predictionEngine.predict(from: input)
-            let adjusted = predictionEngine.predictWithPlannedMeal(
-                currentPrediction: currentResult,
-                plannedMealCarbs: carbs,
-                plannedMealGI: gi,
-                hoursUntilMeal: hoursUntil
-            )
-            hba1cDelta = adjusted.predictedHbA1c - currentResult.predictedHbA1c
-        }
-
-        // 3. Compare with typical meal from history (same logic as fetchAverageCarbs)
-        let mealFetchRequest: NSFetchRequest<MealEntity> = MealEntity.fetchRequest()
-        let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
-        mealFetchRequest.predicate = NSPredicate(
-            format: "timestamp >= %@ AND (mealType != %@ OR mealType == nil)",
-            cutoff as NSDate, "plannedMeal"
-        )
-        mealFetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \MealEntity.timestamp, ascending: false)]
-        let recentMeals = (try? viewContext.fetch(mealFetchRequest)) ?? []
-        var totalHistoryCarbs = 0.0
-        for meal in recentMeals {
-            if let items = meal.foodItems as? Set<MealFoodItemEntity>, !items.isEmpty {
-                for item in items {
-                    totalHistoryCarbs += item.carbsPerServing * item.quantity
-                }
-            } else if let macros = meal.macronutrients as? Set<MacronutrientEntity> {
-                totalHistoryCarbs += macros
-                    .filter { $0.type == "carbohydrates" || $0.type == "carbs" }
-                    .reduce(0) { $0 + $1.amount }
-            }
-        }
-        let avgCarbs: Double = recentMeals.isEmpty ? 0 : totalHistoryCarbs / Double(recentMeals.count)
-        let comparisonPct: Double = avgCarbs > 0 ? ((carbs - avgCarbs) / avgCarbs) * 100 : 0
-
-        // 4. Categorize glycemic load
-        let glCategory: String
-        if gl < 10 { glCategory = "Low" }
-        else if gl < 20 { glCategory = "Moderate" }
-        else { glCategory = "High" }
-
-        // 5. Generate recommendation
-        let isFeast = (mealType == .feast)
-        var recommendation: String? = nil
-        if gl > (isFeast ? 30 : 20) && carbs > (isFeast ? 90 : 60) {
-            recommendation = isFeast
-                ? "Very high carb feast. Some people find a post-meal \(ExerciseOffsetType.current.actionVerb) helpful after meals like this."
-                : "High carb & glycemic load. Some people choose smaller portions or pair with protein/fiber."
-        } else if gl > (isFeast ? 30 : 20) {
-            recommendation = "High glycemic load. Lower-GI alternatives tend to produce a smaller glucose response."
-        } else if carbs > (isFeast ? 100 : 80) {
-            recommendation = "High carbs. Protein or healthy fats are sometimes paired with high-carb meals."
-        }
-
-        // 6. Exercise recommendation (same logic as EstimatedImpactContent)
-        let walkRec: String? = {
-            guard estimatedGlucoseRise > 15 else { return nil }
-            let exerciseType = ExerciseOffsetType.current
-            let walkMET = 3.5
-            let reductionPerMinute = 1.5 * (exerciseType.metValue / walkMET)
-            let targetReduction = estimatedGlucoseRise * 0.5
-            let rawMinutes = targetReduction / reductionPerMinute
-            let exerciseMinutes = min(60, max(5, rawMinutes))
-            let roundedMinutes = Int((exerciseMinutes / 5).rounded()) * 5
-            let hitCap = rawMinutes > 60
-            let pace = exerciseType.defaultPace
-            let rawDistance = Double(roundedMinutes) * pace
-            let formattedDistance: String
-            if exerciseType == .swim {
-                let metres = Int((rawDistance / 50).rounded()) * 50
-                formattedDistance = "\(metres) \(exerciseType.distanceUnit)"
-            } else {
-                formattedDistance = String(format: "%.1f \(exerciseType.distanceUnit)", rawDistance)
-            }
-            let durationText: String
-            if exerciseType == .swim {
-                // Swimming: show duration only, distance is not meaningful to display
-                durationText = hitCap
-                    ? "at least \(roundedMinutes) min"
-                    : "\(roundedMinutes) min"
-            } else {
-                durationText = hitCap
-                    ? "at least \(roundedMinutes) min / \(formattedDistance)"
-                    : "\(roundedMinutes) min / \(formattedDistance)"
-            }
-            return "For reference, a \(exerciseType.actionVerb) of \(durationText) after a meal like this is sometimes associated with a smaller glucose response."
-        }()
-
-        return MealImpactResult(
-            estimatedGlucoseRise: estimatedGlucoseRise,
-            hba1cDelta: hba1cDelta,
-            glycemicLoad: gl,
-            glCategory: glCategory,
-            comparisonPct: comparisonPct,
-            hasHistory: !recentMeals.isEmpty,
-            recommendation: recommendation,
-            walkRecommendation: walkRec
-        )
-    }
-
 }
 
-/// Result of estimated meal impact calculation
-struct MealImpactResult {
-    let estimatedGlucoseRise: Double
-    let hba1cDelta: Double
+
+/// UI-side result of the historical pattern lookup for the currently
+/// planned meal. Carries the raw `HistoricalPatternSummary` plus a few
+/// derived fields (glycaemic load of *this* planned meal, recommendation
+/// text, optional walk recommendation) that aren't part of the summary
+/// itself.
+///
+/// Named with the neutral "ImpactResult" suffix so the surrounding view
+/// struct can be renamed to `HistoricalPatternContent` later (Step G.6)
+/// without churn here.
+fileprivate struct HistoricalImpactResult {
+    let summary: HistoricalPatternSummary
     let glycemicLoad: Double
     let glCategory: String
-    let comparisonPct: Double
-    let hasHistory: Bool
     let recommendation: String?
     let walkRecommendation: String?
 
-    var glucoseColor: Color {
-        if estimatedGlucoseRise < 30 { return .green }
-        else if estimatedGlucoseRise < 60 { return .orange }
+    /// True when we have enough analysed matches to show numeric aggregates.
+    var hasAggregates: Bool {
+        summary.confidence != .insufficient && summary.medianPeakDelta != nil
+    }
+
+    var peakDeltaColor: Color {
+        guard let delta = summary.medianPeakDelta else { return .secondary }
+        if delta < 30 { return .green }
+        else if delta < 60 { return .orange }
         else { return .red }
-    }
-
-    var hba1cColor: Color {
-        if hba1cDelta < 0.05 { return .green }
-        else if hba1cDelta < 0.1 { return .orange }
-        else { return .red }
-    }
-
-    // MARK: - Unit-Aware Display Helpers
-
-    /// Glucose rise formatted for the user's effective unit system
-    /// Internal value is always in mg/dL; converts to mmol/L for IFCC users
-    var formattedGlucoseRise: String {
-        let unit = HbA1cUserProfile.shared.effectiveUnit
-        switch unit {
-        case .ngsp:
-            return "+\(Int(estimatedGlucoseRise)) mg/dL"
-        case .ifcc:
-            let mmolL = estimatedGlucoseRise / 18.0182
-            return String(format: "+%.1f mmol/L", mmolL)
-        }
-    }
-
-    /// HbA1c delta formatted for the user's effective unit system
-    /// Internal value is always in NGSP %; converts to IFCC mmol/mol for IFCC users
-    var formattedHbA1cDelta: String {
-        let unit = HbA1cUserProfile.shared.effectiveUnit
-        switch unit {
-        case .ngsp:
-            return hba1cDelta >= 0.05 ? String(format: "+%.1f%%", hba1cDelta) : "Minimal"
-        case .ifcc:
-            // delta_IFCC = delta_NGSP × 10.929
-            let ifccDelta = hba1cDelta * 10.929
-            // Threshold: 0.05% NGSP ≈ 0.55 mmol/mol IFCC
-            return ifccDelta >= 0.55 ? String(format: "+%.0f mmol/mol", ifccDelta) : "Minimal"
-        }
     }
 
     var glColor: Color {
@@ -644,127 +438,230 @@ struct MealImpactResult {
         }
     }
 
-    var comparisonText: String {
-        guard hasHistory else { return "No meal history" }
-        let pct = Int(abs(comparisonPct))
-        if abs(comparisonPct) < 10 { return "Similar" }
-        else if comparisonPct > 0 { return "\(pct)% more carbs" }
-        else { return "\(pct)% fewer carbs" }
+    /// Median peak delta formatted for the user's effective unit system.
+    /// Internal value is stored in mg/dL; converts to mmol/L for IFCC users.
+    var formattedMedianPeakDelta: String? {
+        guard let delta = summary.medianPeakDelta else { return nil }
+        switch HbA1cUserProfile.shared.effectiveUnit {
+        case .ngsp:
+            return "+\(Int(delta)) mg/dL"
+        case .ifcc:
+            let mmolL = delta / 18.0182
+            return String(format: "+%.1f mmol/L", mmolL)
+        }
     }
 
-    var comparisonColor: Color {
-        guard hasHistory else { return .secondary }
-        if abs(comparisonPct) < 10 { return .green }
-        else if comparisonPct > 30 { return .red }
-        else if comparisonPct > 0 { return .orange }
-        else { return .green }
+    /// Peak delta range formatted similarly. Nil when no range is available.
+    var formattedPeakDeltaRange: String? {
+        guard let range = summary.peakDeltaRange else { return nil }
+        switch HbA1cUserProfile.shared.effectiveUnit {
+        case .ngsp:
+            return "+\(Int(range.lowerBound)) to +\(Int(range.upperBound)) mg/dL"
+        case .ifcc:
+            let lo = range.lowerBound / 18.0182
+            let hi = range.upperBound / 18.0182
+            return String(format: "+%.1f to +%.1f mmol/L", lo, hi)
+        }
+    }
+
+    /// Lab HbA1c bracket text ("first → last") in the user's effective
+    /// unit. Nil when either endpoint is missing.
+    var formattedHbA1cBracket: String? {
+        guard let first = summary.hba1cAtFirstMatch,
+              let last = summary.hba1cAtLastMatch else { return nil }
+        let profile = HbA1cUserProfile.shared
+        return "\(profile.formatHbA1c(first)) → \(profile.formatHbA1c(last))"
+    }
+
+    /// Copy for the empty state, tailored by how many matches were found
+    /// and how many had usable glucose data around them.
+    var emptyStateMessage: String {
+        let needed = HistoricalPatternSummary.minAnalysedForAggregates
+        if summary.matchCount == 0 {
+            return "No similar meals in the last 90 days yet. Log \(needed) meals with similar carbs to see how your glucose usually responds."
+        }
+        if summary.analysedCount == 0 {
+            return "Found \(summary.matchCount) similar meals, but none had enough glucose data around them to show a pattern."
+        }
+        let remaining = max(1, needed - summary.analysedCount)
+        return "Found \(summary.matchCount) similar meals — \(summary.analysedCount) with usable glucose data. Log \(remaining) more similar meal\(remaining == 1 ? "" : "s") with glucose readings to see your pattern."
     }
 }
 
-/// Self-contained view that computes and displays estimated meal impact
-/// Observes MealBuilder directly so it updates automatically when foods change
-/// Uses @State + task to avoid blocking the main thread with Core Data fetches
-struct EstimatedImpactContent: View {
+/// Self-contained view that computes and displays a historical pattern
+/// for the currently planned meal. Observes MealBuilder directly so it
+/// updates automatically when foods change.
+///
+/// Self-contained view that computes and displays a historical pattern
+/// for the currently planned meal. Observes MealBuilder directly so it
+/// updates automatically when foods change.
+struct HistoricalPatternContent: View {
     @ObservedObject var mealBuilder: MealBuilder
     var viewContext: NSManagedObjectContext
-    var predictionEngine: HbA1cPredictionEngine
     var mealType: MealType = .plannedMeal
 
-    @State private var cachedImpact: MealImpactResult?
+    @State private var cachedImpact: HistoricalImpactResult?
     @State private var computeTask: Task<Void, Never>?
 
     var body: some View {
         Group {
-            let impact = cachedImpact
-            if let impact = impact {
-                // Glucose spike estimate
-                HStack {
-                    Image(systemName: "waveform.path.ecg")
-                        .foregroundColor(impact.glucoseColor)
-                        .frame(width: 24)
-                        .accessibilityHidden(true)
-                    Text("Est. glucose rise")
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text(impact.formattedGlucoseRise)
-                        .fontWeight(.semibold)
-                        .foregroundColor(impact.glucoseColor)
-                }
-
-                // HbA1c impact
-                HStack {
-                    Image(systemName: "chart.line.uptrend.xyaxis")
-                        .foregroundColor(impact.hba1cColor)
-                        .frame(width: 24)
-                        .accessibilityHidden(true)
-                    Text("HbA1c impact")
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text(impact.formattedHbA1cDelta)
-                        .fontWeight(.semibold)
-                        .foregroundColor(impact.hba1cColor)
-                }
-
-                // Comparison with typical meals
-                HStack {
-                    Image(systemName: "arrow.left.arrow.right")
-                        .foregroundColor(.blue)
-                        .frame(width: 24)
-                        .accessibilityHidden(true)
-                    Text("vs. your typical meal")
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text(impact.comparisonText)
-                        .fontWeight(.semibold)
-                        .foregroundColor(impact.comparisonColor)
-                }
-
-                // Glycemic load indicator
-                HStack {
-                    Image(systemName: impact.glCategory == "Low" ? "checkmark.circle.fill" : impact.glCategory == "Moderate" ? "exclamationmark.circle.fill" : "xmark.circle.fill")
-                        .foregroundColor(impact.glColor)
-                        .frame(width: 24)
-                        .accessibilityHidden(true)
-                    Text("Glycemic load")
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text("\(Int(impact.glycemicLoad)) (\(impact.glCategory))")
-                        .fontWeight(.semibold)
-                        .foregroundColor(impact.glColor)
-                }
-
-                // Recommendation if any
-                if let recommendation = impact.recommendation {
-                    HStack(alignment: .top) {
-                        Image(systemName: "lightbulb.fill")
-                            .foregroundColor(.yellow)
-                            .frame(width: 24)
-                            .accessibilityHidden(true)
-                        Text(recommendation)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.top, 4)
-                }
-
-                // Walk recommendation
-                if let walkRec = impact.walkRecommendation {
-                    WalkRecommendationCard(recommendation: walkRec)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
-                        .listRowBackground(Color.clear)
-                        .padding(.top, 4)
+            if mealBuilder.selectedFoods.isEmpty {
+                Text("Add foods to see your pattern with similar meals.")
+                    .foregroundColor(.secondary)
+            } else if let impact = cachedImpact {
+                if impact.hasAggregates {
+                    aggregatesView(impact)
+                } else {
+                    emptyHistoryView(impact)
                 }
             } else {
-                Text("Add foods to see estimated impact")
+                // Computing / no result yet — show a muted placeholder.
+                Text("Looking for similar meals in your history…")
                     .foregroundColor(.secondary)
             }
         }
         // Compute on first appearance (handles lazy loading in landscape)
         .onAppear { scheduleCompute() }
-        // Recompute impact asynchronously when foods or planned time change
+        // Recompute asynchronously when foods or planned time change
         .onChange(of: mealBuilder.foodCount) { _, _ in scheduleCompute() }
         .onChange(of: mealBuilder.plannedDateTime) { _, _ in scheduleCompute() }
     }
+
+    // MARK: - Subviews
+
+    @ViewBuilder
+    private func aggregatesView(_ impact: HistoricalImpactResult) -> some View {
+        // How many similar meals underpin the aggregates
+        HStack {
+            Image(systemName: "clock.arrow.circlepath")
+                .foregroundColor(.blue)
+                .frame(width: 24)
+                .accessibilityHidden(true)
+            Text("Based on")
+                .foregroundColor(.secondary)
+            Spacer()
+            Text("\(impact.summary.analysedCount) similar meals")
+                .fontWeight(.semibold)
+        }
+
+        // Typical (median) post-meal glucose rise across those meals
+        if let formatted = impact.formattedMedianPeakDelta {
+            HStack {
+                Image(systemName: "waveform.path.ecg")
+                    .foregroundColor(impact.peakDeltaColor)
+                    .frame(width: 24)
+                    .accessibilityHidden(true)
+                Text("Typical rise after similar meals")
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text(formatted)
+                    .fontWeight(.semibold)
+                    .foregroundColor(impact.peakDeltaColor)
+            }
+        }
+
+        // Range across matches (min..max peak delta)
+        if let rangeText = impact.formattedPeakDeltaRange {
+            HStack {
+                Image(systemName: "arrow.up.and.down")
+                    .foregroundColor(.secondary)
+                    .frame(width: 24)
+                    .accessibilityHidden(true)
+                Text("Range across meals")
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text(rangeText)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+            }
+        }
+
+        // Lab HbA1c bracket (only if we have lab data spanning the window)
+        if let bracket = impact.formattedHbA1cBracket {
+            HStack {
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .foregroundColor(.orange)
+                    .frame(width: 24)
+                    .accessibilityHidden(true)
+                Text("Your lab HbA1c in this window")
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text(bracket)
+                    .fontWeight(.semibold)
+            }
+        }
+
+        // Glycemic load of the *current* planned meal — still useful as a
+        // descriptive property of what they're about to eat.
+        HStack {
+            Image(systemName: impact.glCategory == "Low" ? "checkmark.circle.fill" : impact.glCategory == "Moderate" ? "exclamationmark.circle.fill" : "xmark.circle.fill")
+                .foregroundColor(impact.glColor)
+                .frame(width: 24)
+                .accessibilityHidden(true)
+            Text("Carb impact of this meal")
+                .foregroundColor(.secondary)
+            Spacer()
+            Text("\(Int(impact.glycemicLoad)) (\(impact.glCategory))")
+                .fontWeight(.semibold)
+                .foregroundColor(impact.glColor)
+        }
+
+        if let recommendation = impact.recommendation {
+            HStack(alignment: .top) {
+                Image(systemName: "lightbulb.fill")
+                    .foregroundColor(.yellow)
+                    .frame(width: 24)
+                    .accessibilityHidden(true)
+                Text(recommendation)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.top, 4)
+        }
+
+        if let walkRec = impact.walkRecommendation {
+            WalkRecommendationCard(recommendation: walkRec)
+                .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                .listRowBackground(Color.clear)
+                .padding(.top, 4)
+        }
+    }
+
+    @ViewBuilder
+    private func emptyHistoryView(_ impact: HistoricalImpactResult) -> some View {
+        HStack(alignment: .top) {
+            Image(systemName: "clock.badge.questionmark")
+                .foregroundColor(.secondary)
+                .frame(width: 24)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Not enough history yet")
+                    .fontWeight(.semibold)
+                Text(impact.emptyStateMessage)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+
+        // Still show the glycaemic load of this planned meal even when
+        // we can't surface a historical pattern — it's descriptive of
+        // the current meal, not a projection.
+        HStack {
+            Image(systemName: impact.glCategory == "Low" ? "checkmark.circle.fill" : impact.glCategory == "Moderate" ? "exclamationmark.circle.fill" : "xmark.circle.fill")
+                .foregroundColor(impact.glColor)
+                .frame(width: 24)
+                .accessibilityHidden(true)
+            Text("Carb impact of this meal")
+                .foregroundColor(.secondary)
+            Spacer()
+            Text("\(Int(impact.glycemicLoad)) (\(impact.glCategory))")
+                .fontWeight(.semibold)
+                .foregroundColor(impact.glColor)
+        }
+    }
+
+    // MARK: - Compute
 
     /// Debounced async computation — avoids blocking the main thread
     private func scheduleCompute() {
@@ -777,96 +674,60 @@ struct EstimatedImpactContent: View {
         }
     }
 
-    private func computeImpact() -> MealImpactResult? {
+    /// Build the historical-pattern result for the currently planned meal.
+    /// All forward-projection logic has been removed — the summary is
+    /// descriptive retrospective analysis on the user's own data.
+    private func computeImpact() -> HistoricalImpactResult? {
         guard !mealBuilder.selectedFoods.isEmpty else { return nil }
 
         let carbs = mealBuilder.totalCarbohydrates
-        let gi = mealBuilder.averageGlycemicIndex
         let gl = mealBuilder.totalGlycemicLoad
-        let hoursUntil = max(0, mealBuilder.plannedDateTime.timeIntervalSince(Date()) / 3600.0)
 
-        // 1. Estimate post-meal glucose rise (~2-3 mg/dL per unit of GL)
-        let estimatedGlucoseRise = min(120, gl * 2.5)
+        // 1. Look up past meals similar to this one and aggregate their
+        //    actual glucose excursions. No forward projection.
+        let summary = HistoricalPatternSummary.build(
+            plannedCarbs: carbs,
+            plannedGL: gl,
+            context: viewContext
+        )
 
-        // 2. Calculate HbA1c impact using prediction engine (read-only)
-        var hba1cDelta = 0.0
-        if let input = predictionEngine.gatherInputs(context: viewContext) {
-            let currentResult = predictionEngine.predict(from: input)
-            let adjusted = predictionEngine.predictWithPlannedMeal(
-                currentPrediction: currentResult,
-                plannedMealCarbs: carbs,
-                plannedMealGI: gi,
-                hoursUntilMeal: hoursUntil
-            )
-            hba1cDelta = adjusted.predictedHbA1c - currentResult.predictedHbA1c
-        }
-
-        // 3. Compare with typical meal from history
-        let avgCarbs = fetchAverageCarbs()
-        let comparisonPct: Double = avgCarbs > 0 ? ((carbs - avgCarbs) / avgCarbs) * 100 : 0
-
-        // 4. Categorize glycemic load
+        // 2. Categorize glycemic load of *this* planned meal (descriptive
+        //    property of what's about to be eaten).
         let glCategory: String
         if gl < 10 { glCategory = "Low" }
         else if gl < 20 { glCategory = "Moderate" }
         else { glCategory = "High" }
 
-        // 5. Generate recommendation
-                let isFeast = (mealType == .feast)
-                var recommendation: String? = nil
-                if gl > (isFeast ? 30 : 20) && carbs > (isFeast ? 90 : 60) {
-                    recommendation = isFeast
-                        ? "Very high carb feast. Some people find a post-meal \(ExerciseOffsetType.current.actionVerb) helpful after meals like this."
-                        : "High carb & glycemic load. Some people choose smaller portions or pair with protein/fiber."
-                } else if gl > (isFeast ? 30 : 20) {
-                    recommendation = "High glycemic load. Lower-GI alternatives tend to produce a smaller glucose response."
-                } else if carbs > (isFeast ? 100 : 80) {
-                    recommendation = "High carbs. Protein or healthy fats are sometimes paired with high-carb meals."
-                }
-        // 6. Estimate post-meal walk to offset glucose rise
-        let walkRec = computeWalkRecommendation(estimatedGlucoseRise: estimatedGlucoseRise)
+        // 3. Generic recommendation based on the planned meal's profile.
+        //    This is advice about the meal itself, not a prediction of
+        //    what will happen.
+        let isFeast = (mealType == .feast)
+        var recommendation: String? = nil
+        if gl > (isFeast ? 30 : 20) && carbs > (isFeast ? 90 : 60) {
+            recommendation = isFeast
+                ? "Very high carb feast. Some people find a post-meal \(ExerciseOffsetType.current.actionVerb) helpful after meals like this."
+                : "High carb impact. Some people choose smaller portions or pair with protein/fiber."
+        } else if gl > (isFeast ? 30 : 20) {
+            recommendation = "High carb impact. Lower-GI alternatives tend to produce a smaller glucose response."
+        } else if carbs > (isFeast ? 100 : 80) {
+            recommendation = "High carbs. Protein or healthy fats are sometimes paired with high-carb meals."
+        }
 
-        return MealImpactResult(
-            estimatedGlucoseRise: estimatedGlucoseRise,
-            hba1cDelta: hba1cDelta,
+        // 4. Walk recommendation — now driven off the *historical* median
+        //    peak delta rather than a formula-based projection. Falls back
+        //    to nil when we don't have enough history to know.
+        let walkRec: String? = {
+            guard let medianDelta = summary.medianPeakDelta else { return nil }
+            return computeWalkRecommendation(estimatedGlucoseRise: medianDelta)
+        }()
+
+        return HistoricalImpactResult(
+            summary: summary,
             glycemicLoad: gl,
             glCategory: glCategory,
-            comparisonPct: comparisonPct,
-            hasHistory: avgCarbs > 0,
             recommendation: recommendation,
             walkRecommendation: walkRec
         )
-    }
-
-    private func fetchAverageCarbs() -> Double {
-        let fetchRequest: NSFetchRequest<MealEntity> = MealEntity.fetchRequest()
-        let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
-        fetchRequest.predicate = NSPredicate(
-            format: "timestamp >= %@ AND (mealType != %@ OR mealType == nil)",
-            cutoff as NSDate, "plannedMeal"
-        )
-        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \MealEntity.timestamp, ascending: false)]
-
-        do {
-            let meals = try viewContext.fetch(fetchRequest)
-            guard !meals.isEmpty else { return 0 }
-
-            var totalCarbs = 0.0
-            for meal in meals {
-                if let foodItems = meal.foodItems as? Set<MealFoodItemEntity>, !foodItems.isEmpty {
-                    for item in foodItems {
-                        totalCarbs += item.carbsPerServing * item.quantity
-                    }
-                } else if let macros = meal.macronutrients as? Set<MacronutrientEntity> {
-                    totalCarbs += macros
-                        .filter { $0.type == "carbohydrates" || $0.type == "carbs" }
-                        .reduce(0) { $0 + $1.amount }
-                }
-            }
-            return totalCarbs / Double(meals.count)
-        } catch {
-            return 0
-        }
     }
 
     /// Estimate post-meal exercise duration/distance to help reduce glucose rise.

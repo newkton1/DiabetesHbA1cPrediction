@@ -89,7 +89,11 @@ class HbA1cUserProfile: ObservableObject {
         // Qualify with module name to call the global function, not this instance method
         let decimalPlaces = effectiveUnit == .ngsp ? 1 : 0
         let formatted = String(format: "%.\(decimalPlaces)f", displayValue)
-        return "\(formatted) \(effectiveUnit.shortUnit)"
+        // Chicago Manual of Style: symbolic representations (%) close up to
+        // the number. SI convention: spelled-out unit abbreviations (mmol/mol)
+        // take a separating space.
+        let separator = effectiveUnit == .ngsp ? "" : " "
+        return "\(formatted)\(separator)\(effectiveUnit.shortUnit)"
     }
 
     /// Converts a canonical IFCC value to the user's display unit (value only)

@@ -26,9 +26,11 @@ struct PlannedMealView: View {
         return (try? viewContext.count(for: request)) ?? 0
     }
 
-    /// Builds the multi-colored "Before You Eat" description
+    /// Builds the multi-colored "Before You Eat" description.
+    /// Uses scenario language ("could shift", "projected") rather than predictive claims,
+    /// because this is a what-if planner, not a medical prediction.
     private static var beforeYouEatDescription: AttributedString {
-        var part1 = AttributedString("Build your feast treat and see the predicted impact on your glucose and HbA1c ")
+        var part1 = AttributedString("Build your feast treat and explore how it could shift your glucose and GMI trend ")
         part1.foregroundColor = .secondary
 
         var part2 = AttributedString("as well as how to offset it")
@@ -74,8 +76,8 @@ struct PlannedMealView: View {
                     // Feature highlights
                     VStack(alignment: .leading, spacing: 12) {
                         Text("What you'll see").font(.headline).padding(.horizontal, 4)
-                        PlanFeatureRow(icon: "waveform.path.ecg",         color: .orange,     title: "Estimated glucose rise",        detail: "Predicted mg/dL spike from this feast")
-                        PlanFeatureRow(icon: "chart.line.uptrend.xyaxis", color: .red,        title: "HbA1c impact",                 detail: "How this feast shifts your 3-month average")
+                        PlanFeatureRow(icon: "waveform.path.ecg",         color: .orange,     title: "Possible glucose change",       detail: "Based on your glucose history, your blood glucose might spike if you eat this")
+                        PlanFeatureRow(icon: "chart.line.uptrend.xyaxis", color: .red,        title: "Possible GMI shift",             detail: "Based on your GMI history, this scenario might change your 14-day trend")
                         PlanFeatureRow(icon: ExerciseOffsetType.current.iconName, color: .green, title: "Personalised exercise plan",   detail: "Minutes & distance for your chosen activity")
                         PlanFeatureRow(icon: "arrow.left.arrow.right",    color: .planAccent, title: "Compared to your typical meal", detail: "Ranks this feast against your last 30 days")
                     }
@@ -150,7 +152,7 @@ struct PlannedMealView: View {
             feastWarningMessage = "You have already planned \(count) feasts in the last 7 days. Frequent feast meals may affect your glucose trends. You may want to space your treats out more."
             showFeastWarning = true
         } else if count >= 2 {
-            feastWarningMessage = "This will be your \(ordinal(count + 1)) feast in the last 7 days. The app will show how this may relate to your glucose and HbA1c trends."
+            feastWarningMessage = "This will be your \(ordinal(count + 1)) feast in the last 7 days. The app will show how this may relate to your glucose and GMI trends."
             showFeastWarning = true
         } else {
             showingFeastPlanner = true

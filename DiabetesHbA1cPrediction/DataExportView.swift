@@ -56,7 +56,7 @@ struct DataExportView: View {
                 SummaryRow(label: "Glucose Readings", count: glucoseReadings.count)
                 SummaryRow(label: "Meals", count: meals.count)
                 SummaryRow(label: "Exercise Sessions", count: exercises.count)
-                SummaryRow(label: "HbA1c Predictions", count: predictions.count)
+                SummaryRow(label: "GMI Estimates", count: predictions.count)
                 SummaryRow(label: "User Profiles", count: userProfiles.count)
                 SummaryRow(label: "Health Conditions", count: healthConditions.count)
             }

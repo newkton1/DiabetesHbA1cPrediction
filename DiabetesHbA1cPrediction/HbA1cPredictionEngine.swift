@@ -629,7 +629,7 @@ class HbA1cPredictionEngine: ObservableObject {
         var updatedRecommendations = currentPrediction.recommendations
         
         if glycemicLoad > 20 {
-            updatedRecommendations.insert("This planned meal has a high glycemic load. Lower-GI alternatives tend to produce a smaller glucose response.", at: 0)
+            updatedRecommendations.insert("This planned meal has a high carb impact. Lower-GI alternatives tend to produce a smaller glucose response.", at: 0)
         }
         
         if plannedMealCarbs > 80 {

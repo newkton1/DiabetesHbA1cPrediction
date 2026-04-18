@@ -11,13 +11,13 @@ struct PrivacyPolicyView: View {
     var body: some View {
         List {
             Section {
-                Text("This privacy policy explains how DiabetesHbA1c Prediction handles your data. Your privacy and the security of your health information are important to us.")
+                Text("This privacy policy explains how Diabetes Feast handles your data. Your privacy and the security of your health information are important to us.")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
 
             Section(header: Text("What Data We Read")) {
-                Text("The app reads the following from Apple Health with your permission: blood glucose readings, weight, height, age, and biological sex. This data is used solely to generate personalised HbA1c predictions.")
+                Text("The app reads the following from Apple Health with your permission: blood glucose readings, weight, height, age, and biological sex. This data is used solely to generate personalised GMI estimates.")
                     .font(.subheadline)
             }
 
@@ -36,7 +36,7 @@ struct PrivacyPolicyView: View {
             }
 
             Section(header: Text("Sharing")) {
-                Text("You can export a summary of your HbA1c predictions using the Share button. Before sharing, the app will ask you to confirm because the export contains sensitive health information. No data is shared without your explicit action.")
+                Text("You can export a summary of your GMI estimates using the Share button. Before sharing, the app will ask you to confirm because the export contains sensitive health information. No data is shared without your explicit action.")
                     .font(.subheadline)
             }
 

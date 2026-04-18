@@ -148,5 +148,6 @@ struct HbA1cThresholds {
 func formatHbA1c(_ value: Double, unit: HbA1cUnit, includeUnit: Bool = true) -> String {
     let decimalPlaces = unit == .ngsp ? 1 : 0
     let formatted = String(format: "%.\(decimalPlaces)f", value)
-    return includeUnit ? "\(formatted) \(unit.shortUnit)" : formatted
+    let separator = unit == .ngsp ? "" : " "
+    return includeUnit ? "\(formatted)\(separator)\(unit.shortUnit)" : formatted
 }

@@ -23,13 +23,15 @@ Each step leaves the app in a buildable state. If interrupted, pick up the next 
 
 - [x] **Step A** — Write this handoff file.
 - [x] **Step B** — Build GMI computation + `GMICardView` component; insert into Dashboard (portrait and landscape) in place of the spot where `HbA1cCardView` used to sit. Bergenstal formula. Show the value, the unit, the mean-glucose input it was computed from, the reading count, and a short caption. Gracefully degrade when too few readings. **DONE — verified visually on iPhone 17 Pro Max simulator, showing 6.4 %, 43 readings, 131 mg/dL mean.**
-- [ ] **Step B.1** — Fixes driven by first visual review (16 Apr 2026 evening):
-    - **Remove the dashed line between lab diamonds on the Dashboard chart.** HbA1c integrates 90-day red-cell pool; lab points more than ~60 days apart share no overlapping physiology and a connecting line implies a trajectory that biology does not support. Show diamonds only. If we later want to connect adjacent same-quarter points, add a threshold-based segmented line, but start by removing the line entirely.
-    - **Strengthen visual differentiation between GMI card and lab HbA1c chart.** Two HbA1c-like numbers in the same units on one screen confuses users. Make the chart's y-axis label say "Lab HbA1c (NGSP %)" rather than just "NGSP %". Consider adding a small glucose-drop icon next to the GMI value and a lab/flask icon beside the chart title. Re-word the chart title to something like "Your Lab HbA1c Records" if space allows.
-    - **Update empty-state / subtitle copy so users understand the distinction at a glance.** The "Most recent" inline subtitle should make clear it refers to the most recent *lab* result (not GMI).
-- [ ] **Step C** — Audit `PredictionView.swift`: read full file, list every user-facing string that needs to change, list every place that shows engine output.
-- [ ] **Step D** — Execute the copy rewrite in `PredictionView.swift`. Replace "prediction," "predicted HbA1c," "estimate" with scenario language. Rename any engine-output labels. Update confidence/risk copy.
-- [ ] **Step E** — Remove the "Run New Prediction" button from the Dashboard (both portrait and landscape). The engine now belongs on the What-If screen; running it from the Dashboard is inconsistent with the two-zone architecture.
+- [x] **Step B.1** — Fixes driven by first visual review (16 Apr 2026 evening). **DONE — awaiting simulator verification.**
+    - [x] **Removed the dashed line between lab diamonds on the Dashboard chart.** Diamonds only. LineMark block deleted, legend's dashed-connector glyph + "Between results" text removed, docstring updated to explain the 90-day red-cell-pool reasoning.
+    - [x] **Strengthened visual differentiation between GMI card and lab HbA1c chart.** Chart title now "Your Lab HbA1c Records" with a blue `flask.fill` icon. GMI card title gets an orange `drop.fill` icon for parity. Y-axis label kept short (original "NGSP %" / "IFCC mmol/mol") because the first-pass label "Lab HbA1c (NGSP %)" was too long once rotated and bled into the plot — the flask-icon title already carries the "Lab" differentiation. Two cards now read as two distinct domains at a glance.
+    - [x] **Subtitle copy updated.** "Most recent:" is now "Most recent lab:" with matching accessibilityLabel update.
+- [x] **Step C** — Audit the Zone-2 views. **Discovery: `PredictionView.swift` is orphan code** — never referenced from ContentView, NavigationStack, or any NavigationLink. The live "What if?" tab is actually `PlannedMealView`, which launches `MealBuilderView` as a sheet. `MealBuilderView` (1059 lines, ~63 engine-language references) is where the behavioural engine's output surfaces to users today via `predictionEngine.predictWithPlannedMeal(...)`.
+- [x] **Step D.1** — Deleted orphan `PredictionView.swift` (959 lines) from disk. **Xcode housekeeping needed: when the project is next opened, delete the red-ghost reference from the Project Navigator** (the .xcodeproj is one level above the mounted folder, outside my reach).
+- [ ] **Step D.2** — Rewrite `PlannedMealView.swift` (197 lines) user-facing copy to scenario language. Key strings: `beforeYouEatDescription` ("predicted impact on your glucose and HbA1c"), PlanFeatureRow titles/details ("Estimated glucose rise / Predicted mg/dL spike", "HbA1c impact / How this feast shifts your 3-month average").
+- [ ] **Step D.3** — Rewrite `MealBuilderView.swift` user-facing copy. Section headers "Estimated Impact" (×2), labels "Est. glucose rise", "HbA1c impact", empty state "Add foods to see estimated impact", and the disclaimer footnote. Leave internal variable names (`estimatedGlucoseRise`, etc.) untouched — those are not user-visible.
+- [ ] **Step E** — Remove the "Run New Prediction" button from the Dashboard (both portrait and landscape). The engine now belongs only on the What-If screen.
 - [ ] **Step F** — Final verification: search codebase for any remaining "Estimated HbA1c" / "predict" leaks that should have been caught, confirm clean build list, update this handoff and SESSION_HANDOFF_2026-04-15.md to reflect final state.
 
 ## Design decisions recorded this session (16 Apr 2026 evening)
@@ -53,7 +55,7 @@ Design shape confirmed for when we move meal/exercise visualisation off the Dash
 
 ## Deferred (still on the original pile)
 
-- PredictionView.swift refactor beyond copy (959 lines, 114 "prediction" references) — structural refactor is bigger than copy changes, deferred.
+- ~~PredictionView.swift refactor~~ — **RESOLVED:** file was orphan code, deleted in Step D.1.
 - Project rename DiabetesHbA1cPrediction → DiabetesFeast
 - Comprehensive Swift string audit against vocabulary list
 - App Store description rewrite

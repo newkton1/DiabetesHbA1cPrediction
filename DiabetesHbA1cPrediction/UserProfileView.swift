@@ -308,11 +308,15 @@ struct UserProfileView: View {
                 }
             }
 
-            // MARK: - DEBUG: Data Export (excluded from release builds)
+            // MARK: - DEBUG: Data Export & Import (excluded from release builds)
             #if DEBUG
             Section(header: Text("Developer Tools")) {
                 NavigationLink(destination: DataExportView()) {
                     Label("Export All Data", systemImage: "square.and.arrow.up")
+                        .foregroundColor(.orange)
+                }
+                NavigationLink(destination: DataImportView()) {
+                    Label("Import Data from JSON", systemImage: "square.and.arrow.down")
                         .foregroundColor(.orange)
                 }
             }

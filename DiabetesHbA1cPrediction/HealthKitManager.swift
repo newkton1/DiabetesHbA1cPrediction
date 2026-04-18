@@ -25,6 +25,14 @@ import Combine
 /// await manager.requestAuthorization()
 /// let workouts = await manager.fetchRecentWorkouts(days: 30)
 /// ```
+
+/// Sendable struct for transferring weight data across isolation boundaries.
+/// Top-level so it can be referenced without main-actor isolation.
+struct WeightSampleRecord: Sendable {
+    let date: Date
+    let kilograms: Double
+}
+
 @MainActor
 class HealthKitManager: ObservableObject {
 
@@ -167,7 +175,7 @@ class HealthKitManager: ObservableObject {
         var readTypes: Set<HKSampleType> = [HKWorkoutType.workoutType()]
         let quantityIdentifiers: [HKQuantityTypeIdentifier] = [
             .stepCount, .activeEnergyBurned, .appleExerciseTime,
-            .distanceWalkingRunning, .bloodGlucose
+            .distanceWalkingRunning, .bloodGlucose, .bodyMass
         ]
         for identifier in quantityIdentifiers {
             if let type = HKQuantityType.quantityType(forIdentifier: identifier) {
@@ -957,6 +965,63 @@ class HealthKitManager: ObservableObject {
     /// - Returns: True if HealthKit is available, false otherwise
     static func isHealthKitAvailable() -> Bool {
         return HKHealthStore.isHealthDataAvailable()
+    }
+
+    // MARK: - Weight (Body Mass) from HealthKit
+
+    /// Typealias so call-sites that already use `HealthKitManager.WeightSample`
+    /// continue to compile after the struct was promoted to top-level scope.
+    typealias WeightSample = WeightSampleRecord
+
+    /// Fetches body-mass samples from HealthKit for the specified number of days,
+    /// thinned to at most one reading per week (the latest in each 7-day bucket).
+    ///
+    /// - Parameter days: How many days back to query (default 120 ≈ 4 months,
+    ///   enough for a 3-month delta with margin).
+    /// - Returns: Array of `WeightSample` sorted oldest → newest, ≤ ~17 entries
+    ///   for a 120-day window.
+    func fetchWeeklyWeights(days: Int = 120) async -> [WeightSample] {
+        guard isAuthorized,
+              let massType = HKQuantityType.quantityType(forIdentifier: .bodyMass)
+        else { return [] }
+
+        // Capture main-actor-isolated properties before entering nonisolated closures.
+        let store = healthStore
+
+        let calendar = Calendar.current
+        let endDate = Date()
+        guard let startDate = calendar.date(byAdding: .day, value: -days, to: endDate) else { return [] }
+
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
+        let sortByDate = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
+
+        return await withCheckedContinuation { continuation in
+            let query = HKSampleQuery(
+                sampleType: massType,
+                predicate: predicate,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: [sortByDate]
+            ) { _, samples, error in
+                guard let samples = samples as? [HKQuantitySample], error == nil else {
+                    continuation.resume(returning: [])
+                    return
+                }
+
+                // Thin to one sample per ISO week (keep the latest in each week)
+                var weekBuckets: [Int: WeightSample] = [:]  // weekOfYear*100+year → sample
+                for sample in samples {
+                    let comps = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: sample.startDate)
+                    let key = (comps.yearForWeekOfYear ?? 0) * 100 + (comps.weekOfYear ?? 0)
+                    let kg = sample.quantity.doubleValue(for: .gramUnit(with: .kilo))
+                    // Keep the latest sample in each week bucket
+                    weekBuckets[key] = WeightSample(date: sample.startDate, kilograms: kg)
+                }
+
+                let sorted = weekBuckets.values.sorted { $0.date < $1.date }
+                continuation.resume(returning: sorted)
+            }
+            store.execute(query)
+        }
     }
 }
 

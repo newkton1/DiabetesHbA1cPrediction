@@ -54,7 +54,7 @@ struct WelcomeSheetView: View {
 
             // Subtitle
             VStack(spacing: 2) {
-                Text("Track HbA1c & blood glucose,")
+                Text("Monitor your GMI & glucose trends,")
                 Text("plan meals, treats, etc.")
             }
             .font(.subheadline)
