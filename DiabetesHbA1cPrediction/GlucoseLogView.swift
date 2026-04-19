@@ -1208,12 +1208,6 @@ struct AddGlucoseReadingSheet: View {
         }
     }
 
-    /// How many weeks ago the selected lab date is (for the decay note)
-    private var labDateWeeksAgo: Int {
-        let days = Calendar.current.dateComponents([.day], from: hba1cLabDate, to: Date()).day ?? 0
-        return max(0, days / 7)
-    }
-
     private var isPortrait: Bool {
         verticalSizeClass != .compact
     }
@@ -1404,19 +1398,6 @@ struct AddGlucoseReadingSheet: View {
                            displayedComponents: [.date])
             } header: {
                 Text("Lab Test Date")
-            } footer: {
-                Text(labDateWeightDescription)
-            }
-
-            Section {
-                VStack(alignment: .leading, spacing: 6) {
-                    Label("Time-Weighted Impact", systemImage: "chart.line.downtrend.xyaxis")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    Text("Lab results from the last 4 weeks have full impact on your estimated HbA1c. Impact decreases for results 1–3 months old, and results older than 3 months are excluded.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
             }
         }
         .alert("Confirm Lab Result", isPresented: $showLabConfirmAlert) {
@@ -1431,20 +1412,6 @@ struct AddGlucoseReadingSheet: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(saveErrorMessage)
-        }
-    }
-
-    /// Describes the weight this lab result will receive based on its date
-    private var labDateWeightDescription: String {
-        let weeks = labDateWeeksAgo
-        if weeks <= 4 {
-            return "This result is within 4 weeks — it will have full weight in your HbA1c estimate."
-        } else if weeks <= 8 {
-            return "This result is \(weeks) weeks old — it will have moderate weight in your HbA1c estimate."
-        } else if weeks <= 12 {
-            return "This result is \(weeks) weeks old — it will have reduced weight in your HbA1c estimate."
-        } else {
-            return "This result is over 3 months old — it will not be included in your HbA1c estimate."
         }
     }
 

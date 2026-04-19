@@ -32,6 +32,16 @@ struct UserProfileView: View {
         sortDescriptors: []
     ) private var healthConditions: FetchedResults<HealthConditionEntity>
 
+    @FetchRequest(
+        entity: GlucoseReadingEntity.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \GlucoseReadingEntity.timestamp, ascending: false)]
+    ) private var glucoseReadings: FetchedResults<GlucoseReadingEntity>
+
+    @FetchRequest(
+        entity: HbA1cPredictionEntity.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \HbA1cPredictionEntity.predictionDate, ascending: false)]
+    ) private var gmiEstimates: FetchedResults<HbA1cPredictionEntity>
+
     // MARK: - Unit Profile
     @ObservedObject private var hwProfile = HeightWeightUnitProfile.shared
 
@@ -63,6 +73,11 @@ struct UserProfileView: View {
     @State private var isSaving = false
     @State private var showSaveSuccess = false
     @FocusState private var isTextFieldFocused: Bool
+
+    // Share state
+    @State private var showShareWarning = false
+    @State private var showShareSheet = false
+    @State private var shareSummaryText = ""
 
     // MARK: - Body
     var body: some View {
@@ -308,6 +323,13 @@ struct UserProfileView: View {
                 }
             }
 
+            // MARK: - Share Summary
+            Section(header: Text("Share")) {
+                Button(action: { showShareWarning = true }) {
+                    Label("Share GMI Summary", systemImage: "square.and.arrow.up")
+                }
+            }
+
             // MARK: - DEBUG: Data Export & Import (excluded from release builds)
             #if DEBUG
             Section(header: Text("Developer Tools")) {
@@ -410,6 +432,18 @@ struct UserProfileView: View {
             Button("OK") { }
         } message: {
             Text("Your profile has been saved successfully.")
+        }
+        .alert("Share Health Data?", isPresented: $showShareWarning) {
+            Button("Cancel", role: .cancel) { }
+            Button("Share") {
+                shareSummaryText = buildGmiSummary()
+                showShareSheet = true
+            }
+        } message: {
+            Text("This will share your glucose and GMI data with a third party of your choosing (e.g. email, messaging app). This export contains sensitive personal health information. Are you sure you want to continue?")
+        }
+        .sheet(isPresented: $showShareSheet) {
+            ShareSheetView(activityItems: [shareSummaryText])
         }
         .onAppear {
             loadExistingProfile()
@@ -674,6 +708,84 @@ struct UserProfileView: View {
             validationErrorMessage = "Failed to save profile: \(error.localizedDescription)"
         }
     }
+
+    // MARK: - GMI Summary Builder
+
+    /// Builds a plain-text summary of the user's glucose and GMI data
+    /// suitable for sharing via the iOS share sheet.
+    private func buildGmiSummary() -> String {
+        let df = DateFormatter()
+        df.dateStyle = .medium
+        df.timeStyle = .short
+
+        var lines: [String] = []
+        lines.append("Diabetes Feast — GMI Summary")
+        lines.append("Generated: \(df.string(from: Date()))")
+        lines.append("")
+
+        // Recent glucose readings (last 14 days)
+        let fourteenDaysAgo = Calendar.current.date(byAdding: .day, value: -14, to: Date()) ?? Date()
+        let recentReadings = glucoseReadings.filter { reading in
+            guard let ts = reading.timestamp else { return false }
+            let unit = reading.unit ?? ""
+            // Exclude HbA1c lab results
+            return ts >= fourteenDaysAgo && unit != "NGSP %" && unit != "mmol/mol"
+        }
+
+        if !recentReadings.isEmpty {
+            let values = recentReadings.map { $0.value }
+            let avg = values.reduce(0, +) / Double(values.count)
+            let minVal = values.min() ?? 0
+            let maxVal = values.max() ?? 0
+            let unit = recentReadings.first?.unit ?? "mg/dL"
+
+            lines.append("Glucose (last 14 days)")
+            lines.append("  Readings: \(recentReadings.count)")
+            lines.append("  Average: \(String(format: "%.0f", avg)) \(unit)")
+            lines.append("  Range: \(String(format: "%.0f", minVal)) – \(String(format: "%.0f", maxVal)) \(unit)")
+            lines.append("")
+        } else {
+            lines.append("Glucose: No readings in the last 14 days")
+            lines.append("")
+        }
+
+        // Most recent GMI estimate
+        if let latest = gmiEstimates.first,
+           let date = latest.predictionDate {
+            lines.append("Most Recent GMI Estimate")
+            lines.append("  Value: \(String(format: "%.1f", latest.predictedValue))%")
+            lines.append("  Date: \(df.string(from: date))")
+            lines.append("")
+        }
+
+        // HbA1c lab results
+        let labResults = glucoseReadings.filter { ($0.unit == "NGSP %" || $0.unit == "mmol/mol") }
+        if !labResults.isEmpty {
+            lines.append("HbA1c Lab Results")
+            for lab in labResults.prefix(5) {
+                let dateStr = lab.timestamp.map { df.string(from: $0) } ?? "Unknown date"
+                lines.append("  \(String(format: "%.1f", lab.value)) \(lab.unit ?? "%") — \(dateStr)")
+            }
+            lines.append("")
+        }
+
+        lines.append("—")
+        lines.append("This summary is for personal tracking only and does not constitute medical advice.")
+
+        return lines.joined(separator: "\n")
+    }
+}
+
+// MARK: - Share Sheet (UIKit wrapper)
+
+private struct ShareSheetView: UIViewControllerRepresentable {
+    let activityItems: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - Preview
