@@ -57,6 +57,12 @@ struct GlucoseLogView: View {
     /// Anchor date for the chart window's right edge. nil = "now" (default).
     /// Set by tapping a reading in the list to scroll the chart to that date.
     @State private var chartAnchorDate: Date? = nil
+    /// Timestamp of a reading tapped in the list — triggers hotspot selection
+    /// after the chart window has moved.
+    @State private var pendingSelectionDate: Date? = nil
+    /// Timestamp of the reading selected in the list — shown as a vertical
+    /// indicator line on the chart even when there is no matching hotspot.
+    @State private var selectedReadingDate: Date? = nil
 
     @State private var showAddSheet = false
     @State private var showSyncAlert = false
@@ -298,6 +304,7 @@ struct GlucoseLogView: View {
                         Button(action: {
                             withAnimation { chartAnchorDate = nil }
                             selectedHotspot = nil
+                            selectedReadingDate = nil
                         }) {
                             Text("Now")
                                 .font(.caption)
@@ -395,6 +402,7 @@ struct GlucoseLogView: View {
                                                         .min(by: { $0.1 < $1.1 })
 
                                                     withAnimation(.easeInOut(duration: 0.2)) {
+                                                        selectedReadingDate = nil  // clear list-tap indicator
                                                         if let match = nearest {
                                                             if selectedHotspot?.id == match.0.id {
                                                                 selectedHotspot = nil
@@ -456,6 +464,25 @@ struct GlucoseLogView: View {
                     .accessibilityLabel("Interactive glucose chart showing last \(chartWindowDays) days. Tap highlighted points to see meal and exercise details.")
                     .onChange(of: isPortrait) {
                         selectedHotspot = nil  // dismiss popover on rotation
+                    }
+                    .onChange(of: pendingSelectionDate) {
+                        guard let targetDate = pendingSelectionDate else { return }
+                        pendingSelectionDate = nil
+
+                        // Find the nearest hotspot to the tapped reading
+                        let tolerance: TimeInterval = 300  // 5 minutes
+                        let nearest = hotspots
+                            .map { ($0, abs($0.point.timestamp.timeIntervalSince(targetDate))) }
+                            .filter { $0.1 < tolerance }
+                            .min(by: { $0.1 < $1.1 })
+
+                        if let match = nearest {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                selectedHotspot = match.0
+                                // Position popover on the left side (reading is centred)
+                                popoverAnchorRight = false
+                            }
+                        }
                     }
 
                     // Tap hint — shown when there are hotspots but user hasn't tapped one yet
@@ -570,6 +597,11 @@ struct GlucoseLogView: View {
             RuleMark(x: .value("Selected", sel.point.timestamp))
                 .foregroundStyle(Color.primary.opacity(0.3))
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [3]))
+        } else if let readingDate = selectedReadingDate {
+            // Vertical indicator for a list-tapped reading that isn't a hotspot
+            RuleMark(x: .value("Tapped", readingDate))
+                .foregroundStyle(Color.blue.opacity(0.5))
+                .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
         }
     }
 
@@ -583,6 +615,7 @@ struct GlucoseLogView: View {
         switch point.hotspotType {
         case .spikePeak:     typeText = "Glucose spike"
         case .recoverySlope: typeText = "Recovery point"
+        case .highReading:   typeText = "High glucose"
         case .none:          typeText = "Glucose reading"
         }
         return Text("\(typeText): \(valueText) at \(timeText)")
@@ -613,7 +646,7 @@ struct GlucoseLogView: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
 
-            // Spike delta
+            // Spike delta / high reading label
             if hotspot.point.hotspotType == .spikePeak, let delta = hotspot.deltaFromBaseline {
                 let displayDelta = isMgdlRegion ? delta : delta / 18.0182
                 let formatted = isMgdlRegion
@@ -622,6 +655,10 @@ struct GlucoseLogView: View {
                 Label(formatted + " from baseline", systemImage: "arrow.up.right")
                     .font(.caption.weight(.semibold))
                     .foregroundColor(.orange)
+            } else if hotspot.point.hotspotType == .highReading {
+                Label("Above 170 mg/dL threshold", systemImage: "exclamationmark.triangle")
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(.red)
             } else if hotspot.point.hotspotType == .recoverySlope {
                 Label("Returning to baseline", systemImage: "arrow.down.right")
                     .font(.caption.weight(.semibold))
@@ -732,6 +769,18 @@ struct GlucoseLogView: View {
         }
     }
 
+    // MARK: - Readings filtered to chart window
+
+    /// Glucose readings whose timestamp falls within the current chart window.
+    /// Sorted descending (newest first) to match the list's visual order.
+    private var chartWindowReadings: [GlucoseReadingEntity] {
+        glucoseReadings.filter { reading in
+            guard let ts = reading.timestamp else { return false }
+            return ts >= chartWindowStart && ts <= chartWindowEnd
+        }
+        // glucoseReadings is already sorted descending, so no re-sort needed
+    }
+
     // MARK: - Readings List (top-level List — supports swipeActions)
     @ViewBuilder
     private var readingsList: some View {
@@ -752,8 +801,21 @@ struct GlucoseLogView: View {
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.vertical, 40)
         } else {
+            let windowReadings = chartWindowReadings
             List {
-                ForEach(glucoseReadings, id: \.id) { reading in
+                // Reading count header
+                HStack {
+                    Text("\(windowReadings.count) readings")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text(chartWindowLabel)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .listRowBackground(Color.clear)
+
+                ForEach(windowReadings, id: \.id) { reading in
                     HStack(spacing: 12) {
                         // Glucose value with color coding (converted to locale unit)
                         // HbA1c readings (NGSP %, mmol/mol) keep their original unit
@@ -875,30 +937,30 @@ struct GlucoseLogView: View {
             withAnimation { chartAnchorDate = newEnd }
         }
         selectedHotspot = nil
+        selectedReadingDate = nil
     }
 
-    /// Scroll the chart so that the given reading is visible.
-    /// Called when a user taps a reading in the list.
+    /// Scroll the chart so that the given reading is centred, and select the
+    /// nearest hotspot so its popover appears automatically.  Also shows a
+    /// vertical indicator line on the chart for the tapped reading.
     private func scrollChartTo(reading: GlucoseReadingEntity) {
         guard let ts = reading.timestamp else { return }
         let now = Date()
 
-        // If the reading is already in the current chart window, just dismiss popover
-        if ts >= chartWindowStart && ts <= chartWindowEnd {
-            selectedHotspot = nil
-            return
-        }
-
-        // Centre the chart window on the reading's timestamp.
-        // Set anchor so the reading is roughly in the middle of the window.
+        // Always centre the chart on the tapped reading so the user can see
+        // where it sits, even when it was already inside the visible window.
         let halfWindow = TimeInterval(chartWindowDays * 86400 / 2)
         var newEnd = ts.addingTimeInterval(halfWindow)
         if newEnd > now { newEnd = now }
 
         withAnimation {
-            chartAnchorDate = newEnd
+            chartAnchorDate = (newEnd >= now ? nil : newEnd)
+            selectedReadingDate = ts
         }
+
+        // Clear current popover and queue the auto-select
         selectedHotspot = nil
+        pendingSelectionDate = ts
     }
 
     // MARK: - Helper Methods

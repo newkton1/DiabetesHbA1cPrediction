@@ -104,11 +104,16 @@ struct DataExportView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("Export Data")
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showShareSheet) {
-            if let url = exportURL {
-                ShareSheet(activityItems: [url])
-            }
-        }
+        .background(
+            // Present the share sheet from outside the List to avoid
+            // SwiftUI presentation conflicts with List/NavigationLink.
+            EmptyView()
+                .sheet(isPresented: $showShareSheet) {
+                    if let url = exportURL {
+                        ShareSheet(activityItems: [url])
+                    }
+                }
+        )
     }
 
     // MARK: - Export Logic

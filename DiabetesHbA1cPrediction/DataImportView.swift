@@ -22,6 +22,16 @@ struct DataImportView: View {
     @State private var importResult: DataImportResult?
     @State private var importError: String?
 
+    /// JSON files sitting in the app's Documents directory (e.g. copied
+    /// via `xcrun simctl` or iTunes File Sharing).
+    private var documentsJSONFiles: [URL] {
+        guard let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return [] }
+        let contents = (try? FileManager.default.contentsOfDirectory(at: docs, includingPropertiesForKeys: nil)) ?? []
+        return contents
+            .filter { $0.pathExtension.lowercased() == "json" }
+            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+    }
+
     var body: some View {
         List {
             Section(header: Text("Import")) {
@@ -29,6 +39,22 @@ struct DataImportView: View {
                     Label("Choose JSON File to Import", systemImage: "square.and.arrow.down")
                 }
                 .disabled(isImporting)
+
+                // Direct load from app's Documents folder (useful when
+                // file picker can't see the app container, e.g. Simulator)
+                if !documentsJSONFiles.isEmpty {
+                    ForEach(documentsJSONFiles, id: \.lastPathComponent) { fileURL in
+                        Button(action: { performImport(from: fileURL) }) {
+                            Label(fileURL.lastPathComponent, systemImage: "doc.fill")
+                                .font(.subheadline)
+                        }
+                        .disabled(isImporting)
+                    }
+                } else {
+                    Text("No JSON files found in app Documents folder.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
 
                 if isImporting {
                     HStack(spacing: 10) {

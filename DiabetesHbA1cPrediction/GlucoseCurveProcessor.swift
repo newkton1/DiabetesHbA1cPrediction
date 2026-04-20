@@ -55,6 +55,9 @@ enum HotspotType {
     case spikePeak
     /// First point that drops back within recoveryThresholdMgDl of the pre-spike baseline.
     case recoverySlope
+    /// Reading above the absolute high threshold (170 mg/dL) that wasn't caught
+    /// by the relative spike detector (e.g. gradual rises).
+    case highReading
 }
 
 enum GlucoseSeverity {
@@ -125,6 +128,12 @@ struct GlucoseCurveProcessor {
     /// How close (mg/dL) to the pre-spike baseline a reading must be to qualify
     /// as a "recovery" point.
     static let recoveryThresholdMgDl: Double = 20.0
+
+    /// Absolute glucose threshold (mg/dL) above which a reading is always
+    /// marked as a hotspot, even if the relative delta from the moving average
+    /// is below `spikeThresholdMgDl`.  This catches gradual rises that the
+    /// relative detector misses (e.g. 130→186 over 90 minutes).
+    static let absoluteHighThresholdMgDl: Double = 170.0
 
     /// Readings-per-hour threshold that distinguishes CGM from fingerstick density.
     /// Above this → CGM mode (thinning + spike-only hotspots).
@@ -203,9 +212,12 @@ struct GlucoseCurveProcessor {
             }
             lastTimestamp = ts
 
-            let annotation = spikeAnnotations[i]
-            let isHotspot = isCGM ? annotation != nil : true  // fingerstick: all are hotspots
             let mgDl = reading.value
+            // Use the spike annotation if present; otherwise tag absolute-high readings.
+            let annotation: HotspotType? = spikeAnnotations[i]
+                ?? (mgDl >= absoluteHighThresholdMgDl ? .highReading : nil)
+            // CGM: hotspot if it has any annotation.  Fingerstick: all are hotspots.
+            let isHotspot = isCGM ? annotation != nil : true
             let display = localeIsMgDl ? mgDl : mgDl / 18.0182
 
             let point = CurvePoint(
@@ -382,6 +394,8 @@ struct GlucoseCurveProcessor {
     /// For CGM-density data, select which readings to retain:
     /// - All readings within ±15 minutes of any spike peak or recovery point
     ///   (full resolution around clinically interesting events).
+    /// - All readings above the absolute high threshold (170 mg/dL) — these are
+    ///   clinically significant even during gradual rises.
     /// - In flat regions, keep approximately one reading per `thinningIntervalMinutes`.
     /// - Always keep the first and last reading in the window.
     private static func thinForCGM(
@@ -394,6 +408,13 @@ struct GlucoseCurveProcessor {
         // Always keep first and last
         retained.insert(0)
         retained.insert(sorted.count - 1)
+
+        // Always retain readings above the absolute high threshold
+        for i in 0..<sorted.count {
+            if sorted[i].value >= absoluteHighThresholdMgDl {
+                retained.insert(i)
+            }
+        }
 
         // Identify indices near spikes (keep full resolution).
         // Uses a two-pointer sweep rather than O(n²) scan since readings are sorted.
