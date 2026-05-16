@@ -36,7 +36,7 @@ struct PlanMealDashboardCard: View {
                         }
                     } else {
                         Text("Plan Your Next Meal").font(.headline)
-                        Text("See glucose & HbA1c impact before you eat")
+                        Text("Review your glucose & GMI history before you eat")
                             .font(.caption).foregroundColor(.secondary)
                     }
                 }

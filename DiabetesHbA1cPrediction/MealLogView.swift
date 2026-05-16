@@ -462,6 +462,7 @@ struct MealRowView: View {
                         Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                             .font(.caption)
                             .foregroundColor(.secondary)
+                            .accessibilityLabel(isExpanded ? "Collapse food items" : "Expand food items")
                     }
                 }
             }

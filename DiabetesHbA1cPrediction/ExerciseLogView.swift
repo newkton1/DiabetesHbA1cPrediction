@@ -58,6 +58,7 @@ struct ExerciseLogView: View {
                                 .font(.title2)
                                 .foregroundColor(.blue)
                         }
+                        .accessibilityLabel("Add exercise session")
                     }
                 }
             }
@@ -103,9 +104,9 @@ struct ExerciseLogView: View {
     // MARK: - Portrait Content
     private var portraitContent: some View {
         VStack(spacing: 0) {
-            // MARK: - Last 7 Days header with Sync Button
+            // MARK: - Last 7 Days Summary header with Sync Button
             HStack {
-                Text("Last 7 Days")
+                Text("Last 7 Days Summary")
                     .font(.headline)
 
                 Spacer()
@@ -119,6 +120,13 @@ struct ExerciseLogView: View {
             WeeklySummaryCardNoTitle(exercises: exercises)
                 .padding(.horizontal)
                 .padding(.bottom)
+
+            // MARK: - Full Exercise Log header
+            Text("Full Exercise Log")
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal)
+                .padding(.bottom, 4)
 
             // MARK: - Exercise List
             List {
@@ -172,9 +180,9 @@ struct ExerciseLogView: View {
             // Scrollable content
             ScrollView {
                 VStack(spacing: 4) {
-                    // "Last 7 Days" header with Sync Health button on right
+                    // "Last 7 Days Summary" header with Sync Health button on right
                     HStack {
-                        Text("Last 7 Days")
+                        Text("Last 7 Days Summary")
                             .font(.headline)
                         Spacer()
                         Button(action: syncFromHealth) {
@@ -203,6 +211,14 @@ struct ExerciseLogView: View {
                     // Weekly summary card (without "Last 7 Days" header - using NoTitle version)
                     WeeklySummaryCardNoTitle(exercises: exercises)
                         .padding(.horizontal)
+
+                    // Full Exercise Log header
+                    Text("Full Exercise Log")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                        .padding(.bottom, 4)
 
                     // Exercise items
                     if exercises.isEmpty {
@@ -404,7 +420,7 @@ struct WeeklySummaryCard: View {
     var body: some View {
         VStack(spacing: 12) {
             HStack {
-                Text("Last 7 Days")
+                Text("Last 7 Days Summary")
                     .font(.headline)
                 Spacer()
             }
@@ -672,13 +688,16 @@ struct ExerciseRowView: View {
                             .frame(width: 6, height: 5.5)
                     }
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityValue("Intensity: \(Int(exercise.intensity)) out of 10")
 
                 // Rotated label
                 Text("Intensity")
-                    .font(.system(size: 9.5))
+                    .font(.caption2)
                     .foregroundColor(.secondary)
                     .rotationEffect(.degrees(-90))
                     .fixedSize()
+                    .accessibilityHidden(true)
             }
         }
         .padding(.vertical, 8)
@@ -717,6 +736,7 @@ struct ExerciseRowView: View {
                 Text("Intensity")
                     .font(.caption2)
                     .foregroundColor(.secondary)
+                    .accessibilityHidden(true)
 
                 HStack(spacing: 2) {
                     ForEach(1...10, id: \.self) { level in
@@ -725,6 +745,8 @@ struct ExerciseRowView: View {
                             .frame(height: 4)
                     }
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityValue("Intensity: \(Int(exercise.intensity)) out of 10")
             }
             .frame(width: 70)
         }

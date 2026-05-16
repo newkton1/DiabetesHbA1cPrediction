@@ -12,7 +12,7 @@ struct FeastModeBannerView: View {
                 Text("Feast Mode")
                     .font(.subheadline).fontWeight(.bold)
                     .foregroundColor(.feastAccent)
-                Text("Planning a feast or just a special treat? See how different meals may relate to your glucose and GMI trends.")
+                Text("Planning a feast or just a special treat? Review how similar past meals appeared in your glucose and GMI trends.")
                     .font(.caption).foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }

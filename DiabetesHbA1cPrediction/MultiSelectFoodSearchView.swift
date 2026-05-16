@@ -14,6 +14,7 @@ private let recentCategoryKey = "__recent__"
 /// View for searching and selecting multiple food items
 struct MultiSelectFoodSearchView: View {
     @ObservedObject var mealBuilder: MealBuilder
+    var mealType: MealType = .lastMeal
     @Environment(\.dismiss) private var dismiss
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @Environment(\.managedObjectContext) private var viewContext
@@ -157,6 +158,7 @@ struct MultiSelectFoodSearchView: View {
                     selectedCategory: $selectedCategory,
                     isSearchFieldFocused: _isSearchFieldFocused,
                     isPortrait: isPortrait,
+                    mealType: mealType,
                     categories: categories,
                     groupedFoods: groupedFoods,
                     recentMeals: recentMeals
@@ -183,7 +185,7 @@ struct MultiSelectFoodSearchView: View {
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+                    Button(mealType == .feast ? "Plan" : "Done") {
                         dismiss()
                     }
                     .fontWeight(.semibold)
@@ -206,6 +208,7 @@ private struct FoodSearchContentDirect: View {
     @Binding var selectedCategory: String?
     @FocusState var isSearchFieldFocused: Bool
     let isPortrait: Bool
+    let mealType: MealType
     let categories: [String]
     let groupedFoods: [(category: String, foods: [FoodItem])]
     let recentMeals: [RecentMeal]
@@ -225,7 +228,7 @@ private struct FoodSearchContentDirect: View {
             // Show headline and category chips when not actively searching
             if showCategoryChips {
                 if isPortrait {
-                    Text("Add Foods")
+                    Text(mealType == .feast ? "Add Treat" : "Add Foods")
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.vertical, 6)

@@ -44,8 +44,8 @@ struct CurvePoint: Identifiable {
         case ..<70:  return .hypo
         case ..<100: return .normal
         case ..<126: return .elevated
-        case ..<180: return .warning
-        default:     return .critical
+        case ..<180: return .high
+        default:     return .veryHigh
         }
     }
 }
@@ -61,7 +61,7 @@ enum HotspotType {
 }
 
 enum GlucoseSeverity {
-    case hypo, normal, elevated, warning, critical
+    case hypo, normal, elevated, high, veryHigh
 }
 
 /// Contextual data surfaced when the user taps a hotspot (or any point in
@@ -71,7 +71,7 @@ struct CurveHotspot: Identifiable {
     let point: CurvePoint
     let deltaFromBaseline: Double?           // mg/dL rise from local baseline (nil for recovery)
     let nearbyMeals: [MealSummary]           // meals within mealLookbackMinutes before this point
-    let nearbyExercise: [ExerciseSummary]    // exercise within exerciseLookforwardMinutes after
+    let nearbyExercise: [ExerciseSummary]    // exercise that ended before this reading
     let weightDelta: WeightDelta?            // 3-month weight change context (nil if unavailable)
 
     /// True when at least one meal or exercise correlates with this hotspot.
@@ -95,7 +95,8 @@ struct ExerciseSummary: Identifiable {
     let type: String
     let startDate: Date
     let durationMinutes: Int
-    let minutesAfterReading: Int
+    let minutesBeforeReading: Int
+    let caloriesBurned: Double
 }
 
 // MARK: - Processor
@@ -108,7 +109,7 @@ struct GlucoseCurveProcessor {
 
     /// Minimum relative rise (mg/dL) from the 30-min moving average to qualify
     /// as a spike peak. Based on Robert's clinical experience: baseline ~120,
-    /// a ≥50 rise approaches the 180 danger zone.
+    /// a ≥50 rise approaches the 180 mg/dL threshold.
     static let spikeThresholdMgDl: Double = 50.0
 
     /// Window (minutes) over which the local baseline is computed as a simple
@@ -122,8 +123,12 @@ struct GlucoseCurveProcessor {
     /// How far before a glucose reading (minutes) to search for correlated meals.
     static let mealLookbackMinutes: Int = 120
 
-    /// How far after a glucose reading (minutes) to search for correlated exercise.
-    static let exerciseLookforwardMinutes: Int = 60
+    /// How far before a glucose reading (minutes) to search for exercise that
+    /// has already ended — so the popover only shows what happened by that point.
+    static let exerciseLookbackMinutes: Int = 180
+    /// How far forward (in minutes) to look for exercise that started after a
+    /// glucose reading. This captures post-spike exercise that explains recovery.
+    static let exerciseLookforwardMinutes: Int = 120
 
     /// How close (mg/dL) to the pre-spike baseline a reading must be to qualify
     /// as a "recovery" point.
@@ -161,7 +166,8 @@ struct GlucoseCurveProcessor {
         weightSamples: [WeightSampleRecord] = [],
         windowStart: Date,
         windowEnd: Date,
-        localeIsMgDl: Bool
+        localeIsMgDl: Bool,
+        windowDays: Int = 3
     ) -> (curve: [CurvePoint], hotspots: [CurveHotspot]) {
 
         // 1. Filter to glucose-only readings (exclude lab HbA1c entries) within
@@ -189,9 +195,10 @@ struct GlucoseCurveProcessor {
         let spikeAnnotations = detectSpikes(sorted, baselines: baselines)
 
         // 5. Thin the curve if CGM density, keeping spike regions at full resolution.
+        //    For wider windows (7 days), thin more aggressively to show overall shape.
         let retainedIndices: Set<Int>
         if isCGM {
-            retainedIndices = thinForCGM(sorted, spikeAnnotations: spikeAnnotations)
+            retainedIndices = thinForCGM(sorted, spikeAnnotations: spikeAnnotations, windowDays: windowDays)
         } else {
             retainedIndices = Set(0..<sorted.count)
         }
@@ -250,11 +257,17 @@ struct GlucoseCurveProcessor {
                     lookbackMinutes: mealLookbackMinutes,
                     meals: meals
                 )
-                let nearbyExercise = findNearbyExercise(
-                    after: point.timestamp,
+                let exerciseBefore = findNearbyExercise(
+                    before: point.timestamp,
+                    lookbackMinutes: exerciseLookbackMinutes,
+                    sessions: exerciseSessions
+                )
+                let exerciseAfter = findNearbyExerciseAfter(
+                    timestamp: point.timestamp,
                     lookforwardMinutes: exerciseLookforwardMinutes,
                     sessions: exerciseSessions
                 )
+                let nearbyExercise = exerciseBefore + exerciseAfter
 
                 let weight = WeightDeltaProvider.delta(at: point.timestamp, from: weightSamples)
 
@@ -400,9 +413,26 @@ struct GlucoseCurveProcessor {
     /// - Always keep the first and last reading in the window.
     private static func thinForCGM(
         _ sorted: [GlucoseReadingEntity],
-        spikeAnnotations: [HotspotType?]
+        spikeAnnotations: [HotspotType?],
+        windowDays: Int = 3
     ) -> Set<Int> {
-        let spikeMarginSec: TimeInterval = 15 * 60  // ±15 min around spikes
+        // Wider windows use more aggressive thinning to show overall curve shape
+        // 1-day: 30 min intervals (~48 points/day)
+        // 3-day: 60 min intervals (~24 points/day, ~72 total)
+        // 7-day: 120 min intervals (~12 points/day, ~84 total)
+        let effectiveIntervalMinutes: Int
+        if windowDays >= 7 {
+            effectiveIntervalMinutes = 120
+        } else if windowDays <= 1 {
+            effectiveIntervalMinutes = 30
+        } else {
+            effectiveIntervalMinutes = thinningIntervalMinutes  // 60
+        }
+
+        // Spike margin is also wider at 7 days — keep ±10 min (just the peak shape)
+        // vs ±15 min at 1–3 days (more detail around the spike)
+        let spikeMarginSec: TimeInterval = windowDays >= 7 ? 10 * 60 : 15 * 60
+
         var retained = Set<Int>()
 
         // Always keep first and last
@@ -416,19 +446,16 @@ struct GlucoseCurveProcessor {
             }
         }
 
-        // Identify indices near spikes (keep full resolution).
-        // Uses a two-pointer sweep rather than O(n²) scan since readings are sorted.
+        // Identify indices near spikes (keep full resolution around peaks).
         var nearSpike = Set<Int>()
         let timestamps = sorted.map { $0.timestamp ?? .distantPast }
         for i in 0..<sorted.count {
             guard spikeAnnotations[i] != nil else { continue }
             let spikeTs = timestamps[i]
-            // Walk backwards from spike to find the start of the ±15 min window
             var lo = i
             while lo > 0 && spikeTs.timeIntervalSince(timestamps[lo - 1]) <= spikeMarginSec {
                 lo -= 1
             }
-            // Walk forwards to find the end
             var hi = i
             while hi < sorted.count - 1 && timestamps[hi + 1].timeIntervalSince(spikeTs) <= spikeMarginSec {
                 hi += 1
@@ -439,12 +466,29 @@ struct GlucoseCurveProcessor {
         }
         retained.formUnion(nearSpike)
 
-        // Thin flat regions: keep one reading per thinningIntervalMinutes
-        let intervalSec = Double(thinningIntervalMinutes) * 60.0
+        // Also retain local min/max points in flat regions so the curve shape
+        // is preserved even after aggressive thinning (prevents flat-lining
+        // between retained points that hides gentle rises and dips).
+        if windowDays >= 7 {
+            for i in 1..<(sorted.count - 1) {
+                if nearSpike.contains(i) { continue }
+                let prev = sorted[i - 1].value
+                let curr = sorted[i].value
+                let next = sorted[i + 1].value
+                let isLocalMax = curr > prev && curr > next && (curr - min(prev, next)) >= 10
+                let isLocalMin = curr < prev && curr < next && (max(prev, next) - curr) >= 10
+                if isLocalMax || isLocalMin {
+                    retained.insert(i)
+                }
+            }
+        }
+
+        // Thin flat regions: keep one reading per effectiveIntervalMinutes
+        let intervalSec = Double(effectiveIntervalMinutes) * 60.0
         var lastRetainedTs: Date = sorted[0].timestamp ?? .distantPast
 
         for i in 1..<sorted.count {
-            if nearSpike.contains(i) { continue } // already retained
+            if nearSpike.contains(i) || retained.contains(i) { continue }
             guard let ts = sorted[i].timestamp else { continue }
             if ts.timeIntervalSince(lastRetainedTs) >= intervalSec {
                 retained.insert(i)
@@ -483,17 +527,50 @@ struct GlucoseCurveProcessor {
         .sorted { $0.timestamp > $1.timestamp } // most recent first
     }
 
-    /// Find exercise sessions starting within `lookforwardMinutes` after the
-    /// given timestamp.
+    /// Find exercise sessions that **ended** within `lookbackMinutes` before
+    /// the given timestamp.  This ensures the popover only shows exercise that
+    /// has actually occurred by the time of the reading — not future sessions
+    /// that haven't started yet.
     private static func findNearbyExercise(
-        after timestamp: Date,
+        before timestamp: Date,
+        lookbackMinutes: Int,
+        sessions: [ExerciseSessionEntity]
+    ) -> [ExerciseSummary] {
+        let cutoff = timestamp.addingTimeInterval(-Double(lookbackMinutes) * 60.0)
+        return sessions.compactMap { session in
+            guard let startDate = session.startDate else { return nil }
+            // Compute end date from start + duration
+            let endDate = session.endDate ?? startDate.addingTimeInterval(session.duration * 60.0)
+            // Only include if the session ended before (or at) this reading
+            // and started within the lookback window
+            guard endDate <= timestamp,
+                  startDate >= cutoff else { return nil }
+
+            let minutesBefore = Int(timestamp.timeIntervalSince(endDate) / 60.0)
+            return ExerciseSummary(
+                id: session.id ?? UUID(),
+                type: session.type ?? "Exercise",
+                startDate: startDate,
+                durationMinutes: Int(session.duration),
+                minutesBeforeReading: minutesBefore,
+                caloriesBurned: session.caloriesBurned
+            )
+        }
+        .sorted { $0.startDate < $1.startDate } // earliest first
+    }
+
+    /// Find exercise sessions that **started** within `lookforwardMinutes` after
+    /// the given timestamp. This captures post-spike exercise that explains
+    /// the subsequent glucose recovery.
+    private static func findNearbyExerciseAfter(
+        timestamp: Date,
         lookforwardMinutes: Int,
         sessions: [ExerciseSessionEntity]
     ) -> [ExerciseSummary] {
         let cutoff = timestamp.addingTimeInterval(Double(lookforwardMinutes) * 60.0)
         return sessions.compactMap { session in
             guard let startDate = session.startDate,
-                  startDate >= timestamp,
+                  startDate > timestamp,
                   startDate <= cutoff else { return nil }
 
             let minutesAfter = Int(startDate.timeIntervalSince(timestamp) / 60.0)
@@ -502,9 +579,10 @@ struct GlucoseCurveProcessor {
                 type: session.type ?? "Exercise",
                 startDate: startDate,
                 durationMinutes: Int(session.duration),
-                minutesAfterReading: minutesAfter
+                minutesBeforeReading: -minutesAfter,  // negative indicates "after"
+                caloriesBurned: session.caloriesBurned
             )
         }
-        .sorted { $0.startDate < $1.startDate } // earliest first
+        .sorted { $0.startDate < $1.startDate }
     }
 }

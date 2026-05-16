@@ -175,10 +175,14 @@ class MealBuilder: ObservableObject {
         mealEntity.id = UUID()
         mealEntity.name = mealName.isEmpty ? generateMealName() : mealName
         mealEntity.calories = totalCalories
-        // Use the actual meal time: subtract timeSinceLastMeal hours from now
-        // so retroactively logged meals are inserted in correct chronological order
+        // Use the actual meal time so meals appear in correct chronological order:
+        // - lastMeal: subtract timeSinceLastMeal hours from now
+        // - feast: use the planned date/time the user selected
+        // - all others: use the current time
         if mealType == .lastMeal && timeSinceLastMeal > 0 {
             mealEntity.timestamp = Date().addingTimeInterval(-timeSinceLastMeal * 3600)
+        } else if mealType == .feast {
+            mealEntity.timestamp = plannedDateTime
         } else {
             mealEntity.timestamp = Date()
         }

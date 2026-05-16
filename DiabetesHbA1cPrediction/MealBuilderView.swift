@@ -26,6 +26,9 @@ struct MealBuilderView: View {
     @State private var showGlycemicWarning = false      // auto-dismissing high GL warning
     @State private var showGlucoseElevatedWarning = false  // auto-dismissing warning for regular meals
     @State private var glBeforeFoodSearch: Double = 0      // GL snapshot before opening food search
+    @State private var showSimilarImpact = false           // navigate to Similar Impact screen (feast only)
+    @State private var showSaveConfirmation = false        // 2-second toast after regular meal save
+    @State private var saveConfirmationText = ""           // e.g. "Lunch saved — 45 g carbs"
     let mealType: MealType
     // predictionEngine removed — historical pattern mode uses HistoricalPatternSummary instead
 
@@ -60,18 +63,25 @@ struct MealBuilderView: View {
                         }
                         .fontWeight(.semibold)
                     }
-                } else {
+                } else if !showSaveConfirmation {
                     ToolbarItem(placement: .cancellationAction) {
                         Button(action: { dismiss() }) {
                             Text("Cancel")
                         }
                     }
                     ToolbarItem(placement: .confirmationAction) {
-                        Button(action: { saveMeal() }) {
-                            Text("Save")
+                        if mealType == .feast && mealBuilder.canSave {
+                            Button(action: { showSimilarImpact = true }) {
+                                Text(isPortrait ? "Similar Meal" : "Similar Impact Meal")
+                                    .font(isPortrait ? .caption : .callout)
+                            }
+                            .fontWeight(.semibold)
+                        } else if mealType != .feast && mealBuilder.canSave {
+                            Button(action: { saveMeal() }) {
+                                Text("Save")
+                            }
+                            .fontWeight(.semibold)
                         }
-                        .disabled(!mealBuilder.canSave)
-                        .fontWeight(.semibold)
                     }
                 }
                 // Keyboard dismiss handled by .scrollDismissesKeyboard and .onSubmit on the text field
@@ -79,7 +89,18 @@ struct MealBuilderView: View {
             .sheet(isPresented: $showingFoodSearch, onDismiss: {
                 checkGlucoseElevation()
             }) {
-                MultiSelectFoodSearchView(mealBuilder: mealBuilder)
+                MultiSelectFoodSearchView(mealBuilder: mealBuilder, mealType: mealType)
+            }
+            .fullScreenCover(isPresented: $showSimilarImpact) {
+                SimilarImpactView(
+                    mealBuilder: mealBuilder,
+                    mealType: mealType,
+                    onEatTreat: {
+                        saveMeal()
+                        showSimilarImpact = false
+                        dismiss()
+                    }
+                )
             }
             .alert("Error", isPresented: $showingError) {
                 Button("OK", role: .cancel) { }
@@ -95,7 +116,7 @@ struct MealBuilderView: View {
                         Text("High Carb Impact")
                             .font(.headline)
                             .foregroundColor(.primary)
-                        Text("This wellness feature estimates how exercise might relate to the glucose impact of this meal. These are estimates for personal tracking only — not medical diagnoses or treatment advice.")
+                        Text("This wellness feature shows exercise options based on your activity history. These are for personal tracking only — not medical diagnoses or treatment advice.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -107,7 +128,7 @@ struct MealBuilderView: View {
                     .shadow(radius: 10)
                     .transition(.opacity.combined(with: .scale(scale: 0.9)))
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Note: High carb impact. The app will estimate how exercise may relate to the glucose impact.")
+                    .accessibilityLabel("Note: High carb impact. View exercise options based on your activity history.")
                 }
                 if showGlucoseElevatedWarning {
                     VStack(spacing: 10) {
@@ -130,6 +151,25 @@ struct MealBuilderView: View {
                     .transition(.opacity.combined(with: .scale(scale: 0.9)))
                     .accessibilityElement(children: .combine)
                     .accessibilityLabel("Warning: Elevated blood glucose. Adding this food significantly increases glucose impact.")
+                }
+                if showSaveConfirmation {
+                    VStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.title)
+                            .foregroundColor(.green)
+                        Text(saveConfirmationText)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(24)
+                    .frame(maxWidth: 300)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(16)
+                    .shadow(radius: 10)
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(saveConfirmationText)
                 }
             }
             .onAppear {
@@ -216,7 +256,7 @@ struct MealBuilderView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .textCase(nil)
             ) {
-                TextField("Meal Name (optional)", text: $mealBuilder.mealName)
+                TextField(mealType == .feast ? "Treat Name (optional)" : "Meal Name (optional)", text: $mealBuilder.mealName)
                     .focused($isMealNameFocused)
                     .submitLabel(.done)
                     .onSubmit { isMealNameFocused = false }
@@ -267,31 +307,43 @@ struct MealBuilderView: View {
                     }
                 }
 
-                // Nutrition summary section
-                Section(header: Text("Nutrition Summary")) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        NutritionBulletRow(label: "Carbs", value: "\(Int(mealBuilder.totalCarbohydrates)) g", color: .orange)
-                        NutritionBulletRow(label: "Fiber", value: "\(Int(mealBuilder.totalFiber)) g", color: .green)
-                        NutritionBulletRow(label: "Protein", value: "\(Int(mealBuilder.totalProtein)) g", color: .blue)
-                        NutritionBulletRow(label: "Fat", value: "\(Int(mealBuilder.totalFat)) g", color: .purple)
-                        NutritionBulletRow(label: "Cal", value: "\(Int(mealBuilder.totalCalories))", color: .red)
-                        NutritionBulletRow(label: "GI", value: "\(Int(mealBuilder.averageGlycemicIndex))", color: .gray)
+                // Nutrition summary section — 2-column for feast, single column for other types
+                if mealType == .feast {
+                    Section(header: Text("Nutrition Summary")) {
+                        HStack(alignment: .top, spacing: 16) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                NutritionBulletRow(label: "GL", value: "\(Int(mealBuilder.totalGlycemicLoad))", color: .gray)
+                                NutritionBulletRow(label: "Carbs", value: "\(Int(mealBuilder.totalCarbohydrates)) g", color: .orange)
+                                NutritionBulletRow(label: "Fiber", value: "\(Int(mealBuilder.totalFiber)) g", color: .green)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            VStack(alignment: .leading, spacing: 4) {
+                                NutritionBulletRow(label: "Protein", value: "\(Int(mealBuilder.totalProtein)) g", color: .blue)
+                                NutritionBulletRow(label: "Fat", value: "\(Int(mealBuilder.totalFat)) g", color: .purple)
+                                NutritionBulletRow(label: "Cal", value: "\(Int(mealBuilder.totalCalories))", color: .red)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                } else {
+                    Section(header: Text("Nutrition Summary")) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            NutritionBulletRow(label: "Carbs", value: "\(Int(mealBuilder.totalCarbohydrates)) g", color: .orange)
+                            NutritionBulletRow(label: "Fiber", value: "\(Int(mealBuilder.totalFiber)) g", color: .green)
+                            NutritionBulletRow(label: "Protein", value: "\(Int(mealBuilder.totalProtein)) g", color: .blue)
+                            NutritionBulletRow(label: "Fat", value: "\(Int(mealBuilder.totalFat)) g", color: .purple)
+                            NutritionBulletRow(label: "Cal", value: "\(Int(mealBuilder.totalCalories))", color: .red)
+                            NutritionBulletRow(label: "GL", value: "\(Int(mealBuilder.totalGlycemicLoad))", color: .gray)
+                        }
                     }
                 }
             }
 
-            // Historical pattern section (feast only)
-            if mealType == .feast {
-                Section(header: Text("Your Pattern with Similar Meals")) {
-                    HistoricalPatternContent(
-                        mealBuilder: mealBuilder,
-                        viewContext: viewContext,
-                        mealType: mealType
-                    )
-                }
-            }
+            // Historical pattern section removed from feast — now on SimilarImpactView
+            // Keep for non-feast planned meals if needed in future
 
-            // Time section
+            // Time section — only for non-feast types (feast uses SimilarImpactView)
+            if mealType != .feast {
             Section(header: Text(mealType == .lastMeal ? "Time Since Meal" : "Planned Date & Time")) {
                 if mealType == .lastMeal {
                     VStack(alignment: .leading, spacing: 8) {
@@ -303,7 +355,7 @@ struct MealBuilderView: View {
                                 .font(.title2)
                                 .fontWeight(.semibold)
                             Spacer()
-                            Stepper("", value: $mealBuilder.timeSinceLastMeal, in: 0...24, step: 0.5)
+                            Stepper("", value: $mealBuilder.timeSinceLastMeal, in: 0...48, step: 0.5)
                                 .labelsHidden()
                         }
                         HStack(spacing: 8) {
@@ -311,6 +363,8 @@ struct MealBuilderView: View {
                             QuickTimeButton(title: "1 h", hours: 1, selectedHours: $mealBuilder.timeSinceLastMeal)
                             QuickTimeButton(title: "2 h", hours: 2, selectedHours: $mealBuilder.timeSinceLastMeal)
                             QuickTimeButton(title: "3 h", hours: 3, selectedHours: $mealBuilder.timeSinceLastMeal)
+                            QuickTimeButton(title: "24 h", hours: 24, selectedHours: $mealBuilder.timeSinceLastMeal)
+                            QuickTimeButton(title: "48 h", hours: 48, selectedHours: $mealBuilder.timeSinceLastMeal)
                         }
                     }
                     .padding(.vertical, 4)
@@ -330,6 +384,7 @@ struct MealBuilderView: View {
                     .padding(.vertical, 4)
                 }
             }
+            } // end if mealType != .feast
 
             // Total carbs footer
             if !mealBuilder.selectedFoods.isEmpty {
@@ -370,9 +425,21 @@ struct MealBuilderView: View {
                     withAnimation { showResults = true }
                 }
             } else {
-                // Regular meals: just save and dismiss — no impact results
+                // Regular meals: save, show 2-second confirmation toast, then dismiss
                 try mealBuilder.save(to: viewContext)
-                dismiss()
+
+                // Build confirmation text: "Meal saved — 45 g carbs" or "Lunch saved — 45 g carbs"
+                let carbs = Int(mealBuilder.totalCarbohydrates)
+                if mealBuilder.mealName.trimmingCharacters(in: .whitespaces).isEmpty {
+                    saveConfirmationText = "Meal saved — \(carbs) g carbs"
+                } else {
+                    saveConfirmationText = "\(mealBuilder.mealName) saved — \(carbs) g carbs"
+                }
+                withAnimation(.easeInOut(duration: 0.3)) { showSaveConfirmation = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    withAnimation(.easeInOut(duration: 0.3)) { showSaveConfirmation = false }
+                    dismiss()
+                }
             }
         } catch {
             errorMessage = error.localizedDescription

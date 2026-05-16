@@ -27,10 +27,10 @@ struct PlannedMealView: View {
     }
 
     /// Builds the multi-colored "Before You Eat" description.
-    /// Uses scenario language ("could shift", "projected") rather than predictive claims,
-    /// because this is a what-if planner, not a medical prediction.
+    /// Uses historical language ("review", "trends from") rather than predictive claims,
+    /// because this is a wellness tracker, not a medical device.
     private static var beforeYouEatDescription: AttributedString {
-        var part1 = AttributedString("Build your feast treat and explore how it could shift your glucose and GMI trend ")
+        var part1 = AttributedString("Build your feast treat and review your glucose and GMI trends from previous meals with similar GI, ")
         part1.foregroundColor = .secondary
 
         var part2 = AttributedString("as well as how to offset it")
@@ -76,8 +76,8 @@ struct PlannedMealView: View {
                     // Feature highlights
                     VStack(alignment: .leading, spacing: 12) {
                         Text("What you'll see").font(.headline).padding(.horizontal, 4)
-                        PlanFeatureRow(icon: "waveform.path.ecg",         color: .orange,     title: "Possible glucose change",       detail: "Based on your glucose history, your blood glucose might spike if you eat this")
-                        PlanFeatureRow(icon: "chart.line.uptrend.xyaxis", color: .red,        title: "Possible GMI shift",             detail: "Based on your GMI history, this scenario might change your 14-day trend")
+                        PlanFeatureRow(icon: "waveform.path.ecg",         color: .orange,     title: "Your glucose history",           detail: "See how your glucose responded to similar meals in the past")
+                        PlanFeatureRow(icon: "chart.line.uptrend.xyaxis", color: .red,        title: "Your GMI trend",                 detail: "Review your 14-day GMI trend alongside similar past meals")
                         PlanFeatureRow(icon: ExerciseOffsetType.current.iconName, color: .green, title: "Personalised exercise plan",   detail: "Minutes & distance for your chosen activity")
                         PlanFeatureRow(icon: "arrow.left.arrow.right",    color: .planAccent, title: "Compared to your typical meal", detail: "Ranks this feast against your last 30 days")
                     }
@@ -99,8 +99,8 @@ struct PlannedMealView: View {
                                     .fontWeight(.semibold)
                                     .foregroundColor(feastsThisWeek >= 3 ? .red : .orange)
                                 Text(feastsThisWeek >= 3
-                                     ? "You have planned \(feastsThisWeek) feasts in the last 7 days. Frequent feasts may affect your glucose trends."
-                                     : "This will be your \(ordinal(feastsThisWeek + 1)) feast in 7 days. The app will show how this may relate to your trends.")
+                                     ? "You have logged \(feastsThisWeek) feasts in the last 7 days. Review how frequent feasts have appeared in your glucose trends."
+                                     : "This is your \(ordinal(feastsThisWeek + 1)) feast in 7 days. You can review how past feasts appeared in your trends.")
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -135,7 +135,7 @@ struct PlannedMealView: View {
                 MealBuilderView(mealType: .feast)
                     .environment(\.managedObjectContext, viewContext)
             }
-            .alert("Feast Frequency Warning", isPresented: $showFeastWarning) {
+            .alert("Feast Frequency Notice", isPresented: $showFeastWarning) {
                 Button("Continue Anyway") { showingFeastPlanner = true }
                 Button("Cancel", role: .cancel) { }
             } message: {
@@ -149,10 +149,10 @@ struct PlannedMealView: View {
     private func handlePlanFeast() {
         let count = feastsThisWeek
         if count >= 3 {
-            feastWarningMessage = "You have already planned \(count) feasts in the last 7 days. Frequent feast meals may affect your glucose trends. You may want to space your treats out more."
+            feastWarningMessage = "You have already logged \(count) feasts in the last 7 days. Your glucose history shows patterns around frequent feasts."
             showFeastWarning = true
         } else if count >= 2 {
-            feastWarningMessage = "This will be your \(ordinal(count + 1)) feast in the last 7 days. The app will show how this may relate to your glucose and GMI trends."
+            feastWarningMessage = "This is your \(ordinal(count + 1)) feast in the last 7 days. You can review your glucose and GMI trends from similar past meals."
             showFeastWarning = true
         } else {
             showingFeastPlanner = true

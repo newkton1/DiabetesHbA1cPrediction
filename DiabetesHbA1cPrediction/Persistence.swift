@@ -58,6 +58,14 @@ struct PersistenceController {
                 URL(fileURLWithPath: "/dev/null")
         }
 
+        // Enable lightweight migration so that the v1→v2 entity rename
+        // (HbA1cPredictionEntity → GmiEstimateEntity) is handled automatically
+        // via the renamingIdentifier in the v2 model.
+        if let description = container.persistentStoreDescriptions.first {
+            description.setOption(true as NSNumber, forKey: NSMigratePersistentStoresAutomaticallyOption)
+            description.setOption(true as NSNumber, forKey: NSInferMappingModelAutomaticallyOption)
+        }
+
         container.loadPersistentStores { storeDescription, error in
             if let error = error as NSError? {
                 /*

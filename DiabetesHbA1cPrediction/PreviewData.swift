@@ -214,7 +214,7 @@ struct PreviewData {
             (3, 6.9, 0.80),
         ]
         for p in predictions {
-            let pred = HbA1cPredictionEntity(context: context)
+            let pred = GmiEstimateEntity(context: context)
             pred.id = UUID()
             pred.predictedValue = p.hba1c
             pred.confidenceLevel = p.confidence

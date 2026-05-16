@@ -47,16 +47,17 @@ func ifccToNGSP(_ ifcc: Double) -> Double {
     return (ifcc / 10.929) + 2.15
 }
 
-/// Converts HbA1c to estimated Average Glucose (eAG) in mg/dL
-/// Formula: eAG = (28.7 × NGSP) - 46.7
-/// Reference: Nathan et al. (2008) - A1c-Derived Average Glucose Study
-func hba1cToEAG(ngsp: Double) -> Double {
-    return (28.7 * ngsp) - 46.7
+/// Converts GMI (NGSP %) to estimated mean glucose in mg/dL
+/// Inverse of: GMI (%) = 3.31 + 0.02392 × mean_mg/dL
+/// Therefore: mean_mg/dL = (GMI - 3.31) / 0.02392
+/// Reference: Bergenstal et al. Diabetes Care 2018;41(11):2275-2280
+func gmiToMeanGlucose(gmiPercent: Double) -> Double {
+    return (gmiPercent - 3.31) / 0.02392
 }
 
-/// Converts HbA1c to estimated Average Glucose (eAG) in mmol/L
-func hba1cToEAGMmol(ngsp: Double) -> Double {
-    return hba1cToEAG(ngsp: ngsp) / 18.0182
+/// Converts GMI (NGSP %) to estimated mean glucose in mmol/L
+func gmiToMeanGlucoseMmol(gmiPercent: Double) -> Double {
+    return gmiToMeanGlucose(gmiPercent: gmiPercent) / 18.0182
 }
 
 // MARK: - Canonical Storage Helpers

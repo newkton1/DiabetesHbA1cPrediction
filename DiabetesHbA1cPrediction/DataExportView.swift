@@ -1,10 +1,8 @@
-#if DEBUG
 import SwiftUI
 import CoreData
 
-/// DEBUG-only view for exporting all Core Data as JSON.
-/// Useful for validation testing and Apple Review evidence.
-/// Wrapped in #if DEBUG — automatically excluded from release builds.
+/// View for exporting all Core Data as JSON.
+/// Useful for backup, device migration, and validation testing.
 struct DataExportView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
@@ -24,9 +22,9 @@ struct DataExportView: View {
     ) private var exercises: FetchedResults<ExerciseSessionEntity>
 
     @FetchRequest(
-        entity: HbA1cPredictionEntity.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \HbA1cPredictionEntity.predictionDate, ascending: true)]
-    ) private var predictions: FetchedResults<HbA1cPredictionEntity>
+        entity: GmiEstimateEntity.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \GmiEstimateEntity.predictionDate, ascending: true)]
+    ) private var predictions: FetchedResults<GmiEstimateEntity>
 
     @FetchRequest(
         entity: UserDemographicsEntity.entity(),
@@ -41,8 +39,10 @@ struct DataExportView: View {
     @State private var showShareSheet = false
     @State private var exportURL: URL?
     @State private var exportSummary = ""
+    #if DEBUG
     @State private var seedSummary = ""
     @State private var showSeedConfirm = false
+    #endif
 
     private let iso8601: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
@@ -73,6 +73,7 @@ struct DataExportView: View {
                 }
             }
 
+            #if DEBUG
             Section(header: Text("Seed Demo Data")) {
                 Button(action: { showSeedConfirm = true }) {
                     Label("Seed 12 Weeks of Demo Data", systemImage: "wand.and.stars")
@@ -94,6 +95,7 @@ struct DataExportView: View {
             } message: {
                 Text("This adds 12 weeks of sample data for simulator testing. It does not delete anything, but repeated taps will create duplicates.")
             }
+            #endif
 
             Section(header: Text("Info")) {
                 Text("Exports all app data as a single JSON file suitable for validation evidence or Apple Review submission. No data leaves the device until you choose where to share it.")
@@ -150,6 +152,7 @@ struct DataExportView: View {
         }
     }
 
+    #if DEBUG
     // MARK: - Seed Demo Data
 
     private func seedDemoData() {
@@ -158,6 +161,7 @@ struct DataExportView: View {
         df.timeStyle = .medium
         seedSummary = "Seeded at \(df.string(from: Date())). Pull to refresh dashboard."
     }
+    #endif
 
     // MARK: - Entity Serialization
 
@@ -314,4 +318,3 @@ private struct ShareSheet: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
-#endif

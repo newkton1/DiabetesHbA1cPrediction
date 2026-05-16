@@ -19,7 +19,7 @@ struct WelcomeSheetView: View {
     // MARK: - Constants
 
     private enum Constants {
-        static let videoURL = URL(string: "https://www.youtube.com/watch?v=4XrTVFx0jwc&list=PLEMcKQpcQpgup74VYGWHEFwembOmnPt_U")!
+        static let videoURL = URL(string: "https://www.youtube.com/watch?v=T3dPPyUxcxg&list=PLEMcKQpcQpgup74VYGWHEFwembOmnPt_U")!
         static let hasSeenWelcomeKey = "hasSeenWelcomeSheet"
     }
 
@@ -69,7 +69,7 @@ struct WelcomeSheetView: View {
                 Text("Wellness App")
                     .font(.footnote)
                     .fontWeight(.semibold)
-                Text("This app provides estimates for personal wellness tracking only. It does not diagnose conditions or replace laboratory tests. Always consult your healthcare provider for medical advice.")
+                Text("This app shows trends from your own historical data for personal wellness tracking. It is not a medical device and does not diagnose, treat, or predict health conditions. The estimated GMI is not a substitute for a laboratory HbA1c test. Always consult your healthcare provider for medical advice.")
                     .font(.caption2)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(AppTheme.textSecondary)

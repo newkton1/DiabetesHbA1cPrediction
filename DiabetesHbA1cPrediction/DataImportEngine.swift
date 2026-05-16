@@ -395,12 +395,12 @@ enum DataImportEngine {
                 uuid = UUID()
             }
 
-            if exists(entity: "HbA1cPredictionEntity", uuid: uuid, in: context) {
+            if exists(entity: "GmiEstimateEntity", uuid: uuid, in: context) {
                 count.skipped += 1
                 continue
             }
 
-            let entity = HbA1cPredictionEntity(context: context)
+            let entity = GmiEstimateEntity(context: context)
             entity.id = uuid
             entity.predictedValue = dict["predictedValue"] as? Double ?? 0
             entity.confidenceLevel = dict["confidenceLevel"] as? Double ?? 0

@@ -42,8 +42,8 @@ struct CurvePoint: Identifiable {
         case ..<70:  return .hypo
         case ..<100: return .normal
         case ..<126: return .elevated
-        case ..<180: return .warning
-        default:     return .critical
+        case ..<180: return .high
+        default:     return .veryHigh
         }
     }
 }
@@ -56,7 +56,7 @@ enum HotspotType {
 }
 
 enum GlucoseSeverity {
-    case hypo, normal, elevated, warning, critical
+    case hypo, normal, elevated, high, veryHigh
 }
 
 /// Contextual data surfaced when the user taps a hotspot (or any point in
@@ -102,7 +102,7 @@ struct GlucoseCurveProcessor {
 
     /// Minimum relative rise (mg/dL) from the 30-min moving average to qualify
     /// as a spike peak. Based on Robert's clinical experience: baseline ~120,
-    /// a ≥50 rise approaches the 180 danger zone.
+    /// a ≥50 rise approaches the 180 mg/dL threshold.
     static let spikeThresholdMgDl: Double = 50.0
 
     /// Window (minutes) over which the local baseline is computed as a simple

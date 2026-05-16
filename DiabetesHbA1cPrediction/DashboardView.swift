@@ -43,6 +43,9 @@ struct DashboardView: View {
     // MARK: - State
     @State private var showLastMealSheet = false
 
+    /// Dawn effect detection state — read from UserDefaults after each GMI recalculation
+    @State private var dawnEffectDetected: Bool = UserDefaults.standard.bool(forKey: "lastRunDetectedDawnEffect")
+
     // Timer-driven state for stale data detection
     @State private var currentTime = Date()
     private let staleDataTimer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
@@ -78,13 +81,25 @@ struct DashboardView: View {
                         .padding(.horizontal)
 
                         // Top section: GMI card (from glucose data), notices and disclaimer
-                        GMICardView(glucoseReadings: Array(glucoseReadings))
+                        GMICardView(glucoseReadings: Array(glucoseReadings), onDawnEffectUpdated: { detected in
+                            dawnEffectDetected = detected
+                        })
+
+                        if dawnEffectDetected {
+                            DawnEffectNoticeBanner()
+                        }
 
                         if isGlucoseDataStale {
                             StaleDataWarningBanner()
                         }
 
                         MedicalDisclaimerBanner()
+
+                        // MARK: - 14-Day Activity Snapshot (landscape)
+                        ActivitySnapshotCard(
+                            meals: meals,
+                            exerciseSessions: exerciseSessions
+                        )
 
                         // Action cards side by side in landscape
                         HStack(alignment: .top, spacing: 8) {
@@ -110,13 +125,25 @@ struct DashboardView: View {
                     // MARK: - Portrait Layout (Original)
                     VStack(spacing: 20) {
                         // MARK: - GMI (Glucose Management Indicator) Card
-                        GMICardView(glucoseReadings: Array(glucoseReadings))
+                        GMICardView(glucoseReadings: Array(glucoseReadings), onDawnEffectUpdated: { detected in
+                            dawnEffectDetected = detected
+                        })
+
+                        if dawnEffectDetected {
+                            DawnEffectNoticeBanner()
+                        }
 
                         if isGlucoseDataStale {
                             StaleDataWarningBanner()
                         }
 
                         MedicalDisclaimerBanner()
+
+                        // MARK: - 14-Day Activity Snapshot
+                        ActivitySnapshotCard(
+                            meals: meals,
+                            exerciseSessions: exerciseSessions
+                        )
 
                         // MARK: - Quick Action Cards for Meals
                         MealQuickActionsView(
@@ -254,7 +281,10 @@ private struct GMIResult {
 /// separate with a flask icon to reinforce the distinction.
 private struct GMICardView: View {
     let glucoseReadings: [GlucoseReadingEntity]
+    /// Callback to notify parent when dawn effect detection state changes
+    var onDawnEffectUpdated: ((Bool) -> Void)? = nil
     @ObservedObject private var profile = HbA1cUserProfile.shared
+    @Environment(\.managedObjectContext) private var viewContext
 
     /// Rolling window length used for GMI computation.
     /// Bergenstal 2018 validates the formula on 10–14 day CGM windows.
@@ -267,28 +297,72 @@ private struct GMICardView: View {
     /// Lab HbA1c lookback window — matches the 90-day red-cell pool biology.
     private static let labWindowDays: Int = 90
 
+    // State for interactive features
+    @State private var isRecalculating = false
+    @State private var recalcFlash = false
+    @State private var showLabSheet = false
+
     private var isNgsp: Bool { profile.effectiveUnit == .ngsp }
 
-    /// Compute GMI from mg/dL readings within the last `windowDays` days.
-    /// Returns nil when there is insufficient glucose data.
+    /// Maximum age (in days) for a cached GMI to remain useful. Beyond this the
+    /// entire 14-day glucose window has rolled over with no new data, so the old
+    /// value is no longer representative.
+    private static let staleCacheDays: Int = 30
+
+    /// Keys for persisting the last successful GMI computation.
+    private static let cachedGmiNgspKey  = "lastSuccessfulGmiNgsp"
+    private static let cachedGmiIfccKey  = "lastSuccessfulGmiIfcc"
+    private static let cachedGmiDateKey  = "lastSuccessfulGmiDate"
+
+    /// Compute GMI from glucose readings within the last `windowDays` days.
+    /// Accepts both mg/dL and mmol/L readings, converting mmol/L → mg/dL (×18)
+    /// before averaging. Returns nil when there is insufficient glucose data.
+    /// On success, caches the result to UserDefaults for the stale-data fallback.
     private var gmi: GMIResult? {
         let cutoff = Calendar.current.date(byAdding: .day, value: -Self.windowDays, to: Date()) ?? Date()
+        // Include both mg/dL and mmol/L glucose readings; exclude lab HbA1c entries ("NGSP %" / "mmol/mol").
         let windowReadings = glucoseReadings.filter { reading in
             guard let ts = reading.timestamp, let unit = reading.unit else { return false }
-            // Only mg/dL glucose points — ignore lab HbA1c entries ("NGSP %" / "mmol/mol").
-            return unit == "mg/dL" && ts >= cutoff
+            return (unit == "mg/dL" || unit == "mmol/L") && ts >= cutoff
         }
         guard windowReadings.count >= Self.minReadings else { return nil }
 
-        let mean = windowReadings.reduce(0.0) { $0 + $1.value } / Double(windowReadings.count)
+        // Normalise all readings to mg/dL for the Bergenstal formula
+        let sumMgDl = windowReadings.reduce(0.0) { total, reading in
+            let valueMgDl = reading.unit == "mmol/L" ? reading.value * 18.0 : reading.value
+            return total + valueMgDl
+        }
+        let mean = sumMgDl / Double(windowReadings.count)
         let meanMmol = GMIComputer.mmolPerL(fromMgDl: mean)
-        return GMIResult(
+        let result = GMIResult(
             gmiNgsp: GMIComputer.gmiPercent(meanMgDl: mean),
             gmiIfcc: GMIComputer.gmiMmol(meanMmolL: meanMmol),
             meanMgDl: mean,
             readingCount: windowReadings.count,
             windowDays: Self.windowDays
         )
+
+        // Cache this successful computation for the stale-data fallback
+        UserDefaults.standard.set(result.gmiNgsp, forKey: Self.cachedGmiNgspKey)
+        UserDefaults.standard.set(result.gmiIfcc, forKey: Self.cachedGmiIfccKey)
+        UserDefaults.standard.set(Date(), forKey: Self.cachedGmiDateKey)
+
+        return result
+    }
+
+    /// Returns the last successfully computed GMI if it is within `staleCacheDays`,
+    /// along with how many days ago it was calculated. Returns nil if no cached
+    /// value exists or if it is older than the cutoff.
+    private var cachedGmi: (ngsp: Double, ifcc: Double, daysAgo: Int)? {
+        let ngsp = UserDefaults.standard.double(forKey: Self.cachedGmiNgspKey)
+        guard ngsp > 0,
+              let date = UserDefaults.standard.object(forKey: Self.cachedGmiDateKey) as? Date else {
+            return nil
+        }
+        let daysAgo = Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 999
+        guard daysAgo <= Self.staleCacheDays else { return nil }
+        let ifcc = UserDefaults.standard.double(forKey: Self.cachedGmiIfccKey)
+        return (ngsp: ngsp, ifcc: ifcc, daysAgo: daysAgo)
     }
 
     // MARK: - Lab HbA1c helpers
@@ -345,6 +419,48 @@ private struct GMICardView: View {
 
     private var unitSuffix: String { profile.effectiveUnit.shortUnit }
 
+    /// The actual GlucoseReadingEntity objects for lab results (for deletion).
+    private var labReadingEntities: [GlucoseReadingEntity] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -Self.labWindowDays, to: Date()) ?? Date()
+        return glucoseReadings.filter { reading in
+            guard let ts = reading.timestamp,
+                  let unit = reading.unit,
+                  let source = reading.source,
+                  source == "Hospital Lab Test",
+                  (unit == "NGSP %" || unit == "mmol/mol"),
+                  ts >= cutoff else { return false }
+            return true
+        }
+        .sorted { ($0.timestamp ?? .distantPast) < ($1.timestamp ?? .distantPast) }
+    }
+
+    /// Force recalculation of the GMI estimate and run dawn effect detection.
+    private func recalculateGMI() {
+        isRecalculating = true
+        withAnimation(.easeInOut(duration: 0.2)) { recalcFlash = true }
+
+        Task { @MainActor in
+            let engine = GmiEstimateEngine()
+            let dawnDetected = engine.runPredictionAndSave(context: viewContext)
+
+            // Notify parent view of dawn effect state change
+            onDawnEffectUpdated?(dawnDetected)
+
+            // Schedule a local notification if dawn effect is newly detected
+            if dawnDetected {
+                DawnEffectNotificationManager.scheduleIfNeeded()
+            }
+
+            // Hold the spinner for 2 seconds so the user sees the recalculation feedback
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+
+            withAnimation(.easeInOut(duration: 0.3)) {
+                recalcFlash = false
+                isRecalculating = false
+            }
+        }
+    }
+
     var body: some View {
         VStack(spacing: 8) {
             // ── GMI section ──
@@ -359,14 +475,25 @@ private struct GMICardView: View {
             }
 
             if let gmi = gmi {
-                HStack(alignment: .center, spacing: 4) {
-                    Text(formatDisplayValue(gmi))
-                        .font(.largeTitle.bold())
-                    Text(unitSuffix)
-                        .font(.title2)
-                        .foregroundColor(.secondary)
+                // Tap the GMI value to force recalculation
+                Button(action: recalculateGMI) {
+                    HStack(alignment: .center, spacing: 4) {
+                        Text(formatDisplayValue(gmi))
+                            .font(.largeTitle.bold())
+                        Text(unitSuffix)
+                            .font(.title2)
+                            .foregroundColor(.secondary)
+                        if isRecalculating {
+                            ProgressView()
+                                .scaleEffect(0.7)
+                                .padding(.leading, 4)
+                        }
+                    }
+                    .foregroundColor(rangeColor(forIfcc: gmi.gmiIfcc))
+                    .opacity(recalcFlash ? 0.4 : 1.0)
                 }
-                .foregroundColor(rangeColor(forIfcc: gmi.gmiIfcc))
+                .buttonStyle(.plain)
+                .accessibilityHint("Tap to recalculate GMI")
 
                 Text("Based on \(gmi.readingCount) glucose readings · last \(gmi.windowDays) days")
                     .font(.caption)
@@ -376,12 +503,30 @@ private struct GMICardView: View {
                     .font(.caption2)
                     .foregroundColor(.secondary)
 
-                Text("GMI is a glucose-based indicator, not a laboratory HbA1c result.")
+                Text("Tap the value to recalculate · GMI is an FDA-recognized and endorsed glucose-based indicator, not a laboratory HbA1c result.")
                     .font(.caption2)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.top, 2)
+            } else if let cached = cachedGmi {
+                // Insufficient current data but a recent previous GMI exists
+                Text("Not enough recent readings to calculate GMI")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+
+                let displayValue = isNgsp ? String(format: "%.1f", cached.ngsp) : String(format: "%.0f", cached.ifcc)
+                Text("Your last GMI, calculated \(cached.daysAgo) \(cached.daysAgo == 1 ? "day" : "days") ago, was \(displayValue) \(unitSuffix)")
+                    .font(.callout)
+                    .foregroundColor(rangeColor(forIfcc: cached.ifcc))
+                    .multilineTextAlignment(.center)
+
+                Text("Log at least \(Self.minReadings) glucose readings in the last \(Self.windowDays) days to update your GMI.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
             } else {
+                // No cached GMI at all (first-time user or >30 days stale)
                 Text("Not enough glucose data yet")
                     .font(.body)
                     .foregroundColor(.secondary)
@@ -407,10 +552,16 @@ private struct GMICardView: View {
         .accessibilityLabel({
             if let gmi = gmi {
                 return "Glucose Management Indicator: \(formatDisplayValue(gmi)) \(unitSuffix), based on \(gmi.readingCount) readings over the last \(gmi.windowDays) days."
+            } else if let cached = cachedGmi {
+                let displayValue = isNgsp ? String(format: "%.1f", cached.ngsp) : String(format: "%.0f", cached.ifcc)
+                return "Not enough recent data. Last GMI was \(displayValue) \(unitSuffix), calculated \(cached.daysAgo) days ago."
             } else {
                 return "Not enough glucose data yet to compute Glucose Management Indicator."
             }
         }())
+        .sheet(isPresented: $showLabSheet) {
+            LabResultsSheet(labReadings: labReadingEntities)
+        }
     }
 
     // MARK: - Lab HbA1c row
@@ -436,11 +587,15 @@ private struct GMICardView: View {
                 .foregroundColor(.secondary)
         } else if labs.count == 1 {
             let lab = labs[0]
-            Text(formatLab(lab.ifcc))
-                .font(.largeTitle.bold())
-                .foregroundColor(rangeColor(forIfcc: lab.ifcc))
+            Button(action: { showLabSheet = true }) {
+                Text(formatLab(lab.ifcc))
+                    .font(.largeTitle.bold())
+                    .foregroundColor(rangeColor(forIfcc: lab.ifcc))
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("Tap to view and manage lab results")
 
-            Text("\(shortDate(lab.date))")
+            Text("\(shortDate(lab.date)) · tap to edit")
                 .font(.caption)
                 .foregroundColor(.secondary)
         } else {
@@ -448,21 +603,25 @@ private struct GMICardView: View {
             let maxIfcc = labs.map(\.ifcc).max()!
             let latest = labs.last!
 
-            if abs(minIfcc - maxIfcc) < 0.5 {
-                // Values essentially identical — show single value
-                Text(formatLab(latest.ifcc))
-                    .font(.largeTitle.bold())
-                    .foregroundColor(rangeColor(forIfcc: latest.ifcc))
-            } else {
-                Text("\(formatLab(minIfcc)) – \(formatLab(maxIfcc))")
-                    .font(.largeTitle.bold())
-                    .foregroundColor(rangeColor(forIfcc: latest.ifcc))
+            Button(action: { showLabSheet = true }) {
+                if abs(minIfcc - maxIfcc) < 0.5 {
+                    Text(formatLab(latest.ifcc))
+                        .font(.largeTitle.bold())
+                        .foregroundColor(rangeColor(forIfcc: latest.ifcc))
+                } else {
+                    Text("\(formatLab(minIfcc)) – \(formatLab(maxIfcc))")
+                        .font(.largeTitle.bold())
+                        .foregroundColor(rangeColor(forIfcc: latest.ifcc))
+                }
             }
+            .buttonStyle(.plain)
+            .accessibilityHint("Tap to view and manage lab results")
 
-            Text("\(labs.count) results · \(shortDate(labs.first!.date)) – \(shortDate(latest.date))")
+            Text("\(labs.count) results · \(shortDate(labs.first!.date)) – \(shortDate(latest.date)) · tap to edit")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
+
     }
 }
 
@@ -516,7 +675,7 @@ private struct QuickStatsView: View {
                     }
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .frame(height: 80)
+                    .frame(minHeight: 80)
                     .padding(isLandscape ? 6 : 10)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
@@ -545,7 +704,7 @@ private struct QuickStatsView: View {
                     }
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .frame(height: 80)
+                    .frame(minHeight: 80)
                     .padding(isLandscape ? 6 : 10)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
@@ -570,7 +729,7 @@ private struct QuickStatsView: View {
                     }
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .frame(height: 80)
+                    .frame(minHeight: 80)
                     .padding(isLandscape ? 6 : 10)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
@@ -593,7 +752,7 @@ private struct QuickStatsView: View {
                     }
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .frame(height: 80)
+                    .frame(minHeight: 80)
                     .padding(isLandscape ? 6 : 10)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
@@ -660,6 +819,7 @@ private struct MealQuickActionsView: View {
             Text("Actions")
                 .font(.headline)
                 .padding(.horizontal)
+                .accessibilityAddTraits(.isHeader)
 
             HStack(spacing: isLandscape ? 6 : 12) {
                 // Add Meal Card — simple quick-action, no meal history
@@ -709,7 +869,7 @@ private struct MealQuickActionsView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .frame(height: 80)
+                    .frame(minHeight: 80)
                     .padding(isLandscape ? 6 : 10)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
@@ -758,7 +918,7 @@ private struct MealQuickActionsView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .frame(height: 80)
+                    .frame(minHeight: 80)
                     .padding(isLandscape ? 6 : 10)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
@@ -773,23 +933,49 @@ private struct MealQuickActionsView: View {
 }
 
 // MARK: - Dawn Effect Notice Banner
-/// An orange notice displayed when dawn effect compensation is active.
-/// Shown between the HbA1c card and the medical disclaimer.
+/// An orange informational notice shown when a consistent early-morning glucose
+/// rise pattern is detected without a preceding meal. This is observational —
+/// it describes a pattern in the user's data, not a diagnosis.
 private struct DawnEffectNoticeBanner: View {
+    @State private var isExpanded = false
+
     var body: some View {
-        HStack(alignment: .top, spacing: 6) {
-            Image(systemName: "sunrise.fill")
-                .font(.caption2)
-                .foregroundColor(.orange)
-            Text("Dawn effect adjustment applied — morning readings weighted at 60%")
-                .font(.caption2)
-                .foregroundColor(.orange)
-                .fixedSize(horizontal: false, vertical: true)
+        VStack(alignment: .leading, spacing: 4) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
+            } label: {
+                HStack(alignment: .top, spacing: 6) {
+                    Image(systemName: "sunrise.fill")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                    Text("Pattern noticed: glucose readings between 4–8 AM have been consistently higher than overnight, with no meals logged beforehand.")
+                        .font(.caption2)
+                        .foregroundColor(.orange)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.leading)
+                    Spacer(minLength: 0)
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.caption2)
+                        .foregroundColor(.orange)
+                }
+            }
+            .buttonStyle(.plain)
+
+            if isExpanded {
+                Text("This is sometimes called the \"dawn effect\" — a natural rise in glucose driven by hormones in the early morning. It is common in people with diabetes and does not necessarily indicate a problem. Your GMI value includes these readings as part of its standard calculation.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 2)
+            }
         }
         .padding(.horizontal)
-        .padding(.vertical, 4)
+        .padding(.vertical, 6)
+        .background(Color.orange.opacity(0.08))
+        .cornerRadius(8)
+        .padding(.horizontal)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Dawn effect adjustment applied. Morning readings weighted at 60 percent.")
+        .accessibilityLabel("Pattern noticed: early morning glucose readings are consistently higher than overnight readings with no meals logged. Tap for more information.")
     }
 }
 
@@ -831,6 +1017,289 @@ struct MedicalDisclaimerBanner: View {
         .padding(.horizontal)
         .padding(.vertical, 6)
         .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - Lab Results Management Sheet
+/// Displays all lab HbA1c results with swipe-to-delete.
+private struct LabResultsSheet: View {
+    let labReadings: [GlucoseReadingEntity]
+    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var profile = HbA1cUserProfile.shared
+    @State private var readingsToShow: [GlucoseReadingEntity] = []
+
+    private var isNgsp: Bool { profile.effectiveUnit == .ngsp }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                if readingsToShow.isEmpty {
+                    Text("No lab results to display.")
+                        .foregroundColor(.secondary)
+                } else {
+                    ForEach(readingsToShow, id: \.objectID) { reading in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(formattedValue(for: reading))
+                                    .font(.title3.bold())
+                                    .foregroundColor(colorForReading(reading))
+
+                                if let ts = reading.timestamp {
+                                    Text(dateString(ts))
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+
+                            Spacer()
+
+                            if let unit = reading.unit {
+                                Text(unit)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    .onDelete(perform: deleteReadings)
+                }
+
+                Section {
+                    Text("Swipe left on a result to delete it. This cannot be undone.")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .navigationTitle("Lab HbA1c Results")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+            .onAppear {
+                readingsToShow = labReadings
+            }
+        }
+    }
+
+    private func formattedValue(for reading: GlucoseReadingEntity) -> String {
+        guard let unit = reading.unit else { return "—" }
+        let value = reading.value
+        if unit == "NGSP %" {
+            if isNgsp {
+                return String(format: "%.1f%%", value)
+            } else {
+                return String(format: "%.0f mmol/mol", ngspToIFCC(value))
+            }
+        } else {
+            // mmol/mol
+            if isNgsp {
+                return String(format: "%.1f%%", ifccToNGSP(value))
+            } else {
+                return String(format: "%.0f mmol/mol", value)
+            }
+        }
+    }
+
+    private func colorForReading(_ reading: GlucoseReadingEntity) -> Color {
+        guard let unit = reading.unit else { return .primary }
+        let ifcc: Double = unit == "NGSP %" ? ngspToIFCC(reading.value) : reading.value
+        switch ifcc {
+        case ..<39: return .green
+        case 39..<48: return .yellow
+        case 48...58: return .orange
+        default: return .red
+        }
+    }
+
+    private func dateString(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+
+    private func deleteReadings(at offsets: IndexSet) {
+        for index in offsets {
+            let reading = readingsToShow[index]
+            viewContext.delete(reading)
+        }
+        readingsToShow.remove(atOffsets: offsets)
+
+        do {
+            try viewContext.save()
+        } catch {
+            #if DEBUG
+            print("[LabResultsSheet] Delete failed: \(error)")
+            #endif
+        }
+    }
+}
+
+// MARK: - 14-Day Activity Snapshot Card
+/// Displays how many logged meals in the last 14 days had a post-meal
+/// exercise session, using a dual-window breakdown:
+///   - "Early" = exercise started within 0–90 min of the meal
+///   - "Later" = exercise started within 90–180 min of the meal
+/// The headline shows the combined total (0–180 min). This captures both
+/// people who walk immediately after eating and those who wait for glucose
+/// to start rising before heading out.
+///
+/// Only appears when the user has logged at least 5 meals and 3 exercise
+/// sessions in the period — below that there is not enough data for
+/// the ratio to be meaningful.
+///
+/// The card is purely informational: no encouragement, no judgment,
+/// just the numbers. It auto-refreshes via Core Data's @FetchRequest
+/// and sits on the Dashboard aligned with the 14-day GMI window.
+private struct ActivitySnapshotCard: View {
+    let meals: FetchedResults<MealEntity>
+    let exerciseSessions: FetchedResults<ExerciseSessionEntity>
+
+    /// Window length — matches the GMI calculation period.
+    private static let windowDays: Int = 14
+
+    /// Minimum thresholds before displaying the card.
+    private static let minMeals: Int = 5
+    private static let minExerciseSessions: Int = 3
+
+    /// Dual pairing windows (minutes after meal).
+    private static let earlyWindowEnd: Double = 90
+    private static let lateWindowEnd: Double = 180
+
+    // MARK: - Computed Data
+
+    /// Meals logged (not planned) in the last 14 days.
+    private var recentMeals: [MealEntity] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -Self.windowDays, to: Date()) ?? Date()
+        return meals.filter { meal in
+            guard let ts = meal.timestamp else { return false }
+            return ts >= cutoff && meal.mealType != "plannedMeal"
+        }
+    }
+
+    /// Exercise sessions in the last 14 days.
+    private var recentExercise: [ExerciseSessionEntity] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -Self.windowDays, to: Date()) ?? Date()
+        return exerciseSessions.filter { session in
+            guard let start = session.startDate else { return false }
+            return start >= cutoff
+        }
+    }
+
+    /// Whether the card should be displayed at all.
+    private var meetsThreshold: Bool {
+        recentMeals.count >= Self.minMeals && recentExercise.count >= Self.minExerciseSessions
+    }
+
+    /// Returns the smallest gap (in minutes) between a meal and any subsequent
+    /// exercise session, or nil if no exercise falls within the late window.
+    private func earliestExerciseGap(for meal: MealEntity) -> Double? {
+        guard let mealTime = meal.timestamp else { return nil }
+        let gaps = recentExercise.compactMap { session -> Double? in
+            guard let exerciseStart = session.startDate else { return nil }
+            let gap = exerciseStart.timeIntervalSince(mealTime) / 60.0
+            guard gap >= 0 && gap <= Self.lateWindowEnd else { return nil }
+            return gap
+        }
+        return gaps.min()
+    }
+
+    /// Breakdown of paired meals into early (0–90 min) and later (90–180 min).
+    private var pairingBreakdown: (early: Int, later: Int, total: Int) {
+        var early = 0
+        var later = 0
+        for meal in recentMeals {
+            if let gap = earliestExerciseGap(for: meal) {
+                if gap <= Self.earlyWindowEnd {
+                    early += 1
+                } else {
+                    later += 1
+                }
+            }
+        }
+        return (early: early, later: later, total: early + later)
+    }
+
+    /// Total exercise minutes in the 14-day window.
+    private var totalExerciseMinutes: Int {
+        Int(recentExercise.reduce(0) { $0 + $1.duration })
+    }
+
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    private var isLandscape: Bool { verticalSizeClass == .compact }
+
+    // MARK: - Body
+
+    var body: some View {
+        if meetsThreshold {
+            let breakdown = pairingBreakdown
+            let mealCount = recentMeals.count
+
+            VStack(spacing: 8) {
+                HStack(spacing: 5) {
+                    Image(systemName: "figure.walk.motion")
+                        .font(.subheadline)
+                        .foregroundColor(.green)
+                        .accessibilityHidden(true)
+                    Text("14-Day Activity Snapshot")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                }
+
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text("\(breakdown.total)")
+                        .font(.title.bold())
+                        .foregroundColor(.green)
+                    Text("of \(mealCount) meals")
+                        .font(.body)
+                        .foregroundColor(.primary)
+                }
+
+                Text("had a post-meal exercise session logged")
+                    .font(.callout)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+
+                // Dual-window breakdown — two-column layout so
+                // narrow screens (SE 2020 portrait) break cleanly.
+                HStack(alignment: .top, spacing: 4) {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("\(breakdown.early) within")
+                        Text("90 min")
+                    }
+                    .foregroundColor(.primary)
+                    Text("·")
+                        .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("\(breakdown.later) after")
+                        Text("90–180 min")
+                    }
+                    .foregroundColor(.primary)
+                }
+                .font(.caption)
+
+                Divider()
+                    .padding(.vertical, 2)
+
+                HStack(spacing: 16) {
+                    Label("\(totalExerciseMinutes) min total", systemImage: "clock")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Label("\(recentExercise.count) sessions", systemImage: "flame")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+            .padding(.horizontal)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(breakdown.total) of \(mealCount) meals in the last 14 days had a post-meal exercise session. \(breakdown.early) within 90 minutes, \(breakdown.later) between 90 and 180 minutes. \(totalExerciseMinutes) total minutes across \(recentExercise.count) sessions.")
+        }
     }
 }
 

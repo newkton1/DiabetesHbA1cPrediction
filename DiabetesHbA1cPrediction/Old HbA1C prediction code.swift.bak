@@ -1,0 +1,327 @@
+//  Old HbA1C prediction code.swift
+//
+//  ARCHIVED: This file contains the full multi-factor HbA1c prediction engine
+//  that was removed from operational code on 2026-05-04. It included adjustments
+//  for GL from meals, exercise calories, BMI, demographics, comorbidities, tobacco,
+//  alcohol, dawn effect, and prior HbA1c blending.
+//
+//  The prediction was superseded by:
+//  1. Pure Bergenstal 2018 GMI formula (Dashboard GMICardView)
+//  2. Historical pattern-based meal impact (HistoricalPatternSummary)
+//
+//  Kept for reference in case any of this logic needs to be reintroduced.
+//
+//  Original file: GmiEstimateEngine.swift
+//  ──────────────────────────────────────────────────────────────────────────────
+
+import Foundation
+import CoreData
+import Combine
+
+/// Struct representing all inputs required for HbA1c prediction
+/// Contains glucose metrics, dietary information, physical activity, demographics, and health conditions
+struct PredictionInput {
+    // Glucose Metrics
+    let averageGlucose: Double           // mg/dL - average blood glucose over measurement period
+    let glucoseVariability: Double       // coefficient of variation (%) - measure of glucose stability
+
+    // Dietary Intake
+    let dailyCarbIntake: Double          // grams - carbohydrate consumption
+    let dailyCalories: Double            // kilocalories - total energy intake
+
+    // Physical Activity (7-day window)
+    let weeklyExerciseMinutes: Double    // minutes - total aerobic exercise per week
+    let exerciseIntensityAvg: Double     // 1-10 scale - average intensity of exercise sessions
+
+    // Cardio-specific metrics (Walking/Running/Cycling - last 7 days)
+    var cardioDistanceKm: Double = 0     // km - total distance from cardio exercises
+    var cardioCaloriesBurned: Double = 0 // calories - total from cardio exercises
+
+    // Non-cardio metrics (all other exercise types - last 7 days)
+    var nonCardioMinutes: Double = 0     // minutes - total duration of non-cardio exercises
+    var nonCardioIntensityAvg: Double = 0 // 1-10 scale - average intensity of non-cardio
+
+    // Demographics
+    let age: Int                         // years
+    let sex: String                      // "Male" or "Female"
+    let bmi: Double                      // body mass index (kg/m²)
+
+    // Diabetes Status
+    let hasDiabetes: Bool                // current diabetes diagnosis
+    let diabetesType: String?            // "Type 1" or "Type 2" (nil if no diabetes)
+
+    // Comorbidities
+    let hasCOPD: Bool                    // Chronic Obstructive Pulmonary Disease
+    let hasHeartDisease: Bool            // history of heart disease or current condition
+
+    // Dawn Effect
+    var hasDawnEffect: Bool = false      // user-confirmed dawn effect
+    var dawnEffectDetected: Bool = false  // algorithmically detected dawn pattern
+
+    // Lifestyle Factors
+    let tobaccoUse: String               // "Never", "Former", or "Current"
+    let alcoholUnitsPerWeek: Double      // standard drink units per week
+    let timeSinceLastMealHours: Double   // hours since last food intake
+
+    // Last Meal Data (for immediate glucose impact)
+    var lastMealCarbs: Double = 0        // grams - carbohydrates from last meal
+    var lastMealGlycemicLoad: Double = 0 // glycemic load of last meal
+
+    // Planned Meal Data (for future impact projection)
+    var plannedMealCarbs: Double? = nil   // grams - planned meal carbohydrates
+    var plannedMealGlycemicLoad: Double? = nil  // planned meal glycemic load
+    var hoursUntilPlannedMeal: Double? = nil    // hours until planned meal
+}
+
+/// Struct representing the HbA1c prediction result with clinical interpretation
+struct PredictionResult {
+    let predictedHbA1c: Double           // percentage (e.g., 6.5 represents 6.5%)
+    let confidenceLevel: Double          // 0.0 to 1.0 - statistical confidence in prediction
+    let riskCategory: String             // clinical risk classification
+    let contributingFactors: [String: Double]  // factor name -> contribution to HbA1c (%)
+    let recommendations: [String]        // actionable clinical recommendations
+}
+
+/// Core HbA1c prediction engine using medical formulas and adjustment factors
+/// Based on the Nathan et al. formula relating average glucose to HbA1c
+/// Reference: Nathan et al. Diabetes Care 2008;31:1473-1478
+class GmiEstimateEngine: ObservableObject {
+    let modelVersion = "1.0.0"
+
+    /// Set after each prediction run — true if dawn effect pattern was detected algorithmically
+    @Published var lastRunDetectedDawnEffect: Bool = UserDefaults.standard.bool(forKey: "lastRunDetectedDawnEffect")
+    /// Set after each prediction run — true if dawn compensation was applied (user-enabled or detected)
+    @Published var lastRunAppliedDawnCompensation: Bool = UserDefaults.standard.bool(forKey: "lastRunAppliedDawnCompensation")
+
+    // MARK: - Public Methods
+
+    /// Predicts HbA1c from comprehensive health and lifestyle inputs
+    func predict(from input: PredictionInput) -> PredictionResult {
+        var contributingFactors: [String: Double] = [:]
+
+        // Step 1: Calculate base HbA1c using Nathan et al. formula
+        let baseHbA1c = (input.averageGlucose + 46.7) / 28.7
+        var predictedHbA1c = baseHbA1c
+
+        if input.hasDawnEffect || input.dawnEffectDetected {
+            contributingFactors["Dawn Effect Adjustment"] = 0.0
+        }
+
+        // Step 2: Apply glucose variability adjustment
+        if input.glucoseVariability > 36.0 {
+            let variabilityAdjustment = min(0.3, (input.glucoseVariability - 36.0) / 36.0 * 0.3)
+            predictedHbA1c += variabilityAdjustment
+            contributingFactors["Glucose Variability"] = variabilityAdjustment
+        }
+
+        // Step 3: Apply dietary adjustment - carbohydrate intake
+        if input.dailyCarbIntake > 300.0 {
+            let carbAdjustment = 0.1 + min(0.1, (input.dailyCarbIntake - 300.0) / 100.0 * 0.1)
+            predictedHbA1c += carbAdjustment
+            contributingFactors["High Carb Intake"] = carbAdjustment
+        }
+
+        // Step 4: Apply exercise adjustment (dual-pathway, 7-day history)
+        var totalExerciseEffect = 0.0
+
+        if input.cardioDistanceKm > 0 || input.cardioCaloriesBurned > 0 {
+            let distanceEffect = input.cardioDistanceKm * 0.02
+            let calorieEffect = (input.cardioCaloriesBurned / 500.0) * 0.15
+            let cardioEffect = min(0.4, distanceEffect + calorieEffect)
+            totalExerciseEffect += cardioEffect
+            contributingFactors["Cardio Exercise"] = -cardioEffect
+        }
+
+        if input.nonCardioMinutes > 0 {
+            let nonCardioEffect = min(
+                0.3,
+                (input.nonCardioMinutes / 150.0) * (input.nonCardioIntensityAvg / 10.0) * 0.3
+            )
+            totalExerciseEffect += nonCardioEffect
+            contributingFactors["Other Exercise"] = -nonCardioEffect
+        }
+
+        totalExerciseEffect = min(0.6, totalExerciseEffect)
+        if totalExerciseEffect > 0 {
+            predictedHbA1c -= totalExerciseEffect
+            contributingFactors["Exercise Benefits"] = -totalExerciseEffect
+        }
+
+        // Step 5: Apply age adjustment
+        if input.age > 60 {
+            let ageAdjustment = 0.1
+            predictedHbA1c += ageAdjustment
+            contributingFactors["Age Factor"] = ageAdjustment
+        }
+
+        // Step 6: Apply BMI adjustment
+        if input.bmi >= 30.0 {
+            predictedHbA1c += 0.2
+            contributingFactors["Obesity"] = 0.2
+        } else if input.bmi >= 25.0 {
+            predictedHbA1c += 0.1
+            contributingFactors["Overweight"] = 0.1
+        }
+
+        // Step 7: COPD adjustment
+        if input.hasCOPD {
+            predictedHbA1c += 0.1
+            contributingFactors["COPD Inflammation"] = 0.1
+        }
+
+        // Step 8: Heart disease adjustment
+        if input.hasHeartDisease {
+            predictedHbA1c += 0.1
+            contributingFactors["Heart Disease"] = 0.1
+        }
+
+        // Step 9: Tobacco use adjustment
+        let tobaccoAdjustment: Double
+        switch input.tobaccoUse {
+        case "Current": tobaccoAdjustment = 0.15
+        case "Former": tobaccoAdjustment = 0.05
+        default: tobaccoAdjustment = 0.0
+        }
+        if tobaccoAdjustment > 0 {
+            predictedHbA1c += tobaccoAdjustment
+            contributingFactors["Tobacco Use"] = tobaccoAdjustment
+        }
+
+        // Step 10: Alcohol consumption adjustment
+        let alcoholAdjustment: Double
+        if input.alcoholUnitsPerWeek > 14.0 {
+            alcoholAdjustment = 0.1
+        } else if input.alcoholUnitsPerWeek >= 7.0 {
+            alcoholAdjustment = -0.05
+        } else {
+            alcoholAdjustment = 0.0
+        }
+        if alcoholAdjustment != 0 {
+            predictedHbA1c += alcoholAdjustment
+            contributingFactors["Alcohol Consumption"] = alcoholAdjustment
+        }
+
+        // Step 11: Recent meal impact adjustment
+        if input.lastMealGlycemicLoad > 0 && input.timeSinceLastMealHours < 6 {
+            let timeFactor = max(0, 1.0 - input.timeSinceLastMealHours / 6.0)
+            if input.lastMealGlycemicLoad > 25 {
+                let mealImpact = min(0.1, (input.lastMealGlycemicLoad - 25) / 50.0 * 0.1) * timeFactor
+                predictedHbA1c += mealImpact
+                contributingFactors["Recent High GL Meal"] = mealImpact
+            }
+        }
+
+        if input.lastMealCarbs > 80 && input.timeSinceLastMealHours < 4 {
+            let carbImpact = min(0.05, (input.lastMealCarbs - 80) / 100.0 * 0.05)
+            predictedHbA1c += carbImpact
+            contributingFactors["Recent High Carb Meal"] = carbImpact
+        }
+
+        predictedHbA1c = max(4.0, min(14.0, predictedHbA1c))
+
+        let confidenceLevel = calculateConfidence(glucoseVariability: input.glucoseVariability)
+        let riskCategory = determineRiskCategory(hbA1c: predictedHbA1c)
+        let recommendations = generateRecommendations(
+            input: input, predictedHbA1c: predictedHbA1c,
+            riskCategory: riskCategory, contributingFactors: contributingFactors
+        )
+
+        return PredictionResult(
+            predictedHbA1c: round(predictedHbA1c * 10.0) / 10.0,
+            confidenceLevel: confidenceLevel,
+            riskCategory: riskCategory,
+            contributingFactors: contributingFactors,
+            recommendations: recommendations
+        )
+    }
+
+    /// Gathers prediction inputs from Core Data entities
+    func gatherInputs(context: NSManagedObjectContext) -> PredictionInput? {
+        // ... (full implementation was here — see git history for details)
+        return nil
+    }
+
+    /// Runs full prediction pipeline: gather inputs, predict, and save results
+    func runPredictionAndSave(context: NSManagedObjectContext) -> PredictionResult? {
+        // ... (full implementation was here — see git history for details)
+        return nil
+    }
+
+    /// Predicts future HbA1c impact based on a planned meal
+    func predictWithPlannedMeal(
+        currentPrediction: PredictionResult,
+        plannedMealCarbs: Double,
+        plannedMealGI: Double,
+        hoursUntilMeal: Double
+    ) -> PredictionResult {
+        var adjustedHbA1c = currentPrediction.predictedHbA1c
+        var updatedFactors = currentPrediction.contributingFactors
+
+        let glycemicLoad = (plannedMealGI * plannedMealCarbs) / 100.0
+        let timeFactor = max(0.5, 1.0 - (hoursUntilMeal / 24.0) * 0.3)
+
+        if glycemicLoad > 20 {
+            let glImpact = min(0.15, (glycemicLoad - 20) / 100.0 * 0.15) * timeFactor
+            adjustedHbA1c += glImpact
+            updatedFactors["Planned High GL Meal"] = glImpact
+        } else if glycemicLoad > 10 {
+            let glImpact = min(0.05, (glycemicLoad - 10) / 50.0 * 0.05) * timeFactor
+            adjustedHbA1c += glImpact
+            updatedFactors["Planned Moderate GL Meal"] = glImpact
+        }
+
+        if plannedMealCarbs > 60 {
+            let carbImpact = min(0.1, (plannedMealCarbs - 60) / 100.0 * 0.1) * timeFactor
+            adjustedHbA1c += carbImpact
+            updatedFactors["Planned High Carb Meal"] = carbImpact
+        }
+
+        adjustedHbA1c = max(4.0, min(14.0, adjustedHbA1c))
+
+        var updatedRecommendations = currentPrediction.recommendations
+        if glycemicLoad > 20 {
+            updatedRecommendations.insert("This planned meal has a high carb impact. Lower-GI alternatives tend to produce a smaller glucose response.", at: 0)
+        }
+        if plannedMealCarbs > 80 {
+            updatedRecommendations.insert("This planned meal is high in carbohydrates. Protein or fiber is sometimes associated with a slower glucose response.", at: 0)
+        }
+
+        let updatedRiskCategory = determineRiskCategory(hbA1c: adjustedHbA1c)
+
+        return PredictionResult(
+            predictedHbA1c: round(adjustedHbA1c * 10.0) / 10.0,
+            confidenceLevel: currentPrediction.confidenceLevel * 0.9,
+            riskCategory: updatedRiskCategory,
+            contributingFactors: updatedFactors,
+            recommendations: updatedRecommendations
+        )
+    }
+
+    // MARK: - Private Helper Methods (supporting the prediction pipeline)
+
+    private func calculateConfidence(glucoseVariability: Double) -> Double {
+        var confidence = 0.6
+        if glucoseVariability < 20.0 { confidence += 0.3 }
+        else if glucoseVariability < 36.0 { confidence += 0.2 }
+        else if glucoseVariability < 50.0 { confidence += 0.1 }
+        return min(1.0, confidence)
+    }
+
+    private func determineRiskCategory(hbA1c: Double) -> String {
+        if hbA1c < 5.7 { return "Normal Range" }
+        else if hbA1c < 6.5 { return "Above Typical Range" }
+        else if hbA1c <= 7.0 { return "Moderately Elevated" }
+        else if hbA1c <= 8.0 { return "Elevated" }
+        else { return "Significantly Elevated" }
+    }
+
+    private func generateRecommendations(
+        input: PredictionInput,
+        predictedHbA1c: Double,
+        riskCategory: String,
+        contributingFactors: [String: Double]
+    ) -> [String] {
+        // Full recommendation generation logic — see git history
+        return []
+    }
+}

@@ -50,16 +50,19 @@ struct GlucoseLogView: View {
     ) var exerciseSessions: FetchedResults<ExerciseSessionEntity>
 
     // Interactive chart state
-    @State private var showExtendedWindow = false
+    @State private var chartDaySetting: Int = 3  // 1, 3, or 7
     @State private var selectedHotspot: CurveHotspot? = nil
     @State private var popoverAnchorRight = false  // true → align popover to trailing edge
     @State private var weightSamples: [WeightSampleRecord] = []
+    @State private var selectedWeightTrend: WeightTrendPoint? = nil
     /// Anchor date for the chart window's right edge. nil = "now" (default).
     /// Set by tapping a reading in the list to scroll the chart to that date.
     @State private var chartAnchorDate: Date? = nil
     /// Timestamp of a reading tapped in the list — triggers hotspot selection
     /// after the chart window has moved.
     @State private var pendingSelectionDate: Date? = nil
+    // Reserved for future list-scroll-to-center if a lightweight approach is found
+    // @State private var pendingListScrollID: NSManagedObjectID? = nil
     /// Timestamp of the reading selected in the list — shown as a vertical
     /// indicator line on the chart even when there is no matching hotspot.
     @State private var selectedReadingDate: Date? = nil
@@ -83,12 +86,12 @@ struct GlucoseLogView: View {
     let trendOptions = ["stable", "rising", "falling", "rising rapidly", "falling rapidly"]
 
     var body: some View {
-        NavigationStack {
-            if isPortrait {
+        if isPortrait {
+            NavigationStack {
                 portraitBody
-            } else {
-                landscapeBody
             }
+        } else {
+            landscapeBody
         }
     }
 
@@ -126,15 +129,39 @@ struct GlucoseLogView: View {
 
             readingsList
         }
-        .navigationTitle("Glucose Readings")
+        .navigationTitle("Glucose")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button(action: { showAddSheet = true }) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.blue)
-                        .accessibilityLabel("Add glucose reading")
+                HStack(spacing: 12) {
+                    // Sync button — moved here from chart header to free space on SE
+                    Button(action: syncFromHealth) {
+                        HStack(spacing: 4) {
+                            if isSyncing {
+                                ProgressView()
+                                    .scaleEffect(0.8, anchor: .center)
+                            } else {
+                                Image(systemName: syncSuccess ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
+                            }
+                            Text("Sync")
+                                .font(.caption2)
+                        }
+                        .foregroundColor(syncSuccess ? .green : .blue)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background((syncSuccess ? Color.green : Color.blue).opacity(0.1))
+                        .cornerRadius(6.6)
+                        .animation(.easeInOut(duration: 0.3), value: syncSuccess)
+                    }
+                    .disabled(isSyncing)
+                    .accessibilityLabel(isSyncing ? "Syncing with Apple Health" : syncSuccess ? "Health data synced successfully" : "Sync from Apple Health")
+
+                    Button(action: { showAddSheet = true }) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.blue)
+                            .accessibilityLabel("Add glucose reading")
+                    }
                 }
             }
         }
@@ -170,33 +197,19 @@ struct GlucoseLogView: View {
     // MARK: - Landscape Body
     private var landscapeBody: some View {
         VStack(spacing: 0) {
-            // Fixed header: title on left, + button on right
-            HStack {
-                Text("Glucose Readings")
-                    .font(.title3.bold())
-
-                Spacer()
-
-                Button(action: { showAddSheet = true }) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.blue)
-                        .accessibilityLabel("Add glucose reading")
-                }
-            }
-            .padding(.horizontal)
-            .padding(.top, 14)
-            .padding(.bottom, 2)
-
             // Side-by-side: chart on left, readings list on right
             HStack(alignment: .top, spacing: 0) {
                 chartSection
                     .frame(maxWidth: .infinity)
 
-                // Right side: Sync Health button header + readings list
+                // Right side: compact header + readings list
                 VStack(alignment: .leading, spacing: 0) {
-                    // Sync Health button aligned with "Last 30 Days" header on left
+                    // Header row: Glucose title + Sync button + Add button
+                    // fixedSize keeps this pinned — the List below scrolls independently
                     HStack {
+                        Text("Glucose")
+                            .font(.subheadline.bold())
+                            .lineLimit(1)
                         Spacer()
                         Button(action: syncFromHealth) {
                             HStack(spacing: 4) {
@@ -206,7 +219,7 @@ struct GlucoseLogView: View {
                                 } else {
                                     Image(systemName: syncSuccess ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
                                 }
-                                Text("Sync Health")
+                                Text("Sync")
                                     .font(.caption2)
                             }
                             .foregroundColor(syncSuccess ? .green : .blue)
@@ -218,16 +231,22 @@ struct GlucoseLogView: View {
                         }
                         .disabled(isSyncing)
                         .accessibilityLabel(isSyncing ? "Syncing with Apple Health" : syncSuccess ? "Health data synced successfully" : "Sync from Apple Health")
+
+                        Button(action: { showAddSheet = true }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title3)
+                                .foregroundColor(.blue)
+                                .accessibilityLabel("Add glucose reading")
+                        }
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 8)
 
                     readingsList
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
         }
-        .navigationBarHidden(true)
         .sheet(isPresented: $showAddSheet) {
             AddGlucoseReadingSheet(isPresented: $showAddSheet, moc: moc)
         }
@@ -246,17 +265,46 @@ struct GlucoseLogView: View {
     // MARK: - Chart Section (3-day default, scrollable to 30 days)
 
     /// Number of days visible in the chart window
-    private var chartWindowDays: Int { showExtendedWindow ? 7 : 3 }
+    private var chartWindowDays: Int { chartDaySetting }
 
     /// Right edge of the chart window — either "now" or a date set by tapping
     /// a reading in the list.
+    /// For 1-day view, snaps to end-of-day (23:59:59) so the chart shows a full
+    /// calendar day with evenly spaced 6-hour grid lines.
     private var chartWindowEnd: Date {
-        chartAnchorDate ?? Date()
+        let raw = chartAnchorDate ?? Date()
+        if chartDaySetting <= 1 {
+            // Snap to end of the calendar day containing `raw`
+            let cal = Calendar.current
+            let startOfDay = cal.startOfDay(for: raw)
+            return cal.date(byAdding: DateComponents(day: 1, second: -1), to: startOfDay) ?? raw
+        }
+        return raw
     }
 
     /// Left edge of the chart window
+    /// For 1-day view, starts at midnight so x-axis labels (00, 06, 12, 18) align cleanly.
     private var chartWindowStart: Date {
-        Calendar.current.date(byAdding: .day, value: -chartWindowDays, to: chartWindowEnd) ?? chartWindowEnd
+        if chartDaySetting <= 1 {
+            let cal = Calendar.current
+            return cal.startOfDay(for: chartAnchorDate ?? Date())
+        }
+        return Calendar.current.date(byAdding: .day, value: -chartWindowDays, to: chartWindowEnd) ?? chartWindowEnd
+    }
+
+    /// Calendar component for x-axis stride (weeks for >14 days, hours for 1-day, days otherwise)
+    private var xAxisStrideComponent: Calendar.Component {
+        if chartWindowDays > 14 { return .weekOfYear }
+        if chartWindowDays <= 1 { return .hour }
+        return .day
+    }
+
+    /// Number of units per x-axis label
+    private var xAxisStrideCount: Int {
+        if chartWindowDays > 14 { return 1 }
+        if chartWindowDays > 5 { return 2 }   // 7-day view: label every 2 days
+        if chartWindowDays <= 1 { return 6 }   // 1-day view: label every 6 hours
+        return 1                                // 3-day view: label every day
     }
 
     /// Processed curve and hotspots from GlucoseCurveProcessor
@@ -268,7 +316,8 @@ struct GlucoseLogView: View {
             weightSamples: weightSamples,
             windowStart: chartWindowStart,
             windowEnd: chartWindowEnd,
-            localeIsMgDl: isMgdlRegion
+            localeIsMgDl: isMgdlRegion,
+            windowDays: chartWindowDays
         )
     }
 
@@ -279,28 +328,32 @@ struct GlucoseLogView: View {
             let curvePoints = result.curve
             let hotspots = result.hotspots
 
-            VStack(alignment: .leading, spacing: 12) {
-                // Header row: window label + navigation + Sync Health
-                HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 8) {
+                // Header: date navigation row (Sync moved to nav bar toolbar)
+                HStack(spacing: 6) {
                     // Back arrow — scroll chart earlier (up to 30 days)
                     Button(action: { shiftChart(byDays: -chartWindowDays) }) {
                         Image(systemName: "chevron.left")
                             .font(.caption)
+                            .accessibilityLabel("Scroll chart earlier")
                     }
-                    .disabled(chartWindowStart <= Calendar.current.date(byAdding: .day, value: -30, to: Date())!)
+                    .disabled(chartWindowStart <= (glucoseReadings.last?.timestamp ?? Date()))
 
                     Text(chartWindowLabel)
-                        .font(.headline)
+                        .font(.subheadline.bold())
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
 
                     // Forward arrow — scroll chart later (up to "now")
                     Button(action: { shiftChart(byDays: chartWindowDays) }) {
                         Image(systemName: "chevron.right")
                             .font(.caption)
+                            .accessibilityLabel("Scroll chart later")
                     }
                     .disabled(chartAnchorDate == nil)
 
-                    // Reset to "now"
-                    if chartAnchorDate != nil {
+                    // Reset to "now" — hidden in landscape to save space
+                    if chartAnchorDate != nil && isPortrait {
                         Button(action: {
                             withAnimation { chartAnchorDate = nil }
                             selectedHotspot = nil
@@ -312,47 +365,27 @@ struct GlucoseLogView: View {
                         }
                     }
 
-                    Button(action: {
-                        withAnimation { showExtendedWindow.toggle() }
+                    Picker("Window", selection: $chartDaySetting) {
+                        Text("1d").tag(1)
+                        Text("3d").tag(3)
+                        Text("7d").tag(7)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 110)
+                    .onChange(of: chartDaySetting) {
                         selectedHotspot = nil
-                    }) {
-                        Text(showExtendedWindow ? "3 Days" : "7 Days")
-                            .font(.caption)
-                            .foregroundColor(.blue)
                     }
 
-                    Spacer()
-
-                    // Sync Health button (portrait only — landscape has its own)
-                    if isPortrait {
-                        Button(action: syncFromHealth) {
-                            HStack(spacing: 4) {
-                                if isSyncing {
-                                    ProgressView()
-                                        .scaleEffect(0.88, anchor: .center)
-                                } else {
-                                    Image(systemName: syncSuccess ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
-                                }
-                                Text("Sync Health")
-                                    .font(.caption)
-                            }
-                            .foregroundColor(syncSuccess ? .green : .blue)
-                            .padding(.horizontal, 13.2)
-                            .padding(.vertical, 8.8)
-                            .background((syncSuccess ? Color.green : Color.blue).opacity(0.1))
-                            .cornerRadius(6.6)
-                            .animation(.easeInOut(duration: 0.3), value: syncSuccess)
-                        }
-                        .disabled(isSyncing)
-                        .accessibilityLabel(isSyncing ? "Syncing with Apple Health" : syncSuccess ? "Health data synced successfully" : "Sync from Apple Health")
-                    }
                 }
                 .padding(.horizontal)
 
                 if !curvePoints.isEmpty {
                     let chartUnitLabel = localeGlucoseUnit
                     let yRange = yAxisRange(for: chartUnitLabel)
-                    let yStride: Double = chartUnitLabel == "mmol/L" ? 1 : 20
+                    // Widen stride if range expands beyond default to avoid label crowding
+                    let yStride: Double = chartUnitLabel == "mmol/L"
+                        ? ((yRange.max - yRange.min) > 8 ? 2 : 1)
+                        : ((yRange.max - yRange.min) > 160 ? 40 : 20)
                     let chartHeight: CGFloat = isPortrait ? 200 : 170
                     let plotHeight: CGFloat = isPortrait ? 160 : 130
 
@@ -365,14 +398,21 @@ struct GlucoseLogView: View {
                                 chartDataPoints(points: curvePoints)
                                 chartHotspotRings(points: curvePoints)
                                 chartSelectionIndicator()
+                                chartXLabelsInsidePlot(yRange: yRange)
                             }
                             .chartYScale(domain: yRange.min...yRange.max)
                             .chartYAxis(.hidden)
+                            .chartXScale(domain: chartWindowStart...(chartDaySetting <= 1 ? chartWindowStart.addingTimeInterval(86400) : chartWindowEnd))
                             .chartXAxis {
-                                AxisMarks(position: .bottom, values: .automatic(desiredCount: chartWindowDays)) { _ in
-                                    AxisGridLine()
-                                    AxisValueLabel(format: .dateTime.month(.twoDigits).day(.twoDigits))
-                                        .font(.caption2)
+                                // Grid lines only — labels are rendered inside the plot via annotations
+                                if chartWindowDays <= 1 {
+                                    AxisMarks(position: .bottom, values: .stride(by: .hour, count: 6)) { _ in
+                                        AxisGridLine()
+                                    }
+                                } else {
+                                    AxisMarks(position: .bottom, values: .stride(by: xAxisStrideComponent, count: xAxisStrideCount)) { _ in
+                                        AxisGridLine()
+                                    }
                                 }
                             }
                             .chartPlotStyle { plotArea in
@@ -392,13 +432,22 @@ struct GlucoseLogView: View {
 
                                                     // Map screen position to data coordinates
                                                     guard let tapDate: Date = proxy.value(atX: tapX),
-                                                          let _: Double = proxy.value(atY: tapY) else { return }
+                                                          let tapGlucose: Double = proxy.value(atY: tapY) else { return }
 
-                                                    // Find nearest hotspot within a tap tolerance
-                                                    let tolerance: TimeInterval = Double(chartWindowDays) * 86400 / 30  // ~1/30th of visible window
+                                                    // Find nearest hotspot using 2D distance (time + glucose)
+                                                    // Normalise both axes to the plot frame so they contribute equally
+                                                    let windowSeconds = Double(chartWindowDays) * 86400
+                                                    let glucoseRange = 200.0  // typical chart range in mg/dL
+                                                    let tapTolerance: Double = 0.06  // ~6% of plot frame in normalised coords
+
                                                     let nearest = hotspots
-                                                        .map { ($0, abs($0.point.timestamp.timeIntervalSince(tapDate))) }
-                                                        .filter { $0.1 < tolerance }
+                                                        .map { hotspot -> (CurveHotspot, Double) in
+                                                            let dtNorm = hotspot.point.timestamp.timeIntervalSince(tapDate) / windowSeconds
+                                                            let dgNorm = (hotspot.point.valueMgDl - tapGlucose) / glucoseRange
+                                                            let dist = sqrt(dtNorm * dtNorm + dgNorm * dgNorm)
+                                                            return (hotspot, dist)
+                                                        }
+                                                        .filter { $0.1 < tapTolerance }
                                                         .min(by: { $0.1 < $1.1 })
 
                                                     withAnimation(.easeInOut(duration: 0.2)) {
@@ -410,6 +459,8 @@ struct GlucoseLogView: View {
                                                                 selectedHotspot = match.0
                                                                 // Position popover on the side with more room
                                                                 popoverAnchorRight = tapX > plotFrame.width / 2
+
+                                                                // Future: scroll the list to the matching reading
                                                             }
                                                         } else {
                                                             selectedHotspot = nil
@@ -441,27 +492,42 @@ struct GlucoseLogView: View {
 
                         // Hotspot popover overlay
                         if let sel = selectedHotspot {
-                            hotspotPopover(for: sel)
+                            hotspotPopover(for: sel, allHotspots: hotspots)
                                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
                         }
                     }
                     .padding(.horizontal, 16)
-                    .padding(.top, 16)
-                    .padding(.bottom, isPortrait ? 8 : 16)
+                    .padding(.top, 6)       // reduced from 16 — tighten space above red 180 line
+                    .padding(.bottom, isPortrait ? 6 : 10)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color(.systemGray6))
                     )
+                    .padding(.trailing)
+                    .padding(.leading, 30) // room for rotated y-axis label
                     .overlay(alignment: .leading) {
                         Text("Glucose Level \(chartUnitLabel)")
-                            .font(.system(size: 9.5, weight: .semibold))
+                            .font(.caption2.weight(.semibold))
                             .foregroundColor(.secondary)
                             .rotationEffect(.degrees(-90))
                             .fixedSize()
-                            .offset(x: -46)
+                            .frame(width: 14) // collapsed width so it sits in the leading margin
                     }
-                    .padding(.horizontal)
-                    .accessibilityLabel("Interactive glucose chart showing last \(chartWindowDays) days. Tap highlighted points to see meal and exercise details.")
+
+                    // "Day" or "Time" legend centred below the chart
+                    Text(chartDaySetting <= 1 ? "Time" : "Day")
+                        .font(.system(size: 9))
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.trailing, 70) // offset to align with plot area centre
+                        .padding(.top, 2)
+                    .accessibilityLabel("Glucose chart showing last \(chartWindowDays) days with \(hotspots.count) highlighted points. Use Next Hotspot and Previous Hotspot actions to navigate.")
+                    .accessibilityAction(named: "Next hotspot") {
+                        navigateHotspot(forward: true, in: hotspots)
+                    }
+                    .accessibilityAction(named: "Previous hotspot") {
+                        navigateHotspot(forward: false, in: hotspots)
+                    }
                     .onChange(of: isPortrait) {
                         selectedHotspot = nil  // dismiss popover on rotation
                     }
@@ -485,8 +551,13 @@ struct GlucoseLogView: View {
                         }
                     }
 
+                    // Weight trend arrows beneath the chart (portrait only — saves vertical space in landscape)
+                    if isPortrait {
+                        weightTrendStrip()
+                    }
+
                     // Tap hint — shown when there are hotspots but user hasn't tapped one yet
-                    if selectedHotspot == nil && !hotspots.isEmpty {
+                    if selectedHotspot == nil && !hotspots.isEmpty && isPortrait {
                         Text("Tap a highlighted point to see meal and exercise details")
                             .font(.caption2)
                             .foregroundColor(.secondary)
@@ -498,9 +569,9 @@ struct GlucoseLogView: View {
                         Text("No glucose readings in the last \(chartWindowDays) days")
                             .font(.caption)
                             .foregroundColor(.secondary)
-                        if !showExtendedWindow {
+                        if chartDaySetting < 7 {
                             Button("Try last 7 days") {
-                                withAnimation { showExtendedWindow = true }
+                                withAnimation { chartDaySetting = 7 }
                             }
                             .font(.caption)
                         }
@@ -518,8 +589,8 @@ struct GlucoseLogView: View {
         case .hypo:     return .red
         case .normal:   return .green
         case .elevated: return .yellow
-        case .warning:  return .orange
-        case .critical: return .red
+        case .high:     return .orange
+        case .veryHigh: return .red
         }
     }
 
@@ -551,6 +622,57 @@ struct GlucoseLogView: View {
                 .foregroundStyle(Color.red.opacity(0.5))
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
         }
+    }
+
+    /// Renders date/time labels inside the plot area, positioned just below the
+    /// green dashed baseline so they sit within the grey chart background.
+    @ChartContentBuilder
+    private func chartXLabelsInsidePlot(yRange: (min: Double, max: Double)) -> some ChartContent {
+        let labelY = yRange.min  // position at the very bottom of the plot
+        if chartDaySetting <= 1 {
+            // 1-day: 06 · 12 · 18
+            ForEach([6, 12, 18], id: \.self) { hour in
+                let date = chartWindowStart.addingTimeInterval(Double(hour) * 3600)
+                PointMark(x: .value("T", date), y: .value("L", labelY))
+                    .opacity(0)
+                    .annotation(position: .bottom, spacing: 2) {
+                        Text(String(format: "%02d", hour))
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+            }
+        } else {
+            // 3d/7d: day numbers at stride intervals
+            let stride = xAxisStrideCount
+            let cal = Calendar.current
+            // Generate date marks at each stride day from the start of the window
+            ForEach(labelDates(from: chartWindowStart, to: chartWindowEnd, strideComponent: xAxisStrideComponent, strideCount: stride), id: \.self) { date in
+                PointMark(x: .value("T", date), y: .value("L", labelY))
+                    .opacity(0)
+                    .annotation(position: .bottom, spacing: 2) {
+                        Text("\(cal.component(.day, from: date))")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+            }
+        }
+    }
+
+    /// Helper: generates an array of dates at the given stride within the window.
+    private func labelDates(from start: Date, to end: Date, strideComponent: Calendar.Component, strideCount: Int) -> [Date] {
+        let cal = Calendar.current
+        var dates: [Date] = []
+        // Start from the first stride-aligned date at or after `start`
+        var current = cal.dateInterval(of: strideComponent, for: start)?.start ?? start
+        if current < start {
+            current = cal.date(byAdding: strideComponent, value: strideCount, to: current) ?? current
+        }
+        while current <= end {
+            dates.append(current)
+            guard let next = cal.date(byAdding: strideComponent, value: strideCount, to: current) else { break }
+            current = next
+        }
+        return dates
     }
 
     @ChartContentBuilder
@@ -623,9 +745,9 @@ struct GlucoseLogView: View {
 
     // MARK: - Hotspot Popover
     /// Anchored popover showing glucose context when a hotspot is tapped
-    private func hotspotPopover(for hotspot: CurveHotspot) -> some View {
+    private func hotspotPopover(for hotspot: CurveHotspot, allHotspots: [CurveHotspot]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Glucose value + timestamp
+            // Glucose value + close
             HStack {
                 Text(formatGlucoseValue(hotspot.point.displayValue, unit: localeGlucoseUnit))
                     .font(.headline)
@@ -667,45 +789,60 @@ struct GlucoseLogView: View {
 
             Divider()
 
-            // Meal context
+            // Meal context — line 1: icon + meal name + time ago; line 2: carbs + GL
             if hotspot.nearbyMeals.isEmpty {
                 Label("No meal logged", systemImage: "fork.knife")
                     .font(.caption)
                     .foregroundColor(.secondary)
             } else {
                 ForEach(hotspot.nearbyMeals) { meal in
-                    VStack(alignment: .leading, spacing: 2) {
-                        Label(meal.name, systemImage: "fork.knife")
-                            .font(.caption.weight(.medium))
+                    VStack(alignment: .leading, spacing: 4) {
+                        // Line 1: icon + meal name + time, all on one line
+                        Label {
+                            Text("\(meal.name) \(meal.minutesBeforeReading) min ago")
+                        } icon: {
+                            Image(systemName: "fork.knife")
+                        }
+                        .font(.caption.weight(.medium))
+                        .lineLimit(1)
+                        // Line 2: carbs + GL, left-aligned under the icon
                         HStack(spacing: 8) {
-                            Text("\(Int(meal.totalCarbs))g carbs")
+                            Text("Carbs \(Int(meal.totalCarbs)) g")
                             if meal.totalGL > 0 {
-                                Text("Carb impact: \(Int(meal.totalGL))")
+                                Text("GL \(Int(meal.totalGL))")
                             }
-                            Text("\(meal.minutesBeforeReading) min before")
-                                .foregroundColor(.secondary)
                         }
                         .font(.caption2)
+                        .foregroundColor(.secondary)
                     }
                 }
             }
 
-            // Exercise context
+            // Exercise context — line 1: icon + type + duration; line 2: calories
             if hotspot.nearbyExercise.isEmpty {
                 Label("No exercise logged", systemImage: "figure.walk")
                     .font(.caption)
                     .foregroundColor(.secondary)
             } else {
                 ForEach(hotspot.nearbyExercise) { exercise in
-                    VStack(alignment: .leading, spacing: 2) {
-                        Label(exercise.type, systemImage: "figure.walk")
-                            .font(.caption.weight(.medium))
-                        HStack(spacing: 8) {
-                            Text("\(exercise.durationMinutes) min")
-                            Text("\(exercise.minutesAfterReading) min after reading")
+                    VStack(alignment: .leading, spacing: 4) {
+                        // Line 1: icon + type + duration + timing
+                        Label {
+                            let timing = exercise.minutesBeforeReading >= 0
+                                ? "\(exercise.minutesBeforeReading) min before"
+                                : "\(abs(exercise.minutesBeforeReading)) min after"
+                            Text("\(exercise.type) \(exercise.durationMinutes) min · \(timing)")
+                        } icon: {
+                            Image(systemName: "figure.walk")
+                        }
+                        .font(.caption.weight(.medium))
+                        .lineLimit(1)
+                        // Line 2: calories underneath
+                        if exercise.caloriesBurned > 0 {
+                            Text("\(Int(exercise.caloriesBurned)) kcal")
+                                .font(.caption2)
                                 .foregroundColor(.secondary)
                         }
-                        .font(.caption2)
                     }
                 }
             }
@@ -722,14 +859,52 @@ struct GlucoseLogView: View {
                 .fill(.ultraThinMaterial)
                 .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
         )
-        .frame(maxWidth: isPortrait ? 260 : 240)
+        .frame(maxWidth: isPortrait ? 280 : 240)
         .padding(.top, 8)
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 8)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isModal)
         .accessibilityAction(.escape) {
             withAnimation { selectedHotspot = nil }
         }
+        .accessibilityAction(named: "Next hotspot") {
+            navigateHotspot(forward: true, in: allHotspots)
+        }
+        .accessibilityAction(named: "Previous hotspot") {
+            navigateHotspot(forward: false, in: allHotspots)
+        }
+    }
+
+    // MARK: - Hotspot VoiceOver Navigation
+
+    /// Navigate to the next or previous hotspot in the current chart window.
+    /// Called by accessibility actions and by the prev/next buttons in the popover.
+    private func navigateHotspot(forward: Bool, in hotspots: [CurveHotspot]) {
+        guard !hotspots.isEmpty else { return }
+
+        let sorted = hotspots.sorted { $0.point.timestamp < $1.point.timestamp }
+
+        if let current = selectedHotspot,
+           let currentIndex = sorted.firstIndex(where: { $0.id == current.id }) {
+            let nextIndex = forward ? currentIndex + 1 : currentIndex - 1
+            guard sorted.indices.contains(nextIndex) else { return }
+            withAnimation(.easeInOut(duration: 0.2)) {
+                selectedHotspot = sorted[nextIndex]
+            }
+        } else {
+            // No hotspot selected — select the first or last
+            withAnimation(.easeInOut(duration: 0.2)) {
+                selectedHotspot = forward ? sorted.first : sorted.last
+            }
+        }
+    }
+
+    /// Index of the currently selected hotspot in the sorted array (1-based for display)
+    private func hotspotPosition(in hotspots: [CurveHotspot]) -> (current: Int, total: Int)? {
+        guard let current = selectedHotspot else { return nil }
+        let sorted = hotspots.sorted { $0.point.timestamp < $1.point.timestamp }
+        guard let idx = sorted.firstIndex(where: { $0.id == current.id }) else { return nil }
+        return (idx + 1, sorted.count)
     }
 
     /// Formats a date for the popover: "Wed 16 Apr, 14:32"
@@ -769,6 +944,185 @@ struct GlucoseLogView: View {
         }
     }
 
+    // MARK: - Weight Trend Arrows
+
+    /// Direction of weight change between consecutive readings.
+    private enum WeightDirection {
+        case up, down, stable
+    }
+
+    /// A single weight trend data point positioned at the date of the reading.
+    private struct WeightTrendPoint: Identifiable {
+        let id = UUID()
+        let date: Date             // date of this weight reading
+        let direction: WeightDirection
+        let weightKg: Double       // current weight in kg
+        let deltaKg: Double        // change from previous reading in kg
+    }
+
+    /// Computes weight trend arrows for the visible chart window.
+    /// Compares each weight sample to its predecessor chronologically.
+    /// A delta within ±1 kg is displayed as stable (no-change icon).
+    private func weightTrends() -> [WeightTrendPoint] {
+        guard weightSamples.count >= 2 else { return [] }
+
+        // weightSamples are already sorted oldest → newest from HealthKitManager
+        var trends: [WeightTrendPoint] = []
+
+        for i in 1..<weightSamples.count {
+            let current = weightSamples[i]
+
+            // Only show arrows within the visible chart window
+            guard current.date >= chartWindowStart && current.date <= chartWindowEnd else { continue }
+
+            let previous = weightSamples[i - 1]
+            let delta = current.kilograms - previous.kilograms
+
+            let direction: WeightDirection
+            if abs(delta) < 1.0 {
+                direction = .stable
+            } else if delta > 0 {
+                direction = .up
+            } else {
+                direction = .down
+            }
+
+            trends.append(WeightTrendPoint(
+                date: current.date,
+                direction: direction,
+                weightKg: current.kilograms,
+                deltaKg: delta
+            ))
+        }
+
+        return trends
+    }
+
+    /// Formats a weight trend point for the popover display.
+    /// e.g. "84.3 kg (+1.2 kg)" or "186.0 lbs (no change)"
+    private func weightTrendLabel(_ trend: WeightTrendPoint) -> String {
+        let profile = HeightWeightUnitProfile.shared
+        let useKg = profile.weightUnit == .kg
+        let unit = useKg ? "kg" : "lbs"
+        let displayWeight = useKg ? trend.weightKg : trend.weightKg * 2.20462
+        let displayDelta = useKg ? trend.deltaKg : trend.deltaKg * 2.20462
+
+        let weightStr = String(format: "%.1f %@", displayWeight, unit)
+        let deltaStr: String
+        switch trend.direction {
+        case .up:
+            deltaStr = String(format: "(+%.1f %@)", abs(displayDelta), unit)
+        case .down:
+            deltaStr = String(format: "(\u{2013}%.1f %@)", abs(displayDelta), unit)
+        case .stable:
+            deltaStr = "(no change)"
+        }
+        return "\(weightStr)  \(deltaStr)"
+    }
+
+    /// View showing weight trend arrows beneath the glucose chart x-axis.
+    @ViewBuilder
+    private func weightTrendStrip() -> some View {
+        let trends = weightTrends()
+        if !trends.isEmpty {
+            ZStack(alignment: .top) {
+                HStack(spacing: 0) {
+                    // Text label
+                    Text("Weight\ntrend")
+                        .font(.system(size: 9))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(1)
+                        .frame(width: 38)
+                        .accessibilityHidden(true)
+
+                    // Use a Chart to align arrows with the glucose chart's x-axis
+                    Chart {
+                        ForEach(trends) { trend in
+                            PointMark(
+                                x: .value("Date", trend.date),
+                                y: .value("Trend", 0)
+                            )
+                            .symbol {
+                                switch trend.direction {
+                                case .up:
+                                    Image(systemName: "arrow.up")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.orange)
+                                case .down:
+                                    Image(systemName: "arrow.down")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.green)
+                                case .stable:
+                                    Image(systemName: "equal")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                    }
+                    .chartXScale(domain: chartWindowStart...chartWindowEnd)
+                    .chartXAxis(.hidden)
+                    .chartYAxis(.hidden)
+                    .chartYScale(domain: -1...1)
+                    .frame(height: 22)
+                    .chartOverlay { proxy in
+                        GeometryReader { geometry in
+                            let plotFrame = geometry[proxy.plotFrame!]
+                            Rectangle()
+                                .fill(Color.clear)
+                                .contentShape(Rectangle())
+                                .gesture(
+                                    DragGesture(minimumDistance: 0)
+                                        .onEnded { value in
+                                            let tapX = value.location.x - plotFrame.origin.x
+                                            guard let tapDate: Date = proxy.value(atX: tapX) else { return }
+
+                                            // Find nearest trend point
+                                            let nearest = trends
+                                                .map { ($0, abs($0.date.timeIntervalSince(tapDate))) }
+                                                .min(by: { $0.1 < $1.1 })
+
+                                            if let match = nearest, match.1 < Double(chartWindowDays) * 86400 / 10 {
+                                                withAnimation(.easeInOut(duration: 0.2)) {
+                                                    if selectedWeightTrend?.id == match.0.id {
+                                                        selectedWeightTrend = nil  // toggle off
+                                                    } else {
+                                                        selectedWeightTrend = match.0
+                                                    }
+                                                }
+                                            } else {
+                                                withAnimation { selectedWeightTrend = nil }
+                                            }
+                                        }
+                                )
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
+                .accessibilityLabel("Weight trend: \(trends.map { switch $0.direction { case .up: return "up"; case .down: return "down"; case .stable: return "no change" } }.joined(separator: ", "))")
+
+                // Weight popover
+                if let sel = selectedWeightTrend {
+                    Text(weightTrendLabel(sel))
+                        .font(.caption2.weight(.medium))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(.ultraThinMaterial)
+                                .shadow(color: .black.opacity(0.12), radius: 4, x: 0, y: 2)
+                        )
+                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                        .onTapGesture {
+                            withAnimation { selectedWeightTrend = nil }
+                        }
+                        .padding(.top, 24)
+                }
+            }
+        }
+    }
+
     // MARK: - Readings filtered to chart window
 
     /// Glucose readings whose timestamp falls within the current chart window.
@@ -791,7 +1145,7 @@ struct GlucoseLogView: View {
                     .foregroundColor(.gray)
                     .accessibilityHidden(true)
 
-                Text("No Glucose Readings")
+                Text("No glucose readings")
                     .font(.headline)
 
                 Text("Add your first reading or sync from Health")
@@ -911,18 +1265,33 @@ struct GlucoseLogView: View {
     // MARK: - Chart Navigation Helpers
 
     /// Human-readable label for the chart window date range.
+    /// Same month: "13–16 Apr"   Across months: "29 Apr – 1 May"
     private var chartWindowLabel: String {
+        let cal = Calendar.current
         let df = DateFormatter()
         df.dateFormat = "d MMM"
-        return "\(df.string(from: chartWindowStart)) – \(df.string(from: chartWindowEnd))"
+
+        // 1-day view: show single date (e.g. "30 Apr")
+        if chartDaySetting <= 1 {
+            return df.string(from: chartWindowStart)
+        }
+
+        let sameMonth = cal.component(.month, from: chartWindowStart) == cal.component(.month, from: chartWindowEnd)
+        if sameMonth {
+            let dayOnly = DateFormatter()
+            dayOnly.dateFormat = "d"
+            return "\(dayOnly.string(from: chartWindowStart))–\(df.string(from: chartWindowEnd))"
+        } else {
+            return "\(df.string(from: chartWindowStart)) – \(df.string(from: chartWindowEnd))"
+        }
     }
 
     /// Shift the chart window by a number of days (negative = earlier, positive = later).
-    /// Clamps to the 30-day lookback limit and resets to "now" if moving past today.
+    /// Clamps to the earliest glucose reading and resets to "now" if moving past today.
     private func shiftChart(byDays days: Int) {
         let calendar = Calendar.current
         let now = Date()
-        let earliestAllowed = calendar.date(byAdding: .day, value: -30, to: now) ?? now
+        let earliestAllowed = glucoseReadings.last?.timestamp ?? now
         let currentEnd = chartWindowEnd
 
         guard let newEnd = calendar.date(byAdding: .day, value: days, to: currentEnd) else { return }
@@ -931,7 +1300,7 @@ struct GlucoseLogView: View {
             // Moving forward past "now" → reset to live
             withAnimation { chartAnchorDate = nil }
         } else if newEnd.addingTimeInterval(TimeInterval(-chartWindowDays * 86400)) < earliestAllowed {
-            // Would go past 30-day limit — clamp
+            // Would go past earliest glucose reading — clamp
             return
         } else {
             withAnimation { chartAnchorDate = newEnd }
@@ -1008,20 +1377,77 @@ struct GlucoseLogView: View {
     }
     
     /// Returns the appropriate Y-axis range based on unit type and locale
-    /// - NGSP %: 4 to 10 (portrait) or 4 to 13 (landscape)
-    /// - IFCC mmol/mol: 20 to 120 (portrait) or 20 to 200 (landscape)
-    /// - mg/dL (US/JP): 60 to 180
-    /// - mmol/L (other regions): 3 to 10
+    /// Dynamic y-axis range that expands if readings exceed the default range.
+    /// Defaults: NGSP % 4–10 portrait / 4–13 landscape; mmol/mol 20–120 / 20–200;
+    /// mmol/L 4–10; mg/dL 80–180. All expand dynamically when data exceeds defaults.
+    /// Rounds to the next clean stride boundary so the scale stays tidy.
+    /// Contracts back to the default when high/low readings scroll out of the window.
     func yAxisRange(for unitType: String) -> (min: Double, max: Double) {
+        // Find the min and max reading values in the current chart window
+        let glucoseValues = chartWindowReadings
+            .filter { r in
+                let unit = r.unit ?? ""
+                return unit != "NGSP %" && unit != "mmol/mol"
+            }
+            .map { $0.value }
+        let windowMax = glucoseValues.max() ?? 0
+        let windowMin = glucoseValues.min() ?? 999
+
+        // Find HbA1c/GMI values in the current chart window for dynamic scaling
+        let ngspValues = chartWindowReadings
+            .filter { ($0.unit ?? "") == "NGSP %" }
+            .map { $0.value }
+        let ifccValues = chartWindowReadings
+            .filter { ($0.unit ?? "") == "mmol/mol" }
+            .map { $0.value }
+
         switch unitType {
         case "NGSP %":
-            return isPortrait ? (min: 4, max: 10) : (min: 4, max: 13)
+            let defaultMin: Double = 4
+            let defaultMax: Double = isPortrait ? 10 : 13
+            let dataMax = ngspValues.max() ?? 0
+            let dataMin = ngspValues.min() ?? 999
+            let effectiveMax = dataMax > defaultMax
+                ? ceil(dataMax + 0.5)                // pad 0.5% above highest point
+                : defaultMax
+            let effectiveMin = dataMin < defaultMin
+                ? floor(dataMin - 0.5)               // pad 0.5% below lowest point
+                : defaultMin
+            return (min: effectiveMin, max: effectiveMax)
         case "mmol/mol":
-            return isPortrait ? (min: 20, max: 120) : (min: 20, max: 200)
+            let defaultMin: Double = 20
+            let defaultMax: Double = isPortrait ? 120 : 200
+            let dataMax = ifccValues.max() ?? 0
+            let dataMin = ifccValues.min() ?? 999
+            let effectiveMax = dataMax > defaultMax
+                ? ceil(dataMax / 10.0) * 10.0        // round up to next 10 mmol/mol
+                : defaultMax
+            let effectiveMin = dataMin < defaultMin
+                ? floor(dataMin / 10.0) * 10.0       // round down to next 10 mmol/mol
+                : defaultMin
+            return (min: effectiveMin, max: effectiveMax)
         case "mmol/L":
-            return (min: 3, max: 10)
+            let defaultMin: Double = 4
+            let defaultMax: Double = 10
+            let maxMmol = windowMax / 18.0182
+            let minMmol = windowMin / 18.0182
+            let effectiveMax = maxMmol > defaultMax
+                ? ceil(maxMmol / 1.0) * 1.0
+                : defaultMax
+            let effectiveMin = minMmol < defaultMin
+                ? floor(minMmol / 1.0) * 1.0    // round down to next 1 mmol/L
+                : defaultMin
+            return (min: effectiveMin, max: effectiveMax)
         default: // mg/dL
-            return (min: 60, max: 180)
+            let defaultMin: Double = 80
+            let defaultMax: Double = 180
+            let effectiveMax = windowMax > defaultMax
+                ? ceil(windowMax / 20.0) * 20.0  // round up to next 20 mg/dL
+                : defaultMax
+            let effectiveMin = windowMin < defaultMin
+                ? floor(windowMin / 20.0) * 20.0 // round down to next 20 mg/dL
+                : defaultMin
+            return (min: effectiveMin, max: effectiveMax)
         }
     }
     
@@ -1434,6 +1860,8 @@ struct AddGlucoseReadingSheet: View {
                                         .onTapGesture {
                                             showLabConfirmAlert = true
                                         }
+                                        .accessibilityLabel("Confirm lab result entry")
+                                        .accessibilityAddTraits(.isButton)
                                 }
                             }
                         )

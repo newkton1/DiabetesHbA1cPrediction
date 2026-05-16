@@ -18,7 +18,7 @@
                BlueprintIdentifier = "93CC102C2F400B20003B36A4"
                BuildableName = "DiabetesFeast.app"
                BlueprintName = "DiabetesHbA1cPrediction"
-               ReferencedContainer = "container:DiabetesHbA1cPrediction.xcodeproj">
+               ReferencedContainer = "container:14.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -38,7 +38,7 @@
                BlueprintIdentifier = "93CC103E2F400B22003B36A4"
                BuildableName = "DiabetesHbA1cPredictionTests.xctest"
                BlueprintName = "DiabetesHbA1cPredictionTests"
-               ReferencedContainer = "container:DiabetesHbA1cPrediction.xcodeproj">
+               ReferencedContainer = "container:14.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -49,7 +49,7 @@
                BlueprintIdentifier = "93CC10482F400B22003B36A4"
                BuildableName = "DiabetesHbA1cPredictionUITests.xctest"
                BlueprintName = "DiabetesHbA1cPredictionUITests"
-               ReferencedContainer = "container:DiabetesHbA1cPrediction.xcodeproj">
+               ReferencedContainer = "container:14.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -71,7 +71,7 @@
             BlueprintIdentifier = "93CC102C2F400B20003B36A4"
             BuildableName = "DiabetesFeast.app"
             BlueprintName = "DiabetesHbA1cPrediction"
-            ReferencedContainer = "container:DiabetesHbA1cPrediction.xcodeproj">
+            ReferencedContainer = "container:14.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -88,7 +88,7 @@
             BlueprintIdentifier = "93CC102C2F400B20003B36A4"
             BuildableName = "DiabetesFeast.app"
             BlueprintName = "DiabetesHbA1cPrediction"
-            ReferencedContainer = "container:DiabetesHbA1cPrediction.xcodeproj">
+            ReferencedContainer = "container:14.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

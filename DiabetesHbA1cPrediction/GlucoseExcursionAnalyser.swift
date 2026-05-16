@@ -5,9 +5,8 @@
 //  there are too few glucose readings around the meal to characterise
 //  an excursion (typical for fingerstick-only users with sparse logs).
 //
-//  All values are in mg/dL — this matches how GlucoseReadingEntity
-//  stores its canonical `value` field elsewhere in the app. If that
-//  convention ever changes, guard a unit conversion at the fetch step.
+//  All values are normalised to mg/dL internally. Readings stored as
+//  mmol/L (non-US/JP locales) are converted (×18) at the fetch step.
 //
 
 import Foundation
@@ -73,14 +72,14 @@ enum GlucoseExcursionAnalyser {
 
         let request: NSFetchRequest<GlucoseReadingEntity> = GlucoseReadingEntity.fetchRequest()
         request.predicate = NSPredicate(
-            format: "timestamp >= %@ AND timestamp <= %@",
-            windowStart as NSDate, windowEnd as NSDate
+            format: "timestamp >= %@ AND timestamp <= %@ AND (unit == %@ OR unit == %@)",
+            windowStart as NSDate, windowEnd as NSDate, "mg/dL", "mmol/L"
         )
         request.sortDescriptors = [NSSortDescriptor(keyPath: \GlucoseReadingEntity.timestamp, ascending: true)]
 
-        let readings: [GlucoseReadingEntity]
+        let rawReadings: [GlucoseReadingEntity]
         do {
-            readings = try context.fetch(request)
+            rawReadings = try context.fetch(request)
         } catch {
             #if DEBUG
             print("GlucoseExcursionAnalyser fetch failed: \(error)")
@@ -88,18 +87,28 @@ enum GlucoseExcursionAnalyser {
             return nil
         }
 
+        // Normalise all readings to mg/dL and pair with timestamps.
+        struct NormalisedReading {
+            let timestamp: Date
+            let valueMgDl: Double
+        }
+        let readings: [NormalisedReading] = rawReadings.compactMap { reading in
+            guard let ts = reading.timestamp else { return nil }
+            let valueMgDl = reading.unit == "mmol/L" ? reading.value * 18.0 : reading.value
+            return NormalisedReading(timestamp: ts, valueMgDl: valueMgDl)
+        }
+
         // Partition readings into pre / post / return buckets.
-        var preMeal: [GlucoseReadingEntity] = []
-        var postMeal: [GlucoseReadingEntity] = []      // [meal, meal+2h]
-        var returnWindow: [GlucoseReadingEntity] = []  // [meal+2h, meal+3h]
+        var preMeal: [NormalisedReading] = []
+        var postMeal: [NormalisedReading] = []      // [meal, meal+2h]
+        var returnWindow: [NormalisedReading] = []  // [meal+2h, meal+3h]
 
         let postMealEnd = mealTime.addingTimeInterval(TimeInterval(postMealWindowMinutes * 60))
 
         for reading in readings {
-            guard let ts = reading.timestamp else { continue }
-            if ts < mealTime {
+            if reading.timestamp < mealTime {
                 preMeal.append(reading)
-            } else if ts <= postMealEnd {
+            } else if reading.timestamp <= postMealEnd {
                 postMeal.append(reading)
             } else {
                 returnWindow.append(reading)
@@ -114,39 +123,36 @@ enum GlucoseExcursionAnalyser {
         // slightly downwards, which is acceptable and conservative).
         let baseline: Double = {
             if !preMeal.isEmpty {
-                return Self.median(preMeal.map { $0.value })
+                return Self.median(preMeal.map { $0.valueMgDl })
             }
-            return postMeal.first?.value ?? 0
+            return postMeal.first?.valueMgDl ?? 0
         }()
 
         // Peak: max post-meal reading.
-        guard let peakReading = postMeal.max(by: { $0.value < $1.value }),
-              let peakTime = peakReading.timestamp else {
+        guard let peakReading = postMeal.max(by: { $0.valueMgDl < $1.valueMgDl }) else {
             return nil
         }
-        let peakDelta = peakReading.value - baseline
-        let peakMinutes = Int(peakTime.timeIntervalSince(mealTime) / 60.0)
+        let peakDelta = peakReading.valueMgDl - baseline
+        let peakMinutes = Int(peakReading.timestamp.timeIntervalSince(mealTime) / 60.0)
 
         // Return-to-baseline: look after the peak time in both post and
         // returnWindow buckets.
-        let postPeak: [GlucoseReadingEntity] = (postMeal + returnWindow)
-            .filter { ($0.timestamp ?? .distantPast) > peakTime }
+        let postPeak = (postMeal + returnWindow)
+            .filter { $0.timestamp > peakReading.timestamp }
 
         var returned = false
         var returnMinutes: Int? = nil
         for reading in postPeak {
-            if reading.value <= baseline + returnThresholdMgDl {
+            if reading.valueMgDl <= baseline + returnThresholdMgDl {
                 returned = true
-                if let ts = reading.timestamp {
-                    returnMinutes = Int(ts.timeIntervalSince(mealTime) / 60.0)
-                }
+                returnMinutes = Int(reading.timestamp.timeIntervalSince(mealTime) / 60.0)
                 break
             }
         }
 
         return GlucoseExcursion(
             preMealBaseline: baseline,
-            peakValue: peakReading.value,
+            peakValue: peakReading.valueMgDl,
             peakDelta: peakDelta,
             peakMinutesAfterMeal: peakMinutes,
             returnedToBaseline: returned,

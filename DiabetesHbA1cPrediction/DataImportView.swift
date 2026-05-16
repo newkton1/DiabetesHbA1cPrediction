@@ -1,4 +1,3 @@
-#if DEBUG
 //
 //  DataImportView.swift
 //  DiabetesHbA1cPrediction
@@ -196,4 +195,3 @@ private struct ImportSummaryRow: View {
         }
     }
 }
-#endif

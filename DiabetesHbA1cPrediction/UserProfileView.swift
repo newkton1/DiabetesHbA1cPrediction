@@ -38,9 +38,9 @@ struct UserProfileView: View {
     ) private var glucoseReadings: FetchedResults<GlucoseReadingEntity>
 
     @FetchRequest(
-        entity: HbA1cPredictionEntity.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \HbA1cPredictionEntity.predictionDate, ascending: false)]
-    ) private var gmiEstimates: FetchedResults<HbA1cPredictionEntity>
+        entity: GmiEstimateEntity.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \GmiEstimateEntity.predictionDate, ascending: false)]
+    ) private var gmiEstimates: FetchedResults<GmiEstimateEntity>
 
     // MARK: - Unit Profile
     @ObservedObject private var hwProfile = HeightWeightUnitProfile.shared
@@ -58,7 +58,6 @@ struct UserProfileView: View {
     // Health Conditions
     @State private var hasDiabetes: Bool = false
     @State private var diabetesType: String = "Type 1"
-    @State private var hasDawnEffect: Bool = false
     @State private var hasCOPD: Bool = false
     @State private var hasHeartDisease: Bool = false
     @State private var tobaccoUse: String = "Never"
@@ -78,6 +77,15 @@ struct UserProfileView: View {
     @State private var showShareWarning = false
     @State private var showShareSheet = false
     @State private var shareSummaryText = ""
+
+    // Demo data states
+    @State private var isLoadingDemoData = false
+    @State private var showDemoLoadResult = false
+    @State private var demoLoadMessage = ""
+    @State private var showWipeConfirmation = false
+    @State private var isWipingData = false
+    @State private var showWipeResult = false
+    @State private var wipeResultMessage = ""
 
     // MARK: - Body
     var body: some View {
@@ -192,17 +200,8 @@ struct UserProfileView: View {
                         .padding(.vertical, 4)
                     }
 
-                    if diabetesType == "Type 2" {
-                        Toggle(isOn: $hasDawnEffect) {
-                            Label("Dawn Effect", systemImage: "sunrise.fill")
-                        }
-
-                        if hasDawnEffect {
-                            Text("HbA1c estimate will be adjusted to reduce the impact of elevated early morning glucose (4–8am) caused by the dawn effect.")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
+                    // Dawn effect is now detected automatically from glucose patterns
+                    // and displayed as an informational notice on the Dashboard.
                 }
 
                 Toggle(isOn: $hasCOPD) {
@@ -330,24 +329,71 @@ struct UserProfileView: View {
                 }
             }
 
-            // MARK: - DEBUG: Data Export & Import (excluded from release builds)
-            #if DEBUG
-            Section(header: Text("Developer Tools")) {
+            // MARK: - Data Management
+            Section(header: Text("Data Management")) {
                 NavigationLink(destination: DataExportView()) {
                     Label("Export All Data", systemImage: "square.and.arrow.up")
-                        .foregroundColor(.orange)
                 }
                 NavigationLink(destination: DataImportView()) {
                     Label("Import Data from JSON", systemImage: "square.and.arrow.down")
-                        .foregroundColor(.orange)
                 }
             }
-            #endif
+
+            // MARK: - Demo Data
+            Section(header: Text("Demo Data")) {
+                Button(action: loadDemoData) {
+                    Label("Load Demo Data", systemImage: "tray.and.arrow.down.fill")
+                }
+                .disabled(isLoadingDemoData)
+
+                if isLoadingDemoData {
+                    HStack(spacing: 10) {
+                        ProgressView()
+                        Text("Loading demo data\u{2026}")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
+                    }
+                }
+
+                Button(role: .destructive, action: { showWipeConfirmation = true }) {
+                    Label("Wipe All Data", systemImage: "trash")
+                }
+                .disabled(isWipingData)
+
+                if isWipingData {
+                    HStack(spacing: 10) {
+                        ProgressView()
+                        Text("Wiping data\u{2026}")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
+                    }
+                }
+
+                Text("Load sample data to explore the app, or wipe all data to start fresh.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .alert("Demo Data Loaded", isPresented: $showDemoLoadResult) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(demoLoadMessage)
+            }
+            .alert("Wipe All Data?", isPresented: $showWipeConfirmation) {
+                Button("Cancel", role: .cancel) { }
+                Button("Wipe", role: .destructive) { wipeDemoData() }
+            } message: {
+                Text("This will permanently delete all data including glucose readings, meals, exercise sessions, and GMI estimates. This cannot be undone.")
+            }
+            .alert("Data Wiped", isPresented: $showWipeResult) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(wipeResultMessage)
+            }
 
             // MARK: - Section 5: About
             Section(header: Text("About")) {
                 Button {
-                    if let url = URL(string: "https://www.youtube.com/watch?v=4XrTVFx0jwc&list=PLEMcKQpcQpgup74VYGWHEFwembOmnPt_U") {
+                    if let url = URL(string: "https://www.youtube.com/watch?v=T3dPPyUxcxg&list=PLEMcKQpcQpgup74VYGWHEFwembOmnPt_U") {
                         openURL(url)
                     }
                 } label: {
@@ -521,7 +567,6 @@ struct UserProfileView: View {
 
         if let healthCondition = healthConditions.first {
             hasDiabetes = healthCondition.hasDiabetes
-            hasDawnEffect = healthCondition.hasDawnEffect
             hasCOPD = healthCondition.hasCOPD
             hasHeartDisease = healthCondition.hasHeartDisease
             tobaccoUse = healthCondition.tobaccoUse ?? "Never"
@@ -688,7 +733,8 @@ struct UserProfileView: View {
 
         healthCondition.hasDiabetes = hasDiabetes
         healthCondition.diabetesType = hasDiabetes ? diabetesType : nil
-        healthCondition.hasDawnEffect = hasDiabetes && diabetesType == "Type 2" ? hasDawnEffect : false
+        // Dawn effect is now detected automatically — no longer user-toggled
+        healthCondition.hasDawnEffect = false
         healthCondition.hasCOPD = hasCOPD
         healthCondition.hasHeartDisease = hasHeartDisease
         healthCondition.tobaccoUse = tobaccoUse
@@ -773,6 +819,39 @@ struct UserProfileView: View {
         lines.append("This summary is for personal tracking only and does not constitute medical advice.")
 
         return lines.joined(separator: "\n")
+    }
+
+    // MARK: - Demo Data Actions
+
+    private func loadDemoData() {
+        isLoadingDemoData = true
+        Task { @MainActor in
+            defer { isLoadingDemoData = false }
+            do {
+                let result = try DemoDataManager.loadDemoData(into: viewContext)
+                demoLoadMessage = "Loaded \(result.totalImported) records: \(result.glucoseReadings.imported) glucose readings, \(result.meals.imported) meals, \(result.exerciseSessions.imported) exercise sessions."
+                if result.totalSkipped > 0 {
+                    demoLoadMessage += " (\(result.totalSkipped) duplicates skipped.)"
+                }
+            } catch {
+                demoLoadMessage = "Failed to load demo data: \(error.localizedDescription)"
+            }
+            showDemoLoadResult = true
+        }
+    }
+
+    private func wipeDemoData() {
+        isWipingData = true
+        Task { @MainActor in
+            defer { isWipingData = false }
+            do {
+                let count = try DemoDataManager.wipeAllData(from: viewContext)
+                wipeResultMessage = "Deleted \(count) records. The app is ready for your own data."
+            } catch {
+                wipeResultMessage = "Failed to wipe data: \(error.localizedDescription)"
+            }
+            showWipeResult = true
+        }
     }
 }
 
