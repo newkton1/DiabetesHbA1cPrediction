@@ -68,12 +68,23 @@ class FoodDatabase {
     /// Data is loaded from FoodDatabase.json bundled with the app
     private(set) var allFoods: [FoodItem] = []
 
+    /// User's favorite foods added from online searches
+    /// Stored separately in the Documents directory so they persist across app updates
+    private(set) var favorites: [FoodItem] = []
+
     /// Error message if the food database failed to load
     private(set) var loadError: String?
+
+    /// URL for the user's favorites file in Documents directory
+    private var favoritesFileURL: URL? {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("UserFavorites.json")
+    }
 
     /// Private initializer ensures only one instance of FoodDatabase exists
     private init() {
         populateDatabase()
+        loadFavorites()
     }
 
     /// Loads the food database from the bundled JSON file
@@ -89,6 +100,75 @@ class FoodDatabase {
         } catch {
             loadError = "Food database could not be loaded. Please reinstall the app."
         }
+    }
+
+    // MARK: - Favorites Management
+
+    /// Loads user favorites from the Documents directory
+    private func loadFavorites() {
+        guard let url = favoritesFileURL,
+              FileManager.default.fileExists(atPath: url.path) else { return }
+        do {
+            let data = try Data(contentsOf: url)
+            favorites = try JSONDecoder().decode([FoodItem].self, from: data)
+            // Merge favorites into allFoods so they appear in searches
+            allFoods.append(contentsOf: favorites)
+        } catch {
+            // Silently fail — favorites are a convenience, not critical
+            print("FoodDatabase: Could not load favorites — \(error.localizedDescription)")
+        }
+    }
+
+    /// Saves the current favorites array to disk
+    private func saveFavorites() {
+        guard let url = favoritesFileURL else { return }
+        do {
+            let data = try JSONEncoder().encode(favorites)
+            try data.write(to: url, options: .atomic)
+        } catch {
+            print("FoodDatabase: Could not save favorites — \(error.localizedDescription)")
+        }
+    }
+
+    /// Adds a food item to the user's favorites and persists to disk.
+    /// The food is also immediately available in searches via allFoods.
+    ///
+    /// - Parameter food: The FoodItem to save (typically from an online search)
+    func addFavorite(_ food: FoodItem) {
+        // Avoid duplicates
+        guard !favorites.contains(where: { $0.name == food.name && $0.category == food.category }) else { return }
+
+        // Store with "Favorites" category so it groups nicely in category filters
+        let favoriteFood = FoodItem(
+            name: food.name,
+            category: "Favorites",
+            servingSize: food.servingSize,
+            servingUnit: food.servingUnit,
+            calories: food.calories,
+            carbohydrates: food.carbohydrates,
+            protein: food.protein,
+            fat: food.fat,
+            fiber: food.fiber,
+            glycemicIndex: food.glycemicIndex
+        )
+
+        favorites.append(favoriteFood)
+        allFoods.append(favoriteFood)
+        saveFavorites()
+    }
+
+    /// Removes a food from favorites by name
+    ///
+    /// - Parameter name: The name of the food to remove
+    func removeFavorite(named name: String) {
+        favorites.removeAll { $0.name == name }
+        allFoods.removeAll { $0.name == name && $0.category == "Favorites" }
+        saveFavorites()
+    }
+
+    /// Whether a food with the given name exists in favorites
+    func isFavorite(named name: String) -> Bool {
+        favorites.contains { $0.name == name }
     }
 
     /// Searches for foods by name using case-insensitive matching

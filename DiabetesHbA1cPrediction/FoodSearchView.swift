@@ -16,6 +16,7 @@ struct FoodSearchView: View {
     @State private var searchText = ""
     @State private var isSearching = false
     @State private var showFoodDbError = false
+    @State private var showOnlineSearch = false
 
     // MARK: - Body
     var body: some View {
@@ -116,7 +117,8 @@ struct FoodSearchView: View {
         .listStyle(.insetGrouped)
     }
 
-    /// Empty state view when no foods match the search
+    /// Empty state view when no foods match the search.
+    /// If the user has typed a search query, offers to search online.
     @ViewBuilder
     private var emptyState: some View {
         VStack(spacing: 16) {
@@ -129,9 +131,33 @@ struct FoodSearchView: View {
             Text("Try searching with a different keyword")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+
+            // Online search prompt — only show when user has typed something
+            if !searchText.isEmpty {
+                Button {
+                    showOnlineSearch = true
+                } label: {
+                    Label("Search Online", systemImage: "globe")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .padding(.top, 8)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
+        .sheet(isPresented: $showOnlineSearch) {
+            OnlineFoodSearchSheet(searchQuery: searchText) { food in
+                // When user adds a food from online results, select it and dismiss
+                selectedFood = food
+                dismiss()
+            }
+        }
     }
 
     /// Builds a row for a single food showing name, serving info, calories, macros, and GI

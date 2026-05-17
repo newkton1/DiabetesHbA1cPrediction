@@ -213,6 +213,8 @@ private struct FoodSearchContentDirect: View {
     let groupedFoods: [(category: String, foods: [FoodItem])]
     let recentMeals: [RecentMeal]
 
+    @State private var showOnlineSearch = false
+
     /// Whether the "Recent" pseudo-category is active
     private var isRecentSelected: Bool {
         selectedCategory == recentCategoryKey
@@ -290,6 +292,41 @@ private struct FoodSearchContentDirect: View {
             if isRecentSelected {
                 // Recent meals list
                 RecentMealsList(recentMeals: recentMeals, mealBuilder: mealBuilder)
+            } else if groupedFoods.isEmpty && !searchText.isEmpty {
+                // No local results — offer online search
+                VStack(spacing: 16) {
+                    Spacer()
+                    Image(systemName: "magnifyingglass")
+                        .font(.largeTitle)
+                        .foregroundColor(.gray)
+                        .accessibilityHidden(true)
+                    Text("No Foods Found")
+                        .font(.headline)
+                    Text("Try a different keyword, or search online")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Button {
+                        showOnlineSearch = true
+                    } label: {
+                        Label("Search Online", systemImage: "globe")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding(.top, 8)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity)
+                .sheet(isPresented: $showOnlineSearch) {
+                    OnlineFoodSearchSheet(searchQuery: searchText) { food in
+                        // Add the online result directly to the meal builder
+                        mealBuilder.addFood(food)
+                    }
+                }
             } else {
                 // Food list
                 List {
