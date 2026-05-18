@@ -21,9 +21,19 @@ struct DataImportView: View {
     @State private var importResult: DataImportResult?
     @State private var importError: String?
 
+    // Delete confirmation state
+    @State private var fileToDelete: URL?
+    @State private var showDeleteConfirmation = false
+    @State private var deleteError: String?
+
+    /// Bumped to force the file list to refresh after a deletion.
+    @State private var fileListRefreshID = UUID()
+
     /// JSON files sitting in the app's Documents directory (e.g. copied
     /// via `xcrun simctl` or iTunes File Sharing).
     private var documentsJSONFiles: [URL] {
+        // fileListRefreshID is read here so SwiftUI re-evaluates after deletion
+        let _ = fileListRefreshID
         guard let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return [] }
         let contents = (try? FileManager.default.contentsOfDirectory(at: docs, includingPropertiesForKeys: nil)) ?? []
         return contents
@@ -40,7 +50,8 @@ struct DataImportView: View {
                 .disabled(isImporting)
 
                 // Direct load from app's Documents folder (useful when
-                // file picker can't see the app container, e.g. Simulator)
+                // file picker can't see the app container, e.g. Simulator).
+                // Swipe left on a file to delete it.
                 if !documentsJSONFiles.isEmpty {
                     ForEach(documentsJSONFiles, id: \.lastPathComponent) { fileURL in
                         Button(action: { performImport(from: fileURL) }) {
@@ -48,6 +59,14 @@ struct DataImportView: View {
                                 .font(.subheadline)
                         }
                         .disabled(isImporting)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                fileToDelete = fileURL
+                                showDeleteConfirmation = true
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
                     }
                 } else {
                     Text("No JSON files found in app Documents folder.")
@@ -65,6 +84,14 @@ struct DataImportView: View {
             }
 
             if let error = importError {
+                Section(header: Text("Error")) {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+            }
+
+            if let error = deleteError {
                 Section(header: Text("Error")) {
                     Text(error)
                         .foregroundColor(.red)
@@ -120,12 +147,38 @@ struct DataImportView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("Import Data")
         .navigationBarTitleDisplayMode(.inline)
+        .alert("Delete Backup?", isPresented: $showDeleteConfirmation) {
+            Button("Cancel", role: .cancel) {
+                fileToDelete = nil
+            }
+            Button("Delete", role: .destructive) {
+                if let url = fileToDelete {
+                    deleteBackupFile(url)
+                }
+                fileToDelete = nil
+            }
+        } message: {
+            Text("Delete \"\(fileToDelete?.lastPathComponent ?? "this file")\"? This cannot be undone.")
+        }
         .fileImporter(
             isPresented: $showFilePicker,
             allowedContentTypes: [UTType.json],
             allowsMultipleSelection: false
         ) { result in
             handleFileSelection(result)
+        }
+    }
+
+    // MARK: - File Deletion
+
+    /// Deletes a backup JSON file from the Documents directory.
+    private func deleteBackupFile(_ url: URL) {
+        do {
+            try FileManager.default.removeItem(at: url)
+            // Trigger the file list to refresh
+            fileListRefreshID = UUID()
+        } catch {
+            deleteError = "Could not delete file: \(error.localizedDescription)"
         }
     }
 
