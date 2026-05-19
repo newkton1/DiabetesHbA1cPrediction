@@ -514,8 +514,8 @@ struct GlucoseLogView: View {
                             .frame(width: 14) // collapsed width so it sits in the leading margin
                     }
 
-                    // "Day" or "Time" legend centred below the chart
-                    Text(chartDaySetting <= 1 ? "Time" : "Day")
+                    // "Date" or "Time" legend centred below the chart
+                    Text(chartDaySetting <= 1 ? "Time" : "Date")
                         .font(.system(size: 9))
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity)
