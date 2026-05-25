@@ -31,9 +31,10 @@ enum DawnEffectNotificationManager {
             trigger: trigger
         )
 
+        let key = lastNotifiedKey
         UNUserNotificationCenter.current().add(request) { error in
             if error == nil {
-                UserDefaults.standard.set(Date(), forKey: lastNotifiedKey)
+                UserDefaults.standard.set(Date(), forKey: key)
             }
             #if DEBUG
             if let error = error {

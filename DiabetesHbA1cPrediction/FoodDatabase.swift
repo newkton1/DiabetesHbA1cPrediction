@@ -111,6 +111,17 @@ class FoodDatabase {
         do {
             let data = try Data(contentsOf: url)
             favorites = try JSONDecoder().decode([FoodItem].self, from: data)
+            // Migrate any legacy "Favorites" entries to "My Meals"
+            favorites = favorites.map { item in
+                guard item.category == "Favorites" else { return item }
+                return FoodItem(
+                    name: item.name, category: "My Meals",
+                    servingSize: item.servingSize, servingUnit: item.servingUnit,
+                    calories: item.calories, carbohydrates: item.carbohydrates,
+                    protein: item.protein, fat: item.fat,
+                    fiber: item.fiber, glycemicIndex: item.glycemicIndex
+                )
+            }
             // Merge favorites into allFoods so they appear in searches
             allFoods.append(contentsOf: favorites)
         } catch {
@@ -135,13 +146,13 @@ class FoodDatabase {
     ///
     /// - Parameter food: The FoodItem to save (typically from an online search)
     func addFavorite(_ food: FoodItem) {
-        // Avoid duplicates
-        guard !favorites.contains(where: { $0.name == food.name && $0.category == food.category }) else { return }
+        // Avoid duplicates — check by name since the original may have a different category
+        guard !favorites.contains(where: { $0.name == food.name }) else { return }
 
-        // Store with "Favorites" category so it groups nicely in category filters
+        // Store with "My Meals" category so it groups nicely in category filters
         let favoriteFood = FoodItem(
             name: food.name,
-            category: "Favorites",
+            category: "My Meals",
             servingSize: food.servingSize,
             servingUnit: food.servingUnit,
             calories: food.calories,
@@ -162,7 +173,7 @@ class FoodDatabase {
     /// - Parameter name: The name of the food to remove
     func removeFavorite(named name: String) {
         favorites.removeAll { $0.name == name }
-        allFoods.removeAll { $0.name == name && $0.category == "Favorites" }
+        allFoods.removeAll { $0.name == name && $0.category == "My Meals" }
         saveFavorites()
     }
 
