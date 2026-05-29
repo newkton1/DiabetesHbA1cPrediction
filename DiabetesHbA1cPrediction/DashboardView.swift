@@ -43,6 +43,13 @@ struct DashboardView: View {
     // MARK: - State
     @State private var showLastMealSheet = false
 
+    /// CGM dropout warning toast — true while the sliding toast is visible
+    @State private var showCGMDropoutToast = false
+
+    // UserDefaults keys for persisting CGM dropout warning state across launches
+    private let cgmDropoutDismissedKey = "cgmDropoutWarningDismissed"
+    private let cgmDropoutLastShownKey = "cgmDropoutWarningLastShownAt"
+
     /// Dawn effect detection state — read from UserDefaults after each GMI recalculation
     @State private var dawnEffectDetected: Bool = UserDefaults.standard.bool(forKey: "lastRunDetectedDawnEffect")
 
@@ -55,7 +62,82 @@ struct DashboardView: View {
         guard let latestTimestamp = glucoseReadings.first?.timestamp else { return false }
         return currentTime.timeIntervalSince(latestTimestamp) > 30 * 60
     }
-    
+
+    // MARK: - CGM Dropout Warning Logic
+
+    /// Returns true if reading density in the last 14 days indicates CGM usage.
+    ///
+    /// CGM devices produce a reading every ~5 minutes; after the 15-minute sampling
+    /// step in HealthKitManager this becomes one per 15 min in CoreData.
+    /// Three consecutive readings within 45 minutes are unambiguous CGM behaviour —
+    /// finger-stick users cannot produce that cadence.
+    ///
+    /// A 14-day recency window matches the GMI calculation window so the flag
+    /// naturally expires when a user switches back to finger sticks.
+    private var isActiveCGMUser: Bool {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -14, to: Date()) ?? Date()
+        let timestamps = glucoseReadings
+            .filter { ($0.timestamp ?? .distantPast) >= cutoff }
+            .compactMap { $0.timestamp }
+            .sorted()
+        guard timestamps.count >= 3 else { return false }
+        for i in 0..<(timestamps.count - 2) {
+            if timestamps[i + 2].timeIntervalSince(timestamps[i]) <= 45 * 60 {
+                return true
+            }
+        }
+        return false
+    }
+
+    private var cgmDropoutWarningDismissed: Bool {
+        UserDefaults.standard.bool(forKey: cgmDropoutDismissedKey)
+    }
+
+    private var cgmDropoutLastShown: Date? {
+        UserDefaults.standard.object(forKey: cgmDropoutLastShownKey) as? Date
+    }
+
+    /// Shows the CGM dropout toast if all conditions are met:
+    ///   1. User is an active CGM user (reading density ≥ CGM cadence in last 14 days)
+    ///   2. Glucose data is stale (>30 min since last reading)
+    ///   3. Warning has not been manually dismissed this episode
+    ///   4. Either never shown before, or >1 hour since last appearance
+    ///
+    /// The toast auto-dismisses after 3 seconds but repeats hourly until the
+    /// user taps ✕ or readings resume.
+    private func maybeTriggerCGMDropoutWarning() {
+        guard isActiveCGMUser, isGlucoseDataStale, !cgmDropoutWarningDismissed else { return }
+        let now = Date()
+        if let lastShown = cgmDropoutLastShown {
+            guard now.timeIntervalSince(lastShown) >= 3600 else { return }
+        }
+        UserDefaults.standard.set(now, forKey: cgmDropoutLastShownKey)
+        withAnimation(.easeInOut(duration: 0.3)) { showCGMDropoutToast = true }
+        Task {
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+            withAnimation(.easeInOut(duration: 0.3)) { showCGMDropoutToast = false }
+        }
+    }
+
+    /// Called when the user taps ✕ on the toast.
+    /// Suppresses further warnings for the current dropout episode.
+    /// The flag is cleared automatically when readings resume.
+    private func dismissCGMDropoutWarning() {
+        UserDefaults.standard.set(true, forKey: cgmDropoutDismissedKey)
+        withAnimation(.easeInOut(duration: 0.3)) { showCGMDropoutToast = false }
+    }
+
+    /// Called when glucose readings resume (data is no longer stale).
+    /// Resets dismissed and last-shown state so the next dropout episode
+    /// can warn again from scratch.
+    private func clearCGMDropoutState() {
+        UserDefaults.standard.removeObject(forKey: cgmDropoutDismissedKey)
+        UserDefaults.standard.removeObject(forKey: cgmDropoutLastShownKey)
+        if showCGMDropoutToast {
+            withAnimation(.easeInOut(duration: 0.3)) { showCGMDropoutToast = false }
+        }
+    }
+
     // Environment for detecting orientation
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.verticalSizeClass) private var verticalSizeClass
@@ -87,10 +169,6 @@ struct DashboardView: View {
 
                         if dawnEffectDetected {
                             DawnEffectNoticeBanner()
-                        }
-
-                        if isGlucoseDataStale {
-                            StaleDataWarningBanner()
                         }
 
                         MedicalDisclaimerBanner()
@@ -131,10 +209,6 @@ struct DashboardView: View {
 
                         if dawnEffectDetected {
                             DawnEffectNoticeBanner()
-                        }
-
-                        if isGlucoseDataStale {
-                            StaleDataWarningBanner()
                         }
 
                         MedicalDisclaimerBanner()
@@ -181,6 +255,25 @@ struct DashboardView: View {
             // Plan Meal now switches to the meals tab instead of presenting a sheet
             .onReceive(staleDataTimer) { time in
                 currentTime = time
+                // Each minute: either reset warning state (readings resumed)
+                // or try to show the toast (readings still absent)
+                if isGlucoseDataStale {
+                    maybeTriggerCGMDropoutWarning()
+                } else {
+                    clearCGMDropoutState()
+                }
+            }
+            .onAppear {
+                // Check on every foreground appearance — catches the case where
+                // the app was backgrounded during a dropout and the timer never ticked
+                maybeTriggerCGMDropoutWarning()
+            }
+            .overlay(alignment: .top) {
+                if showCGMDropoutToast {
+                    CGMDropoutToastView(onDismiss: dismissCGMDropoutWarning)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .padding(.top, 4)
+                }
             }
         }
     }
@@ -997,6 +1090,51 @@ private struct StaleDataWarningBanner: View {
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Warning: No glucose data received in the last 30 minutes. Check your CGM Bluetooth connection.")
+    }
+}
+
+// MARK: - CGM Dropout Toast View
+
+/// Auto-dismissing toast that slides in from the top of the dashboard when the
+/// app detects that a CGM user's readings have stopped arriving for >30 minutes.
+///
+/// Behaviour:
+/// - Appears only when reading density confirms the user is an active CGM user
+///   (3+ readings within 45 min in the last 14 days)
+/// - Auto-dismisses after 3 seconds; repeats once per hour until the user taps ✕
+/// - Tapping ✕ suppresses it for the current dropout episode
+/// - The suppression clears automatically when readings resume
+private struct CGMDropoutToastView: View {
+    let onDismiss: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "wifi.slash")
+                .font(.caption)
+                .foregroundColor(.white)
+                .accessibilityHidden(true)
+            Text("No CGM readings in 30+ min. Check your Bluetooth and bridge app (e.g. Zukka).")
+                .font(.caption)
+                .foregroundColor(.white)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 4)
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .font(.caption2)
+                    .foregroundColor(.white.opacity(0.9))
+                    .padding(4)
+                    .contentShape(Rectangle())
+            }
+            .accessibilityLabel("Dismiss CGM connection warning")
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Color.red.opacity(0.88))
+        .cornerRadius(10)
+        .padding(.horizontal, 16)
+        .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("No CGM readings in the last 30 minutes. Check your Bluetooth connection and bridge app.")
     }
 }
 

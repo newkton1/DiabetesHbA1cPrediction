@@ -774,6 +774,8 @@ struct ExerciseRowView: View {
             return "music.note"
         case "hiking":
             return "figure.hiking"
+        case "gardening":
+            return "leaf.fill"
         default:
             return "figure.walk"
         }
@@ -813,7 +815,7 @@ struct AddExerciseSessionSheet: View {
     @State private var notes: String = ""
     @State private var useEstimatedCalories = true
 
-    let exerciseTypes = ["Walking", "Running", "Cycling", "Swimming", "Strength Training", "Yoga", "HIIT", "Dancing", "Hiking", "Other"]
+    let exerciseTypes = ["Walking", "Running", "Cycling", "Swimming", "Strength Training", "Yoga", "HIIT", "Dancing", "Hiking", "Gardening", "Other"]
 
     /// Exercise types that should show Distance slider instead of Intensity
     private var isDistanceBasedExercise: Bool {
@@ -987,6 +989,8 @@ struct AddExerciseSessionSheet: View {
                 return 7.0 // ~420 cal/hour
             case "hiking":
                 return 7.5 // ~450 cal/hour
+            case "gardening":
+                return 3.5 // ~210 cal/hour (comparable to moderate walking)
             default:
                 return 5.0 // ~300 cal/hour
             }

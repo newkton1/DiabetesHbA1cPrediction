@@ -839,15 +839,16 @@ struct HistoricalPatternContent: View {
         }
 
         let durationText: String
-        if exerciseType == .swim {
-            // Swimming: show duration only, distance is not meaningful to display
-            durationText = hitCap
-                ? "at least \(roundedMinutes) min"
-                : "\(roundedMinutes) min"
-        } else {
+        if exerciseType.showsDistance && exerciseType != .swim {
+            // Walk/Run/Cycle: show duration + km distance
             durationText = hitCap
                 ? "at least \(roundedMinutes) min / \(formattedDistance)"
                 : "\(roundedMinutes) min / \(formattedDistance)"
+        } else {
+            // Swim, Gardening, or any other non-distance activity: duration only
+            durationText = hitCap
+                ? "at least \(roundedMinutes) min"
+                : "\(roundedMinutes) min"
         }
 
         return "For reference, a \(exerciseType.actionVerb) of \(durationText) after a meal like this is sometimes associated with a smaller glucose response."

@@ -502,19 +502,48 @@ struct MealRowView: View {
                         HStack {
                             Text(item.foodName ?? "Unknown")
                                 .font(.subheadline)
-                            
+
                             Spacer()
-                            
+
                             Text(ServingFormatter.displayString(for: item.quantity))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                            
+
                             Text("\(Int(item.carbsPerServing * item.quantity)) g")
                                 .font(.caption)
                                 .fontWeight(.medium)
                                 .foregroundColor(.orange)
                         }
                         .padding(.leading, 8)
+                        .contextMenu {
+                            if let name = item.foodName {
+                                if FoodDatabase.shared.isFavorite(named: name) {
+                                    Button(role: .destructive) {
+                                        FoodDatabase.shared.removeFavorite(named: name)
+                                    } label: {
+                                        Label("Remove from My Meals", systemImage: "heart.slash")
+                                    }
+                                } else {
+                                    Button {
+                                        let food = FoodItem(
+                                            name: name,
+                                            category: item.foodCategory ?? "Uncategorized",
+                                            servingSize: item.servingSize,
+                                            servingUnit: item.servingUnit ?? "serving",
+                                            calories: item.caloriesPerServing,
+                                            carbohydrates: item.carbsPerServing,
+                                            protein: item.proteinPerServing,
+                                            fat: item.fatPerServing,
+                                            fiber: item.fiberPerServing,
+                                            glycemicIndex: Int(item.glycemicIndex)
+                                        )
+                                        FoodDatabase.shared.addFavorite(food)
+                                    } label: {
+                                        Label("Add to My Meals", systemImage: "heart")
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 .padding(.top, 4)

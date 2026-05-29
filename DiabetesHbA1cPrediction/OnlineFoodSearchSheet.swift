@@ -277,14 +277,9 @@ private struct OnlineFoodResultRow: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                // Macros
-                HStack(spacing: 12) {
-                    macroLabel("C", value: food.carbohydrates, color: .orange)
-                    macroLabel("P", value: food.protein, color: .blue)
-                    macroLabel("F", value: food.fat, color: .purple)
-                    macroLabel("Fib", value: food.fiber, color: .green)
-                }
-                .font(.caption)
+                // Macros — single concatenated Text so labels can't jumble on narrow screens
+                macrosText(carbs: food.carbohydrates, protein: food.protein,
+                           fat: food.fat, fiber: food.fiber)
 
                 // Glycemic index
                 HStack(spacing: 4) {
@@ -327,14 +322,18 @@ private struct OnlineFoodResultRow: View {
         .padding(.vertical, 4)
     }
 
-    private func macroLabel(_ label: String, value: Double, color: Color) -> some View {
-        HStack(spacing: 2) {
-            Text(label + ":")
-                .foregroundColor(color)
-                .fontWeight(.medium)
-            Text("\(Int(value))g")
-                .foregroundColor(.secondary)
-        }
+    private func macrosText(carbs: Double, protein: Double, fat: Double, fiber: Double) -> some View {
+        (Text("C: ").foregroundColor(.orange).fontWeight(.medium) +
+         Text("\(Int(carbs)) g").foregroundColor(.secondary) +
+         Text("  P: ").foregroundColor(.blue).fontWeight(.medium) +
+         Text("\(Int(protein)) g").foregroundColor(.secondary) +
+         Text("  F: ").foregroundColor(.purple).fontWeight(.medium) +
+         Text("\(Int(fat)) g").foregroundColor(.secondary) +
+         Text("  Fib: ").foregroundColor(.green).fontWeight(.medium) +
+         Text("\(Int(fiber)) g").foregroundColor(.secondary))
+        .font(.caption)
+        .lineLimit(1)
+        .minimumScaleFactor(0.5)
     }
 
     private func giLabel(_ gi: Int) -> String {

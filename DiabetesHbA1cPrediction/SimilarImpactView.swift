@@ -341,20 +341,13 @@ struct SimilarImpactView: View {
                         .foregroundColor(.secondary)
                 }
 
-                // Distance
-                if exerciseType != .swim {
-                    VStack(spacing: 2) {
-                        Text(String(format: "%.1f", rawDistance))
-                            .font(.title2.bold())
-                            .foregroundColor(.blue)
-                        Text(exerciseType.distanceUnit)
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                } else {
+                // Distance — only shown for activities where pace/distance is meaningful
+                if exerciseType.showsDistance {
                     let metres = Int((rawDistance / 50).rounded()) * 50
                     VStack(spacing: 2) {
-                        Text("\(metres)")
+                        Text(exerciseType == .swim
+                             ? "\(metres)"
+                             : String(format: "%.1f", rawDistance))
                             .font(.title2.bold())
                             .foregroundColor(.blue)
                         Text(exerciseType.distanceUnit)
