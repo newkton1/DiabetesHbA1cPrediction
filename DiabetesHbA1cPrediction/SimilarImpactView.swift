@@ -57,59 +57,59 @@ struct SimilarImpactView: View {
                     } else if let match = matchResult {
                         // We have a matching meal with glucose data
                         matchedPatternCard(match)
-                    } else {
-                        // Not enough history
-                        noHistoryCard
-                    }
 
-                    // Planned Date & Time
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Planned Date & Time")
-                            .font(.headline)
+                        // Planned Date & Time (only shown when history exists)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Planned Date & Time")
+                                .font(.headline)
+                                .padding(.horizontal)
+
+                            HStack {
+                                Text("Date and time of this treat")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                            }
                             .padding(.horizontal)
 
-                        HStack {
-                            Text("Date and time of this treat")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                        }
-                        .padding(.horizontal)
-
-                        HStack {
-                            Spacer()
-                            DatePicker(
-                                "Date & Time",
-                                selection: $mealBuilder.plannedDateTime,
-                                displayedComponents: [.date, .hourAndMinute]
-                            )
-                            .labelsHidden()
-                            .datePickerStyle(.compact)
-                            Spacer()
+                            HStack {
+                                Spacer()
+                                DatePicker(
+                                    "Date & Time",
+                                    selection: $mealBuilder.plannedDateTime,
+                                    displayedComponents: [.date, .hourAndMinute]
+                                )
+                                .labelsHidden()
+                                .datePickerStyle(.compact)
+                                Spacer()
+                            }
+                            .padding(.vertical, 4)
                         }
                         .padding(.vertical, 4)
-                    }
-                    .padding(.vertical, 4)
-                    .padding(.horizontal, 4)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    .padding(.horizontal)
+                        .padding(.horizontal, 4)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
 
-                    // Eat Treat button
-                    Button(action: onEatTreat) {
-                        HStack {
-                            Image(systemName: "fork.knife")
-                            Text("Eat Treat")
-                                .fontWeight(.bold)
+                        // Eat Treat button
+                        Button(action: onEatTreat) {
+                            HStack {
+                                Image(systemName: "fork.knife")
+                                Text("Eat Treat")
+                                    .fontWeight(.bold)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(14)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(14)
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                    } else {
+                        // Not enough history — show only the cold-start card
+                        noHistoryCard
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 8)
 
                     Spacer(minLength: 20)
                 }
@@ -131,19 +131,26 @@ struct SimilarImpactView: View {
 
     private var noHistoryCard: some View {
         VStack(spacing: 12) {
-            // Also show the HistoricalPatternContent for the full "not enough data" message
             HStack(alignment: .top, spacing: 8) {
                 Image(systemName: "clock.badge.questionmark")
                     .foregroundColor(.secondary)
                     .frame(width: 24)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Not enough history yet")
+                    Text("Your meal history at a glance")
                         .fontWeight(.semibold)
-                    Text("No meals with a similar glycaemic load found in the last 90 days with glucose readings. Log more meals and glucose data to see your pattern.")
+                    Text("After a week of logging meals and glucose, Diabetes Feast will match new meals to similar ones you've eaten before — so you can review how your glucose responded to those past meals and use that information however you choose.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
+
+                    // Progress indicator
+                    let daysLogged = ColdStartManager.shared.glucoseDaysLogged
+                    let required = ColdStartManager.similarMealDaysRequired
+                    Text("\(daysLogged) of \(required) days of meal + glucose data")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 4)
                 }
             }
         }

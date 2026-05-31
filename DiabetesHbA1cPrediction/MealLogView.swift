@@ -179,20 +179,17 @@ struct MealLogView: View {
     // MARK: - Shared Components
 
     private var emptyStateView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "fork.knife")
-                .font(.largeTitle)
-                .foregroundColor(.gray)
-                .accessibilityHidden(true)
-            Text("No Meals Logged")
-                .font(.headline)
-            Text("Use the Add Meal card on the Dashboard to log meals")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity, alignment: .center)
-        .padding(.vertical, 20)
+        ColdStartEmptyStateView(
+            icon: "fork.knife",
+            heading: "See how meals have affected your glucose",
+            bodyText: "Once you've logged meals alongside glucose readings, Diabetes Feast will show you which foods raised your levels — and by how much. Start by logging a meal and checking your glucose before and after eating.",
+            steps: [
+                .init(icon: "drop.fill", text: "Log glucose"),
+                .init(icon: "fork.knife", text: "Log a meal"),
+                .init(icon: "clock", text: "Wait 2 hours"),
+                .init(icon: "drop.fill", text: "Log glucose again"),
+            ]
+        )
     }
 
     @ViewBuilder

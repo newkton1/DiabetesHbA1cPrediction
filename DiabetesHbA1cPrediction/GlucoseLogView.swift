@@ -1139,21 +1139,19 @@ struct GlucoseLogView: View {
     @ViewBuilder
     private var readingsList: some View {
         if glucoseReadings.isEmpty {
-            VStack(alignment: .center, spacing: 12) {
-                Image(systemName: "drop.fill")
-                    .font(.largeTitle)
-                    .foregroundColor(.gray)
-                    .accessibilityHidden(true)
-
-                Text("No glucose readings")
-                    .font(.headline)
-
-                Text("Add your first reading or sync from Health")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(.vertical, 40)
+            ColdStartEmptyStateView(
+                icon: "chart.line.uptrend.xyaxis",
+                heading: "Your trend history will appear here",
+                bodyText: "Log blood glucose readings over a few days — by CGM or finger-stick — and you'll start to see patterns in how your levels respond to meals and activity.",
+                progress: ColdStartEmptyStateView.Progress(
+                    current: ColdStartManager.shared.glucoseDaysLogged,
+                    total: ColdStartManager.trendDaysRequired,
+                    label: "days logged"
+                ),
+                actionTitle: "Log glucose reading",
+                actionIcon: "plus"
+            )
+            .padding(.vertical, 20)
         } else {
             let windowReadings = chartWindowReadings
             List {

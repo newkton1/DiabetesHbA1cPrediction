@@ -846,6 +846,8 @@ struct UserProfileView: View {
             defer { isWipingData = false }
             do {
                 let count = try DemoDataManager.wipeAllData(from: viewContext)
+                ColdStartManager.shared.resetOnboarding()
+                ColdStartManager.shared.refresh(context: viewContext)
                 wipeResultMessage = "Deleted \(count) records. The app is ready for your own data."
             } catch {
                 wipeResultMessage = "Failed to wipe data: \(error.localizedDescription)"

@@ -40,6 +40,10 @@ struct DashboardView: View {
         sortDescriptors: [NSSortDescriptor(keyPath: \ExerciseSessionEntity.startDate, ascending: false)]
     ) private var exerciseSessions: FetchedResults<ExerciseSessionEntity>
 
+    // MARK: - Cold Start
+    @ObservedObject private var coldStart = ColdStartManager.shared
+    @State private var isDemoData = DemoDataManager.isDemoDataLoaded
+
     // MARK: - State
     @State private var showLastMealSheet = false
 
@@ -162,6 +166,13 @@ struct DashboardView: View {
                         }
                         .padding(.horizontal)
 
+                        // Demo data banner (landscape)
+                        if isDemoData {
+                            DemoDataBannerView(onDemoDataCleared: {
+                                isDemoData = false
+                            })
+                        }
+
                         // Top section: GMI card (from glucose data), notices and disclaimer
                         GMICardView(glucoseReadings: Array(glucoseReadings), onDawnEffectUpdated: { detected in
                             dawnEffectDetected = detected
@@ -169,6 +180,12 @@ struct DashboardView: View {
 
                         if dawnEffectDetected {
                             DawnEffectNoticeBanner()
+                        }
+
+                        // MARK: - Getting Started Checklist (landscape)
+                        if coldStart.shouldShowChecklist {
+                            GettingStartedChecklistView(coldStart: coldStart)
+                                .transition(.opacity.combined(with: .scale(scale: 0.95)))
                         }
 
                         MedicalDisclaimerBanner()
@@ -202,6 +219,13 @@ struct DashboardView: View {
                 } else {
                     // MARK: - Portrait Layout (Original)
                     VStack(spacing: 20) {
+                        // MARK: - Demo Data Banner
+                        if isDemoData {
+                            DemoDataBannerView(onDemoDataCleared: {
+                                isDemoData = false
+                            })
+                        }
+
                         // MARK: - GMI (Glucose Management Indicator) Card
                         GMICardView(glucoseReadings: Array(glucoseReadings), onDawnEffectUpdated: { detected in
                             dawnEffectDetected = detected
@@ -209,6 +233,12 @@ struct DashboardView: View {
 
                         if dawnEffectDetected {
                             DawnEffectNoticeBanner()
+                        }
+
+                        // MARK: - Getting Started Checklist
+                        if coldStart.shouldShowChecklist {
+                            GettingStartedChecklistView(coldStart: coldStart)
+                                .transition(.opacity.combined(with: .scale(scale: 0.95)))
                         }
 
                         MedicalDisclaimerBanner()
@@ -267,6 +297,10 @@ struct DashboardView: View {
                 // Check on every foreground appearance — catches the case where
                 // the app was backgrounded during a dropout and the timer never ticked
                 maybeTriggerCGMDropoutWarning()
+
+                // Refresh cold-start milestone state
+                coldStart.refresh(context: viewContext)
+                isDemoData = DemoDataManager.isDemoDataLoaded
             }
             .overlay(alignment: .top) {
                 if showCGMDropoutToast {
@@ -620,14 +654,39 @@ private struct GMICardView: View {
                     .padding(.horizontal)
             } else {
                 // No cached GMI at all (first-time user or >30 days stale)
-                Text("Not enough glucose data yet")
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                Text("Log at least \(Self.minReadings) glucose readings in the last \(Self.windowDays) days to see your GMI.")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
+                VStack(spacing: 6) {
+                    Text("14 days to your first GMI")
+                        .font(.body.bold())
+                        .foregroundColor(.primary)
+
+                    Text("Your GMI estimate needs at least \(Self.minReadings) glucose readings over \(Self.windowDays) days. Keep logging daily and your first estimate will appear here automatically.")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+
+                    // Progress bar
+                    let daysLogged = ColdStartManager.shared.glucoseDaysLogged
+                    VStack(spacing: 4) {
+                        Text("\(daysLogged) of \(Self.windowDays) days")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+
+                        GeometryReader { geo in
+                            ZStack(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(Color(.systemGray4))
+                                    .frame(height: 4)
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(Color.blue)
+                                    .frame(width: geo.size.width * min(Double(daysLogged) / Double(Self.windowDays), 1.0), height: 4)
+                            }
+                        }
+                        .frame(height: 4)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 4)
+                }
             }
 
             // ── Lab HbA1c section ──
