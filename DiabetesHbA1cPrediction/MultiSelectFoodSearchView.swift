@@ -69,17 +69,17 @@ struct MultiSelectFoodSearchView: View {
     }
 
     // Get unique categories sorted alphabetically by chip label
-    // "My Meals" is excluded here because it gets its own pinned chip
+    // "My Menu" is excluded here because it gets its own pinned chip
     private var categories: [String] {
         let allCategories = Set(foodDatabase.allFoods.map { $0.category })
         return allCategories
-            .filter { $0 != "My Meals" }
+            .filter { $0 != "My Menu" }
             .sorted { MultiSelectFoodSearchView.chipLabel(for: $0) < MultiSelectFoodSearchView.chipLabel(for: $1) }
     }
 
-    /// Whether the user has any saved "My Meals" items
+    /// Whether the user has any saved "My Menu" items
     private var hasMyMeals: Bool {
-        foodDatabase.allFoods.contains { $0.category == "My Meals" }
+        foodDatabase.allFoods.contains { $0.category == "My Menu" }
     }
 
     // Filtered foods based on search and category
@@ -255,11 +255,11 @@ private struct FoodSearchContentDirect: View {
                             action: { selectedCategory = nil }
                         )
 
-                        // My Meals chip — always visible for discoverability
+                        // My Menu chip — always visible for discoverability
                         CategoryFilterChip(
-                            title: "My Meals",
-                            isSelected: selectedCategory == "My Meals",
-                            action: { selectedCategory = "My Meals" }
+                            title: "My Menu",
+                            isSelected: selectedCategory == "My Menu",
+                            action: { selectedCategory = "My Menu" }
                         )
 
                         // Recent meals chip — only show if there are saved meals
@@ -309,8 +309,8 @@ private struct FoodSearchContentDirect: View {
             if isRecentSelected {
                 // Recent meals list
                 RecentMealsList(recentMeals: recentMeals, mealBuilder: mealBuilder)
-            } else if selectedCategory == "My Meals" && !hasMyMeals {
-                // Empty My Meals — show helpful onboarding message
+            } else if selectedCategory == "My Menu" && !hasMyMeals {
+                // Empty My Menu — show helpful onboarding message
                 VStack(spacing: 16) {
                     Spacer()
                     Image(systemName: "heart.circle")
@@ -319,7 +319,7 @@ private struct FoodSearchContentDirect: View {
                         .accessibilityHidden(true)
                     Text("No Meals Yet")
                         .font(.headline)
-                    Text("Long-press any food to add it to My Meals for quick access.")
+                    Text("Long-press any food to add it to My Menu for quick access.")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -390,13 +390,13 @@ private struct FoodSearchContentDirect: View {
                                         Button(role: .destructive) {
                                             FoodDatabase.shared.removeFavorite(named: food.name)
                                         } label: {
-                                            Label("Remove from My Meals", systemImage: "heart.slash")
+                                            Label("Remove from My Menu", systemImage: "heart.slash")
                                         }
                                     } else {
                                         Button {
                                             FoodDatabase.shared.addFavorite(food)
                                         } label: {
-                                            Label("Add to My Meals", systemImage: "heart")
+                                            Label("Add to My Menu", systemImage: "heart")
                                         }
                                     }
                                 }

@@ -184,7 +184,7 @@ struct DashboardView: View {
 
                         // MARK: - Getting Started Checklist (landscape)
                         if coldStart.shouldShowChecklist {
-                            GettingStartedChecklistView(coldStart: coldStart)
+                            GettingStartedChecklistView(coldStart: coldStart, selectedTab: $selectedTab)
                                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
                         }
 
@@ -237,7 +237,7 @@ struct DashboardView: View {
 
                         // MARK: - Getting Started Checklist
                         if coldStart.shouldShowChecklist {
-                            GettingStartedChecklistView(coldStart: coldStart)
+                            GettingStartedChecklistView(coldStart: coldStart, selectedTab: $selectedTab)
                                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
                         }
 
@@ -654,38 +654,54 @@ private struct GMICardView: View {
                     .padding(.horizontal)
             } else {
                 // No cached GMI at all (first-time user or >30 days stale)
+                let daysLogged = ColdStartManager.shared.glucoseDaysLogged
+
                 VStack(spacing: 6) {
-                    Text("14 days to your first GMI")
-                        .font(.body.bold())
-                        .foregroundColor(.primary)
-
-                    Text("Your GMI estimate needs at least \(Self.minReadings) glucose readings over \(Self.windowDays) days. Keep logging daily and your first estimate will appear here automatically.")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-
-                    // Progress bar
-                    let daysLogged = ColdStartManager.shared.glucoseDaysLogged
-                    VStack(spacing: 4) {
-                        Text("\(daysLogged) of \(Self.windowDays) days")
-                            .font(.caption2)
+                    if daysLogged >= Self.windowDays {
+                        // Has enough historical days but not enough RECENT readings
+                        Text("Not enough recent readings to calculate GMI")
+                            .font(.body)
                             .foregroundColor(.secondary)
 
-                        GeometryReader { geo in
-                            ZStack(alignment: .leading) {
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(Color(.systemGray4))
-                                    .frame(height: 4)
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(Color.blue)
-                                    .frame(width: geo.size.width * min(Double(daysLogged) / Double(Self.windowDays), 1.0), height: 4)
+                        Text("Log at least \(Self.minReadings) glucose readings in the last \(Self.windowDays) days to see your GMI estimate.")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    } else {
+                        // True cold start — still building up data
+                        let daysRemaining = Self.windowDays - daysLogged
+                        Text("\(daysRemaining) day\(daysRemaining == 1 ? "" : "s") to your first GMI")
+                            .font(.body.bold())
+                            .foregroundColor(.primary)
+
+                        Text("Your GMI estimate needs at least \(Self.minReadings) glucose readings over \(Self.windowDays) days. Keep logging daily and your first estimate will appear here automatically.")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+
+                        // Progress bar
+                        VStack(spacing: 4) {
+                            Text("\(daysLogged) of \(Self.windowDays) days")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+
+                            GeometryReader { geo in
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 2)
+                                        .fill(Color(.systemGray4))
+                                        .frame(height: 4)
+                                    RoundedRectangle(cornerRadius: 2)
+                                        .fill(Color.blue)
+                                        .frame(width: geo.size.width * min(Double(daysLogged) / Double(Self.windowDays), 1.0), height: 4)
+                                }
                             }
+                            .frame(height: 4)
                         }
-                        .frame(height: 4)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 4)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 4)
                 }
             }
 

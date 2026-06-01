@@ -518,7 +518,7 @@ struct MealRowView: View {
                                     Button(role: .destructive) {
                                         FoodDatabase.shared.removeFavorite(named: name)
                                     } label: {
-                                        Label("Remove from My Meals", systemImage: "heart.slash")
+                                        Label("Remove from My Menu", systemImage: "heart.slash")
                                     }
                                 } else {
                                     Button {
@@ -536,7 +536,7 @@ struct MealRowView: View {
                                         )
                                         FoodDatabase.shared.addFavorite(food)
                                     } label: {
-                                        Label("Add to My Meals", systemImage: "heart")
+                                        Label("Add to My Menu", systemImage: "heart")
                                     }
                                 }
                             }
