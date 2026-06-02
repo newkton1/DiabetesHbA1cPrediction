@@ -474,7 +474,47 @@ private struct GMICardView: View {
         UserDefaults.standard.set(result.gmiIfcc, forKey: Self.cachedGmiIfccKey)
         UserDefaults.standard.set(Date(), forKey: Self.cachedGmiDateKey)
 
+        // Persist to Core Data for export (max once per calendar day)
+        Self.persistGmiIfNeeded(ngsp: result.gmiNgsp, ifcc: result.gmiIfcc, context: viewContext)
+
         return result
+    }
+
+    /// Saves a GMI estimate to Core Data if one hasn't already been saved today.
+    /// Stores the NGSP % value in `predictedValue` with `modelVersion` set to
+    /// "Bergenstal2018-NGSP" to distinguish from legacy IFCC records.
+    private static func persistGmiIfNeeded(ngsp: Double, ifcc: Double, context: NSManagedObjectContext) {
+        let calendar = Calendar.current
+        let todayStart = calendar.startOfDay(for: Date())
+        guard let todayEnd = calendar.date(byAdding: .day, value: 1, to: todayStart) else { return }
+
+        // Check if we already saved a Bergenstal GMI today
+        let request: NSFetchRequest<GmiEstimateEntity> = GmiEstimateEntity.fetchRequest()
+        request.predicate = NSPredicate(
+            format: "modelVersion == %@ AND predictionDate >= %@ AND predictionDate < %@",
+            "Bergenstal2018-NGSP", todayStart as NSDate, todayEnd as NSDate
+        )
+        request.fetchLimit = 1
+
+        let alreadySaved = (try? context.count(for: request)) ?? 0
+        guard alreadySaved == 0 else { return }
+
+        let entity = GmiEstimateEntity(context: context)
+        entity.id = UUID()
+        entity.predictedValue = ngsp
+        entity.confidenceLevel = 1.0
+        entity.predictionDate = Date()
+        entity.modelVersion = "Bergenstal2018-NGSP"
+
+        // Store IFCC value in contributing factors for reference
+        if let jsonData = try? JSONSerialization.data(
+            withJSONObject: ["gmiIfccMmolMol": ifcc],
+            options: []
+        ) {
+            entity.contributingFactorsJSON = jsonData
+        }
+
+        try? context.save()
     }
 
     /// Returns the last successfully computed GMI if it is within `staleCacheDays`,

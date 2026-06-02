@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		93508EF02FCE3B88006DC104 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 93508EEF2FCE3B88006DC104 /* ZIPFoundation */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		93CC10402F400B22003B36A4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -66,6 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				93508EF02FCE3B88006DC104 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -126,6 +131,7 @@
 			);
 			name = DiabetesHbA1cPrediction;
 			packageProductDependencies = (
+				93508EEF2FCE3B88006DC104 /* ZIPFoundation */,
 			);
 			productName = DiabetesHbA1cPrediction;
 			productReference = 93CC102D2F400B20003B36A4 /* DiabetesFeast.app */;
@@ -209,6 +215,9 @@
 			);
 			mainGroup = 93CC10242F400B20003B36A4;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				93508EEE2FCE3B88006DC104 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 93CC102E2F400B20003B36A4 /* Products */;
 			projectDirPath = "";
@@ -412,7 +421,7 @@
 				CODE_SIGN_ENTITLEMENTS = DiabetesHbA1cPrediction/DiabetesHbA1cPrediction.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 29;
 				DEVELOPMENT_TEAM = QN365Z622F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -456,7 +465,7 @@
 				CODE_SIGN_ENTITLEMENTS = DiabetesHbA1cPrediction/DiabetesHbA1cPrediction.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 29;
 				DEVELOPMENT_TEAM = QN365Z622F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -616,6 +625,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		93508EEE2FCE3B88006DC104 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.20;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		93508EEF2FCE3B88006DC104 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 93508EEE2FCE3B88006DC104 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 93CC10252F400B20003B36A4 /* Project object */;
 }

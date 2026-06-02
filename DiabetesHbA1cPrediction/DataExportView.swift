@@ -66,6 +66,10 @@ struct DataExportView: View {
                     Label("Export All Data as JSON", systemImage: "square.and.arrow.up")
                 }
 
+                Button(action: exportAsExcel) {
+                    Label("Export for Doctor (Excel)", systemImage: "tablecells")
+                }
+
                 if !exportSummary.isEmpty {
                     Text(exportSummary)
                         .font(.caption)
@@ -149,6 +153,88 @@ struct DataExportView: View {
             showShareSheet = true
         } catch {
             exportSummary = "Export failed: \(error.localizedDescription)"
+        }
+    }
+
+    // MARK: - Excel Export
+
+    private func exportAsExcel() {
+        // Build GMI rows — only include Bergenstal2018-NGSP records (not legacy)
+        let gmiRows = predictions.compactMap { pred -> XLSXExporter.GmiExportRow? in
+            guard let date = pred.predictionDate,
+                  pred.modelVersion == "Bergenstal2018-NGSP" else { return nil }
+            return XLSXExporter.GmiExportRow(
+                date: date,
+                gmiValue: pred.predictedValue,
+                confidence: pred.confidenceLevel
+            )
+        }
+
+        // Build Lab HbA1c rows (stored in GlucoseReadingEntity with source "Hospital Lab Test")
+        let labRows = glucoseReadings.compactMap { reading -> XLSXExporter.LabHbA1cExportRow? in
+            guard reading.source == "Hospital Lab Test",
+                  let date = reading.timestamp else { return nil }
+            return XLSXExporter.LabHbA1cExportRow(
+                date: date,
+                value: reading.value,
+                unit: reading.unit ?? "NGSP %"
+            )
+        }
+
+        // Build Meal rows
+        let mealRows = meals.compactMap { meal -> XLSXExporter.MealExportRow? in
+            guard let date = meal.timestamp else { return nil }
+            let foodItems = (meal.foodItems as? Set<MealFoodItemEntity>) ?? []
+            let foodNames = foodItems.compactMap { $0.foodName }.sorted().joined(separator: ", ")
+            let totalCarbs = foodItems.reduce(0.0) { $0 + $1.carbsPerServing * $1.quantity }
+            let totalProtein = foodItems.reduce(0.0) { $0 + $1.proteinPerServing * $1.quantity }
+            let totalFat = foodItems.reduce(0.0) { $0 + $1.fatPerServing * $1.quantity }
+            let totalFiber = foodItems.reduce(0.0) { $0 + $1.fiberPerServing * $1.quantity }
+            let giItems = foodItems.filter { $0.glycemicIndex > 0 }
+            let avgGI = giItems.isEmpty ? 0.0 : Double(giItems.reduce(0) { $0 + Int($1.glycemicIndex) }) / Double(giItems.count)
+
+            return XLSXExporter.MealExportRow(
+                date: date,
+                name: meal.name ?? "",
+                mealType: meal.mealType ?? "",
+                foods: foodNames,
+                totalCarbs: totalCarbs,
+                totalProtein: totalProtein,
+                totalFat: totalFat,
+                totalFiber: totalFiber,
+                totalCalories: meal.calories,
+                avgGlycemicIndex: avgGI
+            )
+        }
+
+        // Build Exercise rows
+        let exerciseRows = exercises.compactMap { ex -> XLSXExporter.ExerciseExportRow? in
+            guard let date = ex.startDate else { return nil }
+            return XLSXExporter.ExerciseExportRow(
+                date: date,
+                type: ex.type ?? "",
+                durationMinutes: ex.duration,
+                distance: ex.distance,
+                intensity: ex.intensity,
+                caloriesBurned: ex.caloriesBurned,
+                notes: ex.notes ?? ""
+            )
+        }
+
+        do {
+            let url = try XLSXExporter.export(
+                gmiEstimates: gmiRows,
+                labHbA1cReadings: labRows,
+                meals: mealRows,
+                exercises: exerciseRows
+            )
+            let sizeKB = (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int)
+                .map { Double($0) / 1024.0 } ?? 0
+            exportSummary = String(format: "Ready: %@ (%.1f KB)", url.lastPathComponent, sizeKB)
+            exportURL = url
+            showShareSheet = true
+        } catch {
+            exportSummary = "Excel export failed: \(error.localizedDescription)"
         }
     }
 

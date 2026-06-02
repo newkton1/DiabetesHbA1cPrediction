@@ -88,5 +88,42 @@ struct PersistenceController {
         // Use a sensible merge policy: in-memory wins over store
         // in the rare case of a conflict.
         container.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+
+        // One-time data migrations
+        if !inMemory {
+            Self.purgeLegacyGmiRecords(context: container.viewContext)
+        }
+    }
+
+    // MARK: - One-Time Migrations
+
+    /// Removes legacy GmiEstimateEntity records from the old multi-factor
+    /// prediction engine (modelVersion "1.0.0") that stored IFCC mmol/mol
+    /// values in predictedValue. New Bergenstal2018 records store NGSP %.
+    private static let legacyGmiPurgedKey = "legacyGmiRecordsPurged"
+
+    private static func purgeLegacyGmiRecords(context: NSManagedObjectContext) {
+        guard !UserDefaults.standard.bool(forKey: legacyGmiPurgedKey) else { return }
+
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "GmiEstimateEntity")
+        request.predicate = NSPredicate(format: "modelVersion == %@ OR modelVersion == nil", "1.0.0")
+        let batchDelete = NSBatchDeleteRequest(fetchRequest: request)
+        batchDelete.resultType = .resultTypeCount
+
+        do {
+            let result = try context.execute(batchDelete) as? NSBatchDeleteResult
+            let count = result?.result as? Int ?? 0
+            if count > 0 {
+                context.reset()
+                #if DEBUG
+                print("Purged \(count) legacy GmiEstimateEntity records (old prediction engine)")
+                #endif
+            }
+            UserDefaults.standard.set(true, forKey: legacyGmiPurgedKey)
+        } catch {
+            #if DEBUG
+            print("Failed to purge legacy GMI records: \(error.localizedDescription)")
+            #endif
+        }
     }
 }
