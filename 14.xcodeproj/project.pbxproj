@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		930E568B2FD26A3800BE4C7F /* StoreKitConfig.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 930E568A2FD26A3800BE4C7F /* StoreKitConfig.storekit */; };
 		93508EF02FCE3B88006DC104 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 93508EEF2FCE3B88006DC104 /* ZIPFoundation */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		930E568A2FD26A3800BE4C7F /* StoreKitConfig.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = StoreKitConfig.storekit; sourceTree = "<group>"; };
 		93CC102D2F400B20003B36A4 /* DiabetesFeast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiabetesFeast.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		93CC103F2F400B22003B36A4 /* DiabetesHbA1cPredictionTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DiabetesHbA1cPredictionTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		93CC10492F400B22003B36A4 /* DiabetesHbA1cPredictionUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DiabetesHbA1cPredictionUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -94,6 +96,7 @@
 		93CC10242F400B20003B36A4 = {
 			isa = PBXGroup;
 			children = (
+				930E568A2FD26A3800BE4C7F /* StoreKitConfig.storekit */,
 				93CC102F2F400B20003B36A4 /* DiabetesHbA1cPrediction */,
 				93CC10422F400B22003B36A4 /* DiabetesHbA1cPredictionTests */,
 				93CC104C2F400B22003B36A4 /* DiabetesHbA1cPredictionUITests */,
@@ -235,6 +238,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				930E568B2FD26A3800BE4C7F /* StoreKitConfig.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

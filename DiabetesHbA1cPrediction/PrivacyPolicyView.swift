@@ -2,65 +2,61 @@
 //  PrivacyPolicyView.swift
 //  DiabetesHbA1cPrediction
 //
-//  In-app privacy policy explaining how the app handles health data.
+//  Loads the live privacy policy from GitHub Pages so there is a single
+//  source of truth. Updating the GitHub page automatically updates the
+//  in-app view — no code change required.
 //
 
 import SwiftUI
+import WebKit
 
 struct PrivacyPolicyView: View {
+
+    private let url = URL(string: "https://newkton1.github.io/diabetes-feast-privacy/")!
+
     var body: some View {
-        List {
-            Section {
-                Text("This privacy policy explains how Diabetes Feast handles your data. Your privacy and the security of your health information are important to us.")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
+        PrivacyWebView(url: url)
+            .navigationTitle("Privacy Policy")
+            .navigationBarTitleDisplayMode(.inline)
+    }
+}
 
-            Section(header: Text("What Data We Read")) {
-                Text("The app reads the following from Apple Health with your permission: blood glucose readings, weight, height, age, and biological sex. This data is used solely to generate personalised GMI estimates.")
-                    .font(.subheadline)
-            }
+// MARK: - WKWebView wrapper
 
-            Section(header: Text("What We Do Not Do")) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Label("The app never writes data to Apple Health.", systemImage: "xmark.circle")
-                    Label("The app does not transmit your data to any external server.", systemImage: "xmark.circle")
-                    Label("The app does not use analytics or advertising frameworks.", systemImage: "xmark.circle")
-                }
-                .font(.subheadline)
-            }
+struct PrivacyWebView: UIViewRepresentable {
 
-            Section(header: Text("Data Storage")) {
-                Text("All data is stored locally on your device using encrypted Core Data storage with iOS file protection. Your health information never leaves your device unless you explicitly choose to share it.")
-                    .font(.subheadline)
-            }
+    let url: URL
 
-            Section(header: Text("Sharing")) {
-                Text("You can export a summary of your GMI estimates using the Share button. Before sharing, the app will ask you to confirm because the export contains sensitive health information. No data is shared without your explicit action.")
-                    .font(.subheadline)
-            }
+    func makeUIView(context: Context) -> WKWebView {
+        let config = WKWebViewConfiguration()
+        // Always fetch fresh content — never serve a stale cached page.
+        let webView = WKWebView(frame: .zero, configuration: config)
+        webView.navigationDelegate = context.coordinator
+        return webView
+    }
 
-            Section(header: Text("Your Control")) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Label("Revoke HealthKit access at any time in Settings > Health > Data Access & Devices.", systemImage: "hand.raised")
-                    Label("Delete all app data by uninstalling the app.", systemImage: "trash")
-                }
-                .font(.subheadline)
-            }
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        var request = URLRequest(url: url)
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        webView.load(request)
+    }
 
-            Section(header: Text("Wellness App Disclaimer")) {
-                Text("Diabetes Feast is a wellness application that provides estimates for personal tracking and educational purposes only. It does not diagnose medical conditions, prescribe treatments, or replace laboratory tests. This app is not a medical device. Always consult a qualified healthcare provider for medical advice about your health.")
-                    .font(.subheadline)
-            }
+    func makeCoordinator() -> Coordinator { Coordinator() }
 
-            Section {
-                Text("Last updated: March 2026")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+    class Coordinator: NSObject, WKNavigationDelegate {
+        /// Open any tapped links (e.g. the mailto: contact link) in Safari
+        /// rather than trying to navigate within the web view.
+        func webView(
+            _ webView: WKWebView,
+            decidePolicyFor navigationAction: WKNavigationAction
+        ) async -> WKNavigationActionPolicy {
+            if navigationAction.navigationType == .linkActivated,
+               let url = navigationAction.request.url {
+                await UIApplication.shared.open(url)
+                return .cancel
             }
+            return .allow
         }
-        .navigationTitle("Privacy Policy")
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

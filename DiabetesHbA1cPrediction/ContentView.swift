@@ -8,6 +8,15 @@ struct ContentView: View {
     /// Tracks whether we've already reset the tab this launch cycle
     @State private var hasResetOnLaunch = false
 
+    // MARK: - Subscription gate
+    @ObservedObject private var subscriptionManager = SubscriptionManager.shared
+    @ObservedObject private var trialManager        = TrialManager.shared
+
+    /// True when the paywall should be shown
+    private var shouldShowPaywall: Bool {
+        !subscriptionManager.isSubscribed && !trialManager.isInTrial
+    }
+
     enum Tab: String, CaseIterable {
         case dashboard = "Dashboard"
         case meals     = "What if?"
@@ -50,7 +59,17 @@ struct ContentView: View {
                 .tag(Tab.profile)
         }
         .tint(selectedTab == .meals ? .planAccent : .blue)
+        .fullScreenCover(isPresented: Binding(
+            get: { shouldShowPaywall },
+            set: { _ in }   // dismissal only via successful purchase
+        )) {
+            PaywallView()
+        }
         .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                trialManager.refresh()
+                Task { await subscriptionManager.refreshSubscriptionStatus() }
+            }
             // Reset to dashboard exactly once per cold launch.
             // @State already initialises hasResetOnLaunch to false on a fresh
             // process launch, so we do NOT clear it when the app backgrounds.

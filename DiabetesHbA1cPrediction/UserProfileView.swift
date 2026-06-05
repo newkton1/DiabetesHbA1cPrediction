@@ -77,6 +77,9 @@ struct UserProfileView: View {
     @State private var showShareWarning = false
     @State private var showShareSheet = false
     @State private var shareSummaryText = ""
+    @State private var showExportJSONWarning = false
+    @State private var showExportExcelWarning = false
+    @State private var navigateToExport = false
 
     // Demo data states
     @State private var isLoadingDemoData = false
@@ -325,14 +328,18 @@ struct UserProfileView: View {
             // MARK: - Share Summary
             Section(header: Text("Share")) {
                 Button(action: { showShareWarning = true }) {
-                    Label("Share GMI Summary", systemImage: "square.and.arrow.up")
+                    Label("Quick GMI Text Summary", systemImage: "square.and.arrow.up")
                 }
             }
 
             // MARK: - Data Management
             Section(header: Text("Data Management")) {
-                NavigationLink(destination: DataExportView()) {
+                Button(action: { showExportJSONWarning = true }) {
                     Label("Export All Data", systemImage: "square.and.arrow.up")
+                        .foregroundColor(.primary)
+                }
+                .navigationDestination(isPresented: $navigateToExport) {
+                    DataExportView()
                 }
                 NavigationLink(destination: DataImportView()) {
                     Label("Import Data from JSON", systemImage: "square.and.arrow.down")
@@ -487,6 +494,14 @@ struct UserProfileView: View {
             }
         } message: {
             Text("This will share your glucose and GMI data with a third party of your choosing (e.g. email, messaging app). This export contains sensitive personal health information. Are you sure you want to continue?")
+        }
+        .alert("Export Health Data?", isPresented: $showExportJSONWarning) {
+            Button("Cancel", role: .cancel) { }
+            Button("Continue") {
+                navigateToExport = true
+            }
+        } message: {
+            Text("The export screen contains all your health data including glucose readings, meals, exercise sessions, and your personal profile. This data is sensitive — only share it with people you trust.")
         }
         .sheet(isPresented: $showShareSheet) {
             ShareSheetView(activityItems: [shareSummaryText])
