@@ -14,7 +14,11 @@ struct ContentView: View {
 
     /// True when the paywall should be shown
     private var shouldShowPaywall: Bool {
-        !subscriptionManager.isSubscribed && !trialManager.isInTrial
+        #if DEBUG
+        return false   // always bypass paywall in debug/Xcode builds
+        #else
+        return !subscriptionManager.isSubscribed && !trialManager.isInTrial
+        #endif
     }
 
     enum Tab: String, CaseIterable {

@@ -16,6 +16,7 @@ import UniformTypeIdentifiers
 struct DataImportView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
+    // JSON import state
     @State private var showFilePicker = false
     @State private var isImporting = false
     @State private var importResult: DataImportResult?
@@ -199,6 +200,8 @@ struct DataImportView: View {
             performImport(from: url)
         }
     }
+
+    // MARK: - JSON Handling
 
     private func performImport(from url: URL) {
         isImporting = true

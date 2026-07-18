@@ -9,7 +9,7 @@ import Combine
 /// - Authorization requests for HealthKit data access
 /// - Fetching workout and exercise data
 /// - Fetching step count and active calories
-/// - Fetching blood glucose readings (from FreeStyle Libre 2 and other connected monitors)
+/// - Fetching blood glucose readings (from CGMs and other connected monitors)
 /// - Syncing HealthKit data to CoreData for local persistence
 ///
 /// IMPORTANT: Privacy considerations
@@ -58,6 +58,17 @@ class HealthKitManager: ObservableObject {
 
     /// Tracks whether the glucose observer has already been started
     private var isGlucoseObserverRunning = false
+
+    /// Minimum time between consecutive observer-triggered syncs. HealthKit's
+    /// `.immediate` background delivery can call the observer far more often
+    /// than a genuinely new reading exists; without this throttle, every
+    /// fire forces a full Core Data merge and a full SwiftUI re-render of
+    /// the entire glucose/meal/exercise history (a major contributor to the
+    /// long-session memory growth seen in Instruments).
+    private let minimumObserverSyncInterval: TimeInterval = 30
+
+    /// Timestamp of the last observer-triggered sync that actually ran.
+    private var lastObserverSyncDate: Date?
 
     // MARK: - Initialization
 
@@ -120,12 +131,32 @@ class HealthKitManager: ObservableObject {
                     finish()
                     return
                 }
+
+                // Coalesce rapid-fire notifications. HealthKit can call this
+                // observer far more often than new data actually exists, and
+                // each pass forces every @FetchRequest-driven view to fully
+                // re-fetch and re-render. Skipping redundant fires keeps that
+                // churn bounded. (We still call `finish()` immediately so
+                // HealthKit doesn't think we're stalled.)
+                if let last = self.lastObserverSyncDate,
+                   Date().timeIntervalSince(last) < self.minimumObserverSyncInterval {
+                    finish()
+                    return
+                }
+                self.lastObserverSyncDate = Date()
+
                 let result = await self.syncGlucoseToCorData(context: context, days: 1)
                 #if DEBUG
                 if result.newImported > 0 {
                     print("[HealthKit] Auto-synced \(result.newImported) new glucose reading(s).")
                 }
                 #endif
+
+                // Let Core Data fault objects that aren't currently displayed
+                // back out of memory instead of holding the entire history
+                // resident for the lifetime of the context.
+                context.refreshAllObjects()
+
                 // Tell HealthKit we're done processing
                 finish()
             }
@@ -389,7 +420,7 @@ class HealthKitManager: ObservableObject {
     /// Fetches blood glucose readings from HealthKit.
     ///
     /// This method retrieves glucose samples, which may come from:
-    /// - FreeStyle Libre 2 continuous glucose monitor
+    /// - Dexcom G7, FreeStyle Libre 3, or any CGM writing to Apple Health
     /// - Dexcom G6/G7 continuous glucose monitor
     /// - Other connected glucose monitors that integrate with HealthKit
     /// - Manual glucose entries by the user

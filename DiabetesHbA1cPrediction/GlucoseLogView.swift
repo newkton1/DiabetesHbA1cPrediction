@@ -34,20 +34,34 @@ struct GlucoseLogView: View {
         verticalSizeClass == .regular && horizontalSizeClass == .compact
     }
 
-    @FetchRequest(
-        entity: GlucoseReadingEntity.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \GlucoseReadingEntity.timestamp, ascending: false)]
-    ) var glucoseReadings: FetchedResults<GlucoseReadingEntity>
+    // Note: fetchBatchSize doesn't limit *which* readings are available —
+    // full history is still reachable (the chevron navigation depends on
+    // that) — it just tells Core Data to page results into memory in
+    // chunks instead of materialising every historical object at once,
+    // which was a major contributor to the long-session memory growth.
+    @FetchRequest(fetchRequest: {
+        let request = GlucoseReadingEntity.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \GlucoseReadingEntity.timestamp, ascending: false)]
+        request.fetchBatchSize = 50
+        return request
+    }())
+    var glucoseReadings: FetchedResults<GlucoseReadingEntity>
 
-    @FetchRequest(
-        entity: MealEntity.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \MealEntity.timestamp, ascending: false)]
-    ) var meals: FetchedResults<MealEntity>
+    @FetchRequest(fetchRequest: {
+        let request = MealEntity.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \MealEntity.timestamp, ascending: false)]
+        request.fetchBatchSize = 50
+        return request
+    }())
+    var meals: FetchedResults<MealEntity>
 
-    @FetchRequest(
-        entity: ExerciseSessionEntity.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \ExerciseSessionEntity.startDate, ascending: false)]
-    ) var exerciseSessions: FetchedResults<ExerciseSessionEntity>
+    @FetchRequest(fetchRequest: {
+        let request = ExerciseSessionEntity.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \ExerciseSessionEntity.startDate, ascending: false)]
+        request.fetchBatchSize = 50
+        return request
+    }())
+    var exerciseSessions: FetchedResults<ExerciseSessionEntity>
 
     // Interactive chart state
     @State private var chartDaySetting: Int = 3  // 1, 3, or 7
@@ -68,6 +82,8 @@ struct GlucoseLogView: View {
     @State private var selectedReadingDate: Date? = nil
 
     @State private var showAddSheet = false
+    @State private var showCGMSetup = false
+    @State private var showDemoAlert = false
     @State private var showSyncAlert = false
     @State private var syncMessage = ""
     @State private var isSyncing = false
@@ -86,13 +102,16 @@ struct GlucoseLogView: View {
     let trendOptions = ["stable", "rising", "falling", "rising rapidly", "falling rapidly"]
 
     var body: some View {
-        if isPortrait {
-            NavigationStack {
-                portraitBody
+        Group {
+            if isPortrait {
+                NavigationStack {
+                    portraitBody
+                }
+            } else {
+                landscapeBody
             }
-        } else {
-            landscapeBody
         }
+        .demoRedirect(isPresented: $showDemoAlert)
     }
 
     // MARK: - Spike ↔ Meal Correlations
@@ -156,7 +175,20 @@ struct GlucoseLogView: View {
                     .disabled(isSyncing)
                     .accessibilityLabel(isSyncing ? "Syncing with Apple Health" : syncSuccess ? "Health data synced successfully" : "Sync from Apple Health")
 
-                    Button(action: { showAddSheet = true }) {
+                    Button(action: { showCGMSetup = true }) {
+                        Image(systemName: "sensor.tag.radiowaves.forward.fill")
+                            .font(.subheadline)
+                            .foregroundColor(.blue)
+                            .accessibilityLabel("CGM setup")
+                    }
+
+                    Button(action: {
+                        if DemoDataManager.isDemoDataLoaded {
+                            showDemoAlert = true
+                        } else {
+                            showAddSheet = true
+                        }
+                    }) {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
                             .foregroundColor(.blue)
@@ -167,6 +199,9 @@ struct GlucoseLogView: View {
         }
         .sheet(isPresented: $showAddSheet) {
             AddGlucoseReadingSheet(isPresented: $showAddSheet, moc: moc)
+        }
+        .sheet(isPresented: $showCGMSetup) {
+            CGMSetupView()
         }
         .alert("Sync Status", isPresented: $showSyncAlert) {
             Button("OK") { }
@@ -232,7 +267,13 @@ struct GlucoseLogView: View {
                         .disabled(isSyncing)
                         .accessibilityLabel(isSyncing ? "Syncing with Apple Health" : syncSuccess ? "Health data synced successfully" : "Sync from Apple Health")
 
-                        Button(action: { showAddSheet = true }) {
+                        Button(action: {
+                            if DemoDataManager.isDemoDataLoaded {
+                                showDemoAlert = true
+                            } else {
+                                showAddSheet = true
+                            }
+                        }) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.title3)
                                 .foregroundColor(.blue)
@@ -1519,7 +1560,9 @@ struct GlucoseLogView: View {
     /// Returns the appropriate SF Symbol for a source value
     func sourceIcon(for source: String) -> String {
         switch source.lowercased() {
-        case "freestyle libre 2":
+        case "freestyle libre 2",   // legacy stored data — sensor discontinued Sept 2025
+             "continuous glucose monitor",
+             "cgm":
             return "waveform.circle.fill"
         case "manual finger stick":
             return "drop.fill"
@@ -1539,7 +1582,7 @@ struct GlucoseLogView: View {
         return formatter.string(from: date)
     }
 
-    /// Syncs glucose data from HealthKit (FreeStyle Libre 2 / manual entries)
+    /// Syncs glucose data from HealthKit (CGM and manual entries)
     func syncFromHealth() {
         isSyncing = true
 
@@ -1557,7 +1600,7 @@ struct GlucoseLogView: View {
                 return
             }
 
-            // Sync glucose readings from HealthKit to CoreData (includes FreeStyle Libre 2 data)
+            // Sync glucose readings from HealthKit to CoreData (CGM and manual entries)
             let syncResult = await healthKitManager.syncGlucoseToCorData(context: moc, days: 30)
 
             await MainActor.run {

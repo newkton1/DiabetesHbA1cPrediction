@@ -19,6 +19,7 @@ struct ExerciseLogView: View {
     ) var exercises: FetchedResults<ExerciseSessionEntity>
 
     @State private var showAddSheet = false
+    @State private var showDemoAlert = false
     @State private var showSyncAlert = false
     @State private var syncMessage = ""
     @State private var isSyncing = false
@@ -53,7 +54,13 @@ struct ExerciseLogView: View {
                             .fixedSize(horizontal: true, vertical: false)
                     }
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button(action: { showAddSheet = true }) {
+                        Button(action: {
+                            if DemoDataManager.isDemoDataLoaded {
+                                showDemoAlert = true
+                            } else {
+                                showAddSheet = true
+                            }
+                        }) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.title2)
                                 .foregroundColor(.blue)
@@ -99,6 +106,7 @@ struct ExerciseLogView: View {
                 }
             }
         }
+        .demoRedirect(isPresented: $showDemoAlert)
     }
 
     // MARK: - Portrait Content
@@ -166,7 +174,13 @@ struct ExerciseLogView: View {
                 Text("Exercise Log")
                     .font(.title3.bold())
                 Spacer()
-                Button(action: { showAddSheet = true }) {
+                Button(action: {
+                    if DemoDataManager.isDemoDataLoaded {
+                        showDemoAlert = true
+                    } else {
+                        showAddSheet = true
+                    }
+                }) {
                     Image(systemName: "plus.circle.fill")
                         .font(.title2)
                         .foregroundColor(.blue)

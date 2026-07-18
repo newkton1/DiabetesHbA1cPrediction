@@ -9,7 +9,7 @@
     "protein": 12.7,
     "fat": 6.0,
     "fiber": 7.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 35
   },
   {
     "name": "あわ　精白粒",
@@ -21,7 +21,7 @@
     "protein": 11.2,
     "fat": 4.4,
     "fiber": 3.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "あわ　あわもち",
@@ -45,7 +45,7 @@
     "protein": 13.7,
     "fat": 5.7,
     "fiber": 9.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "おおむぎ　七分つき押麦",
@@ -57,7 +57,7 @@
     "protein": 10.9,
     "fat": 2.1,
     "fiber": 10.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 42
   },
   {
     "name": "おおむぎ　押麦　乾",
@@ -69,7 +69,7 @@
     "protein": 6.7,
     "fat": 1.5,
     "fiber": 12.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 35
   },
   {
     "name": "おおむぎ　押麦　めし",
@@ -81,7 +81,7 @@
     "protein": 2.2,
     "fat": 0.5,
     "fiber": 4.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 37
   },
   {
     "name": "おおむぎ　米粒麦",
@@ -93,7 +93,7 @@
     "protein": 7.0,
     "fat": 2.1,
     "fiber": 8.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 35
   },
   {
     "name": "おおむぎ　大麦めん　乾",
@@ -105,7 +105,7 @@
     "protein": 12.9,
     "fat": 1.7,
     "fiber": 6.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 35
   },
   {
     "name": "おおむぎ　大麦めん　ゆで",
@@ -117,7 +117,7 @@
     "protein": 4.8,
     "fat": 0.6,
     "fiber": 2.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 37
   },
   {
     "name": "おおむぎ　麦こがし",
@@ -129,7 +129,7 @@
     "protein": 12.5,
     "fat": 5.0,
     "fiber": 15.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "キヌア　玄穀",
@@ -141,7 +141,7 @@
     "protein": 13.4,
     "fat": 3.2,
     "fiber": 6.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 53
   },
   {
     "name": "きび　精白粒",
@@ -153,7 +153,7 @@
     "protein": 11.3,
     "fat": 3.3,
     "fiber": 1.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "こむぎ　［玄穀］　国産　普通",
@@ -165,7 +165,7 @@
     "protein": 10.8,
     "fat": 3.1,
     "fiber": 14.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "こむぎ　［玄穀］　輸入　軟質",
@@ -177,7 +177,7 @@
     "protein": 10.1,
     "fat": 3.3,
     "fiber": 11.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "こむぎ　［玄穀］　輸入　硬質",
@@ -189,7 +189,7 @@
     "protein": 13.0,
     "fat": 3.0,
     "fiber": 11.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "こむぎ　［小麦粉］　薄力粉　1等",
@@ -201,7 +201,7 @@
     "protein": 8.3,
     "fat": 1.5,
     "fiber": 2.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 85
   },
   {
     "name": "こむぎ　［小麦粉］　薄力粉　2等",
@@ -213,7 +213,7 @@
     "protein": 9.3,
     "fat": 1.9,
     "fiber": 2.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 85
   },
   {
     "name": "こむぎ　［小麦粉］　中力粉　1等",
@@ -225,7 +225,7 @@
     "protein": 9.0,
     "fat": 1.6,
     "fiber": 2.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 75
   },
   {
     "name": "こむぎ　［小麦粉］　中力粉　2等",
@@ -237,7 +237,7 @@
     "protein": 9.7,
     "fat": 1.8,
     "fiber": 2.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 85
   },
   {
     "name": "こむぎ　［小麦粉］　強力粉　1等",
@@ -249,7 +249,7 @@
     "protein": 11.8,
     "fat": 1.5,
     "fiber": 2.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 85
   },
   {
     "name": "こむぎ　［小麦粉］　強力粉　2等",
@@ -261,7 +261,7 @@
     "protein": 12.6,
     "fat": 1.7,
     "fiber": 2.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 85
   },
   {
     "name": "こむぎ　［小麦粉］　強力粉　全粒粉",
@@ -285,7 +285,7 @@
     "protein": 10.1,
     "fat": 1.9,
     "fiber": 2.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 80
   },
   {
     "name": "こむぎ　［小麦粉］　プレミックス粉　ホットケーキ用",
@@ -309,7 +309,7 @@
     "protein": 10.2,
     "fat": 1.2,
     "fiber": 2.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 80
   },
   {
     "name": "こむぎ　［小麦粉］　プレミックス粉　天ぷら用",
@@ -321,7 +321,7 @@
     "protein": 8.8,
     "fat": 1.3,
     "fiber": 2.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 85
   },
   {
     "name": "こむぎ　［小麦粉］　プレミックス粉　天ぷら用　バッター",
@@ -333,7 +333,7 @@
     "protein": 3.3,
     "fat": 0.5,
     "fiber": 1.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 80
   },
   {
     "name": "こむぎ　［小麦粉］　プレミックス粉　天ぷら用　バッター　揚げ",
@@ -441,7 +441,7 @@
     "protein": 9.2,
     "fat": 3.8,
     "fiber": 3.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 74
   },
   {
     "name": "こむぎ　［パン類］　バンズ",
@@ -453,7 +453,7 @@
     "protein": 10.4,
     "fat": 4.8,
     "fiber": 4.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 74
   },
   {
     "name": "こむぎ　［パン類］　乾パン",
@@ -465,7 +465,7 @@
     "protein": 9.5,
     "fat": 4.4,
     "fiber": 3.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 80
   },
   {
     "name": "こむぎ　［パン類］　フランスパン",
@@ -477,7 +477,7 @@
     "protein": 9.4,
     "fat": 1.3,
     "fiber": 2.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 93
   },
   {
     "name": "こむぎ　［パン類］　ライ麦パン",
@@ -561,7 +561,7 @@
     "protein": 8.2,
     "fat": 12.6,
     "fiber": 2.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "こむぎ　［パン類］　イングリッシュマフィン",
@@ -573,7 +573,7 @@
     "protein": 8.1,
     "fat": 3.6,
     "fiber": 1.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 77
   },
   {
     "name": "こむぎ　［パン類］　ナン",
@@ -585,7 +585,7 @@
     "protein": 10.3,
     "fat": 3.4,
     "fiber": 2.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 75
   },
   {
     "name": "こむぎ　［パン類］　ベーグル",
@@ -597,7 +597,7 @@
     "protein": 9.6,
     "fat": 2.0,
     "fiber": 2.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "こむぎ　［うどん・そうめん類］　うどん　生",
@@ -957,7 +957,7 @@
     "protein": 10.9,
     "fat": 18.5,
     "fiber": 5.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　塩味　調理後全体　（添付調味料等を含むもの）",
@@ -981,7 +981,7 @@
     "protein": 3.8,
     "fat": 7.7,
     "fiber": 2.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　しょうゆ味　乾　（添付調味料等を含むもの）",
@@ -993,7 +993,7 @@
     "protein": 10.0,
     "fat": 19.1,
     "fiber": 6.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　しょうゆ味　調理後全体　（添付調味料等を含むもの）",
@@ -1017,7 +1017,7 @@
     "protein": 3.0,
     "fat": 5.8,
     "fiber": 1.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "こむぎ　［即席めん類］　中華スタイル即席カップめん　油揚げ　焼きそば　乾　（添付調味料等を含むもの）",
@@ -1053,7 +1053,7 @@
     "protein": 9.2,
     "fat": 5.8,
     "fiber": 6.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "こむぎ　［即席めん類］　中華スタイル即席カップめん　非油揚げ　調理後全体　（添付調味料等を含むもの）",
@@ -1065,7 +1065,7 @@
     "protein": 2.5,
     "fat": 2.1,
     "fiber": 1.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 57
   },
   {
     "name": "こむぎ　［即席めん類］　中華スタイル即席カップめん　非油揚げ　調理後のめん　（スープを残したもの）",
@@ -1077,7 +1077,7 @@
     "protein": 3.4,
     "fat": 1.3,
     "fiber": 2.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 57
   },
   {
     "name": "こむぎ　［即席めん類］　和風スタイル即席カップめん　油揚げ　乾　（添付調味料等を含むもの）",
@@ -1089,7 +1089,7 @@
     "protein": 10.9,
     "fat": 19.8,
     "fiber": 6.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "こむぎ　［即席めん類］　和風スタイル即席カップめん　油揚げ　調理後全体　（添付調味料等を含むもの）",
@@ -1113,7 +1113,7 @@
     "protein": 2.7,
     "fat": 7.2,
     "fiber": 2.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 57
   },
   {
     "name": "こむぎ　［マカロニ・スパゲッティ類］　マカロニ・スパゲッティ　乾",
@@ -1125,7 +1125,7 @@
     "protein": 12.9,
     "fat": 1.8,
     "fiber": 5.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "こむぎ　［マカロニ・スパゲッティ類］　マカロニ・スパゲッティ　ゆで",
@@ -1137,7 +1137,7 @@
     "protein": 5.8,
     "fat": 0.9,
     "fiber": 3.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "こむぎ　［マカロニ・スパゲッティ類］　マカロニ・スパゲッティ　ソテー",
@@ -1149,7 +1149,7 @@
     "protein": 5.5,
     "fat": 5.8,
     "fiber": 2.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 50
   },
   {
     "name": "こむぎ　［マカロニ・スパゲッティ類］　生パスタ　生",
@@ -1161,7 +1161,7 @@
     "protein": 7.8,
     "fat": 1.9,
     "fiber": 1.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 50
   },
   {
     "name": "こむぎ　［ふ類］　生ふ",
@@ -1233,7 +1233,7 @@
     "protein": 32.0,
     "fat": 11.6,
     "fiber": 14.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 40
   },
   {
     "name": "こむぎ　［その他］　小麦たんぱく　粉末状",
@@ -1293,7 +1293,7 @@
     "protein": 9.3,
     "fat": 1.4,
     "fiber": 2.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "こむぎ　［その他］　しゅうまいの皮　生",
@@ -1305,7 +1305,7 @@
     "protein": 8.3,
     "fat": 1.4,
     "fiber": 2.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "こむぎ　［その他］　春巻きの皮　生",
@@ -1341,7 +1341,7 @@
     "protein": 9.1,
     "fat": 3.0,
     "fiber": 2.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "こむぎ　［その他］　ちくわぶ",
@@ -1365,7 +1365,7 @@
     "protein": 11.0,
     "fat": 5.1,
     "fiber": 3.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 75
   },
   {
     "name": "こむぎ　［その他］　パン粉　半生",
@@ -1377,7 +1377,7 @@
     "protein": 12.5,
     "fat": 5.8,
     "fiber": 3.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 75
   },
   {
     "name": "こむぎ　［その他］　パン粉　乾燥",
@@ -1389,7 +1389,7 @@
     "protein": 14.9,
     "fat": 4.1,
     "fiber": 6.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 75
   },
   {
     "name": "こむぎ　［その他］　冷めん　生",
@@ -1401,7 +1401,7 @@
     "protein": 3.9,
     "fat": 0.7,
     "fiber": 1.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "こめ　［水稲穀粒］　玄米",
@@ -1425,7 +1425,7 @@
     "protein": 6.5,
     "fat": 1.8,
     "fiber": 1.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 85
   },
   {
     "name": "こめ　［水稲穀粒］　七分つき米",
@@ -1437,7 +1437,7 @@
     "protein": 6.3,
     "fat": 1.5,
     "fiber": 0.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "こめ　［水稲穀粒］　精白米　うるち米",
@@ -1485,7 +1485,7 @@
     "protein": 6.5,
     "fat": 2.0,
     "fiber": 1.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "こめ　［水稲穀粒］　発芽玄米",
@@ -1509,7 +1509,7 @@
     "protein": 8.5,
     "fat": 3.3,
     "fiber": 6.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 54
   },
   {
     "name": "こめ　［水稲穀粒］　黒米",
@@ -1521,7 +1521,7 @@
     "protein": 7.8,
     "fat": 3.2,
     "fiber": 5.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "こめ　［水稲めし］　玄米",
@@ -1545,7 +1545,7 @@
     "protein": 2.7,
     "fat": 0.6,
     "fiber": 0.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "こめ　［水稲めし］　七分つき米",
@@ -1557,7 +1557,7 @@
     "protein": 2.6,
     "fat": 0.5,
     "fiber": 0.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 68
   },
   {
     "name": "こめ　［水稲めし］　精白米　インディカ米",
@@ -1605,7 +1605,7 @@
     "protein": 2.7,
     "fat": 0.6,
     "fiber": 0.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "こめ　［水稲めし］　発芽玄米",
@@ -1629,7 +1629,7 @@
     "protein": 3.8,
     "fat": 1.3,
     "fiber": 3.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 54
   },
   {
     "name": "こめ　［水稲めし］　黒米",
@@ -1641,7 +1641,7 @@
     "protein": 3.6,
     "fat": 1.4,
     "fiber": 3.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "こめ　［水稲軟めし］　精白米",
@@ -1821,7 +1821,7 @@
     "protein": 9.6,
     "fat": 1.8,
     "fiber": 1.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "こめ　［陸稲穀粒］　七分つき米",
@@ -1833,7 +1833,7 @@
     "protein": 9.5,
     "fat": 1.5,
     "fiber": 0.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "こめ　［陸稲穀粒］　精白米",
@@ -1869,7 +1869,7 @@
     "protein": 3.8,
     "fat": 0.6,
     "fiber": 0.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "こめ　［陸稲めし］　七分つき米",
@@ -1881,7 +1881,7 @@
     "protein": 3.6,
     "fat": 0.5,
     "fiber": 0.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 68
   },
   {
     "name": "こめ　［陸稲めし］　精白米",
@@ -2169,7 +2169,7 @@
     "protein": 13.4,
     "fat": 19.6,
     "fiber": 20.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 25
   },
   {
     "name": "そば　そば粉　全層粉",
@@ -2301,7 +2301,7 @@
     "protein": 8.6,
     "fat": 5.0,
     "fiber": 9.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "とうもろこし　玄穀　白色種",
@@ -2313,7 +2313,7 @@
     "protein": 8.6,
     "fat": 5.0,
     "fiber": 9.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "とうもろこし　コーンミール　黄色種",
@@ -2325,7 +2325,7 @@
     "protein": 8.3,
     "fat": 4.0,
     "fiber": 8.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "とうもろこし　コーンミール　白色種",
@@ -2337,7 +2337,7 @@
     "protein": 8.3,
     "fat": 4.0,
     "fiber": 8.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "とうもろこし　コーングリッツ　黄色種",
@@ -2349,7 +2349,7 @@
     "protein": 8.2,
     "fat": 1.0,
     "fiber": 2.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "とうもろこし　コーングリッツ　白色種",
@@ -2361,7 +2361,7 @@
     "protein": 8.2,
     "fat": 1.0,
     "fiber": 2.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "とうもろこし　コーンフラワー　黄色種",
@@ -2373,7 +2373,7 @@
     "protein": 6.6,
     "fat": 2.8,
     "fiber": 1.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 80
   },
   {
     "name": "とうもろこし　コーンフラワー　白色種",
@@ -2385,7 +2385,7 @@
     "protein": 6.6,
     "fat": 2.8,
     "fiber": 1.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 80
   },
   {
     "name": "とうもろこし　ジャイアントコーン　フライ　味付け",
@@ -2409,7 +2409,7 @@
     "protein": 10.2,
     "fat": 22.8,
     "fiber": 9.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "とうもろこし　コーンフレーク",
@@ -2421,7 +2421,7 @@
     "protein": 7.8,
     "fat": 1.7,
     "fiber": 2.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 79
   },
   {
     "name": "はとむぎ　精白粒",
@@ -2445,7 +2445,7 @@
     "protein": 9.4,
     "fat": 3.3,
     "fiber": 4.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 75
   },
   {
     "name": "もろこし　玄穀",
@@ -2457,7 +2457,7 @@
     "protein": 10.3,
     "fat": 4.7,
     "fiber": 9.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "もろこし　精白粒",
@@ -2469,7 +2469,7 @@
     "protein": 9.5,
     "fat": 2.6,
     "fiber": 4.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 68
   },
   {
     "name": "ライむぎ　全粒粉",
@@ -2493,7 +2493,7 @@
     "protein": 8.5,
     "fat": 1.6,
     "fiber": 12.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 50
   },
   {
     "name": "＜いも類＞　アメリカほどいも　塊根　生",
@@ -2505,7 +2505,7 @@
     "protein": 5.9,
     "fat": 0.6,
     "fiber": 11.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜いも類＞　アメリカほどいも　塊根　ゆで",
@@ -2517,7 +2517,7 @@
     "protein": 6.0,
     "fat": 0.8,
     "fiber": 8.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "＜いも類＞　きくいも　塊茎　生",
@@ -2745,7 +2745,7 @@
     "protein": 1.5,
     "fat": 0.1,
     "fiber": 2.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 53
   },
   {
     "name": "＜いも類＞　（さといも類）　さといも　球茎　水煮",
@@ -2757,7 +2757,7 @@
     "protein": 1.5,
     "fat": 0.1,
     "fiber": 2.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "＜いも類＞　（さといも類）　さといも　球茎　冷凍",
@@ -2769,7 +2769,7 @@
     "protein": 2.2,
     "fat": 0.1,
     "fiber": 8.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "＜いも類＞　（さといも類）　セレベス　球茎　生",
@@ -2781,7 +2781,7 @@
     "protein": 2.2,
     "fat": 0.3,
     "fiber": 2.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 63
   },
   {
     "name": "＜いも類＞　（さといも類）　セレベス　球茎　水煮",
@@ -2793,7 +2793,7 @@
     "protein": 2.1,
     "fat": 0.3,
     "fiber": 2.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜いも類＞　（さといも類）　たけのこいも　球茎　生",
@@ -2805,7 +2805,7 @@
     "protein": 1.7,
     "fat": 0.4,
     "fiber": 2.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜いも類＞　（さといも類）　たけのこいも　球茎　水煮",
@@ -2817,7 +2817,7 @@
     "protein": 1.6,
     "fat": 0.4,
     "fiber": 2.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "＜いも類＞　（さといも類）　みずいも　球茎　生",
@@ -2829,7 +2829,7 @@
     "protein": 0.7,
     "fat": 0.4,
     "fiber": 2.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜いも類＞　（さといも類）　みずいも　球茎　水煮",
@@ -2841,7 +2841,7 @@
     "protein": 0.7,
     "fat": 0.4,
     "fiber": 2.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "＜いも類＞　（さといも類）　やつがしら　球茎　生",
@@ -2853,7 +2853,7 @@
     "protein": 3.0,
     "fat": 0.7,
     "fiber": 2.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 54
   },
   {
     "name": "＜いも類＞　（さといも類）　やつがしら　球茎　水煮",
@@ -2865,7 +2865,7 @@
     "protein": 2.7,
     "fat": 0.6,
     "fiber": 2.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 57
   },
   {
     "name": "＜いも類＞　じゃがいも　塊茎　皮つき　生",
@@ -3021,7 +3021,7 @@
     "protein": 4.5,
     "fat": 0.5,
     "fiber": 1.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 50
   },
   {
     "name": "＜いも類＞　（やまのいも類）　ながいも　ながいも　塊根　生",
@@ -3033,7 +3033,7 @@
     "protein": 2.2,
     "fat": 0.3,
     "fiber": 1.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "＜いも類＞　（やまのいも類）　ながいも　ながいも　塊根　水煮",
@@ -3045,7 +3045,7 @@
     "protein": 2.0,
     "fat": 0.3,
     "fiber": 1.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 44
   },
   {
     "name": "＜いも類＞　（やまのいも類）　ながいも　やまといも　塊根　生",
@@ -3057,7 +3057,7 @@
     "protein": 4.5,
     "fat": 0.2,
     "fiber": 2.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 53
   },
   {
     "name": "＜いも類＞　（やまのいも類）　じねんじょ　塊根　生",
@@ -3069,7 +3069,7 @@
     "protein": 2.8,
     "fat": 0.7,
     "fiber": 2.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "＜いも類＞　（やまのいも類）　だいじょ　塊根　生",
@@ -3081,7 +3081,7 @@
     "protein": 2.6,
     "fat": 0.1,
     "fiber": 2.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜でん粉・でん粉製品＞　（でん粉類）　おおうばゆりでん粉",
@@ -3345,7 +3345,7 @@
     "protein": 1.7,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "（砂糖類）　てんさい含蜜糖",
@@ -3357,7 +3357,7 @@
     "protein": 0.9,
     "fat": 0.0,
     "fiber": 8.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 50
   },
   {
     "name": "（砂糖類）　和三盆糖",
@@ -3369,7 +3369,7 @@
     "protein": 0.2,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 100
   },
   {
     "name": "（砂糖類）　車糖　上白糖",
@@ -3381,7 +3381,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 100
   },
   {
     "name": "（砂糖類）　車糖　三温糖",
@@ -3393,7 +3393,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 100
   },
   {
     "name": "（砂糖類）　ざらめ糖　グラニュー糖",
@@ -3405,7 +3405,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 100
   },
   {
     "name": "（砂糖類）　ざらめ糖　白ざら糖",
@@ -3417,7 +3417,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 100
   },
   {
     "name": "（砂糖類）　ざらめ糖　中ざら糖",
@@ -3429,7 +3429,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 100
   },
   {
     "name": "（砂糖類）　加工糖　角砂糖",
@@ -3441,7 +3441,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 100
   },
   {
     "name": "（砂糖類）　加工糖　氷砂糖",
@@ -3453,7 +3453,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 100
   },
   {
     "name": "（砂糖類）　加工糖　コーヒーシュガー",
@@ -3465,7 +3465,7 @@
     "protein": 0.1,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 100
   },
   {
     "name": "（砂糖類）　加工糖　粉糖",
@@ -3477,7 +3477,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 100
   },
   {
     "name": "（砂糖類）　液糖　しょ糖型液糖",
@@ -3489,7 +3489,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "（砂糖類）　液糖　転化型液糖",
@@ -3501,7 +3501,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "（砂糖類）　氷糖みつ",
@@ -3669,7 +3669,7 @@
     "protein": 1.0,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "（その他）　はちみつ",
@@ -3681,7 +3681,7 @@
     "protein": 0.3,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "（その他）　はちみつ　国産品",
@@ -3693,7 +3693,7 @@
     "protein": 0.1,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "（その他）　メープルシロップ",
@@ -3837,7 +3837,7 @@
     "protein": 22.1,
     "fat": 2.5,
     "fiber": 19.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 29
   },
   {
     "name": "いんげんまめ　全粒　ゆで",
@@ -3849,7 +3849,7 @@
     "protein": 9.3,
     "fat": 1.2,
     "fiber": 13.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 29
   },
   {
     "name": "いんげんまめ　うずら豆",
@@ -3861,7 +3861,7 @@
     "protein": 6.7,
     "fat": 1.3,
     "fiber": 5.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 32
   },
   {
     "name": "いんげんまめ　こし生あん",
@@ -3897,7 +3897,7 @@
     "protein": 21.7,
     "fat": 2.3,
     "fiber": 17.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 22
   },
   {
     "name": "えんどう　全粒　青えんどう　ゆで",
@@ -3909,7 +3909,7 @@
     "protein": 9.2,
     "fat": 1.0,
     "fiber": 7.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 22
   },
   {
     "name": "えんどう　全粒　赤えんどう　乾",
@@ -3921,7 +3921,7 @@
     "protein": 21.7,
     "fat": 2.3,
     "fiber": 17.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 22
   },
   {
     "name": "えんどう　全粒　赤えんどう　ゆで",
@@ -3933,7 +3933,7 @@
     "protein": 9.2,
     "fat": 1.0,
     "fiber": 7.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 22
   },
   {
     "name": "えんどう　グリンピース（揚げ豆）",
@@ -3981,7 +3981,7 @@
     "protein": 5.4,
     "fat": 0.8,
     "fiber": 8.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 42
   },
   {
     "name": "ささげ　全粒　乾",
@@ -3993,7 +3993,7 @@
     "protein": 23.9,
     "fat": 2.0,
     "fiber": 18.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 32
   },
   {
     "name": "ささげ　全粒　ゆで",
@@ -4005,7 +4005,7 @@
     "protein": 10.2,
     "fat": 0.9,
     "fiber": 10.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "そらまめ　全粒　乾",
@@ -4017,7 +4017,7 @@
     "protein": 26.0,
     "fat": 2.0,
     "fiber": 9.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 40
   },
   {
     "name": "そらまめ　フライビーンズ",
@@ -4929,7 +4929,7 @@
     "protein": 20.0,
     "fat": 5.2,
     "fiber": 16.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 28
   },
   {
     "name": "ひよこまめ　全粒　ゆで",
@@ -4941,7 +4941,7 @@
     "protein": 9.5,
     "fat": 2.5,
     "fiber": 11.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 28
   },
   {
     "name": "ひよこまめ　全粒　フライ　味付け",
@@ -4965,7 +4965,7 @@
     "protein": 17.2,
     "fat": 1.7,
     "fiber": 26.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 32
   },
   {
     "name": "べにばないんげん　全粒　ゆで",
@@ -4977,7 +4977,7 @@
     "protein": 6.2,
     "fat": 0.6,
     "fiber": 7.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 32
   },
   {
     "name": "やぶまめ　乾",
@@ -5001,7 +5001,7 @@
     "protein": 21.9,
     "fat": 1.8,
     "fiber": 19.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 32
   },
   {
     "name": "らいまめ　全粒　ゆで",
@@ -5013,7 +5013,7 @@
     "protein": 9.6,
     "fat": 0.9,
     "fiber": 10.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 32
   },
   {
     "name": "りょくとう　全粒　乾",
@@ -5025,7 +5025,7 @@
     "protein": 25.1,
     "fat": 1.5,
     "fiber": 14.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 28
   },
   {
     "name": "りょくとう　全粒　ゆで",
@@ -5037,7 +5037,7 @@
     "protein": 10.2,
     "fat": 0.6,
     "fiber": 5.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 42
   },
   {
     "name": "レンズまめ　全粒　乾",
@@ -5145,7 +5145,7 @@
     "protein": 19.8,
     "fat": 47.6,
     "fiber": 6.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 27
   },
   {
     "name": "かぼちゃ　いり　味付け",
@@ -5181,7 +5181,7 @@
     "protein": 4.7,
     "fat": 1.6,
     "fiber": 1.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 50
   },
   {
     "name": "ぎんなん　ゆで",
@@ -5193,7 +5193,7 @@
     "protein": 4.6,
     "fat": 1.5,
     "fiber": 2.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "（くり類）　日本ぐり　生",
@@ -5205,7 +5205,7 @@
     "protein": 2.8,
     "fat": 0.5,
     "fiber": 4.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 57
   },
   {
     "name": "（くり類）　日本ぐり　ゆで",
@@ -5217,7 +5217,7 @@
     "protein": 3.5,
     "fat": 0.6,
     "fiber": 6.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "（くり類）　日本ぐり　甘露煮",
@@ -5241,7 +5241,7 @@
     "protein": 4.9,
     "fat": 0.9,
     "fiber": 8.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "くるみ　いり",
@@ -5385,7 +5385,7 @@
     "protein": 5.9,
     "fat": 0.5,
     "fiber": 2.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 40
   },
   {
     "name": "はす　成熟　乾",
@@ -5397,7 +5397,7 @@
     "protein": 18.3,
     "fat": 2.3,
     "fiber": 10.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 42
   },
   {
     "name": "はす　成熟　ゆで",
@@ -5409,7 +5409,7 @@
     "protein": 7.3,
     "fat": 0.8,
     "fiber": 5.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "（ひし類）　ひし　生",
@@ -5421,7 +5421,7 @@
     "protein": 5.8,
     "fat": 0.5,
     "fiber": 2.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 50
   },
   {
     "name": "（ひし類）　とうびし　生",
@@ -5433,7 +5433,7 @@
     "protein": 2.7,
     "fat": 0.4,
     "fiber": 8.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "（ひし類）　とうびし　ゆで",
@@ -5445,7 +5445,7 @@
     "protein": 2.7,
     "fat": 0.3,
     "fiber": 5.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "ピスタチオ　いり　味付け",
@@ -5565,7 +5565,7 @@
     "protein": 25.0,
     "fat": 49.6,
     "fiber": 11.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 14
   },
   {
     "name": "らっかせい　小粒種　乾",
@@ -5613,7 +5613,7 @@
     "protein": 20.6,
     "fat": 50.4,
     "fiber": 7.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 14
   },
   {
     "name": "アーティチョーク　花らい　生",
@@ -5973,7 +5973,7 @@
     "protein": 6.9,
     "fat": 0.4,
     "fiber": 7.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "（えんどう類）　グリンピース　ゆで",
@@ -5985,7 +5985,7 @@
     "protein": 8.3,
     "fat": 0.2,
     "fiber": 8.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "（えんどう類）　グリンピース　冷凍",
@@ -5997,7 +5997,7 @@
     "protein": 5.8,
     "fat": 0.7,
     "fiber": 9.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "（えんどう類）　グリンピース　冷凍　ゆで",
@@ -6009,7 +6009,7 @@
     "protein": 6.2,
     "fat": 0.7,
     "fiber": 10.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "（えんどう類）　グリンピース　冷凍　油いため",
@@ -6021,7 +6021,7 @@
     "protein": 6.3,
     "fat": 4.6,
     "fiber": 9.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "（えんどう類）　グリンピース　水煮缶詰",
@@ -6033,7 +6033,7 @@
     "protein": 3.6,
     "fat": 0.4,
     "fiber": 6.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "おおさかしろな　葉　生",
@@ -6297,7 +6297,7 @@
     "protein": 1.9,
     "fat": 0.3,
     "fiber": 3.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "（かぼちゃ類）　西洋かぼちゃ　果実　ゆで",
@@ -6309,7 +6309,7 @@
     "protein": 1.6,
     "fat": 0.3,
     "fiber": 4.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "（かぼちゃ類）　西洋かぼちゃ　果実　焼き",
@@ -6321,7 +6321,7 @@
     "protein": 2.5,
     "fat": 0.4,
     "fiber": 5.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 75
   },
   {
     "name": "（かぼちゃ類）　西洋かぼちゃ　果実　冷凍",
@@ -6333,7 +6333,7 @@
     "protein": 2.2,
     "fat": 0.3,
     "fiber": 4.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "（かぼちゃ類）　そうめんかぼちゃ　果実　生",
@@ -6405,7 +6405,7 @@
     "protein": 6.3,
     "fat": 0.2,
     "fiber": 30.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 28
   },
   {
     "name": "かんぴょう　ゆで",
@@ -6429,7 +6429,7 @@
     "protein": 2.3,
     "fat": 0.2,
     "fiber": 5.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "きく　花びら　生",
@@ -6609,7 +6609,7 @@
     "protein": 0.3,
     "fat": 0.1,
     "fiber": 1.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 15
   },
   {
     "name": "きゅうり　漬物　ピクルス　サワー型",
@@ -7317,7 +7317,7 @@
     "protein": 10.9,
     "fat": 0.2,
     "fiber": 2.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "そらまめ　未熟豆　ゆで",
@@ -7329,7 +7329,7 @@
     "protein": 10.5,
     "fat": 0.2,
     "fiber": 4.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "タアサイ　葉　生",
@@ -8085,7 +8085,7 @@
     "protein": 3.6,
     "fat": 1.7,
     "fiber": 3.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "（とうもろこし類）　スイートコーン　未熟種子　ゆで",
@@ -8097,7 +8097,7 @@
     "protein": 3.5,
     "fat": 1.7,
     "fiber": 3.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "（とうもろこし類）　スイートコーン　未熟種子　電子レンジ調理",
@@ -8109,7 +8109,7 @@
     "protein": 4.2,
     "fat": 2.2,
     "fiber": 3.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "（とうもろこし類）　スイートコーン　未熟種子　穂軸つき　冷凍",
@@ -8121,7 +8121,7 @@
     "protein": 3.5,
     "fat": 1.5,
     "fiber": 2.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "（とうもろこし類）　スイートコーン　未熟種子　カーネル　冷凍",
@@ -8133,7 +8133,7 @@
     "protein": 2.9,
     "fat": 1.3,
     "fiber": 4.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "（とうもろこし類）　スイートコーン　未熟種子　カーネル　冷凍　ゆで",
@@ -8145,7 +8145,7 @@
     "protein": 2.8,
     "fat": 1.5,
     "fiber": 6.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "（とうもろこし類）　スイートコーン　未熟種子　カーネル　冷凍　油いため",
@@ -8157,7 +8157,7 @@
     "protein": 2.9,
     "fat": 5.8,
     "fiber": 4.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "（とうもろこし類）　スイートコーン　缶詰　クリームスタイル",
@@ -8181,7 +8181,7 @@
     "protein": 2.3,
     "fat": 0.5,
     "fiber": 3.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "（とうもろこし類）　ヤングコーン　幼雌穂　生",
@@ -8241,7 +8241,7 @@
     "protein": 14.2,
     "fat": 2.1,
     "fiber": 21.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 38
   },
   {
     "name": "（トマト類）　加工品　ホール　食塩無添加",
@@ -10401,7 +10401,7 @@
     "protein": 1.9,
     "fat": 0.1,
     "fiber": 2.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 38
   },
   {
     "name": "れんこん　根茎　ゆで",
@@ -10413,7 +10413,7 @@
     "protein": 1.3,
     "fat": 0.1,
     "fiber": 2.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 40
   },
   {
     "name": "れんこん　甘酢れんこん",
@@ -10425,7 +10425,7 @@
     "protein": 0.6,
     "fat": 0.2,
     "fiber": 2.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 40
   },
   {
     "name": "わけぎ　葉　生",
@@ -12993,7 +12993,7 @@
     "protein": 3.4,
     "fat": 14.0,
     "fiber": 4.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 50
   },
   {
     "name": "しいたけ　生しいたけ　原木栽培　生",
@@ -13041,7 +13041,7 @@
     "protein": 21.2,
     "fat": 2.8,
     "fiber": 46.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 15
   },
   {
     "name": "しいたけ　乾しいたけ　ゆで",
@@ -13065,7 +13065,7 @@
     "protein": 3.3,
     "fat": 0.4,
     "fiber": 6.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 10
   },
   {
     "name": "（しめじ類）　はたけしめじ　生",
@@ -13149,7 +13149,7 @@
     "protein": 3.4,
     "fat": 17.1,
     "fiber": 4.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "（しめじ類）　ほんしめじ　生",
@@ -13521,7 +13521,7 @@
     "protein": 40.0,
     "fat": 3.5,
     "fiber": 25.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 30
   },
   {
     "name": "あらめ　蒸し干し",
@@ -13749,7 +13749,7 @@
     "protein": 6.0,
     "fat": 1.0,
     "fiber": 6.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "すいぜんじのり　素干し　水戻し",
@@ -13941,7 +13941,7 @@
     "protein": 14.4,
     "fat": 1.3,
     "fiber": 4.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 57
   },
   {
     "name": "ふのり　素干し",
@@ -14853,7 +14853,7 @@
     "protein": 20.0,
     "fat": 30.3,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "＜魚類＞　（いわし類）　まいわし　塩いわし",
@@ -17157,7 +17157,7 @@
     "protein": 10.6,
     "fat": 0.5,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 50
   },
   {
     "name": "＜魚類＞　ちか　生",
@@ -18357,7 +18357,7 @@
     "protein": 38.0,
     "fat": 1.6,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 28
   },
   {
     "name": "＜貝類＞　あわび　塩辛",
@@ -18453,7 +18453,7 @@
     "protein": 7.6,
     "fat": 11.1,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "＜貝類＞　かき　くん製油漬缶詰",
@@ -18465,7 +18465,7 @@
     "protein": 12.5,
     "fat": 22.6,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 18
   },
   {
     "name": "＜貝類＞　さざえ　生",
@@ -18501,7 +18501,7 @@
     "protein": 15.9,
     "fat": 2.2,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 30
   },
   {
     "name": "＜貝類＞　しじみ　生",
@@ -19665,7 +19665,7 @@
     "protein": 11.2,
     "fat": 2.9,
     "fiber": 0.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 30
   },
   {
     "name": "＜水産練り製品＞　昆布巻きかまぼこ",
@@ -21477,7 +21477,7 @@
     "protein": 19.2,
     "fat": 4.4,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 30
   },
   {
     "name": "＜畜肉類＞　うし　［加工品］　ビーフジャーキー",
@@ -21981,7 +21981,7 @@
     "protein": 25.1,
     "fat": 25.3,
     "fiber": 0.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 50
   },
   {
     "name": "＜畜肉類＞　ぶた　［中型種肉］　かた　脂身つき　生",
@@ -23517,7 +23517,7 @@
     "protein": 18.4,
     "fat": 7.8,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 48
   },
   {
     "name": "＜鳥肉類＞　にわとり　［その他］　チキンナゲット",
@@ -23529,7 +23529,7 @@
     "protein": 15.5,
     "fat": 13.7,
     "fiber": 1.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "＜鳥肉類＞　にわとり　［その他］　つくね",
@@ -23541,7 +23541,7 @@
     "protein": 15.2,
     "fat": 15.2,
     "fiber": 1.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 40
   },
   {
     "name": "＜鳥肉類＞　はと　肉　皮なし　生",
@@ -23613,7 +23613,7 @@
     "protein": 16.2,
     "fat": 7.2,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 22
   },
   {
     "name": "あひる卵　ピータン",
@@ -23757,7 +23757,7 @@
     "protein": 9.8,
     "fat": 10.6,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 50
   },
   {
     "name": "鶏卵　全卵　乾燥全卵",
@@ -23805,7 +23805,7 @@
     "protein": 12.1,
     "fat": 23.9,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "鶏卵　卵黄　乾燥卵黄",
@@ -25053,7 +25053,7 @@
     "protein": 4.5,
     "fat": 1.1,
     "fiber": 1.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　今川焼　つぶしあん入り",
@@ -25065,7 +25065,7 @@
     "protein": 4.5,
     "fat": 1.4,
     "fiber": 1.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　今川焼　カスタードクリーム入り",
@@ -25077,7 +25077,7 @@
     "protein": 4.7,
     "fat": 2.6,
     "fiber": 0.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　ういろう　白",
@@ -25089,7 +25089,7 @@
     "protein": 1.0,
     "fat": 0.2,
     "fiber": 0.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　ういろう　黒",
@@ -25101,7 +25101,7 @@
     "protein": 1.5,
     "fat": 0.2,
     "fiber": 0.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　うぐいすもち　こしあん入り",
@@ -25161,7 +25161,7 @@
     "protein": 7.1,
     "fat": 5.0,
     "fiber": 0.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　かのこ",
@@ -25173,7 +25173,7 @@
     "protein": 4.8,
     "fat": 0.4,
     "fiber": 3.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　かるかん",
@@ -25185,7 +25185,7 @@
     "protein": 2.1,
     "fat": 0.3,
     "fiber": 0.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　きび団子",
@@ -25197,7 +25197,7 @@
     "protein": 1.6,
     "fat": 0.2,
     "fiber": 0.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 75
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　ぎゅうひ",
@@ -25209,7 +25209,7 @@
     "protein": 1.3,
     "fat": 0.2,
     "fiber": 0.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 82
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　きりざんしょ",
@@ -25221,7 +25221,7 @@
     "protein": 2.1,
     "fat": 0.3,
     "fiber": 0.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　きんぎょく糖",
@@ -25233,7 +25233,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　きんつば",
@@ -25245,7 +25245,7 @@
     "protein": 6.0,
     "fat": 0.7,
     "fiber": 5.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　草もち　こしあん入り",
@@ -25281,7 +25281,7 @@
     "protein": 3.8,
     "fat": 0.4,
     "fiber": 1.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　くし団子　あん　つぶしあん入り",
@@ -25293,7 +25293,7 @@
     "protein": 3.8,
     "fat": 0.5,
     "fiber": 1.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　くし団子　みたらし",
@@ -25305,7 +25305,7 @@
     "protein": 3.2,
     "fat": 0.4,
     "fiber": 0.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　くずもち　関西風　くずでん粉製品",
@@ -25341,7 +25341,7 @@
     "protein": 4.7,
     "fat": 8.5,
     "fiber": 2.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 62
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　五平もち",
@@ -25413,7 +25413,7 @@
     "protein": 4.0,
     "fat": 0.5,
     "fiber": 1.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　笹だんご　つぶしあん入り",
@@ -25425,7 +25425,7 @@
     "protein": 4.7,
     "fat": 0.6,
     "fiber": 2.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 68
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　ずんだあん",
@@ -25437,7 +25437,7 @@
     "protein": 6.3,
     "fat": 3.4,
     "fiber": 2.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 38
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　ずんだもち",
@@ -25485,7 +25485,7 @@
     "protein": 5.9,
     "fat": 3.0,
     "fiber": 1.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　ちまき",
@@ -25497,7 +25497,7 @@
     "protein": 1.3,
     "fat": 0.2,
     "fiber": 0.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　ちゃつう",
@@ -25509,7 +25509,7 @@
     "protein": 6.2,
     "fat": 4.3,
     "fiber": 3.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　どら焼　こしあん入り",
@@ -25521,7 +25521,7 @@
     "protein": 6.6,
     "fat": 3.1,
     "fiber": 1.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　どら焼　つぶしあん入り",
@@ -25533,7 +25533,7 @@
     "protein": 6.6,
     "fat": 3.2,
     "fiber": 1.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 68
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　生八つ橋　あん入り　こしあん入り",
@@ -25545,7 +25545,7 @@
     "protein": 3.6,
     "fat": 0.3,
     "fiber": 1.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　生八つ橋　あん入り　こしあん・つぶしあん混合",
@@ -25557,7 +25557,7 @@
     "protein": 3.5,
     "fat": 0.3,
     "fiber": 2.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　生八つ橋　あん入り　つぶしあん入り",
@@ -25569,7 +25569,7 @@
     "protein": 3.7,
     "fat": 0.5,
     "fiber": 2.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 75
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　ねりきり",
@@ -25581,7 +25581,7 @@
     "protein": 5.3,
     "fat": 0.3,
     "fiber": 3.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　カステラまんじゅう　こしあん入り",
@@ -25593,7 +25593,7 @@
     "protein": 6.7,
     "fat": 2.1,
     "fiber": 2.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　カステラまんじゅう　つぶしあん入り",
@@ -25605,7 +25605,7 @@
     "protein": 6.9,
     "fat": 2.3,
     "fiber": 3.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　かるかんまんじゅう　こしあん入り",
@@ -25617,7 +25617,7 @@
     "protein": 3.0,
     "fat": 0.3,
     "fiber": 1.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　かるかんまんじゅう　つぶしあん入り",
@@ -25629,7 +25629,7 @@
     "protein": 3.1,
     "fat": 0.4,
     "fiber": 1.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　くずまんじゅう　こしあん入り",
@@ -25641,7 +25641,7 @@
     "protein": 3.1,
     "fat": 0.2,
     "fiber": 2.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　くずまんじゅう　つぶしあん入り",
@@ -25653,7 +25653,7 @@
     "protein": 1.3,
     "fat": 0.1,
     "fiber": 1.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　くりまんじゅう　こしあん入り",
@@ -25665,7 +25665,7 @@
     "protein": 6.5,
     "fat": 1.4,
     "fiber": 3.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　くりまんじゅう　つぶしあん入り",
@@ -25677,7 +25677,7 @@
     "protein": 6.7,
     "fat": 1.6,
     "fiber": 4.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　とうまんじゅう　こしあん入り",
@@ -25689,7 +25689,7 @@
     "protein": 6.8,
     "fat": 3.1,
     "fiber": 1.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 68
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　とうまんじゅう　つぶしあん入り",
@@ -25701,7 +25701,7 @@
     "protein": 6.9,
     "fat": 3.3,
     "fiber": 2.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 68
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　蒸しまんじゅう　こしあん入り",
@@ -25713,7 +25713,7 @@
     "protein": 4.6,
     "fat": 0.5,
     "fiber": 2.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　蒸しまんじゅう　つぶしあん入り",
@@ -25725,7 +25725,7 @@
     "protein": 4.7,
     "fat": 0.7,
     "fiber": 3.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　中華まんじゅう　あんまん　こしあん入り",
@@ -25737,7 +25737,7 @@
     "protein": 6.1,
     "fat": 5.6,
     "fiber": 2.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　中華まんじゅう　あんまん　つぶしあん入り",
@@ -25749,7 +25749,7 @@
     "protein": 6.2,
     "fat": 6.0,
     "fiber": 3.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　まんじゅう　中華まんじゅう　肉まん",
@@ -25761,7 +25761,7 @@
     "protein": 10.0,
     "fat": 5.1,
     "fiber": 3.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 50
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　もなか　こしあん入り",
@@ -25773,7 +25773,7 @@
     "protein": 4.9,
     "fat": 0.3,
     "fiber": 3.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 62
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　もなか　つぶしあん入り",
@@ -25785,7 +25785,7 @@
     "protein": 6.4,
     "fat": 0.7,
     "fiber": 6.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 62
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　ゆべし",
@@ -25797,7 +25797,7 @@
     "protein": 2.4,
     "fat": 3.5,
     "fiber": 0.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　ようかん　練りようかん",
@@ -25809,7 +25809,7 @@
     "protein": 3.6,
     "fat": 0.2,
     "fiber": 3.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　ようかん　水ようかん",
@@ -25821,7 +25821,7 @@
     "protein": 2.6,
     "fat": 0.2,
     "fiber": 2.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜和生菓子・和半生菓子類＞　ようかん　蒸しようかん",
@@ -25833,7 +25833,7 @@
     "protein": 4.4,
     "fat": 0.3,
     "fiber": 2.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 62
   },
   {
     "name": "＜和干菓子類＞　あめ玉",
@@ -25845,7 +25845,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 100
   },
   {
     "name": "＜和干菓子類＞　芋かりんとう",
@@ -25857,7 +25857,7 @@
     "protein": 1.4,
     "fat": 20.6,
     "fiber": 2.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜和干菓子類＞　おこし",
@@ -25869,7 +25869,7 @@
     "protein": 3.8,
     "fat": 0.7,
     "fiber": 0.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 83
   },
   {
     "name": "＜和干菓子類＞　おのろけ豆",
@@ -25881,7 +25881,7 @@
     "protein": 11.3,
     "fat": 13.6,
     "fiber": 2.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜和干菓子類＞　かりんとう　黒",
@@ -25893,7 +25893,7 @@
     "protein": 7.5,
     "fat": 11.6,
     "fiber": 1.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜和干菓子類＞　かりんとう　白",
@@ -25905,7 +25905,7 @@
     "protein": 9.7,
     "fat": 11.2,
     "fiber": 1.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 68
   },
   {
     "name": "＜和干菓子類＞　ごかぼう",
@@ -25917,7 +25917,7 @@
     "protein": 10.6,
     "fat": 6.4,
     "fiber": 4.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 68
   },
   {
     "name": "＜和干菓子類＞　小麦粉せんべい　磯部せんべい",
@@ -25929,7 +25929,7 @@
     "protein": 4.3,
     "fat": 0.8,
     "fiber": 1.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 75
   },
   {
     "name": "＜和干菓子類＞　小麦粉せんべい　かわらせんべい",
@@ -25941,7 +25941,7 @@
     "protein": 7.0,
     "fat": 3.2,
     "fiber": 1.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 75
   },
   {
     "name": "＜和干菓子類＞　小麦粉せんべい　巻きせんべい",
@@ -25953,7 +25953,7 @@
     "protein": 4.3,
     "fat": 1.4,
     "fiber": 1.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 75
   },
   {
     "name": "＜和干菓子類＞　小麦粉せんべい　南部せんべい　ごま入り",
@@ -25965,7 +25965,7 @@
     "protein": 11.2,
     "fat": 11.1,
     "fiber": 4.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜和干菓子類＞　小麦粉せんべい　南部せんべい　落花生入り",
@@ -25977,7 +25977,7 @@
     "protein": 11.7,
     "fat": 9.5,
     "fiber": 3.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "＜和干菓子類＞　しおがま",
@@ -25989,7 +25989,7 @@
     "protein": 2.6,
     "fat": 0.2,
     "fiber": 0.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 74
   },
   {
     "name": "＜和干菓子類＞　ひなあられ　関西風",
@@ -26001,7 +26001,7 @@
     "protein": 8.0,
     "fat": 1.4,
     "fiber": 1.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 85
   },
   {
     "name": "＜和干菓子類＞　ひなあられ　関東風",
@@ -26013,7 +26013,7 @@
     "protein": 9.6,
     "fat": 2.8,
     "fiber": 2.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 80
   },
   {
     "name": "＜和干菓子類＞　米菓　揚げせんべい",
@@ -26025,7 +26025,7 @@
     "protein": 5.6,
     "fat": 17.4,
     "fiber": 0.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 80
   },
   {
     "name": "＜和干菓子類＞　米菓　甘辛せんべい",
@@ -26037,7 +26037,7 @@
     "protein": 6.7,
     "fat": 0.9,
     "fiber": 0.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 83
   },
   {
     "name": "＜和干菓子類＞　米菓　あられ",
@@ -26049,7 +26049,7 @@
     "protein": 7.5,
     "fat": 1.0,
     "fiber": 0.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 87
   },
   {
     "name": "＜和干菓子類＞　米菓　しょうゆせんべい",
@@ -26061,7 +26061,7 @@
     "protein": 7.3,
     "fat": 1.0,
     "fiber": 0.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 80
   },
   {
     "name": "＜和干菓子類＞　ボーロ　小粒",
@@ -26073,7 +26073,7 @@
     "protein": 2.5,
     "fat": 2.1,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "＜和干菓子類＞　ボーロ　そばボーロ",
@@ -26097,7 +26097,7 @@
     "protein": 4.0,
     "fat": 0.7,
     "fiber": 1.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "＜和干菓子類＞　みしま豆",
@@ -26109,7 +26109,7 @@
     "protein": 12.3,
     "fat": 8.6,
     "fiber": 6.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 30
   },
   {
     "name": "＜和干菓子類＞　八つ橋",
@@ -26121,7 +26121,7 @@
     "protein": 3.3,
     "fat": 0.5,
     "fiber": 0.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 80
   },
   {
     "name": "＜和干菓子類＞　らくがん　らくがん",
@@ -26133,7 +26133,7 @@
     "protein": 2.4,
     "fat": 0.2,
     "fiber": 0.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 100
   },
   {
     "name": "＜和干菓子類＞　らくがん　麦らくがん",
@@ -26145,7 +26145,7 @@
     "protein": 4.8,
     "fat": 1.8,
     "fiber": 5.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "＜和干菓子類＞　らくがん　もろこしらくがん",
@@ -26157,7 +26157,7 @@
     "protein": 6.6,
     "fat": 0.3,
     "fiber": 6.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 75
   },
   {
     "name": "＜菓子パン類＞　揚げパン",
@@ -26181,7 +26181,7 @@
     "protein": 6.8,
     "fat": 3.6,
     "fiber": 2.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 68
   },
   {
     "name": "＜菓子パン類＞　あんパン　つぶしあん入り",
@@ -26193,7 +26193,7 @@
     "protein": 7.0,
     "fat": 3.8,
     "fiber": 3.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "＜菓子パン類＞　あんパン　薄皮タイプ　こしあん入り",
@@ -26205,7 +26205,7 @@
     "protein": 6.6,
     "fat": 3.5,
     "fiber": 2.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "＜菓子パン類＞　あんパン　薄皮タイプ　つぶしあん入り",
@@ -26217,7 +26217,7 @@
     "protein": 6.8,
     "fat": 3.7,
     "fiber": 3.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "＜菓子パン類＞　カレーパン　皮及び具",
@@ -26229,7 +26229,7 @@
     "protein": 6.6,
     "fat": 18.3,
     "fiber": 1.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "＜菓子パン類＞　カレーパン　皮のみ",
@@ -26241,7 +26241,7 @@
     "protein": 7.2,
     "fat": 22.4,
     "fiber": 1.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "＜菓子パン類＞　カレーパン　具のみ",
@@ -26253,7 +26253,7 @@
     "protein": 5.3,
     "fat": 9.3,
     "fiber": 2.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 35
   },
   {
     "name": "＜菓子パン類＞　クリームパン",
@@ -26265,7 +26265,7 @@
     "protein": 7.9,
     "fat": 7.4,
     "fiber": 1.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜菓子パン類＞　クリームパン　薄皮タイプ",
@@ -26277,7 +26277,7 @@
     "protein": 6.0,
     "fat": 7.1,
     "fiber": 0.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 53
   },
   {
     "name": "＜菓子パン類＞　ジャムパン",
@@ -26289,7 +26289,7 @@
     "protein": 5.3,
     "fat": 3.9,
     "fiber": 1.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "＜菓子パン類＞　チョココロネ",
@@ -26301,7 +26301,7 @@
     "protein": 5.8,
     "fat": 15.3,
     "fiber": 1.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜菓子パン類＞　チョコパン　薄皮タイプ",
@@ -26313,7 +26313,7 @@
     "protein": 4.7,
     "fat": 19.4,
     "fiber": 0.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜菓子パン類＞　メロンパン",
@@ -26325,7 +26325,7 @@
     "protein": 8.0,
     "fat": 10.5,
     "fiber": 1.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "＜菓子パン類＞　菓子パン　あんなし",
@@ -26337,7 +26337,7 @@
     "protein": 8.2,
     "fat": 6.1,
     "fiber": 1.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "＜ケーキ・ペストリー類＞　シュークリーム",
@@ -26349,7 +26349,7 @@
     "protein": 6.0,
     "fat": 11.4,
     "fiber": 0.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 57
   },
   {
     "name": "＜ケーキ・ペストリー類＞　スポンジケーキ",
@@ -26361,7 +26361,7 @@
     "protein": 7.9,
     "fat": 7.5,
     "fiber": 0.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜ケーキ・ペストリー類＞　ショートケーキ　果実なし",
@@ -26373,7 +26373,7 @@
     "protein": 6.9,
     "fat": 15.2,
     "fiber": 0.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 68
   },
   {
     "name": "＜ケーキ・ペストリー類＞　ショートケーキ　いちご",
@@ -26397,7 +26397,7 @@
     "protein": 4.7,
     "fat": 13.5,
     "fiber": 1.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 62
   },
   {
     "name": "＜ケーキ・ペストリー類＞　チーズケーキ　ベイクドチーズケーキ",
@@ -26409,7 +26409,7 @@
     "protein": 8.5,
     "fat": 21.2,
     "fiber": 0.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 46
   },
   {
     "name": "＜ケーキ・ペストリー類＞　チーズケーキ　レアチーズケーキ",
@@ -26421,7 +26421,7 @@
     "protein": 5.8,
     "fat": 27.5,
     "fiber": 0.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 44
   },
   {
     "name": "＜ケーキ・ペストリー類＞　デニッシュペストリー　アメリカンタイプ　プレーン",
@@ -26433,7 +26433,7 @@
     "protein": 6.2,
     "fat": 26.3,
     "fiber": 2.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜ケーキ・ペストリー類＞　デニッシュペストリー　デンマークタイプ　プレーン",
@@ -26445,7 +26445,7 @@
     "protein": 6.5,
     "fat": 34.0,
     "fiber": 2.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 62
   },
   {
     "name": "＜ケーキ・ペストリー類＞　デニッシュペストリー　アメリカンタイプ　あん入り　こしあん",
@@ -26457,7 +26457,7 @@
     "protein": 6.0,
     "fat": 15.6,
     "fiber": 2.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜ケーキ・ペストリー類＞　デニッシュペストリー　アメリカンタイプ　あん入り　つぶしあん",
@@ -26469,7 +26469,7 @@
     "protein": 6.0,
     "fat": 15.7,
     "fiber": 3.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜ケーキ・ペストリー類＞　デニッシュペストリー　デンマークタイプ　あん入り　こしあん",
@@ -26481,7 +26481,7 @@
     "protein": 6.5,
     "fat": 21.3,
     "fiber": 3.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 62
   },
   {
     "name": "＜ケーキ・ペストリー類＞　デニッシュペストリー　デンマークタイプ　あん入り　つぶしあん",
@@ -26493,7 +26493,7 @@
     "protein": 6.6,
     "fat": 22.0,
     "fiber": 4.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 62
   },
   {
     "name": "＜ケーキ・ペストリー類＞　デニッシュペストリー　アメリカンタイプ　あん入り　カスタードクリーム",
@@ -26505,7 +26505,7 @@
     "protein": 5.8,
     "fat": 19.3,
     "fiber": 1.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜ケーキ・ペストリー類＞　デニッシュペストリー　デンマークタイプ　あん入り　カスタードクリーム",
@@ -26517,7 +26517,7 @@
     "protein": 7.3,
     "fat": 29.6,
     "fiber": 2.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 62
   },
   {
     "name": "＜ケーキ・ペストリー類＞　ドーナッツ　イーストドーナッツ　プレーン",
@@ -26529,7 +26529,7 @@
     "protein": 7.2,
     "fat": 20.2,
     "fiber": 1.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜ケーキ・ペストリー類＞　ドーナッツ　イーストドーナッツ　あん入り　こしあん",
@@ -26541,7 +26541,7 @@
     "protein": 6.8,
     "fat": 12.6,
     "fiber": 2.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜ケーキ・ペストリー類＞　ドーナッツ　イーストドーナッツ　あん入り　つぶしあん",
@@ -26553,7 +26553,7 @@
     "protein": 7.0,
     "fat": 13.0,
     "fiber": 3.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜ケーキ・ペストリー類＞　ドーナッツ　イーストドーナッツ　あん入り　カスタードクリーム",
@@ -26565,7 +26565,7 @@
     "protein": 7.7,
     "fat": 18.9,
     "fiber": 1.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 77
   },
   {
     "name": "＜ケーキ・ペストリー類＞　ドーナッツ　ケーキドーナッツ　プレーン",
@@ -26577,7 +26577,7 @@
     "protein": 7.2,
     "fat": 11.7,
     "fiber": 1.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "＜ケーキ・ペストリー類＞　ドーナッツ　ケーキドーナッツ　あん入り　こしあん",
@@ -26589,7 +26589,7 @@
     "protein": 8.3,
     "fat": 5.4,
     "fiber": 2.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜ケーキ・ペストリー類＞　ドーナッツ　ケーキドーナッツ　あん入り　つぶしあん",
@@ -26601,7 +26601,7 @@
     "protein": 8.6,
     "fat": 5.7,
     "fiber": 3.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜ケーキ・ペストリー類＞　ドーナッツ　ケーキドーナッツ　あん入り　カスタードクリーム",
@@ -26613,7 +26613,7 @@
     "protein": 9.6,
     "fat": 10.5,
     "fiber": 0.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜ケーキ・ペストリー類＞　パイ　パイ皮",
@@ -26625,7 +26625,7 @@
     "protein": 5.0,
     "fat": 25.4,
     "fiber": 1.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 57
   },
   {
     "name": "＜ケーキ・ペストリー類＞　パイ　アップルパイ",
@@ -26637,7 +26637,7 @@
     "protein": 4.0,
     "fat": 17.5,
     "fiber": 1.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 62
   },
   {
     "name": "＜ケーキ・ペストリー類＞　パイ　ミートパイ",
@@ -26649,7 +26649,7 @@
     "protein": 9.7,
     "fat": 29.9,
     "fiber": 1.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "＜ケーキ・ペストリー類＞　バターケーキ",
@@ -26661,7 +26661,7 @@
     "protein": 5.8,
     "fat": 25.3,
     "fiber": 0.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 56
   },
   {
     "name": "＜ケーキ・ペストリー類＞　ホットケーキ",
@@ -26685,7 +26685,7 @@
     "protein": 7.3,
     "fat": 7.9,
     "fiber": 0.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "＜ケーキ・ペストリー類＞　ワッフル　ジャム入り",
@@ -26697,7 +26697,7 @@
     "protein": 4.9,
     "fat": 4.2,
     "fiber": 1.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "＜デザート菓子類＞　カスタードプリン",
@@ -26709,7 +26709,7 @@
     "protein": 5.7,
     "fat": 5.5,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 40
   },
   {
     "name": "＜デザート菓子類＞　牛乳寒天",
@@ -26733,7 +26733,7 @@
     "protein": 0.0,
     "fat": 0.1,
     "fiber": 0.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 15
   },
   {
     "name": "＜デザート菓子類＞　ゼリー　オレンジ",
@@ -26769,7 +26769,7 @@
     "protein": 4.3,
     "fat": 3.7,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "＜デザート菓子類＞　ゼリー　ワイン",
@@ -26781,7 +26781,7 @@
     "protein": 1.7,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 40
   },
   {
     "name": "＜デザート菓子類＞　ババロア",
@@ -26793,7 +26793,7 @@
     "protein": 5.6,
     "fat": 12.9,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 43
   },
   {
     "name": "＜ビスケット類＞　ウエハース",
@@ -26937,7 +26937,7 @@
     "protein": 7.6,
     "fat": 19.5,
     "fiber": 2.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 72
   },
   {
     "name": "＜スナック類＞　コーンスナック",
@@ -26985,7 +26985,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 100
   },
   {
     "name": "＜キャンデー類＞　キャラメル",
@@ -27009,7 +27009,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "＜キャンデー類＞　ゼリービーンズ",
@@ -27021,7 +27021,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 80
   },
   {
     "name": "＜キャンデー類＞　ドロップ",
@@ -27033,7 +27033,7 @@
     "protein": 0.0,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 100
   },
   {
     "name": "＜キャンデー類＞　バタースコッチ",
@@ -27045,7 +27045,7 @@
     "protein": 0.0,
     "fat": 6.5,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "＜キャンデー類＞　ブリットル",
@@ -27057,7 +27057,7 @@
     "protein": 12.6,
     "fat": 26.5,
     "fiber": 3.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "＜キャンデー類＞　マシュマロ",
@@ -27069,7 +27069,7 @@
     "protein": 2.1,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜キャンデー類＞　ラムネ",
@@ -27093,7 +27093,7 @@
     "protein": 11.4,
     "fat": 40.4,
     "fiber": 6.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 38
   },
   {
     "name": "＜チョコレート類＞　カバーリングチョコレート",
@@ -27105,7 +27105,7 @@
     "protein": 7.1,
     "fat": 24.3,
     "fiber": 3.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "＜チョコレート類＞　スイートチョコレート",
@@ -27117,7 +27117,7 @@
     "protein": 5.8,
     "fat": 37.7,
     "fiber": 7.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "＜チョコレート類＞　スイートチョコレート　カカオ増量",
@@ -27129,7 +27129,7 @@
     "protein": 8.9,
     "fat": 41.3,
     "fiber": 13.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 40
   },
   {
     "name": "＜チョコレート類＞　ホワイトチョコレート",
@@ -27141,7 +27141,7 @@
     "protein": 7.2,
     "fat": 39.5,
     "fiber": 0.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 44
   },
   {
     "name": "＜チョコレート類＞　ミルクチョコレート",
@@ -27153,7 +27153,7 @@
     "protein": 6.9,
     "fat": 34.1,
     "fiber": 3.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 43
   },
   {
     "name": "＜果実菓子類＞　マロングラッセ",
@@ -27165,7 +27165,7 @@
     "protein": 1.1,
     "fat": 0.3,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "＜チューインガム類＞　板ガム",
@@ -27213,7 +27213,7 @@
     "protein": 5.1,
     "fat": 7.6,
     "fiber": 0.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 50
   },
   {
     "name": "＜その他＞　しるこ　こしあん",
@@ -27225,7 +27225,7 @@
     "protein": 4.7,
     "fat": 0.3,
     "fiber": 3.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜その他＞　しるこ　つぶしあん",
@@ -27237,7 +27237,7 @@
     "protein": 4.2,
     "fat": 0.4,
     "fiber": 4.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜その他＞　チョコレートクリーム",
@@ -27249,7 +27249,7 @@
     "protein": 4.6,
     "fat": 32.0,
     "fiber": 0.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "＜アルコール飲料類＞　（醸造酒類）　清酒　普通酒",
@@ -27561,7 +27561,7 @@
     "protein": 0.3,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 55
   },
   {
     "name": "＜アルコール飲料類＞　（混成酒類）　みりん　本直し",
@@ -27609,7 +27609,7 @@
     "protein": 0.1,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 25
   },
   {
     "name": "＜アルコール飲料類＞　（混成酒類）　ペパーミント",
@@ -27921,7 +27921,7 @@
     "protein": 1.7,
     "fat": 0.1,
     "fiber": 0.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 85
   },
   {
     "name": "＜その他＞　昆布茶",
@@ -27933,7 +27933,7 @@
     "protein": 5.2,
     "fat": 0.2,
     "fiber": 2.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 28
   },
   {
     "name": "＜その他＞　スポーツドリンク",
@@ -27969,7 +27969,7 @@
     "protein": 0.1,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "＜その他＞　（炭酸飲料類）　サイダー",
@@ -28029,7 +28029,7 @@
     "protein": 1.0,
     "fat": 0.1,
     "fiber": 0.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "＜調味料類＞　（ウスターソース類）　中濃ソース",
@@ -28041,7 +28041,7 @@
     "protein": 0.8,
     "fat": 0.1,
     "fiber": 1.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜調味料類＞　（ウスターソース類）　濃厚ソース",
@@ -28053,7 +28053,7 @@
     "protein": 0.9,
     "fat": 0.1,
     "fiber": 1.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜調味料類＞　（ウスターソース類）　お好み焼きソース",
@@ -28065,7 +28065,7 @@
     "protein": 1.6,
     "fat": 0.1,
     "fiber": 0.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜調味料類＞　（辛味調味料類）　トウバンジャン",
@@ -28209,7 +28209,7 @@
     "protein": 2.4,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜調味料類＞　（食塩類）　食塩",
@@ -28329,7 +28329,7 @@
     "protein": 0.5,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 5
   },
   {
     "name": "＜調味料類＞　（食酢類）　果実酢　ぶどう酢",
@@ -28521,7 +28521,7 @@
     "protein": 9.6,
     "fat": 0.1,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 42
   },
   {
     "name": "＜調味料類＞　（だし類）　顆粒中華だし",
@@ -28629,7 +28629,7 @@
     "protein": 0.1,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 57
   },
   {
     "name": "＜調味料類＞　（調味ソース類）　エビチリの素",
@@ -28665,7 +28665,7 @@
     "protein": 6.3,
     "fat": 13.1,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 40
   },
   {
     "name": "＜調味料類＞　（調味ソース類）　魚醤油　いかなごしょうゆ",
@@ -28725,7 +28725,7 @@
     "protein": 4.0,
     "fat": 8.0,
     "fiber": 1.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 42
   },
   {
     "name": "＜調味料類＞　（調味ソース類）　ごまだれ",
@@ -28737,7 +28737,7 @@
     "protein": 7.2,
     "fat": 15.1,
     "fiber": 3.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 42
   },
   {
     "name": "＜調味料類＞　（調味ソース類）　三杯酢",
@@ -28749,7 +28749,7 @@
     "protein": 0.9,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 25
   },
   {
     "name": "＜調味料類＞　（調味ソース類）　二杯酢",
@@ -28773,7 +28773,7 @@
     "protein": 0.1,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜調味料類＞　（調味ソース類）　すし酢　にぎり用",
@@ -28809,7 +28809,7 @@
     "protein": 3.0,
     "fat": 3.4,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "＜調味料類＞　（調味ソース類）　デミグラスソース",
@@ -28845,7 +28845,7 @@
     "protein": 2.1,
     "fat": 1.2,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜調味料類＞　（調味ソース類）　ホワイトソース",
@@ -28905,7 +28905,7 @@
     "protein": 0.1,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 35
   },
   {
     "name": "＜調味料類＞　（調味ソース類）　ミートソース",
@@ -28941,7 +28941,7 @@
     "protein": 3.3,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "＜調味料類＞　（調味ソース類）　焼き肉のたれ",
@@ -28953,7 +28953,7 @@
     "protein": 4.3,
     "fat": 2.2,
     "fiber": 0.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "＜調味料類＞　（調味ソース類）　みたらしのたれ",
@@ -28965,7 +28965,7 @@
     "protein": 0.9,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 68
   },
   {
     "name": "＜調味料類＞　（調味ソース類）　ゆずこしょう",
@@ -29001,7 +29001,7 @@
     "protein": 3.8,
     "fat": 0.1,
     "fiber": 4.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 35
   },
   {
     "name": "＜調味料類＞　（トマト加工品類）　トマトケチャップ",
@@ -29013,7 +29013,7 @@
     "protein": 1.6,
     "fat": 0.2,
     "fiber": 1.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜調味料類＞　（トマト加工品類）　トマトソース",
@@ -29085,7 +29085,7 @@
     "protein": 0.0,
     "fat": 31.5,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 40
   },
   {
     "name": "＜調味料類＞　（ドレッシング類）　分離液状ドレッシング　和風ドレッシング　分離液状",
@@ -29121,7 +29121,7 @@
     "protein": 2.7,
     "fat": 38.3,
     "fiber": 0.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 40
   },
   {
     "name": "＜調味料類＞　（ドレッシング類）　乳化液状ドレッシング　サウザンアイランドドレッシング",
@@ -29133,7 +29133,7 @@
     "protein": 0.3,
     "fat": 39.2,
     "fiber": 0.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 10
   },
   {
     "name": "＜調味料類＞　（ドレッシング類）　乳化液状ドレッシング　フレンチドレッシング　乳化液状",
@@ -29169,7 +29169,7 @@
     "protein": 12.5,
     "fat": 6.0,
     "fiber": 4.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 32
   },
   {
     "name": "＜調味料類＞　（みそ類）　米みそ　赤色辛みそ",
@@ -29205,7 +29205,7 @@
     "protein": 10.3,
     "fat": 5.1,
     "fiber": 4.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 32
   },
   {
     "name": "＜調味料類＞　（みそ類）　麦みそ",
@@ -29241,7 +29241,7 @@
     "protein": 11.0,
     "fat": 5.9,
     "fiber": 4.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 30
   },
   {
     "name": "＜調味料類＞　（みそ類）　即席みそ　粉末タイプ",
@@ -29253,7 +29253,7 @@
     "protein": 21.9,
     "fat": 9.3,
     "fiber": 6.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 35
   },
   {
     "name": "＜調味料類＞　（みそ類）　即席みそ　ペーストタイプ",
@@ -29277,7 +29277,7 @@
     "protein": 5.0,
     "fat": 2.1,
     "fiber": 2.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 35
   },
   {
     "name": "＜調味料類＞　（みそ類）　ごまみそ",
@@ -29301,7 +29301,7 @@
     "protein": 4.9,
     "fat": 1.5,
     "fiber": 2.8,
-    "glycemicIndex": 0
+    "glycemicIndex": 38
   },
   {
     "name": "＜調味料類＞　（みそ類）　練りみそ",
@@ -29313,7 +29313,7 @@
     "protein": 5.5,
     "fat": 1.7,
     "fiber": 3.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 42
   },
   {
     "name": "＜調味料類＞　（ルウ類）　カレールウ",
@@ -29325,7 +29325,7 @@
     "protein": 6.5,
     "fat": 34.1,
     "fiber": 6.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "＜調味料類＞　（ルウ類）　ハヤシルウ",
@@ -29349,7 +29349,7 @@
     "protein": 20.2,
     "fat": 3.7,
     "fiber": 3.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 58
   },
   {
     "name": "＜調味料類＞　（その他）　キムチの素",
@@ -29361,7 +29361,7 @@
     "protein": 5.3,
     "fat": 1.0,
     "fiber": 3.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 30
   },
   {
     "name": "＜調味料類＞　（その他）　酒かす",
@@ -29385,7 +29385,7 @@
     "protein": 18.3,
     "fat": 0.8,
     "fiber": 3.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 28
   },
   {
     "name": "＜調味料類＞　（その他）　ふりかけ　たまご",
@@ -29397,7 +29397,7 @@
     "protein": 23.4,
     "fat": 21.9,
     "fiber": 5.1,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "＜調味料類＞　（その他）　みりん風調味料",
@@ -29409,7 +29409,7 @@
     "protein": 0.1,
     "fat": 0.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "＜調味料類＞　（その他）　料理酒",
@@ -29529,7 +29529,7 @@
     "protein": 11.0,
     "fat": 6.0,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜香辛料類＞　こしょう　白　粉",
@@ -29541,7 +29541,7 @@
     "protein": 10.1,
     "fat": 6.4,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜香辛料類＞　こしょう　混合　粉",
@@ -29553,7 +29553,7 @@
     "protein": 10.6,
     "fat": 6.2,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜香辛料類＞　さんしょう　粉",
@@ -29589,7 +29589,7 @@
     "protein": 7.8,
     "fat": 4.9,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜香辛料類＞　しょうが　おろし",
@@ -29673,7 +29673,7 @@
     "protein": 19.9,
     "fat": 0.8,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜香辛料類＞　にんにく　ガーリックパウダー　食塩添加",
@@ -29685,7 +29685,7 @@
     "protein": 19.9,
     "fat": 0.8,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "＜香辛料類＞　にんにく　おろし",
@@ -29793,7 +29793,7 @@
     "protein": 0.0,
     "fat": 1.2,
     "fiber": 0.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 50
   },
   {
     "name": "和風料理　和え物類　青菜の白和え",
@@ -29829,7 +29829,7 @@
     "protein": 3.8,
     "fat": 0.9,
     "fiber": 2.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 32
   },
   {
     "name": "和風料理　汁物類　とん汁",
@@ -29949,7 +29949,7 @@
     "protein": 4.3,
     "fat": 1.3,
     "fiber": 1.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 62
   },
   {
     "name": "和風料理　煮物類　ひじきのいため煮",
@@ -29985,7 +29985,7 @@
     "protein": 5.2,
     "fat": 6.5,
     "fiber": 2.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 65
   },
   {
     "name": "和風料理　その他　とりから揚げ",
@@ -29997,7 +29997,7 @@
     "protein": 15.6,
     "fat": 10.1,
     "fiber": 1.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "和風料理　その他　松前漬け　しょうゆ漬",
@@ -30009,7 +30009,7 @@
     "protein": 17.0,
     "fat": 1.4,
     "fiber": 1.6,
-    "glycemicIndex": 0
+    "glycemicIndex": 35
   },
   {
     "name": "洋風料理　カレー類　チキンカレー",
@@ -30057,7 +30057,7 @@
     "protein": 5.1,
     "fat": 17.1,
     "fiber": 1.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "洋風料理　コロッケ類　コーンクリームコロッケ",
@@ -30069,7 +30069,7 @@
     "protein": 5.1,
     "fat": 16.0,
     "fiber": 1.4,
-    "glycemicIndex": 0
+    "glycemicIndex": 62
   },
   {
     "name": "洋風料理　コロッケ類　ポテトコロッケ",
@@ -30081,7 +30081,7 @@
     "protein": 5.3,
     "fat": 12.6,
     "fiber": 2.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 70
   },
   {
     "name": "洋風料理　シチュー類　チキンシチュー",
@@ -30117,7 +30117,7 @@
     "protein": 10.2,
     "fat": 12.5,
     "fiber": 1.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 45
   },
   {
     "name": "洋風料理　スープ類　かぼちゃのクリームスープ",
@@ -30201,7 +30201,7 @@
     "protein": 13.3,
     "fat": 11.3,
     "fiber": 0.9,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "洋風料理　フライ類　えびフライ",
@@ -30213,7 +30213,7 @@
     "protein": 15.9,
     "fat": 11.6,
     "fiber": 1.0,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "洋風料理　フライ類　かきフライ",
@@ -30225,7 +30225,7 @@
     "protein": 8.9,
     "fat": 18.0,
     "fiber": 2.3,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "洋風料理　フライ類　白身フライ",
@@ -30249,7 +30249,7 @@
     "protein": 10.7,
     "fat": 18.7,
     "fiber": 1.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "洋風料理　フライ用冷凍食品　いかフライ　冷凍",
@@ -30345,7 +30345,7 @@
     "protein": 3.3,
     "fat": 2.3,
     "fiber": 1.2,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "中国料理　点心類　ぎょうざ",
@@ -30357,7 +30357,7 @@
     "protein": 6.9,
     "fat": 11.3,
     "fiber": 1.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 47
   },
   {
     "name": "中国料理　点心類　しゅうまい",
@@ -30369,7 +30369,7 @@
     "protein": 9.1,
     "fat": 9.2,
     "fiber": 1.7,
-    "glycemicIndex": 0
+    "glycemicIndex": 60
   },
   {
     "name": "中国料理　点心類　中華ちまき",
@@ -30381,7 +30381,7 @@
     "protein": 5.9,
     "fat": 5.5,
     "fiber": 0.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 67
   },
   {
     "name": "中国料理　点心類　春巻き",
@@ -30393,7 +30393,7 @@
     "protein": 6.0,
     "fat": 19.3,
     "fiber": 3.5,
-    "glycemicIndex": 0
+    "glycemicIndex": 52
   },
   {
     "name": "中国料理　菜類　酢豚",

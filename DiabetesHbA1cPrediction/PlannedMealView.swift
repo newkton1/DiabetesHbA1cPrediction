@@ -9,6 +9,9 @@ struct PlannedMealView: View {
     @State private var showingFeastPlanner = false
     @State private var showFeastWarning = false
     @State private var feastWarningMessage = ""
+    @State private var showHighFeastSheet = false      // 3+ feasts: custom sheet with disclaimer
+    @State private var disclaimerAcknowledged = false  // checkbox state inside sheet
+    @State private var showDemoAlert = false           // demo mode soft redirect
 
     private var isLandscape: Bool { verticalSizeClass == .compact }
 
@@ -99,7 +102,7 @@ struct PlannedMealView: View {
                                     .fontWeight(.semibold)
                                     .foregroundColor(feastsThisWeek >= 3 ? .red : .orange)
                                 Text(feastsThisWeek >= 3
-                                     ? "You have logged \(feastsThisWeek) feasts in the last 7 days. Review how frequent feasts have appeared in your glucose trends."
+                                     ? "You have logged \(feastsThisWeek) feasts in the last 7 days. Please consult your healthcare provider before planning another feast."
                                      : "This is your \(ordinal(feastsThisWeek + 1)) feast in 7 days. You can review how past feasts appeared in your trends.")
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
@@ -141,16 +144,30 @@ struct PlannedMealView: View {
             } message: {
                 Text(feastWarningMessage)
             }
+            .sheet(isPresented: $showHighFeastSheet) {
+                HighFeastWarningSheet(
+                    feastCount: feastsThisWeek,
+                    isAcknowledged: $disclaimerAcknowledged,
+                    onContinue: { showingFeastPlanner = true }
+                )
+            }
+            .demoRedirect(isPresented: $showDemoAlert)
     }
 
     // MARK: - Feast Frequency Logic
 
-    /// Decides whether to show a warning alert or open the planner directly
+    /// Decides whether to show a warning alert, the disclaimer sheet, or open the planner directly
     private func handlePlanFeast() {
+        // Soft redirect while demo data is active — no data entry allowed
+        guard !DemoDataManager.isDemoDataLoaded else {
+            showDemoAlert = true
+            return
+        }
+
         let count = feastsThisWeek
         if count >= 3 {
-            feastWarningMessage = "You have already logged \(count) feasts in the last 7 days. Your glucose history shows patterns around frequent feasts."
-            showFeastWarning = true
+            disclaimerAcknowledged = false
+            showHighFeastSheet = true
         } else if count >= 2 {
             feastWarningMessage = "This is your \(ordinal(count + 1)) feast in the last 7 days. You can review your glucose and GMI trends from similar past meals."
             showFeastWarning = true
@@ -175,6 +192,124 @@ struct PlannedMealView: View {
             }
         }
         return "\(n)\(suffix)"
+    }
+}
+
+// MARK: - High Feast Warning Sheet (3+ feasts in 7 days)
+
+private struct HighFeastWarningSheet: View {
+    let feastCount: Int
+    @Binding var isAcknowledged: Bool
+    var onContinue: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+
+                    // Warning icon + title
+                    VStack(spacing: 12) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 48))
+                            .foregroundColor(.red)
+                            .accessibilityHidden(true)
+                        Text("High Feast Frequency")
+                            .font(.title2).bold()
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 8)
+
+                    // Count summary
+                    Text("You have already logged \(feastCount) feast meals in the last 7 days.")
+                        .font(.body)
+                        .foregroundColor(.primary)
+
+                    // Clinical context
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Frequent high-glycaemic meals can significantly affect blood glucose control in people with Type 2 diabetes.")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+
+                        Text("Diabetes Feast is a personal wellness journal, not a medical device. It cannot assess whether planning another feast meal is appropriate for your individual condition, medication, or clinical circumstances.")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                    }
+
+                    // Healthcare provider prompt
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "stethoscope")
+                            .foregroundColor(.red)
+                            .font(.body)
+                            .padding(.top, 2)
+                            .accessibilityHidden(true)
+                        Text("Please consult your healthcare provider before planning this meal.")
+                            .font(.body)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.red)
+                    }
+                    .padding(14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.red.opacity(0.08))
+                    .cornerRadius(10)
+
+                    // Checkbox acknowledgement
+                    Button(action: { isAcknowledged.toggle() }) {
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: isAcknowledged ? "checkmark.square.fill" : "square")
+                                .font(.title2)
+                                .foregroundColor(isAcknowledged ? .blue : .secondary)
+                                .accessibilityHidden(true)
+                            Text("I understand that Diabetes Feast is not medical advice and I will consult my healthcare provider before planning this feast meal.")
+                                .font(.subheadline)
+                                .foregroundColor(.primary)
+                                .multilineTextAlignment(.leading)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Acknowledgement checkbox")
+                    .accessibilityValue(isAcknowledged ? "Checked" : "Unchecked")
+                    .accessibilityHint("Double-tap to toggle")
+
+                    // Action buttons
+                    VStack(spacing: 12) {
+                        Button(action: {
+                            dismiss()
+                            onContinue()
+                        }) {
+                            Text("Continue Anyway")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(isAcknowledged ? Color.red : Color(.systemGray4))
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                        }
+                        .disabled(!isAcknowledged)
+                        .animation(.easeInOut(duration: 0.2), value: isAcknowledged)
+
+                        Button(action: { dismiss() }) {
+                            Text("Cancel")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color(.systemGray5))
+                                .foregroundColor(.primary)
+                                .cornerRadius(12)
+                        }
+                    }
+                }
+                .padding(24)
+            }
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
     }
 }
 

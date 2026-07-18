@@ -5,10 +5,11 @@
 //
 //  MET (Metabolic Equivalent of Task) values are clinical averages for
 //  moderate-intensity exercise:
-//    Walk  ≈ 3.5 METs  (brisk walking ~5 km/h)
-//    Run   ≈ 9.0 METs  (jogging ~8 km/h)
-//    Cycle ≈ 7.0 METs  (moderate effort ~18 km/h)
-//    Swim  ≈ 6.0 METs  (moderate freestyle)
+//    Walk            ≈ 3.5 METs  (brisk walking ~5 km/h)
+//    Run             ≈ 9.0 METs  (jogging ~8 km/h)
+//    Cycle           ≈ 7.0 METs  (moderate effort ~18 km/h)
+//    Swim            ≈ 6.0 METs  (moderate freestyle)
+//    StrengthTraining≈ 5.0 METs  (moderate weight/resistance training)
 //
 //  Calorie burn per minute ≈ MET × bodyWeightKg × 0.0175
 
@@ -19,7 +20,8 @@ enum ExerciseOffsetType: String, CaseIterable, Identifiable {
     case run    = "run"
     case cycle  = "cycle"
     case swim   = "swim"
-    case garden = "garden"
+    case garden          = "garden"
+    case strengthTraining = "strengthTraining"
 
     var id: String { rawValue }
 
@@ -30,7 +32,8 @@ enum ExerciseOffsetType: String, CaseIterable, Identifiable {
         case .run:    return "Run"
         case .cycle:  return "Cycle"
         case .swim:   return "Swim"
-        case .garden: return "Garden"
+        case .garden:          return "Garden"
+        case .strengthTraining: return "Strength Training"
         }
     }
 
@@ -41,7 +44,8 @@ enum ExerciseOffsetType: String, CaseIterable, Identifiable {
         case .run:    return "figure.run.circle.fill"
         case .cycle:  return "figure.outdoor.cycle"
         case .swim:   return "figure.pool.swim"
-        case .garden: return "leaf.fill"
+        case .garden:          return "leaf.fill"
+        case .strengthTraining: return "dumbbell.fill"
         }
     }
 
@@ -52,7 +56,8 @@ enum ExerciseOffsetType: String, CaseIterable, Identifiable {
         case .run:    return 9.0
         case .cycle:  return 7.0
         case .swim:   return 6.0
-        case .garden: return 3.5  // general gardening ≈ 3.0–4.0 METs; use walk equivalent
+        case .garden:          return 3.5  // general gardening ≈ 3.0–4.0 METs; use walk equivalent
+        case .strengthTraining: return 5.0  // moderate weight/resistance training ≈ 5.0 METs
         }
     }
 
@@ -65,7 +70,8 @@ enum ExerciseOffsetType: String, CaseIterable, Identifiable {
         case .run:    return 8.0 / 60.0    // 8 km/h
         case .cycle:  return 18.0 / 60.0   // 18 km/h
         case .swim:   return 30.0 / 60.0   // 30 m/min (≈ 1.8 km/h)
-        case .garden: return 0.0           // not distance-based
+        case .garden:          return 0.0  // not distance-based
+        case .strengthTraining: return 0.0  // not distance-based
         }
     }
 
@@ -74,7 +80,7 @@ enum ExerciseOffsetType: String, CaseIterable, Identifiable {
     var showsDistance: Bool {
         switch self {
         case .walk, .run, .cycle, .swim: return true
-        case .garden:                    return false
+        case .garden, .strengthTraining: return false
         }
     }
 
@@ -93,7 +99,8 @@ enum ExerciseOffsetType: String, CaseIterable, Identifiable {
         case .run:    return "run"
         case .cycle:  return "cycle"
         case .swim:   return "swim"
-        case .garden: return "gardening session"
+        case .garden:          return "gardening session"
+        case .strengthTraining: return "strength training session"
         }
     }
 
@@ -104,7 +111,8 @@ enum ExerciseOffsetType: String, CaseIterable, Identifiable {
         case .run:    return "Running"
         case .cycle:  return "Cycling"
         case .swim:   return "Swimming"
-        case .garden: return "Gardening"
+        case .garden:          return "Gardening"
+        case .strengthTraining: return "Strength Training"
         }
     }
 

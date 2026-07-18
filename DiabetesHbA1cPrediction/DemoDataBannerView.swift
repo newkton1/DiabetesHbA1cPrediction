@@ -18,6 +18,7 @@ struct DemoDataBannerView: View {
     var onDemoDataCleared: (() -> Void)? = nil
 
     @State private var showConfirmation = false
+    @State private var showTransitionSheet = false
 
     var body: some View {
         HStack(spacing: 8) {
@@ -56,6 +57,13 @@ struct DemoDataBannerView: View {
         } message: {
             Text("This will remove all demo data so you can start logging your own glucose, meals, and exercise. This cannot be undone.")
         }
+        // Transition sheet shown immediately after the wipe — explains
+        // progressive feature unlocking before returning to the dashboard.
+        .sheet(isPresented: $showTransitionSheet) {
+            DemoClearedTransitionView(onDismiss: {
+                onDemoDataCleared?()
+            })
+        }
     }
 
     private func clearDemoData() {
@@ -63,7 +71,10 @@ struct DemoDataBannerView: View {
             try DemoDataManager.wipeAllData(from: viewContext)
             ColdStartManager.shared.resetOnboarding()
             ColdStartManager.shared.refresh(context: viewContext)
-            onDemoDataCleared?()
+            // Don't call onDemoDataCleared here — it fires after the
+            // transition sheet is dismissed, so the dashboard doesn't
+            // flip to the cold-start state while the sheet is still visible.
+            showTransitionSheet = true
         } catch {
             // Silently handle — the user can retry from Settings
             print("Failed to clear demo data: \(error.localizedDescription)")
