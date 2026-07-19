@@ -70,6 +70,10 @@ struct DataExportView: View {
                     Label("Export for Doctor (Excel)", systemImage: "tablecells")
                 }
 
+                Button(action: exportAsHTML) {
+                    Label("Export for Doctor (HTML)", systemImage: "chart.xyaxis.line")
+                }
+
                 if !exportSummary.isEmpty {
                     Text(exportSummary)
                         .font(.caption)
@@ -235,6 +239,30 @@ struct DataExportView: View {
             showShareSheet = true
         } catch {
             exportSummary = "Excel export failed: \(error.localizedDescription)"
+        }
+    }
+
+    // MARK: - HTML Export
+
+    private func exportAsHTML() {
+        // HTML generation is pure string-building — fast enough to run
+        // synchronously on the main actor without needing a background task.
+        exportSummary = ""
+        do {
+            let url = try ClinicalSummaryExporter.generateHTML(
+                glucoseReadings: Array(glucoseReadings),
+                meals:           Array(meals),
+                exercises:       Array(exercises),
+                predictions:     Array(predictions),
+                userProfiles:    Array(userProfiles)
+            )
+            let sizeKB = (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int)
+                .map { Double($0) / 1024.0 } ?? 0
+            exportSummary = String(format: "Ready: %@ (%.0f KB)", url.lastPathComponent, sizeKB)
+            exportURL = url
+            showShareSheet = true
+        } catch {
+            exportSummary = "HTML export failed: \(error.localizedDescription)"
         }
     }
 
