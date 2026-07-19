@@ -250,7 +250,7 @@ struct MealBuilderView: View {
         Form {
             // Meal name section — title used as section header so it sits tight
             Section(header:
-                Text(mealType == .lastMeal ? "Last Meal" : mealType == .feast ? "Plan Feast Treat" : "Plan Meal")
+                Text(LocalizedStringKey(mealType == .lastMeal ? "Last Meal" : mealType == .feast ? "Plan Feast Treat" : "Plan Meal"))
                     .font(.headline)
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -344,7 +344,7 @@ struct MealBuilderView: View {
 
             // Time section — only for non-feast types (feast uses SimilarImpactView)
             if mealType != .feast {
-            Section(header: Text(mealType == .lastMeal ? "Time Since Meal" : "Planned Date & Time")) {
+            Section(header: Text(LocalizedStringKey(mealType == .lastMeal ? "Time Since Meal" : "Planned Date & Time"))) {
                 if mealType == .lastMeal {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("How long ago did you eat this meal?")
@@ -954,14 +954,14 @@ struct NutritionBulletRow: View {
 
 /// Quick time selection button
 struct QuickTimeButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let hours: Double
     @Binding var selectedHours: Double
-    
+
     var isSelected: Bool {
         abs(selectedHours - hours) < 0.1
     }
-    
+
     var body: some View {
         Button(action: { selectedHours = hours }) {
             Text(title)

@@ -84,6 +84,7 @@ class FoodDatabase {
     /// Private initializer ensures only one instance of FoodDatabase exists
     private init() {
         populateDatabase()
+        populateJapaneseDatabase()
         loadFavorites()
     }
 
@@ -99,6 +100,37 @@ class FoodDatabase {
             allFoods = try JSONDecoder().decode([FoodItem].self, from: data)
         } catch {
             loadError = "Food database could not be loaded. Please reinstall the app."
+        }
+    }
+
+    /// Loads the Japanese government food database (2,538 items) if bundled.
+    /// All items are tagged with category "日本食" regardless of their original sub-category,
+    /// so they appear together under the 日本食 chip in the food search UI.
+    private func populateJapaneseDatabase() {
+        guard let url = Bundle.main.url(forResource: "FoodDatabase_JP", withExtension: "json") else {
+            // Not yet added to Xcode target — silently skip
+            return
+        }
+        do {
+            let data = try Data(contentsOf: url)
+            let raw = try JSONDecoder().decode([FoodItem].self, from: data)
+            let tagged = raw.map { item in
+                FoodItem(
+                    name: item.name,
+                    category: "日本食",
+                    servingSize: item.servingSize,
+                    servingUnit: item.servingUnit,
+                    calories: item.calories,
+                    carbohydrates: item.carbohydrates,
+                    protein: item.protein,
+                    fat: item.fat,
+                    fiber: item.fiber,
+                    glycemicIndex: item.glycemicIndex
+                )
+            }
+            allFoods.append(contentsOf: tagged)
+        } catch {
+            print("FoodDatabase: Could not load Japanese database — \(error.localizedDescription)")
         }
     }
 

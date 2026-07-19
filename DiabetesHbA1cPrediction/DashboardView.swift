@@ -557,10 +557,11 @@ private struct GMICardView: View {
         profile.formatHbA1c(ifcc)
     }
 
-    /// Short date string, e.g. "02 Apr".
+    /// Short date string, e.g. "02 Apr" (English) or "4月2日" (Japanese).
     private func shortDate(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "dd MMM"
+        let isJapanese = Locale.current.language.languageCode?.identifier == "ja"
+        formatter.dateFormat = isJapanese ? "M月d日" : "dd MMM"
         return formatter.string(from: date)
     }
 
@@ -682,12 +683,12 @@ private struct GMICardView: View {
                     .foregroundColor(.secondary)
 
                 let displayValue = isNgsp ? String(format: "%.1f", cached.ngsp) : String(format: "%.0f", cached.ifcc)
-                Text("Your last GMI, calculated \(cached.daysAgo) \(cached.daysAgo == 1 ? "day" : "days") ago, was \(displayValue) \(unitSuffix)")
+                Text(String(format: NSLocalizedString("Your last GMI, calculated %lld %@ ago, was %@ %@", comment: ""), Int64(cached.daysAgo), NSLocalizedString(cached.daysAgo == 1 ? "day" : "days", comment: ""), displayValue, unitSuffix))
                     .font(.callout)
                     .foregroundColor(rangeColor(forIfcc: cached.ifcc))
                     .multilineTextAlignment(.center)
 
-                Text("Log at least \(Self.minReadings) glucose readings in the last \(Self.windowDays) days to update your GMI.")
+                Text(String(format: NSLocalizedString("Log at least %lld glucose readings in the last %lld days to update your GMI.", comment: ""), Int64(Self.minReadings), Int64(Self.windowDays)))
                     .font(.caption2)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -703,7 +704,7 @@ private struct GMICardView: View {
                             .font(.body)
                             .foregroundColor(.secondary)
 
-                        Text("Log at least \(Self.minReadings) glucose readings in the last \(Self.windowDays) days to see your GMI estimate.")
+                        Text(String(format: NSLocalizedString("Log at least %lld glucose readings in the last %lld days to see your GMI estimate.", comment: ""), Int64(Self.minReadings), Int64(Self.windowDays)))
                             .font(.caption2)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -803,7 +804,7 @@ private struct GMICardView: View {
             .buttonStyle(.plain)
             .accessibilityHint("Tap to view and manage lab results")
 
-            Text("\(shortDate(lab.date)) · tap to edit")
+            Text(String(format: NSLocalizedString("%@ · tap to edit", comment: ""), shortDate(lab.date)))
                 .font(.caption)
                 .foregroundColor(.secondary)
         } else {
@@ -825,7 +826,7 @@ private struct GMICardView: View {
             .buttonStyle(.plain)
             .accessibilityHint("Tap to view and manage lab results")
 
-            Text("\(labs.count) results · \(shortDate(labs.first!.date)) – \(shortDate(latest.date)) · tap to edit")
+            Text(String(format: NSLocalizedString("%lld results · %@ – %@ · tap to edit", comment: ""), Int64(labs.count), shortDate(labs.first!.date), shortDate(latest.date)))
                 .font(.caption)
                 .foregroundColor(.secondary)
         }

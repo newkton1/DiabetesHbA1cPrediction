@@ -69,17 +69,22 @@ struct MultiSelectFoodSearchView: View {
     }
 
     // Get unique categories sorted alphabetically by chip label
-    // "My Menu" is excluded here because it gets its own pinned chip
+    // "My Menu" and "日本食" are excluded here because they get their own pinned chips
     private var categories: [String] {
         let allCategories = Set(foodDatabase.allFoods.map { $0.category })
         return allCategories
-            .filter { $0 != "My Menu" }
+            .filter { $0 != "My Menu" && $0 != "日本食" }
             .sorted { MultiSelectFoodSearchView.chipLabel(for: $0) < MultiSelectFoodSearchView.chipLabel(for: $1) }
     }
 
     /// Whether the user has any saved "My Menu" items
     private var hasMyMeals: Bool {
         foodDatabase.allFoods.contains { $0.category == "My Menu" }
+    }
+
+    /// Whether the Japanese food database has been loaded (FoodDatabase_JP.json added to target)
+    private var hasJapaneseDatabase: Bool {
+        foodDatabase.allFoods.contains { $0.category == "日本食" }
     }
 
     // Filtered foods based on search and category
@@ -170,7 +175,8 @@ struct MultiSelectFoodSearchView: View {
                     categories: categories,
                     groupedFoods: groupedFoods,
                     recentMeals: recentMeals,
-                    hasMyMeals: hasMyMeals
+                    hasMyMeals: hasMyMeals,
+                    hasJapaneseDatabase: hasJapaneseDatabase
                 )
             }
             .navigationTitle("")
@@ -222,6 +228,7 @@ private struct FoodSearchContentDirect: View {
     let groupedFoods: [(category: String, foods: [FoodItem])]
     let recentMeals: [RecentMeal]
     let hasMyMeals: Bool
+    let hasJapaneseDatabase: Bool
 
     @State private var showOnlineSearch = false
 
@@ -262,6 +269,15 @@ private struct FoodSearchContentDirect: View {
                             action: { selectedCategory = "My Menu" }
                         )
 
+                        // Japanese food database chip — only shown when FoodDatabase_JP.json is bundled
+                        if hasJapaneseDatabase {
+                            CategoryFilterChip(
+                                title: "日本食",
+                                isSelected: selectedCategory == "日本食",
+                                action: { selectedCategory = "日本食" }
+                            )
+                        }
+
                         // Recent meals chip — only show if there are saved meals
                         if !recentMeals.isEmpty {
                             CategoryFilterChip(
@@ -273,7 +289,7 @@ private struct FoodSearchContentDirect: View {
 
                         ForEach(categories, id: \.self) { category in
                             CategoryFilterChip(
-                                title: MultiSelectFoodSearchView.chipLabel(for: category),
+                                title: LocalizedStringKey(MultiSelectFoodSearchView.chipLabel(for: category)),
                                 isSelected: selectedCategory == category,
                                 action: { selectedCategory = category }
                             )
@@ -297,7 +313,7 @@ private struct FoodSearchContentDirect: View {
 
                     Spacer()
 
-                    Text("\(Int(mealBuilder.totalCarbohydrates)) g carbs")
+                    Text(String(format: NSLocalizedString("%lld g carbs", comment: ""), Int64(mealBuilder.totalCarbohydrates)))
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .foregroundColor(.orange)
@@ -366,7 +382,7 @@ private struct FoodSearchContentDirect: View {
                 // Food list
                 List {
                     ForEach(groupedFoods, id: \.category) { group in
-                        Section(header: Text(MultiSelectFoodSearchView.chipLabel(for: group.category))) {
+                        Section(header: Text(LocalizedStringKey(MultiSelectFoodSearchView.chipLabel(for: group.category)))) {
                             ForEach(group.foods) { food in
                                 FoodSelectionRow(
                                     food: food,
@@ -501,7 +517,7 @@ private struct RecentMealRow: View {
                         .lineLimit(2)
 
                     HStack(spacing: 8) {
-                        Text("\(Int(meal.totalCarbs)) g carbs")
+                        Text(String(format: NSLocalizedString("%lld g carbs", comment: ""), Int64(meal.totalCarbs)))
                             .font(.caption)
                             .foregroundColor(.orange)
 
@@ -563,7 +579,7 @@ struct FoodSelectionRow: View {
                 .foregroundColor(.primary)
 
             HStack(spacing: 8) {
-                Text("\(displayCarbs) g carbs")
+                Text(String(format: NSLocalizedString("%lld g carbs", comment: ""), Int64(displayCarbs)))
                     .font(.caption)
                     .foregroundColor(.orange)
 
@@ -571,7 +587,7 @@ struct FoodSelectionRow: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                Text("\(food.servingSize, specifier: "%.0f") \(food.servingUnit)")
+                Text("\(food.servingSize, specifier: "%.0f") ") + Text(LocalizedStringKey(food.servingUnit))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -670,7 +686,7 @@ enum ServingFormatter {
 
 /// Category filter chip button
 struct CategoryFilterChip: View {
-    let title: String
+    let title: LocalizedStringKey
     let isSelected: Bool
     let action: () -> Void
 

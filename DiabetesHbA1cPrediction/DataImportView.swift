@@ -229,7 +229,7 @@ struct DataImportView: View {
 // MARK: - Summary Row
 
 private struct ImportSummaryRow: View {
-    let label: String
+    let label: LocalizedStringKey
     let count: DataImportResult.ImportCount
 
     var body: some View {

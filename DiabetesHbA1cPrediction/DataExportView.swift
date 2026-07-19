@@ -407,7 +407,7 @@ struct DataExportView: View {
 // MARK: - Helper Views
 
 private struct SummaryRow: View {
-    let label: String
+    let label: LocalizedStringKey
     let count: Int
 
     var body: some View {

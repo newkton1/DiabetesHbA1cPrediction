@@ -547,7 +547,7 @@ struct GlucoseLogView: View {
                     .padding(.trailing)
                     .padding(.leading, 30) // room for rotated y-axis label
                     .overlay(alignment: .leading) {
-                        Text("Glucose Level \(chartUnitLabel)")
+                        Text(String(format: NSLocalizedString("Glucose Level %@", comment: ""), chartUnitLabel))
                             .font(.caption2.weight(.semibold))
                             .foregroundColor(.secondary)
                             .rotationEffect(.degrees(-90))
@@ -607,7 +607,7 @@ struct GlucoseLogView: View {
                 } else {
                     // No glucose data in window (only HbA1c lab results or outside window)
                     VStack(spacing: 8) {
-                        Text("No glucose readings in the last \(chartWindowDays) days")
+                        Text(String(format: NSLocalizedString("No glucose readings in the last %lld days", comment: ""), Int64(chartWindowDays)))
                             .font(.caption)
                             .foregroundColor(.secondary)
                         if chartDaySetting < 7 {
@@ -1198,7 +1198,7 @@ struct GlucoseLogView: View {
             List {
                 // Reading count header
                 HStack {
-                    Text("\(windowReadings.count) readings")
+                    Text(String(format: NSLocalizedString("%lld readings", comment: ""), Int64(windowReadings.count)))
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Spacer()
@@ -1304,13 +1304,15 @@ struct GlucoseLogView: View {
     // MARK: - Chart Navigation Helpers
 
     /// Human-readable label for the chart window date range.
-    /// Same month: "13–16 Apr"   Across months: "29 Apr – 1 May"
+    /// English — same month: "13–16 Apr"   cross-month: "29 Apr – 1 May"
+    /// Japanese — same month: "4月13–16日"   cross-month: "4月29日 – 5月1日"
     private var chartWindowLabel: String {
         let cal = Calendar.current
+        let isJapanese = Locale.current.language.languageCode?.identifier == "ja"
         let df = DateFormatter()
-        df.dateFormat = "d MMM"
+        df.dateFormat = isJapanese ? "M月d日" : "d MMM"
 
-        // 1-day view: show single date (e.g. "30 Apr")
+        // 1-day view: show single date (e.g. "30 Apr" / "4月30日")
         if chartDaySetting <= 1 {
             return df.string(from: chartWindowStart)
         }
@@ -1319,7 +1321,12 @@ struct GlucoseLogView: View {
         if sameMonth {
             let dayOnly = DateFormatter()
             dayOnly.dateFormat = "d"
-            return "\(dayOnly.string(from: chartWindowStart))–\(df.string(from: chartWindowEnd))"
+            if isJapanese {
+                let month = cal.component(.month, from: chartWindowStart)
+                return "\(month)月\(dayOnly.string(from: chartWindowStart))–\(dayOnly.string(from: chartWindowEnd))日"
+            } else {
+                return "\(dayOnly.string(from: chartWindowStart))–\(df.string(from: chartWindowEnd))"
+            }
         } else {
             return "\(df.string(from: chartWindowStart)) – \(df.string(from: chartWindowEnd))"
         }

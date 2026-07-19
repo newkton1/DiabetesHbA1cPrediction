@@ -648,10 +648,11 @@ struct ExerciseRowView: View {
         return "\(totalMinutes) min"
     }
 
-    /// Format the exercise date as MM/dd
+    /// Format the exercise date as MM/dd (English) or M月d日 (Japanese).
     private var dateText: String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MM/dd"
+        let isJapanese = Locale.current.language.languageCode?.identifier == "ja"
+        formatter.dateFormat = isJapanese ? "M月d日" : "MM/dd"
         return formatter.string(from: exercise.startDate ?? Date())
     }
 
@@ -674,7 +675,7 @@ struct ExerciseRowView: View {
                     Image(systemName: exerciseIcon(for: exercise.type ?? ""))
                         .font(.headline)
                         .foregroundColor(.blue)
-                    Text("\(exercise.type ?? "Unknown") \(dateText)")
+                    Text(LocalizedStringKey(exercise.type ?? "Unknown")) + Text(" \(dateText)")
                         .font(.headline)
                 }
 
@@ -729,7 +730,7 @@ struct ExerciseRowView: View {
 
             // Exercise details
             VStack(alignment: .leading, spacing: 6) {
-                Text("\(exercise.type ?? "Unknown") \(dateText)")
+                Text(LocalizedStringKey(exercise.type ?? "Unknown")) + Text(" \(dateText)")
                     .font(.headline)
 
                 HStack(spacing: 12) {

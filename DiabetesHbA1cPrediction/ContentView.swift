@@ -38,9 +38,9 @@ struct ContentView: View {
             }
         }
 
-        /// Label for the tab bar
-        var tabLabel: String {
-            return rawValue
+        /// Label for the tab bar (LocalizedStringKey so SwiftUI looks up translations)
+        var tabLabel: LocalizedStringKey {
+            LocalizedStringKey(rawValue)
         }
     }
 

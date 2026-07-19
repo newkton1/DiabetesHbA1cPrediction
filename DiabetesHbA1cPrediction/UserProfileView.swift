@@ -685,7 +685,7 @@ struct UserProfileView: View {
             color = .orange
         }
 
-        return (String(format: "%.1f - %@", bmi, category), color)
+        return (String(format: "%.1f - %@", bmi, NSLocalizedString(category, comment: "")), color)
     }
 
     /// Calculate the current age based on the selected date of birth.
@@ -844,9 +844,9 @@ struct UserProfileView: View {
             defer { isLoadingDemoData = false }
             do {
                 let result = try DemoDataManager.loadDemoData(into: viewContext)
-                demoLoadMessage = "Loaded \(result.totalImported) records: \(result.glucoseReadings.imported) glucose readings, \(result.meals.imported) meals, \(result.exerciseSessions.imported) exercise sessions."
+                demoLoadMessage = String(format: NSLocalizedString("Loaded %lld records: %lld glucose readings, %lld meals, %lld exercise sessions.", comment: ""), Int64(result.totalImported), Int64(result.glucoseReadings.imported), Int64(result.meals.imported), Int64(result.exerciseSessions.imported))
                 if result.totalSkipped > 0 {
-                    demoLoadMessage += " (\(result.totalSkipped) duplicates skipped.)"
+                    demoLoadMessage += String(format: NSLocalizedString(" (%lld duplicates skipped.)", comment: ""), Int64(result.totalSkipped))
                 }
             } catch {
                 demoLoadMessage = "Failed to load demo data: \(error.localizedDescription)"

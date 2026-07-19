@@ -32,17 +32,13 @@ struct PlannedMealView: View {
     /// Builds the multi-colored "Before You Eat" description.
     /// Uses historical language ("review", "trends from") rather than predictive claims,
     /// because this is a wellness tracker, not a medical device.
-    private static var beforeYouEatDescription: AttributedString {
-        var part1 = AttributedString("Build your feast treat and review your glucose and GMI trends from previous meals with similar GI, ")
-        part1.foregroundColor = .secondary
-
-        var part2 = AttributedString("as well as how to offset it")
-        part2.foregroundColor = .orange
-
-        var part3 = AttributedString(", before taking a single bite.")
-        part3.foregroundColor = .secondary
-
-        return part1 + part2 + part3
+    private static var beforeYouEatDescription: Text {
+        Text("Build your feast treat and review your glucose and GMI trends from previous meals with similar GI, ")
+            .foregroundColor(.secondary) +
+        Text("as well as how to offset it")
+            .foregroundColor(.orange) +
+        Text(", before taking a single bite.")
+            .foregroundColor(.secondary)
     }
 
     var body: some View {
@@ -69,7 +65,7 @@ struct PlannedMealView: View {
                                 .font(.title3).fontWeight(.bold)
                                 .foregroundColor(.planAccent)
                         }
-                        Text(Self.beforeYouEatDescription)
+                        Self.beforeYouEatDescription
                             .font(.caption)
                     }
                     .padding(16).frame(maxWidth: .infinity, alignment: .leading)
@@ -95,9 +91,9 @@ struct PlannedMealView: View {
                                 .foregroundColor(feastsThisWeek >= 3 ? .red : .orange)
                                 .accessibilityHidden(true)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(feastsThisWeek >= 3
+                                Text(LocalizedStringKey(feastsThisWeek >= 3
                                      ? "Feast frequency is high"
-                                     : "Second feast this week")
+                                     : "Second feast this week"))
                                     .font(.caption)
                                     .fontWeight(.semibold)
                                     .foregroundColor(feastsThisWeek >= 3 ? .red : .orange)
@@ -314,7 +310,7 @@ private struct HighFeastWarningSheet: View {
 }
 
 private struct PlanFeatureRow: View {
-    let icon: String; let color: Color; let title: String; let detail: String
+    let icon: String; let color: Color; let title: LocalizedStringKey; let detail: LocalizedStringKey
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon).foregroundColor(color).frame(width: 28, alignment: .center).accessibilityHidden(true)
