@@ -82,10 +82,6 @@ struct MultiSelectFoodSearchView: View {
         foodDatabase.allFoods.contains { $0.category == "My Menu" }
     }
 
-    /// Whether the Japanese food database has been loaded (FoodDatabase_JP.json added to target)
-    private var hasJapaneseDatabase: Bool {
-        foodDatabase.allFoods.contains { $0.category == "日本食" }
-    }
 
     // Filtered foods based on search and category
     private var filteredFoods: [FoodItem] {
@@ -175,8 +171,7 @@ struct MultiSelectFoodSearchView: View {
                     categories: categories,
                     groupedFoods: groupedFoods,
                     recentMeals: recentMeals,
-                    hasMyMeals: hasMyMeals,
-                    hasJapaneseDatabase: hasJapaneseDatabase
+                    hasMyMeals: hasMyMeals
                 )
             }
             .navigationTitle("")
@@ -228,7 +223,6 @@ private struct FoodSearchContentDirect: View {
     let groupedFoods: [(category: String, foods: [FoodItem])]
     let recentMeals: [RecentMeal]
     let hasMyMeals: Bool
-    let hasJapaneseDatabase: Bool
 
     @State private var showOnlineSearch = false
 
@@ -269,12 +263,15 @@ private struct FoodSearchContentDirect: View {
                             action: { selectedCategory = "My Menu" }
                         )
 
-                        // Japanese food database chip — only shown when FoodDatabase_JP.json is bundled
-                        if hasJapaneseDatabase {
+                        // Japanese food database chip — loaded lazily on first tap
+                        if Bundle.main.url(forResource: "FoodDatabase_JP", withExtension: "json") != nil {
                             CategoryFilterChip(
                                 title: "日本食",
                                 isSelected: selectedCategory == "日本食",
-                                action: { selectedCategory = "日本食" }
+                                action: {
+                                    FoodDatabase.shared.loadJapaneseDatabaseIfNeeded()
+                                    selectedCategory = "日本食"
+                                }
                             )
                         }
 

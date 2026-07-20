@@ -50,7 +50,7 @@ struct ClinicalSummaryExporter {
             Double(allVals.filter { $0 >= 70 && $0 <= 180 }.count) / Double(allVals.count) * 100))
         let ovGmi   = allVals.isEmpty ? 0.0 : (round((3.31 + 0.02392 * ovAvg) * 10) / 10)
         let ovPeak  = allVals.map { Int($0) }.max() ?? 0
-        let ovLow   = allVals.map { Int($0) }.min() ?? 0
+        _ = allVals.map { Int($0) }.min() ?? 0   // ovLow unused; suppress warning
         let ovMeals = panels.reduce(0) { $0 + $1.stats.meals }
         let ovEx    = panels.reduce(0) { $0 + $1.stats.exercise }
 
@@ -109,7 +109,7 @@ struct ClinicalSummaryExporter {
         cal.timeZone = tz
 
         // Exclusive upper bound = midnight at start of tomorrow (local tz)
-        var comps = cal.dateComponents([.year, .month, .day], from: Date())
+        let comps = cal.dateComponents([.year, .month, .day], from: Date())
         let todayMidnight = cal.date(from: comps)!
         let upper = cal.date(byAdding: .day, value: 1, to: todayMidnight)!
 

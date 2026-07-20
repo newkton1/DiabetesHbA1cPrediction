@@ -1,0 +1,42 @@
+# Snapfile — Diabetes Feast screenshot automation
+# Run with: fastlane snapshot
+# Output: fastlane/screenshots/
+
+# ── Target ───────────────────────────────────────────────────────────────────
+project("./14.xcodeproj")
+scheme("DiabetesHbA1cPrediction")
+
+# The UI test class that calls snapshot()
+# (must match the class name in DiabetesFeastScreenshots.swift)
+
+# ── Devices ──────────────────────────────────────────────────────────────────
+devices([
+  "iPhone 16"
+])
+
+# ── Locales ──────────────────────────────────────────────────────────────────
+# en-US first so screenshots are paired English → Japanese side by side
+languages([
+  "en-US",
+  "ja"
+])
+
+# ── Output ───────────────────────────────────────────────────────────────────
+output_directory("./fastlane/screenshots")
+output_simulator_logs(false)
+clear_previous_screenshots(true)
+
+# ── Status bar ───────────────────────────────────────────────────────────────
+# Clean status bar: 9:41 AM, full signal, full battery — looks great in docs
+override_status_bar(true)
+
+# ── Behaviour ────────────────────────────────────────────────────────────────
+# Stop on first failure so you can debug; set to true once reliable
+stop_after_first_error(false)
+
+# Switch the simulator's system language for each locale run.
+# (Don't combine with erase_simulator — they conflict and crash.)
+localize_simulator(true)
+
+# How long to wait for the app to appear
+launch_arguments(["-UITestScreenshots YES", "-SkipHealthKitAuth YES"])

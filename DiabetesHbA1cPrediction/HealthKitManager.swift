@@ -202,6 +202,18 @@ class HealthKitManager: ObservableObject {
             return false
         }
 
+        // Suppress the auth dialog during automated screenshot runs.
+        // Check both launch environment (most reliable) and launch arguments.
+        let env = ProcessInfo.processInfo.environment
+        let args = ProcessInfo.processInfo.arguments
+        let isScreenshotTest = env["IS_UI_SCREENSHOT_TEST"] == "1"
+            || args.contains("-FASTLANE_SNAPSHOT")
+            || args.contains("-SkipHealthKitAuth")
+        guard !isScreenshotTest else {
+            self.isAuthorized = false
+            return false
+        }
+
         // Define the types we want to read
         var readTypes: Set<HKSampleType> = [HKWorkoutType.workoutType()]
         let quantityIdentifiers: [HKQuantityTypeIdentifier] = [

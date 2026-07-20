@@ -56,8 +56,11 @@ struct DiabetesHbA1cPredictionApp: App {
                 }
                 // Request HealthKit permissions on first appearance,
                 // then start the glucose observer for live sync.
+                // Skip during UI test screenshot runs (avoids the auth dialog).
                 .onAppear {
-                    if HealthKitManager.isHealthKitAvailable() {
+                    let isUITestRun = ProcessInfo.processInfo.environment["IS_UI_SCREENSHOT_TEST"] == "1"
+                        || ProcessInfo.processInfo.arguments.contains("-SkipHealthKitAuth")
+                    if HealthKitManager.isHealthKitAvailable() && !isUITestRun {
                         healthKitManager.requestAuthorization { success in
                             if success {
                                 #if DEBUG

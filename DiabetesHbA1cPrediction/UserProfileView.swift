@@ -249,7 +249,7 @@ struct UserProfileView: View {
                 Picker(selection: $preferredExerciseType,
                        label: Label("Offset Exercise", systemImage: "figure.run.circle.fill")) {
                     ForEach(ExerciseOffsetType.allCases) { type in
-                        Text(type.label).tag(type)
+                        Text(LocalizedStringKey(type.label)).tag(type)
                     }
                 }
 

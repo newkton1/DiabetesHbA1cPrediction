@@ -223,11 +223,11 @@ struct MealLogView: View {
     private func sectionHeader(for date: Date) -> String {
         let calendar = Calendar.current
         if calendar.isDateInToday(date) {
-            return "Today"
+            return NSLocalizedString("Today", comment: "")
         } else if calendar.isDateInTomorrow(date) {
-            return "Tomorrow"
+            return NSLocalizedString("Tomorrow", comment: "")
         } else if calendar.isDateInYesterday(date) {
-            return "Yesterday"
+            return NSLocalizedString("Yesterday", comment: "")
         } else {
             return dateFormatter.string(from: date)
         }
@@ -426,7 +426,9 @@ struct MealRowView: View {
                                 .foregroundColor(.primary)
                             
                             if !foodItems.isEmpty {
-                                Text("(\(foodItems.count) item\(foodItems.count == 1 ? "" : "s"))")
+                                Text(foodItems.count == 1
+                    ? String(format: NSLocalizedString("(%lld item)", comment: ""), Int64(foodItems.count))
+                    : String(format: NSLocalizedString("(%lld items)", comment: ""), Int64(foodItems.count)))
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -439,7 +441,7 @@ struct MealRowView: View {
                                     .foregroundColor(.secondary)
                                 
                                 if meal.mealType == "lastMeal" && meal.timeSinceLastMeal > 0 {
-                                    Text("• \(meal.timeSinceLastMeal, specifier: "%.1f") h ago")
+                                    Text(String(format: NSLocalizedString("• %.1f h ago", comment: ""), meal.timeSinceLastMeal))
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
@@ -552,7 +554,7 @@ struct MealRowView: View {
 
 /// Small macro badge component (used in landscape mode)
 struct MacroBadge: View {
-    let label: String
+    let label: LocalizedStringKey
     let value: Double
     let color: Color
 
@@ -572,7 +574,7 @@ struct MacroBadge: View {
 
 /// Bulleted macro row component (used in portrait mode)
 struct MacroBulletRow: View {
-    let label: String
+    let label: LocalizedStringKey
     let value: Double
     let color: Color
 

@@ -81,11 +81,14 @@ class FoodDatabase {
             .appendingPathComponent("UserFavorites.json")
     }
 
+    /// Whether the Japanese database has been loaded into allFoods yet
+    private var japaneseDatabaseLoaded = false
+
     /// Private initializer ensures only one instance of FoodDatabase exists
     private init() {
         populateDatabase()
-        populateJapaneseDatabase()
         loadFavorites()
+        // Japanese database is loaded lazily via loadJapaneseDatabaseIfNeeded()
     }
 
     /// Loads the food database from the bundled JSON file
@@ -103,12 +106,11 @@ class FoodDatabase {
         }
     }
 
-    /// Loads the Japanese government food database (2,538 items) if bundled.
-    /// All items are tagged with category "日本食" regardless of their original sub-category,
-    /// so they appear together under the 日本食 chip in the food search UI.
-    private func populateJapaneseDatabase() {
+    /// Loads the Japanese government food database (2,538 items) on first demand.
+    /// Called when the user taps the 日本食 chip — not at app launch — to save memory.
+    func loadJapaneseDatabaseIfNeeded() {
+        guard !japaneseDatabaseLoaded else { return }
         guard let url = Bundle.main.url(forResource: "FoodDatabase_JP", withExtension: "json") else {
-            // Not yet added to Xcode target — silently skip
             return
         }
         do {
@@ -129,6 +131,7 @@ class FoodDatabase {
                 )
             }
             allFoods.append(contentsOf: tagged)
+            japaneseDatabaseLoaded = true
         } catch {
             print("FoodDatabase: Could not load Japanese database — \(error.localizedDescription)")
         }

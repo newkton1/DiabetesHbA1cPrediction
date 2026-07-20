@@ -645,7 +645,7 @@ struct ExerciseRowView: View {
     /// Duration displayed in minutes only for both portrait and landscape
     var durationText: String {
         let totalMinutes = Int(exercise.duration)
-        return "\(totalMinutes) min"
+        return String(format: NSLocalizedString("%lld min", comment: ""), Int64(totalMinutes))
     }
 
     /// Format the exercise date as MM/dd (English) or M月d日 (Japanese).
@@ -685,7 +685,7 @@ struct ExerciseRowView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
 
-                    Label("\(Int(exercise.caloriesBurned)) cal", systemImage: "flame.fill")
+                    Label(String(format: NSLocalizedString("%lld cal", comment: ""), Int64(exercise.caloriesBurned)), systemImage: "flame.fill")
                         .font(.caption)
                         .foregroundColor(flameColor)
                 }
@@ -738,7 +738,7 @@ struct ExerciseRowView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
 
-                    Label("\(formatNoComma(Int(exercise.caloriesBurned))) cal", systemImage: "flame.fill")
+                    Label(String(format: NSLocalizedString("%lld cal", comment: ""), Int64(exercise.caloriesBurned)), systemImage: "flame.fill")
                         .font(.caption)
                         .foregroundColor(flameColor)
                 }

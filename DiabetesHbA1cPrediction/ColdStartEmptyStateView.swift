@@ -35,18 +35,22 @@ struct ColdStartEmptyStateView: View {
         }
 
         var displayText: String {
-            "\(current) of \(total) \(label)"
+            // Use positional format so Japanese can reorder the components.
+            // xcstrings key: "%1$d of %2$d %3$@"
+            // Japanese:       "%2$d日中%1$d日%3$@"
+            let localizedLabel = NSLocalizedString(label, comment: "")
+            return String(format: NSLocalizedString("%1$d of %2$d %3$@", comment: ""), current, total, localizedLabel)
         }
     }
 
     let icon: String
-    let heading: String
-    let bodyText: String
+    let heading: LocalizedStringKey
+    let bodyText: LocalizedStringKey
     var progress: Progress? = nil
-    var actionTitle: String? = nil
+    var actionTitle: LocalizedStringKey? = nil
     var actionIcon: String? = nil
     var action: (() -> Void)? = nil
-    var secondaryTitle: String? = nil
+    var secondaryTitle: LocalizedStringKey? = nil
     var secondaryAction: (() -> Void)? = nil
 
     /// Optional pill-style steps (used by Meal Impact screen)

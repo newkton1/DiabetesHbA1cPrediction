@@ -191,7 +191,7 @@ struct GettingStartedChecklistView: View {
                                 .foregroundColor(.blue)
                                 .frame(width: 32)
 
-                            Text(info.title)
+                            Text(LocalizedStringKey(info.title))
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.primary)
@@ -209,7 +209,7 @@ struct GettingStartedChecklistView: View {
                                     .foregroundColor(.green)
                             }
                         } else {
-                            Text(info.subtitle)
+                            Text(LocalizedStringKey(info.subtitle))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -221,7 +221,7 @@ struct GettingStartedChecklistView: View {
                         // Tap hint
                         HStack {
                             Spacer()
-                            Text("Tap to go to \(info.tab.rawValue)")
+                            Text("Tap to go to \(NSLocalizedString(info.tab.rawValue, comment: "Tab name"))")
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                             Image(systemName: "chevron.right")
@@ -256,7 +256,7 @@ struct GettingStartedChecklistView: View {
             HStack {
                 ForEach(0..<total, id: \.self) { i in
                     if i > 0 { Spacer() }
-                    Text(segmentLabel(index: i))
+                    Text(LocalizedStringKey(segmentLabel(index: i)))
                         .font(.system(size: 9))
                         .foregroundColor(i < filled ? .green : .secondary)
                     if i < total - 1 { Spacer() }
@@ -299,14 +299,20 @@ struct GettingStartedChecklistView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(milestone.title)
+                        Text(LocalizedStringKey(milestone.title))
                             .font(.subheadline)
                             .fontWeight(reached ? .regular : .medium)
                             .foregroundColor(reached ? .secondary : .primary)
                             .strikethrough(reached, color: .secondary)
-                        Text(reached ? milestone.subtitle : "\(milestone.days - coldStart.glucoseDaysLogged) more day\(milestone.days - coldStart.glucoseDaysLogged == 1 ? "" : "s") to unlock")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        if reached {
+                            Text(LocalizedStringKey(milestone.subtitle))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text("\(milestone.days - coldStart.glucoseDaysLogged) more day\(milestone.days - coldStart.glucoseDaysLogged == 1 ? "" : "s") to unlock")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
 
                     Spacer()

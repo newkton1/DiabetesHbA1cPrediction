@@ -1502,13 +1502,23 @@ private struct ActivitySnapshotCard: View {
                         .foregroundColor(.secondary)
                 }
 
+                let isJapanese = Locale.current.language.languageCode?.identifier == "ja"
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text("\(breakdown.total)")
-                        .font(.title.bold())
-                        .foregroundColor(.green)
-                    Text("of \(mealCount) meals")
-                        .font(.body)
-                        .foregroundColor(.primary)
+                    if isJapanese {
+                        Text(String(format: "%lld食中", Int64(mealCount)))
+                            .font(.body)
+                            .foregroundColor(.primary)
+                        Text("\(breakdown.total)件")
+                            .font(.title.bold())
+                            .foregroundColor(.green)
+                    } else {
+                        Text("\(breakdown.total)")
+                            .font(.title.bold())
+                            .foregroundColor(.green)
+                        Text(String(format: NSLocalizedString("of %lld meals", comment: ""), Int64(mealCount)))
+                            .font(.body)
+                            .foregroundColor(.primary)
+                    }
                 }
 
                 Text("had a post-meal exercise session logged")
@@ -1516,32 +1526,22 @@ private struct ActivitySnapshotCard: View {
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
 
-                // Dual-window breakdown — two-column layout so
-                // narrow screens (SE 2020 portrait) break cleanly.
-                HStack(alignment: .top, spacing: 4) {
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("\(breakdown.early) within")
-                        Text("90 min")
-                    }
-                    .foregroundColor(.primary)
-                    Text("·")
-                        .foregroundColor(.secondary)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("\(breakdown.later) after")
-                        Text("90–180 min")
-                    }
-                    .foregroundColor(.primary)
+                // Dual-window breakdown — one row per window
+                VStack(alignment: .center, spacing: 2) {
+                    Text(String(format: NSLocalizedString("%lld within 90 min", comment: ""), Int64(breakdown.early)))
+                    Text(String(format: NSLocalizedString("%lld after 90–180 min", comment: ""), Int64(breakdown.later)))
                 }
                 .font(.caption)
+                .foregroundColor(.primary)
 
                 Divider()
                     .padding(.vertical, 2)
 
                 HStack(spacing: 16) {
-                    Label("\(totalExerciseMinutes) min total", systemImage: "clock")
+                    Label(String(format: NSLocalizedString("%lld min total", comment: ""), Int64(totalExerciseMinutes)), systemImage: "clock")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    Label("\(recentExercise.count) sessions", systemImage: "flame")
+                    Label(String(format: NSLocalizedString("%lld sessions", comment: ""), Int64(recentExercise.count)), systemImage: "flame")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
