@@ -437,6 +437,10 @@ struct UserProfileView: View {
                     Label("Privacy Policy", systemImage: "lock.shield")
                 }
 
+                NavigationLink(destination: ReferencesView()) {
+                    Label("References & Citations", systemImage: "book.closed")
+                }
+
                 HStack {
                     Text("Version")
                         .foregroundColor(.primary)
