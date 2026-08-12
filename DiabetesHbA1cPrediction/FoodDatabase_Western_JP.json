@@ -1,0 +1,6697 @@
+[
+  {
+    "nameEN": "M&Ms",
+    "nameJP": "M&Ms",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Honey",
+    "nameJP": "はちみつ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Spinach Artichoke Dip",
+    "nameJP": "ほうれん草アーティチョークディップ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Cotton Candy",
+    "nameJP": "わたあめ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Ice Cream",
+    "nameJP": "アイスクリーム",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Ice Cream Cake",
+    "nameJP": "アイスクリームケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Ice Cream Sundae",
+    "nameJP": "アイスクリームサンデー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Apple Crumble",
+    "nameJP": "アップルクランブル",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Apple Crisp ",
+    "nameJP": "アップルクリスプ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Apple Strudel",
+    "nameJP": "アップルシュトゥルーデル",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Apple Pie",
+    "nameJP": "アップルパイ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Animal Crackers",
+    "nameJP": "アニマルクラッカー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Affogato",
+    "nameJP": "アフォガート",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Arancini",
+    "nameJP": "アランチーニ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Yellow Cake",
+    "nameJP": "イエローケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Strawberry Ice Cream",
+    "nameJP": "イチゴアイスクリーム",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Easter Chocolate Egg",
+    "nameJP": "イースターチョコレートエッグ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Eclairs",
+    "nameJP": "エクレア",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Angel Food Cake",
+    "nameJP": "エンジェルフードケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Onion Dip",
+    "nameJP": "オニオンディップ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Oreo A365Cheesecake",
+    "nameJP": "オレオチーズケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Oatmeal Raisin Cookies",
+    "nameJP": "オートミールレーズンクッキー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Kaiserschmarrn",
+    "nameJP": "カイザーシュマレン",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Custard",
+    "nameJP": "カスタード",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Custard Cream",
+    "nameJP": "カスタードクリーム",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Galettes",
+    "nameJP": "ガレット",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Caramel",
+    "nameJP": "キャラメル",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Carrot Cake",
+    "nameJP": "キャロットケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Key Lime Pie",
+    "nameJP": "キーライムパイ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Biscuits",
+    "nameJP": "クッキー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Crackers",
+    "nameJP": "クラッカー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Christmas Pudding",
+    "nameJP": "クリスマスプディング",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Cream Tea with Scone",
+    "nameJP": "クリームティースコーン",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Cruller Donuts",
+    "nameJP": "クルーラードーナツ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Sweet Crepes",
+    "nameJP": "クレープ  (甘味)",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Savory Crepes ",
+    "nameJP": "クレープ  (総菜)",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Creme Brulee",
+    "nameJP": "クレームブリュレ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Croquetas",
+    "nameJP": "クロケタス",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Crostini",
+    "nameJP": "クロスティーニ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Guacamole and Chips",
+    "nameJP": "グアカモレとチップス",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Granola Bar",
+    "nameJP": "グラノーラバー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Grand Marnier Souffle",
+    "nameJP": "グランマルニエスフレ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Glazed Donuts",
+    "nameJP": "グレーズドドーナツ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Cake",
+    "nameJP": "ケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Coconut Cream Pie",
+    "nameJP": "ココナッツクリームパイ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Sherry Trifle",
+    "nameJP": "シェリートライフル",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Sorbet",
+    "nameJP": "シャーベット",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Sugar Cookies",
+    "nameJP": "シュガークッキー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Stollen",
+    "nameJP": "シュトーレン",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Black Forest Cake",
+    "nameJP": "シュヴァルツヴェルダーキルシュトルテ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Shortbread",
+    "nameJP": "ショートブレッド",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Gelato",
+    "nameJP": "ジェラート",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Jelly Donuts",
+    "nameJP": "ジェリードーナツ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Jam",
+    "nameJP": "ジャム",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "German Chocolate Cake",
+    "nameJP": "ジャーマンチョコレートケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Strawberry Shortcake",
+    "nameJP": "ストロベリーショートケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Strawberry Cheesecake",
+    "nameJP": "ストロベリーチーズケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Strawberry Mousse ",
+    "nameJP": "ストロベリームース",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Snickerdoodles",
+    "nameJP": "スニッカードゥードル",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Sponge Cake",
+    "nameJP": "スポンジケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Smarties",
+    "nameJP": "スマーティーズ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "S'mores",
+    "nameJP": "スモア",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Diabetic Chocolate",
+    "nameJP": "ゼロチョコレート",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Saltine Crackers",
+    "nameJP": "ソルティーンクラッカー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Tapioca Pudding",
+    "nameJP": "タピオカプディング",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Taffy",
+    "nameJP": "タフィー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Tarte Tatin",
+    "nameJP": "タルト タタン",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Cherry Pie",
+    "nameJP": "チェリーパイ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Crisps",
+    "nameJP": "チップス",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Churros",
+    "nameJP": "チュロス",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Chocolate Chip Cookies",
+    "nameJP": "チョコチップクッキー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Chocolate Ice Cream",
+    "nameJP": "チョコレートアイスクリーム",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Chocolate Cupcake",
+    "nameJP": "チョコレートカップケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Chocolate Cream Pie",
+    "nameJP": "チョコレートクリームパイ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Chocolate Cake",
+    "nameJP": "チョコレートケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Chocolate Souffle ",
+    "nameJP": "チョコレートスフレ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Chocolate Cheesecake ",
+    "nameJP": "チョコレートチーズケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Chocolate Donuts",
+    "nameJP": "チョコレートドーナツ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Chocolate Pudding",
+    "nameJP": "チョコレートプディング",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Chocolate Mousse ",
+    "nameJP": "チョコレートムース",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Chocolate Lava Cake",
+    "nameJP": "チョコレートラバケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Plain Cheesecake ",
+    "nameJP": "チーズケーキ (プレーン)",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Tiramisu",
+    "nameJP": "ティラミス",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Devil's Food Cake",
+    "nameJP": "デビルズフードケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Trifle",
+    "nameJP": "トライフル",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Trail Mix",
+    "nameJP": "トレイルミックス",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Tres Leches Cake",
+    "nameJP": "トレスレチェスケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Dried Fruit Mix",
+    "nameJP": "ドライフルーツミックス",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Donuts",
+    "nameJP": "ドーナツ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Nanaimo Bar",
+    "nameJP": "ナナイモバー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Nutella",
+    "nameJP": "ヌテラ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Jalapeno Poppers",
+    "nameJP": "ハラペーニョポッパー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Hard Candy",
+    "nameJP": "ハードキャンディー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Baklava",
+    "nameJP": "バクラヴァ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Buffalo Chicken Dip",
+    "nameJP": "バッファローチキンディップ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Banana Cream Pie",
+    "nameJP": "バナナクリームパイ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Banana Split",
+    "nameJP": "バナナスプリット",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Banana Pudding",
+    "nameJP": "バナナプディング",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Vanilla Cupcake ",
+    "nameJP": "バニラカップケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Vanilla Pudding",
+    "nameJP": "バニラプディング",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Bundt Cake",
+    "nameJP": "バントケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Pie",
+    "nameJP": "パイ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Pineapple Upside-down Cake",
+    "nameJP": "パイナップルアップサイドダウンケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Pound Cake",
+    "nameJP": "パウンドケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Pavlova",
+    "nameJP": "パブロバ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Pain au Chocolat",
+    "nameJP": "パン オ ショコラ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Panna Cotta",
+    "nameJP": "パンナコッタ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Pumpkin Pie",
+    "nameJP": "パンプキンパイ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Bitter Chocolate ",
+    "nameJP": "ビタースウィートチョコレート",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Bean Dip",
+    "nameJP": "ビーンディップ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Pigs in a Blanket",
+    "nameJP": "ピッグスインブランケット",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Pecan Pie",
+    "nameJP": "ピーカンパイ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Peach Cobbler",
+    "nameJP": "ピーチコブラー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Peanut Butter Cookies",
+    "nameJP": "ピーナッツバタークッキー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Fudge",
+    "nameJP": "ファッジ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Funnel Cake",
+    "nameJP": "ファネルケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Molten Chocolate Cake",
+    "nameJP": "フォンダンショコラ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Hummus and Pita",
+    "nameJP": "フムスとピタパン",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Flan",
+    "nameJP": "フラン",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Fruit Cake",
+    "nameJP": "フルーツケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Fruit Snacks",
+    "nameJP": "フルーツスナック",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Fruit and Cheese Plate",
+    "nameJP": "フルーツチーズプレート",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Fruit Leather",
+    "nameJP": "フルーツレザー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Frozen Yogurt",
+    "nameJP": "フローズンヨーグルト",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Brownies",
+    "nameJP": "ブラウニー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Blueberry Pie",
+    "nameJP": "ブルーベリーパイ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Bread Pudding",
+    "nameJP": "ブレッドプディング",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Blondies",
+    "nameJP": "ブロンディー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Creme Caramel",
+    "nameJP": "プリン (クレームキャラメル)",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Pretzels",
+    "nameJP": "プレッツェル",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Profiteroles",
+    "nameJP": "プロフィットロール",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Beignets",
+    "nameJP": "ベニエ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Berry Crisp",
+    "nameJP": "ベリークリスプ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Berry Cobbler ",
+    "nameJP": "ベリーコブラー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Popcorn",
+    "nameJP": "ポップコーン",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Macaroons",
+    "nameJP": "マカロン",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Marshmallows",
+    "nameJP": "マシュマロ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Madeleines",
+    "nameJP": "マドレーヌ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Marron Glace",
+    "nameJP": "マロングラッセ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Mars Bar",
+    "nameJP": "マーズバー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Marble Cake",
+    "nameJP": "マーブルケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Mixed Candy",
+    "nameJP": "ミックスキャンディー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Mini Quiche",
+    "nameJP": "ミニキッシュ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Milk Chocolate",
+    "nameJP": "ミルクチョコレート",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Mille-feuille",
+    "nameJP": "ミルフィーユ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Mince Pies",
+    "nameJP": "ミンスパイ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Mozzarella Sticks",
+    "nameJP": "モッツァレラスティック",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Rice Crispy Treats",
+    "nameJP": "ライスクリスピートリート",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Rice Cakes",
+    "nameJP": "ライスケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Rice Pudding",
+    "nameJP": "ライスプディング",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Ritz-style Crackers",
+    "nameJP": "リッツ風クラッカー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Rhubarb Crumble",
+    "nameJP": "ルバーブクランブル",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Root Beer Float",
+    "nameJP": "ルートビアフロート",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Red Velvet A395Cupcake ",
+    "nameJP": "レッドベルベットカップケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Red Velvet Cake",
+    "nameJP": "レッドベルベットケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Lemon Meringue Pie",
+    "nameJP": "レモンメレンゲパイ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Rock Candy",
+    "nameJP": "ロックキャンディー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Lollipop",
+    "nameJP": "ロリポップ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Loaded Nachos",
+    "nameJP": "ローデッドナチョス",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Victoria Sponge Cake",
+    "nameJP": "ヴィクトリアスポンジケーキ",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Wheat Crackers",
+    "nameJP": "全粒粉クラッカー",
+    "category": "お菓子"
+  },
+  {
+    "nameEN": "Congee",
+    "nameJP": "お粥",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Bamboo Shoots",
+    "nameJP": "たけのこ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Bean Sprouts",
+    "nameJP": "もやし",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Lotus Root",
+    "nameJP": "れんこん",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Egg Roll",
+    "nameJP": "エッグロール",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Orange Chicken",
+    "nameJP": "オレンジチキン",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Thai Fried Rice",
+    "nameJP": "カオパット (タイ炒め飯)",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Thai Basil Chicken",
+    "nameJP": "ガパオライス",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Kimchi",
+    "nameJP": "キムチ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Kimchi Jjigae",
+    "nameJP": "キムチチゲ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Kimbap",
+    "nameJP": "キンパ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Water Chestnuts",
+    "nameJP": "クワイ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Green Curry",
+    "nameJP": "グリーンカレー",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Com Tam",
+    "nameJP": "コムタム (砕き米)",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Satay",
+    "nameJP": "サテー (チキン串焼き)",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Samosa",
+    "nameJP": "サモサ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "General Tso's Chicken",
+    "nameJP": "ジェネラルツォチキン",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Sundubu Jjigae",
+    "nameJP": "スンドゥブチゲ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Tandoori Chicken",
+    "nameJP": "タンドリーチキン",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Dal",
+    "nameJP": "ダール (豆カレー)",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Chicken Tikka Masala",
+    "nameJP": "チキンティッカマサラ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Chow Mein",
+    "nameJP": "チャウメン",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Japchae",
+    "nameJP": "チャプチェ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Char Siu",
+    "nameJP": "チャーシュー",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Fried Rice",
+    "nameJP": "チャーハン",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Bok Choy",
+    "nameJP": "チンゲン菜",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Tteokbokki",
+    "nameJP": "トッポッキ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Tom Kha Gai",
+    "nameJP": "トムカーガイ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Tom Yum Soup",
+    "nameJP": "トムヤムスープ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Banh Mi Sandwich",
+    "nameJP": "バインミー",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Butter Chicken",
+    "nameJP": "バターチキン",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Pakora",
+    "nameJP": "パコラ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Pad Thai",
+    "nameJP": "パッタイ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Palak Paneer",
+    "nameJP": "パラクパニール",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Bibimbap",
+    "nameJP": "ビビンバ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Biryani",
+    "nameJP": "ビリヤニ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Pho",
+    "nameJP": "フォー (牛肉麺)",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Bun Bo Hue",
+    "nameJP": "ブンボーフエ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Bulgogi",
+    "nameJP": "プルコギ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Massaman Curry",
+    "nameJP": "マッサマンカレー",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Mongolian Beef",
+    "nameJP": "モンゴリアンビーフ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Red Curry",
+    "nameJP": "レッドカレー",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Lo Mein",
+    "nameJP": "ローメン",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Wonton Soup",
+    "nameJP": "ワンタンスープ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Peking Duck",
+    "nameJP": "北京ダック",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Kung Pao Chicken",
+    "nameJP": "宮保鶏丁",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Spring Roll",
+    "nameJP": "揚げ春巻き",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Dim Sum",
+    "nameJP": "点心",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Beef and Broccoli",
+    "nameJP": "牛肉とブロッコリー炒め",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Egg Drop Soup",
+    "nameJP": "玉子スープ",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Fresh Spring Roll",
+    "nameJP": "生春巻き",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Chinese Broccoli",
+    "nameJP": "芥蘭 (カイラン)",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Sweet and Sour Pork",
+    "nameJP": "酢豚",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Hot and Sour Soup",
+    "nameJP": "酸辣湯",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Korean Fried Chicken",
+    "nameJP": "韓国フライドチキン",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Mapo Tofu",
+    "nameJP": "麻婆豆腐",
+    "category": "アジア"
+  },
+  {
+    "nameEN": "Enchilada Casserole",
+    "nameJP": "エンチラーダキャセロール",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Cauliflower Cheese",
+    "nameJP": "カリフラワーチーズグラタン",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Whole Roasted Cauliflower",
+    "nameJP": "カリフラワー丸ごとロースト",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Carnitas",
+    "nameJP": "カルニタス",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "King Ranch Chicken",
+    "nameJP": "キングランチチキン",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Crown Roast",
+    "nameJP": "クラウンロースト",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Green Bean Casserole",
+    "nameJP": "グリーンビーンキャセロール",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Glazed Ham",
+    "nameJP": "グレーズドハム",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Cottage Pie",
+    "nameJP": "コテージパイ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Cornish Pasty",
+    "nameJP": "コーニッシュパスティ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Cornish Hen",
+    "nameJP": "コーニッシュヘン",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Braised Short Ribs",
+    "nameJP": "ショートリブ煮込み",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Turkey Tetrazzini",
+    "nameJP": "ターキーテトラジーニ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Turkey Pot Pie",
+    "nameJP": "ターキーポットパイ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Turkey Meatloaf",
+    "nameJP": "ターキーミートローフ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Chicken Cacciatore",
+    "nameJP": "チキンカッチャトーレ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Chicken Tetrazzini",
+    "nameJP": "チキンテトラジーニ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Chicken Divan",
+    "nameJP": "チキンディヴァン",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Chicken Parmesan Bake",
+    "nameJP": "チキンパルメザン焼き",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Chicken Piccata",
+    "nameJP": "チキンピカタ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Chicken Pot Pie",
+    "nameJP": "チキンポットパイ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Chicken and Mushroom Pie",
+    "nameJP": "チキンマッシュルームパイ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Chicken Marsala",
+    "nameJP": "チキンマルサラ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Tuna Casserole",
+    "nameJP": "ツナキャセロール",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Toad in the Hole",
+    "nameJP": "トードインザホール",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Dolmas",
+    "nameJP": "ドルマス",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Honey Baked Ham",
+    "nameJP": "ハニーベイクドハム",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Herb Roasted Chicken",
+    "nameJP": "ハーブローストチキン",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Beer Can Chicken",
+    "nameJP": "ビア缶チキン",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Beef Wellington",
+    "nameJP": "ビーフウェリントン",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Beef Stroganoff",
+    "nameJP": "ビーフストロガノフ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Beef Chili",
+    "nameJP": "ビーフチリ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Broccoli Quiche",
+    "nameJP": "ブロッコリーキッシュ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Prime Rib",
+    "nameJP": "プライムリブ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Pulled Pork",
+    "nameJP": "プルドポーク",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Plain Cheese Quiche",
+    "nameJP": "プレーンチーズキッシュ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Baked Ziti",
+    "nameJP": "ベイクドジティ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Bacon Quiche",
+    "nameJP": "ベーコンキッシュ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Pot Roast",
+    "nameJP": "ポットロースト",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Pork Tenderloin",
+    "nameJP": "ポークテンダーロイン",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Pork Pie",
+    "nameJP": "ポークパイ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Meatloaf",
+    "nameJP": "ミートローフ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Yorkshire Pudding",
+    "nameJP": "ヨークシャープディング",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Rack of Lamb",
+    "nameJP": "ラムラック",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Lemon Pepper Chicken",
+    "nameJP": "レモンペッパーチキン",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Rotisserie Chicken",
+    "nameJP": "ロティサリーチキン",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Roast Turkey",
+    "nameJP": "ローストターキー",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Roast Duck",
+    "nameJP": "ローストダック",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Roast Chicken Dinner",
+    "nameJP": "ローストチキンディナー",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Roast Beef Dinner",
+    "nameJP": "ローストビーフディナー",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Roast Potatoes",
+    "nameJP": "ローストポテト",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Roast Pork Dinner",
+    "nameJP": "ローストポークディナー",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Roasted Pork Belly",
+    "nameJP": "ローストポークベリー",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Roast Lamb Dinner",
+    "nameJP": "ローストラムディナー",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Stuffed Cabbage",
+    "nameJP": "ロールキャベツ",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Veal Parmesan",
+    "nameJP": "仔牛パルメザン",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Stuffed Turkey Breast",
+    "nameJP": "詰め物ターキーブレスト",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Stuffed Tomatoes",
+    "nameJP": "詰め物トマト",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Stuffed Peppers",
+    "nameJP": "詰め物ピーマン",
+    "category": "オーブン"
+  },
+  {
+    "nameEN": "Cucumber Salad",
+    "nameJP": "きゅうりサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Chickpea Salad",
+    "nameJP": "ひよこ豆サラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Spinach Salad",
+    "nameJP": "ほうれん草サラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Mandarin Orange Salad",
+    "nameJP": "みかんサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Asian Chicken Salad",
+    "nameJP": "アジア風チキンサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Apple Walnut Salad",
+    "nameJP": "アップルクルミサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Avocado Salad",
+    "nameJP": "アボカドサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Almond Salad",
+    "nameJP": "アーモンドサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Wedge Salad",
+    "nameJP": "ウェッジサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Waldorf Salad",
+    "nameJP": "ウォルドーフサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Egg Salad",
+    "nameJP": "エッグサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Shrimp Salad",
+    "nameJP": "エビサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Crab Salad",
+    "nameJP": "カニサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Caprese Salad",
+    "nameJP": "カプレーゼサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Garden Salad",
+    "nameJP": "ガーデンサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Kiwi Salad",
+    "nameJP": "キウイサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Quinoa Salad",
+    "nameJP": "キヌアサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Carrot Salad",
+    "nameJP": "キャロットサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Greek Salad",
+    "nameJP": "ギリシャサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Couscous Salad",
+    "nameJP": "クスクスサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Creamy Coleslaw",
+    "nameJP": "クリーミーコールスロー",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Walnut Salad",
+    "nameJP": "クルミサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Grilled Chicken Salad",
+    "nameJP": "グリルチキンサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Kale Salad",
+    "nameJP": "ケールサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Cobb Salad",
+    "nameJP": "コブサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Coleslaw",
+    "nameJP": "コールスロー",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Corn Salad",
+    "nameJP": "コーンサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Goat Cheese Salad",
+    "nameJP": "ゴートチーズサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Watermelon Salad",
+    "nameJP": "スイカサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Strawberry Spinach Salad",
+    "nameJP": "ストロベリーほうれん草サラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Strawberry Salad",
+    "nameJP": "ストロベリーサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Thai Chicken Salad",
+    "nameJP": "タイ風チキンサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Tabbouleh",
+    "nameJP": "タブレ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Turkey Salad",
+    "nameJP": "ターキーサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Chicken Salad",
+    "nameJP": "チキンサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Nicoise Salad",
+    "nameJP": "ニース風サラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Buffalo Chicken Salad",
+    "nameJP": "バッファローチキンサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Pineapple Salad",
+    "nameJP": "パイナップルサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Papaya Salad",
+    "nameJP": "パパイヤサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Vinegar Coleslaw",
+    "nameJP": "ビネガーコールスロー",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Beet Salad",
+    "nameJP": "ビーツサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Beef Salad",
+    "nameJP": "ビーフサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Pecan Salad",
+    "nameJP": "ピーカンサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Peach Salad",
+    "nameJP": "ピーチサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Fattoush",
+    "nameJP": "ファトゥーシュ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Feta and Olive Salad",
+    "nameJP": "フェタオリーブサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Fruit Salad",
+    "nameJP": "フルーツサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Black Bean and Corn Salad",
+    "nameJP": "ブラックビーンコーンサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Blue Cheese Salad",
+    "nameJP": "ブルーチーズサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Blueberry Salad",
+    "nameJP": "ブルーベリーサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Berry Salad",
+    "nameJP": "ベリーサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Pear Salad",
+    "nameJP": "ペアサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Horiatiki Salad",
+    "nameJP": "ホリアティキサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Potato Salad",
+    "nameJP": "ポテトサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Macaroni Salad",
+    "nameJP": "マカロニサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Mango Salad",
+    "nameJP": "マンゴーサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Mixed Greens Salad",
+    "nameJP": "ミックスグリーンサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Raspberry Salad",
+    "nameJP": "ラズベリーサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Lyonnaise Salad",
+    "nameJP": "リヨン風サラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Arugula Salad",
+    "nameJP": "ルッコラサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Lentil Salad",
+    "nameJP": "レンズ豆サラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Lobster Salad",
+    "nameJP": "ロブスターサラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Three Bean Salad",
+    "nameJP": "三種豆サラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "Bean Salad",
+    "nameJP": "豆サラダ",
+    "category": "サラダ"
+  },
+  {
+    "nameEN": "BBQ Pulled Pork Sandwich",
+    "nameJP": "BBQプルドポークサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "BLT",
+    "nameJP": "BLTサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "BLT Wrap",
+    "nameJP": "BLTラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Spinach Wrap",
+    "nameJP": "ほうれん草ラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Al Pastor Wrap",
+    "nameJP": "アル パストルラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Arepa",
+    "nameJP": "アレパ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Italian Sub",
+    "nameJP": "イタリアンサブ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Egg Salad Sandwich",
+    "nameJP": "エッグサラダサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Shrimp Salad Wrap",
+    "nameJP": "エビサラダラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Shrimp Po'boy",
+    "nameJP": "エビポーボーイ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Empanada",
+    "nameJP": "エンパナーダ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Open-face Salmon",
+    "nameJP": "オープンフェイスサーモン",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Open-face Turkey",
+    "nameJP": "オープンフェイスターキー",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Open-face Roast Beef",
+    "nameJP": "オープンフェイスローストビーフ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Oyster Po'boy",
+    "nameJP": "カキポーボーイ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Crab Salad Sandwich",
+    "nameJP": "カニサラダサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Cuban Sandwich",
+    "nameJP": "キューバンサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Greek Wrap",
+    "nameJP": "ギリシャ風ラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Gyro Sandwich",
+    "nameJP": "ギロスサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Gyro Wrap",
+    "nameJP": "ギロスラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Club Sandwich",
+    "nameJP": "クラブサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Croque Madame",
+    "nameJP": "クロックマダム",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Croque Monsieur",
+    "nameJP": "クロックムッシュ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Turkey Croissant Sandwich",
+    "nameJP": "クロワッサンサンド (ターキー)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Ham Croissant Sandwich",
+    "nameJP": "クロワッサンサンド (ハム)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Chicken Sandwich, Grilled",
+    "nameJP": "グリルチキンサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Tomato Grilled Cheese",
+    "nameJP": "グリルドチーズ (トマト)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Plain Grilled Cheese",
+    "nameJP": "グリルドチーズ (プレーン)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Bacon Grilled Cheese",
+    "nameJP": "グリルドチーズ (ベーコン)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Southwest Chicken Wrap",
+    "nameJP": "サウスウェストチキンラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Submarine Sandwich",
+    "nameJP": "サブマリンサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Thanksgiving Sandwich",
+    "nameJP": "サンクスギビングサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Steak and Cheese",
+    "nameJP": "ステーキチーズサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Steak Wrap",
+    "nameJP": "ステーキラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Sloppy Joe",
+    "nameJP": "スロッピージョー",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Taco Sandwich",
+    "nameJP": "タコスサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Turkey and Avocado Wrap",
+    "nameJP": "ターキーアボカドラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Turkey Club",
+    "nameJP": "ターキークラブ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Turkey Sandwich",
+    "nameJP": "ターキーサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Dagwood Sandwich",
+    "nameJP": "ダグウッドサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Chicken Salad Sandwich",
+    "nameJP": "チキンサラダサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Chicken Salad Wrap",
+    "nameJP": "チキンサラダラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Chicken Caesar Wrap",
+    "nameJP": "チキンシーザーラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Tuna Salad Sandwich",
+    "nameJP": "ツナサラダサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Tuna Sandwich",
+    "nameJP": "ツナサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Tuna Melt",
+    "nameJP": "ツナメルト",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Tuna Wrap",
+    "nameJP": "ツナラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Meet Torta",
+    "nameJP": "トルタ (カルニタス)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Chicken Torta",
+    "nameJP": "トルタ (チキン)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Ham and Cheese",
+    "nameJP": "ハムチーズサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Chicken Banh Mi",
+    "nameJP": "バインミー (チキン)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Pork Banh Mi",
+    "nameJP": "バインミー (豚肉)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Salami Baguette",
+    "nameJP": "バゲットサンド (サラミ)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Buffalo Chicken Wrap",
+    "nameJP": "バッファローチキンラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Patty Melt",
+    "nameJP": "パティメルト",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Caprese Panini",
+    "nameJP": "パニーニ (カプレーゼ)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Chicken Panini",
+    "nameJP": "パニーニ (チキン)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Prosciutto Panini",
+    "nameJP": "パニーニ (プロシュート)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Vegetarian Panini",
+    "nameJP": "パニーニ (ベジタリアン)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Beef Barbacoa Wrap",
+    "nameJP": "ビーフバルバコアラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Chicken Pita Pocket",
+    "nameJP": "ピタポケット (チキン)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Falafel Pita Pocket",
+    "nameJP": "ピタポケット (ファラフェル)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Peanut Butter Sandwich",
+    "nameJP": "ピーナッツバターサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Peanut Butter and Jelly Sandwich",
+    "nameJP": "ピーナッツバタージェリーサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Falafel Wrap",
+    "nameJP": "ファラフェルラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Fish Sandwich",
+    "nameJP": "フィッシュサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Philly Cheesesteak",
+    "nameJP": "フィリーチーズステーキ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Chicken Sandwich, Fried",
+    "nameJP": "フライドチキンサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Steak Flatbread Wrap",
+    "nameJP": "フラットブレッドラップ (ステーキ)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Veggie Flatbread Wrap",
+    "nameJP": "フラットブレッドラップ (ベジ)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "French Dip",
+    "nameJP": "フレンチディップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Pulled Pork Sandwich",
+    "nameJP": "プルドポークサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Veggie Wrap",
+    "nameJP": "ベジラップ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Cream Cheese Bagel ",
+    "nameJP": "ベーグルサンド (クリームチーズ)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Lox Bagel",
+    "nameJP": "ベーグルサンド (スモークサーモン)",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Bacon Burger",
+    "nameJP": "ベーコンバーガー",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Hoagie",
+    "nameJP": "ホーギー",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Meatball Sub",
+    "nameJP": "ミートボールサブ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Meatloaf Sandwich",
+    "nameJP": "ミートローフサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Monte Cristo",
+    "nameJP": "モンテクリストサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Reuben",
+    "nameJP": "ルーベンサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Lobster Roll",
+    "nameJP": "ロブスターロール",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Roast Beef Sandwich",
+    "nameJP": "ローストビーフサンドウィッチ",
+    "category": "サンド"
+  },
+  {
+    "nameEN": "Osso Buco",
+    "nameJP": "オッソブーコ",
+    "category": "シチュー"
+  },
+  {
+    "nameEN": "Cassoulet",
+    "nameJP": "カスレ",
+    "category": "シチュー"
+  },
+  {
+    "nameEN": "Coq au Vin",
+    "nameJP": "コックオーヴァン",
+    "category": "シチュー"
+  },
+  {
+    "nameEN": "Duck Confit",
+    "nameJP": "コンフィ ド カナール",
+    "category": "シチュー"
+  },
+  {
+    "nameEN": "Chicken Stew",
+    "nameJP": "チキンシチュー",
+    "category": "シチュー"
+  },
+  {
+    "nameEN": "Beef Bourguignon",
+    "nameJP": "ブフ ブルギニョン",
+    "category": "シチュー"
+  },
+  {
+    "nameEN": "Pork Stew",
+    "nameJP": "ポークシチュー",
+    "category": "シチュー"
+  },
+  {
+    "nameEN": "Lancashire Hotpot",
+    "nameJP": "ランカシャーホットポット",
+    "category": "シチュー"
+  },
+  {
+    "nameEN": "Beef Vegetable Stew",
+    "nameJP": "牛肉野菜シチュー",
+    "category": "シチュー"
+  },
+  {
+    "nameEN": "Pork Vegetable Stew",
+    "nameJP": "豚肉野菜シチュー",
+    "category": "シチュー"
+  },
+  {
+    "nameEN": "Asian Style Soup",
+    "nameJP": "アジア風スープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Squid Soup",
+    "nameJP": "イカスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Italian Wedding Soup",
+    "nameJP": "イタリアンウェディングスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Shrimp and Okra Gumbo",
+    "nameJP": "エビオクラガンボ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Oxtail Soup",
+    "nameJP": "オックステールスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Oyster Stew",
+    "nameJP": "カキシチュー",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Crab Soup",
+    "nameJP": "カニスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Gazpacho",
+    "nameJP": "ガスパチョ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Carrot Ginger Soup",
+    "nameJP": "キャロットジンジャースープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Carrot Soup",
+    "nameJP": "キャロットスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Clam Chowder",
+    "nameJP": "クラムチャウダー",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Cream of Chicken Soup",
+    "nameJP": "クリームチキンスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Cream of Tomato Soup",
+    "nameJP": "クリームトマトスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Cream of Broccoli Soup",
+    "nameJP": "クリームブロッコリースープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Cream of Mushroom Soup",
+    "nameJP": "クリームマッシュルームスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Pea Soup",
+    "nameJP": "グリンピーススープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Goulash",
+    "nameJP": "グーラッシュ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Cock-a-leekie",
+    "nameJP": "コックアリーキー",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Corn Chowder",
+    "nameJP": "コーンチャウダー",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Salmon Soup",
+    "nameJP": "サーモンスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Seafood Stew",
+    "nameJP": "シーフードシチュー",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Seafood Chowder",
+    "nameJP": "シーフードチャウダー",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Jambalaya Soup",
+    "nameJP": "ジャンバラヤスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Scotch Broth",
+    "nameJP": "スコッチブロス",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Stilton Soup",
+    "nameJP": "スティルトンスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Thai Coconut Soup",
+    "nameJP": "タイ風ココナッツスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Turkey Chili",
+    "nameJP": "ターキーチリ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Chicken Dumpling Soup",
+    "nameJP": "チキンダンプリングスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Chicken Tortilla Soup",
+    "nameJP": "チキントルティーヤスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Chicken Noodle Soup",
+    "nameJP": "チキンヌードルスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Chicken Rice Soup",
+    "nameJP": "チキンライススープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Cioppino",
+    "nameJP": "チョッピーノ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Chili Con Carne",
+    "nameJP": "チリコンカーネ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Tomato Bisque",
+    "nameJP": "トマトビスク",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Tortellini Soup",
+    "nameJP": "トルテリーニスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "New England Clam Chowder",
+    "nameJP": "ニューイングランドクラムチャウダー",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Navy Bean Soup",
+    "nameJP": "ネービービーンスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Ham and Bean Soup",
+    "nameJP": "ハムビーンスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Butternut Squash Soup",
+    "nameJP": "バターナッツかぼちゃスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Pumpkin Soup",
+    "nameJP": "パンプキンスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Parsnip Soup",
+    "nameJP": "パースニップスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Beef Soup",
+    "nameJP": "ビーフスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "French Onion Soup",
+    "nameJP": "フレンチオニオンスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Bouillabaisse",
+    "nameJP": "ブイヤベース",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Black Bean Soup",
+    "nameJP": "ブラックビーンスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Brunswick Stew",
+    "nameJP": "ブランズウィックシチュー",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Broccoli Cheddar Soup",
+    "nameJP": "ブロッコリーチェダースープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Vegetarian Chili",
+    "nameJP": "ベジタリアンチリ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "White Chicken Chili",
+    "nameJP": "ホワイトチキンチリ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Borscht",
+    "nameJP": "ボルシチ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Posole",
+    "nameJP": "ポソレ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Potato Leek Soup",
+    "nameJP": "ポテトリークスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Mushroom Barley Soup",
+    "nameJP": "マッシュルーム大麦スープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Matzo Ball Soup",
+    "nameJP": "マッツォボールスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Mulligatawny",
+    "nameJP": "マリガトーニースープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Manhattan Clam Chowder",
+    "nameJP": "マンハッタンクラムチャウダー",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Minestrone",
+    "nameJP": "ミネストローネ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Mussel Soup",
+    "nameJP": "ムール貝スープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Ramen Broth",
+    "nameJP": "ラーメンスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Leek Soup",
+    "nameJP": "リークスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Leek and Potato Soup",
+    "nameJP": "リークポテトスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Lentil Soup",
+    "nameJP": "レンズ豆スープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Lobster Bisque",
+    "nameJP": "ロブスタービスク",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Vichyssoise",
+    "nameJP": "ヴィシソワーズ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "White Fish Chowder",
+    "nameJP": "白身魚チャウダー",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Bean Soup",
+    "nameJP": "豆スープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Red Lentil Soup",
+    "nameJP": "赤レンズ豆スープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Vegetable Soup",
+    "nameJP": "野菜スープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Vegetable Noodle Soup",
+    "nameJP": "野菜ヌードルスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Vegetable Beef Soup",
+    "nameJP": "野菜ビーフスープ",
+    "category": "スープ"
+  },
+  {
+    "nameEN": "Pumpkin Seeds",
+    "nameJP": "かぼちゃの種",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "Sesame Seeds",
+    "nameJP": "ごま",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "Sunflower Seeds",
+    "nameJP": "ひまわりの種",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "Almonds",
+    "nameJP": "アーモンド",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "Cashews",
+    "nameJP": "カシューナッツ",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "Walnuts",
+    "nameJP": "クルミ",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "Chia Seeds",
+    "nameJP": "チア",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "Pistachios",
+    "nameJP": "ピスタチオ",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "Pecans",
+    "nameJP": "ピーカンナッツ",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "Peanuts",
+    "nameJP": "ピーナッツ",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "Brazil Nuts",
+    "nameJP": "ブラジルナッツ",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "Macadamia Nuts",
+    "nameJP": "マカダミアナッツ",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "Mixed Nuts",
+    "nameJP": "ミックスナッツ",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "Flax Seeds",
+    "nameJP": "亜麻仁",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "Pine Nuts",
+    "nameJP": "松の実",
+    "category": "ナッツ類"
+  },
+  {
+    "nameEN": "BBQ Burger",
+    "nameJP": "BBQバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Italian Sausage Sandwich",
+    "nameJP": "イタリアンソーセージサンドウィッチ",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Western Burger",
+    "nameJP": "ウエスタンバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Polish Kielbasa",
+    "nameJP": "キールバサ (ポーランドソーセージ)",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Crab Cake Burger",
+    "nameJP": "クラブケーキバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Crispy Fish Burger",
+    "nameJP": "クリスピーフィッシュバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Coney Dog",
+    "nameJP": "コニードッグ",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Corn Dog",
+    "nameJP": "コーンドッグ",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Chicago Style Hot Dog",
+    "nameJP": "シカゴスタイルホットドッグ",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Shrimp Burger",
+    "nameJP": "シュリンプバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Swiss Burger",
+    "nameJP": "スイスバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Spicy Chicken Burger",
+    "nameJP": "スパイシーチキンバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Slider",
+    "nameJP": "スライダー (ミニバーガー)",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Turkey Burger",
+    "nameJP": "ターキーバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Turkey Hot Dog",
+    "nameJP": "ターキーホットドッグ",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Double Cheeseburger",
+    "nameJP": "ダブルチーズバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Chicken Sausage",
+    "nameJP": "チキンソーセージ",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Chili Dog",
+    "nameJP": "チリドッグ",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Cheese Slider",
+    "nameJP": "チーズスライダー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Teriyaki Burger",
+    "nameJP": "テリヤキバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Jalapeno Burger",
+    "nameJP": "ハラペーニョバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Hawaiian Burger",
+    "nameJP": "ハワイアンバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Bison Burger",
+    "nameJP": "バイソンバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Buffalo Chicken Burger",
+    "nameJP": "バッファローチキンバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Fajita Burger",
+    "nameJP": "ファヒータバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Fish Burger",
+    "nameJP": "フィッシュバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Fried Chicken Burger",
+    "nameJP": "フライドチキンバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Black Bean Burger",
+    "nameJP": "ブラックビーンバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Bratwurst",
+    "nameJP": "ブラートヴルスト",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Blue Cheese Burger",
+    "nameJP": "ブルーチーズバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Veggie Burger",
+    "nameJP": "ベジバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Veggie Hot Dog",
+    "nameJP": "ベジホットドッグ",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Bacon Cheeseburger",
+    "nameJP": "ベーコンチーズバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Pepper Jack Burger",
+    "nameJP": "ペッパージャックバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Portobello Burger",
+    "nameJP": "ポルトベロバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Portobello Mushroom Burger",
+    "nameJP": "ポルトベロマッシュルームバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Mushroom Swiss Burger",
+    "nameJP": "マッシュルームスイスバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Mushroom and Cheddar Burger",
+    "nameJP": "マッシュルームチェダーバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "Lamb Burger",
+    "nameJP": "ラムバーガー",
+    "category": "バーガー"
+  },
+  {
+    "nameEN": "BBQ Chicken Pizza",
+    "nameJP": "BBQチキンピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "BBQ Pulled Pork Pizza",
+    "nameJP": "BBQプルドポークピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Spinach Artichoke Pizza",
+    "nameJP": "ほうれん草アーティチョークピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Spinach and Feta Pizza",
+    "nameJP": "ほうれん草フェタピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Irish Soda Bread",
+    "nameJP": "アイリッシュソーダブレッド",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Apple Danish",
+    "nameJP": "アップルデニッシュ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Almond Croissant",
+    "nameJP": "アーモンドクロワッサン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "English Muffin",
+    "nameJP": "イングリッシュマフィン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Eccles Cake",
+    "nameJP": "エクルズケーキ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Focaccia Olive",
+    "nameJP": "オリーブフォカッチャ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Oat Bread",
+    "nameJP": "オートブレッド",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Kaiser Roll",
+    "nameJP": "カイザーロール",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Calzone",
+    "nameJP": "カルツォーネ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Cannoli",
+    "nameJP": "カンノーリ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Garlic and Herb Pizza",
+    "nameJP": "ガーリックハーブピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Garlic Bread",
+    "nameJP": "ガーリックブレッド",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Caramelized Onion Pizza",
+    "nameJP": "キャラメライズドオニオンピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Carrot Muffin",
+    "nameJP": "キャロットマフィン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Greek Pizza",
+    "nameJP": "ギリシャ風ピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Crumb Cake",
+    "nameJP": "クラムケーキ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Cranberry Orange Muffin",
+    "nameJP": "クランベリーオレンジマフィン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Toasted Crumpets",
+    "nameJP": "クランペット (プレーン)",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Croissant",
+    "nameJP": "クロワッサン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Cloverleaf Roll",
+    "nameJP": "クローバーリーフロール",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Quattro Formaggi Pizza",
+    "nameJP": "クワトロフォルマッジピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Coffee Cake",
+    "nameJP": "コーヒーケーキ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Corn A673Tortilla",
+    "nameJP": "コーントルティーヤ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Cornbread",
+    "nameJP": "コーンブレッド",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Corn Muffin",
+    "nameJP": "コーンマフィン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Sourdough Bread",
+    "nameJP": "サワードウパン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Za'atar Pizza",
+    "nameJP": "ザアタルピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Chicago Deep Dish Pizza",
+    "nameJP": "シカゴディープディッシュピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Sicilian Pizza",
+    "nameJP": "シチリアンピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Cinnamon Roll",
+    "nameJP": "シナモンロール",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Simnel Cake",
+    "nameJP": "シムネルケーキ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Strudel Cake",
+    "nameJP": "シュトロイゼルケーキ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Jam Toast",
+    "nameJP": "ジャムトースト",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Jam Roly Poly",
+    "nameJP": "ジャムロリーポリー",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Johnnycake",
+    "nameJP": "ジョニーケーキ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Scone",
+    "nameJP": "スコーン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Sticky Toffee Pudding",
+    "nameJP": "スティッキートフィープディング",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Stromboli",
+    "nameJP": "ストロンボリ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Spanish Tortilla",
+    "nameJP": "スペイン風オムレツ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Spotted Dick",
+    "nameJP": "スポッテッドディック",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Smoked Salmon Pizza",
+    "nameJP": "スモークサーモンピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Zucchini Bread",
+    "nameJP": "ズッキーニブレッド",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Sausage Pizza",
+    "nameJP": "ソーセージピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Sausage and Pepperoni Pizza",
+    "nameJP": "ソーセージペパロニピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Taco Pizza",
+    "nameJP": "タコスピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Tarte Flambee",
+    "nameJP": "タルトフランベ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Dundee Cake",
+    "nameJP": "ダンディーケーキ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Biscuit Cheddar",
+    "nameJP": "チェダービスケット",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Cherry Danish",
+    "nameJP": "チェリーデニッシュ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Chicken Alfredo Pizza",
+    "nameJP": "チキンアルフレードピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Ciabatta",
+    "nameJP": "チャバタ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Chocolate Croissant",
+    "nameJP": "チョコクロワッサン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Chocolate Chip Muffin",
+    "nameJP": "チョコチップマフィン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Chocolate Muffin",
+    "nameJP": "チョコレートマフィン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Cheese Danish",
+    "nameJP": "チーズデニッシュ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Cheese Bagel",
+    "nameJP": "チーズベーグル",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Dinner Rolls",
+    "nameJP": "ディナーロール",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Detroit Style Pizza",
+    "nameJP": "デトロイトスタイルピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Truffle Pizza",
+    "nameJP": "トリュフピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Treacle Tart",
+    "nameJP": "トリークルタルト",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Neapolitan Pizza",
+    "nameJP": "ナポリタンピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Naan",
+    "nameJP": "ナン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "New York Style Pizza",
+    "nameJP": "ニューヨークスタイルピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Hush Puppy",
+    "nameJP": "ハッシュパピー",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Ham and Cheese Croissant",
+    "nameJP": "ハムチーズクロワッサン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Ham Bagel",
+    "nameJP": "ハムベーグル",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Challah",
+    "nameJP": "ハラー",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Hawaiian Pizza",
+    "nameJP": "ハワイアンピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Focaccia Herb",
+    "nameJP": "ハーブフォカッチャ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Buttered Crumpets",
+    "nameJP": "バタークランペット",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Biscuit Buttermilk",
+    "nameJP": "バターミルクビスケット",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Battenberg Cake",
+    "nameJP": "バッテンバーグケーキ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Buffalo Chicken Pizza",
+    "nameJP": "バッファローチキンピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Banana Nut Muffin",
+    "nameJP": "バナナナッツマフィン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Banana Bread",
+    "nameJP": "バナナブレッド",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Pumpkin Bread",
+    "nameJP": "パンプキンブレッド",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Pumpkin Muffin",
+    "nameJP": "パンプキンマフィン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Bread Roll",
+    "nameJP": "パンロール)",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Parker House Roll",
+    "nameJP": "パーカーハウスロール",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Biscotti",
+    "nameJP": "ビスコッティ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Pissaladiere",
+    "nameJP": "ピサラディエール",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Pita",
+    "nameJP": "ピタパン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Pecan Sticky Bun",
+    "nameJP": "ピーカンスティッキーバン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Focaccia",
+    "nameJP": "フォカッチャ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "French Baguette",
+    "nameJP": "フランスパン  (バゲット)",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Brioche",
+    "nameJP": "ブリオッシュ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Bruschetta",
+    "nameJP": "ブルスケッタ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Bread and Butter Pudding",
+    "nameJP": "ブレッドアンドバタープディング",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Breadsticks",
+    "nameJP": "ブレッドスティック",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Pretzel Roll",
+    "nameJP": "プレッツェルロール",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Prosciutto and Arugula Pizza",
+    "nameJP": "プロシュートルッコラピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Pumpernickel",
+    "nameJP": "プンパーニッケル",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Bakewell Tart",
+    "nameJP": "ベイクウェルタルト",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Veggie Pizza",
+    "nameJP": "ベジピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Bagel",
+    "nameJP": "ベーグル",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Bacon and Cheddar Pizza",
+    "nameJP": "ベーコンチェダーピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Pesto Pizza",
+    "nameJP": "ペストピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Pepperoni Pizza",
+    "nameJP": "ペパロニピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "White Pizza",
+    "nameJP": "ホワイトピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Potato Bread",
+    "nameJP": "ポテトブレッド",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Mushroom and Swiss Pizza",
+    "nameJP": "マッシュルームスイスピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Mushroom Pizza",
+    "nameJP": "マッシュルームピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Muffin",
+    "nameJP": "マフィン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Margherita Pizza",
+    "nameJP": "マルゲリータピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Marble Rye",
+    "nameJP": "マーブルライ麦パン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Meat Pizza",
+    "nameJP": "ミートラバーズピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Morning Glory Muffin",
+    "nameJP": "モーニンググローリーマフィン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Rye Bread",
+    "nameJP": "ライ麦パン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Lemon Poppy Seed Muffin",
+    "nameJP": "レモンポピーシードマフィン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Roman Pizza",
+    "nameJP": "ローマ風ピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Whole Wheat Bread",
+    "nameJP": "全粒粉パン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Mediterranean Pizza",
+    "nameJP": "地中海風ピザ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Flour Tortilla",
+    "nameJP": "小麦粉トルティーヤ",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "White Bread",
+    "nameJP": "白パン",
+    "category": "パン類"
+  },
+  {
+    "nameEN": "Edam",
+    "nameJP": "エダム",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Cottage Cheese",
+    "nameJP": "カッテージチーズ",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Camembert",
+    "nameJP": "カマンベール",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Greek Yogurt",
+    "nameJP": "ギリシャヨーグルト",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Cream Cheese",
+    "nameJP": "クリームチーズ",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Clotted Cream",
+    "nameJP": "クロテッドクリーム",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Gorgonzola ",
+    "nameJP": "ゴルゴンゾーラ",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Gouda",
+    "nameJP": "ゴーダ",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Sour Cream",
+    "nameJP": "サワークリーム",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Stilton",
+    "nameJP": "スティルトン",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Cheddar",
+    "nameJP": "チェダーチーズ",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Butter",
+    "nameJP": "バター",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Feta",
+    "nameJP": "フェタチーズ",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Brie",
+    "nameJP": "ブリー",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Whipped Cream",
+    "nameJP": "ホイップクリーム",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Mascarpone",
+    "nameJP": "マスカルポーネ",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Margarine",
+    "nameJP": "マーガリン",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Plain Yogurt",
+    "nameJP": "ヨーグルト (プレーン)",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Ricotta",
+    "nameJP": "リコッタ",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "2% Milk",
+    "nameJP": "低脂肪牛乳",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Whole Milk",
+    "nameJP": "牛乳  (全脂肪)",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Skim Milk",
+    "nameJP": "脱脂牛乳",
+    "category": "乳製品"
+  },
+  {
+    "nameEN": "Inari Sushi",
+    "nameJP": "いなり寿司",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Udon Noodles",
+    "nameJP": "うどん",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Udon Soup",
+    "nameJP": "うどん汁",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Unagi",
+    "nameJP": "うなぎ蒲焼き",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Onigiri",
+    "nameJP": "おにぎり",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Okonomiyaki",
+    "nameJP": "お好み焼き",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Kakiage",
+    "nameJP": "かき揚げ",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Kinpira",
+    "nameJP": "きんぴらごぼう",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Shabu Shabu",
+    "nameJP": "しゃぶしゃぶ",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Shirataki Noodles",
+    "nameJP": "しらたき",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Sukiyaki",
+    "nameJP": "すき焼き",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Somen Noodles",
+    "nameJP": "そうめん",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Soba Soup",
+    "nameJP": "そば汁",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Takoyaki",
+    "nameJP": "たこ焼き",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Tonkatsu",
+    "nameJP": "とんかつ",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Tonkotsu Ramen",
+    "nameJP": "とんこつラーメン",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Wakame Seaweed",
+    "nameJP": "わかめ",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Katsudon",
+    "nameJP": "カツ丼",
+    "category": "和食"
+  },
+  {
+    "nameEN": "California Roll",
+    "nameJP": "カリフォルニアロール",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Pickled Ginger",
+    "nameJP": "ガリ (生姜漬け)",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Salmon Sashimi",
+    "nameJP": "サーモン刺身",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Salmon Nigiri",
+    "nameJP": "サーモン握り",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Spicy Tuna Roll",
+    "nameJP": "スパイシーツナロール",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Chicken Katsu",
+    "nameJP": "チキンカツ",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Dragon Roll",
+    "nameJP": "ドラゴンロール",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Tuna Sashimi",
+    "nameJP": "マグロ刺身",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Tuna Nigiri",
+    "nameJP": "マグロ握り",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Miso Ramen",
+    "nameJP": "味噌ラーメン",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Shio Ramen",
+    "nameJP": "塩ラーメン",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Daikon Radish",
+    "nameJP": "大根",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Tempura Roll",
+    "nameJP": "天ぷらロール",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Sushi Rice",
+    "nameJP": "寿司飯",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Agedashi Tofu",
+    "nameJP": "揚げ出し豆腐",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Glass Noodles",
+    "nameJP": "春雨",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Shrimp and Squid Fry ",
+    "nameJP": "海老いか揚げ",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Fried Prawns in Hot Chili Sauce",
+    "nameJP": "海老チリ",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Tempura Shrimp",
+    "nameJP": "海老天ぷら",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Nori",
+    "nameJP": "海苔",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Tsukemono",
+    "nameJP": "漬け物",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Yakisoba Noodles",
+    "nameJP": "焼きそば",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Yakitori",
+    "nameJP": "焼き鳥",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Gyudon",
+    "nameJP": "牛丼",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Tamago",
+    "nameJP": "玉子寿司",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Tamagoyaki",
+    "nameJP": "玉子焼き",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Natto",
+    "nameJP": "納豆",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Nikuman",
+    "nameJP": "肉まん",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Chawanmushi",
+    "nameJP": "茶碗蒸し",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Oyakodon",
+    "nameJP": "親子丼",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Shoyu Ramen",
+    "nameJP": "醤油ラーメン",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Vegetable Tempura",
+    "nameJP": "野菜天ぷら",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Nagasaki Sara Udon",
+    "nameJP": "長崎皿うどん",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Gyoza",
+    "nameJP": "餃子",
+    "category": "和食"
+  },
+  {
+    "nameEN": "Teriyaki Chicken",
+    "nameJP": "鶏の照り焼き",
+    "category": "和食"
+  },
+  {
+    "nameEN": "American Cheese",
+    "nameJP": "アメリカンチーズ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Antipasto Platter",
+    "nameJP": "アンティパストプラッター",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Olive Medley",
+    "nameJP": "オリーブミックス",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Capicola",
+    "nameJP": "カピコラ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Currywurst",
+    "nameJP": "カリーヴルスト",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Gruyere",
+    "nameJP": "グリュイエールチーズ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Colby Jack",
+    "nameJP": "コルビージャックチーズ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Goat Cheese",
+    "nameJP": "ゴートチーズ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Summer Sausage",
+    "nameJP": "サマーソーセージ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Sauerbraten",
+    "nameJP": "ザウアーブラーテン",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Charcuterie Board",
+    "nameJP": "シャルキュトリーボード",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Spatzle",
+    "nameJP": "シュペッツレ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Schweinshaxe",
+    "nameJP": "シュヴァインスハクセ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Genoa Salami",
+    "nameJP": "ジェノア風サラミ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Sliced Turkey Breast",
+    "nameJP": "スライスターキーブレスト",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Sliced Chicken Breast",
+    "nameJP": "スライスチキンブレスト",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Sliced Ham",
+    "nameJP": "スライスハム",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Sliced Roast Beef",
+    "nameJP": "スライスローストビーフ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Sun-Dried Tomatoes",
+    "nameJP": "セミドライトマト",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Chicken Liver Pate",
+    "nameJP": "チキンレバーパテ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Cheese Ball",
+    "nameJP": "チーズボール",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Kartoffelsalat",
+    "nameJP": "ドイツポテトサラダ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Knockwurst",
+    "nameJP": "ノックヴルスト",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Havarti",
+    "nameJP": "ハバティチーズ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Hard Salami",
+    "nameJP": "ハードサラミ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Pastrami",
+    "nameJP": "パストラミ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Parmesan",
+    "nameJP": "パルメザンチーズ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Pancetta",
+    "nameJP": "パンチェッタ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Pickled Vegetables",
+    "nameJP": "ピクルス野菜",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Mozzarella",
+    "nameJP": "フレッシュモッツァレラ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Boursin",
+    "nameJP": "ブルサンチーズ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Prosciutto",
+    "nameJP": "プロシュート",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Pepper Jack",
+    "nameJP": "ペッパージャックチーズ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Pepperoni",
+    "nameJP": "ペパロニ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Bologna",
+    "nameJP": "ボローニャソーセージ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Marinated Artichokes",
+    "nameJP": "マリネアーティチョーク",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Manchego",
+    "nameJP": "マンチェゴチーズ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Mortadella",
+    "nameJP": "モルタデッラ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Leberkase",
+    "nameJP": "レバーケーゼ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Liverwurst",
+    "nameJP": "レバーソーセージ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Roasted Red Peppers",
+    "nameJP": "ロースト赤パプリカ",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Rouladen",
+    "nameJP": "ローラーデン",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Black Forest Ham",
+    "nameJP": "黒の森ハム",
+    "category": "惣菜"
+  },
+  {
+    "nameEN": "Oatmeal with Honey",
+    "nameJP": "はちみつオートミール",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Honey Granola",
+    "nameJP": "はちみつグラノーラ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Spinach Omelet",
+    "nameJP": "ほうれん草オムレツ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Boiled Eggs",
+    "nameJP": "ゆで卵",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Irish Breakfast",
+    "nameJP": "アイリッシュフルブレックファスト",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "English Breakfast",
+    "nameJP": "イングリッシュフルブレックファスト",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Weetabix",
+    "nameJP": "ウィータビックス",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Wheat Cereal",
+    "nameJP": "ウィートシリアル",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Huevos Rancheros",
+    "nameJP": "ウェボスランチェロス",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Welsh Rarebit",
+    "nameJP": "ウェルシュレアビット",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Western Omelet",
+    "nameJP": "ウエスタンオムレツ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Egg Cups",
+    "nameJP": "エッグカップ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Eggs Florentine",
+    "nameJP": "エッグフローレンタイン",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Eggs Benedict",
+    "nameJP": "エッグベネディクト",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Egg McMuffin ",
+    "nameJP": "エッグマフィン風サンドウィッチ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Overnight Oats",
+    "nameJP": "オーバーナイトオーツ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Cottage Cheese with Fruit",
+    "nameJP": "カッテージチーズフルーツ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Croissant Sandwich",
+    "nameJP": "クロワッサンサンドウィッチ (朝食)",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Plain Granola",
+    "nameJP": "グラノーラ (プレーン)",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Granola and Milk",
+    "nameJP": "グラノーラとミルク",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Grits",
+    "nameJP": "グリッツ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Kedgeree",
+    "nameJP": "ケジャリー",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Corned Beef Hash",
+    "nameJP": "コーンドビーフハッシュ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Cornflakes",
+    "nameJP": "コーンフレーク",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Cornflakes and Milk",
+    "nameJP": "コーンフレークとミルク",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Cinnamon French Toast",
+    "nameJP": "シナモンフレンチトースト",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Shakshuka",
+    "nameJP": "シャクシュカ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Scrambled Eggs",
+    "nameJP": "スクランブルエッグ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Scottish Breakfast",
+    "nameJP": "スコティッシュフルブレックファスト",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Steel Cut Oats",
+    "nameJP": "スティールカットオーツ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Strawberry Waffles",
+    "nameJP": "ストロベリーワッフル",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Smoothie Bowl",
+    "nameJP": "スムージーボウル",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Sausage Burrito",
+    "nameJP": "ソーセージブレックファストブリトー",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Turkey Bacon",
+    "nameJP": "ターキーベーコン",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Chocolate Chip Pancakes",
+    "nameJP": "チョコチップパンケーキ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Chocolate Granola",
+    "nameJP": "チョコレートグラノーラ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Chilaquiles",
+    "nameJP": "チラキレス",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Cheese and Crackers",
+    "nameJP": "チーズとクラッカー",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Cheeese Omelet",
+    "nameJP": "チーズオムレツ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Denver Omelet",
+    "nameJP": "デンバーオムレツ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Haggis",
+    "nameJP": "ハギス",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Hash Browns",
+    "nameJP": "ハッシュブラウン",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Ham Omelet",
+    "nameJP": "ハムオムレツ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Buttered Toast",
+    "nameJP": "バタートースト",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Banana Pancakes",
+    "nameJP": "バナナパンケーキ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Bubble and Squeak",
+    "nameJP": "バブルアンドスクィーク",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Plain Pancakes",
+    "nameJP": "パンケーキ (プレーン)",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Biscuits and Gravy",
+    "nameJP": "ビスケットグレービーソースがけ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Peanut Butter Toast",
+    "nameJP": "ピーナッツバタートースト",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Fruit and Nuts",
+    "nameJP": "フルーツとナッツ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Plain French Toast",
+    "nameJP": "フレンチトースト (プレーン)",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Black Pudding",
+    "nameJP": "ブラックプディング",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Bran Muffin",
+    "nameJP": "ブランマフィン",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Pancakes, Banana",
+    "nameJP": "ブルーベリーパンケーキ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Blueberry Muffin",
+    "nameJP": "ブルーベリーマフィン",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Breakfast Quiche",
+    "nameJP": "ブレックファストキッシュ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Breakfast Casserole",
+    "nameJP": "ブレックファストキャセロール",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Breakfast Cookies",
+    "nameJP": "ブレックファストクッキー",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Breakfast Sausage Patties",
+    "nameJP": "ブレックファストソーセージ (パティ)",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Breakfast Pizza",
+    "nameJP": "ブレックファストピザ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Breakfast Potatoes",
+    "nameJP": "ブレックファストポテト",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Plain Omelet",
+    "nameJP": "プレーンオムレツ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Protein Pancakes",
+    "nameJP": "プロテインパンケーキ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Oatmeal with Berries",
+    "nameJP": "ベリーオートミール",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Berries with Yogurt",
+    "nameJP": "ベリーヨーグルト",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Belgian Waffles",
+    "nameJP": "ベルギーワッフル",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Bagel Sandwich",
+    "nameJP": "ベーグルサンドウィッチ (朝食)",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Bacon Burrito",
+    "nameJP": "ベーコンブレックファストブリトー",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "White Pudding",
+    "nameJP": "ホワイトプディング",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Home Fries",
+    "nameJP": "ホームフライ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Porridge and Milk",
+    "nameJP": "ポリッジとミルク",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Poached Eggs",
+    "nameJP": "ポーチドエッグ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Mushroom Omelet",
+    "nameJP": "マッシュルームオムレツ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Muesli",
+    "nameJP": "ミューズリー",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Monkey Bread",
+    "nameJP": "モンキーブレッド",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Yogurt Parfait",
+    "nameJP": "ヨーグルトパフェ",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Rye Toast",
+    "nameJP": "ライ麦パントースト",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Raisin Bran",
+    "nameJP": "レーズンブランシリアル",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Plain Waffles",
+    "nameJP": "ワッフル (プレーン)",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Wheat Toast",
+    "nameJP": "全粒粉パントースト",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "White Toast",
+    "nameJP": "白パントースト",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Fried Eggs",
+    "nameJP": "目玉焼き",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Veggie Burrito",
+    "nameJP": "野菜ブレックファストブリトー",
+    "category": "朝ご飯"
+  },
+  {
+    "nameEN": "Satsuma Orange",
+    "nameJP": "みかん",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Avocado",
+    "nameJP": "アボカド",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Strawberries",
+    "nameJP": "イチゴ",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Orange",
+    "nameJP": "オレンジ",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Kiwi",
+    "nameJP": "キウイ",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Grapefruit",
+    "nameJP": "グレープフルーツ",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Cherries",
+    "nameJP": "サクランボ",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Pomegranate",
+    "nameJP": "ザクロ",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Watermelon",
+    "nameJP": "スイカ",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Banana",
+    "nameJP": "バナナ",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Pineapple",
+    "nameJP": "パイナップル",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Papaya",
+    "nameJP": "パパイヤ",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Grapes",
+    "nameJP": "ブドウ",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Blackberries",
+    "nameJP": "ブラックベリー",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Blueberries",
+    "nameJP": "ブルーベリー",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Plum",
+    "nameJP": "プラム",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Mango",
+    "nameJP": "マンゴー",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Peach",
+    "nameJP": "モモ",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Raspberries",
+    "nameJP": "ラズベリー",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Apple",
+    "nameJP": "リンゴ",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Pear",
+    "nameJP": "洋梨",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Canned Pineapple",
+    "nameJP": "缶詰パイナップル",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Canned Fruit",
+    "nameJP": "缶詰フルーツ",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Canned Pears",
+    "nameJP": "缶詰洋梨",
+    "category": "果物"
+  },
+  {
+    "nameEN": "Buckwheat",
+    "nameJP": "そば",
+    "category": "米/穀類"
+  },
+  {
+    "nameEN": "Arborio Rice",
+    "nameJP": "アルボリオ米",
+    "category": "米/穀類"
+  },
+  {
+    "nameEN": "Oatmeal",
+    "nameJP": "オートミール",
+    "category": "米/穀類"
+  },
+  {
+    "nameEN": "Quinoa",
+    "nameJP": "キヌア",
+    "category": "米/穀類"
+  },
+  {
+    "nameEN": "Couscous",
+    "nameJP": "クスクス",
+    "category": "米/穀類"
+  },
+  {
+    "nameEN": "Jasmine Rice",
+    "nameJP": "ジャスミンライス",
+    "category": "米/穀類"
+  },
+  {
+    "nameEN": "Basmati Rice",
+    "nameJP": "バスマティライス",
+    "category": "米/穀類"
+  },
+  {
+    "nameEN": "Bulgur",
+    "nameJP": "ブルグル",
+    "category": "米/穀類"
+  },
+  {
+    "nameEN": "Rye",
+    "nameJP": "ライ麦",
+    "category": "米/穀類"
+  },
+  {
+    "nameEN": "Wild Rice",
+    "nameJP": "ワイルドライス",
+    "category": "米/穀類"
+  },
+  {
+    "nameEN": "Barley",
+    "nameJP": "大麦",
+    "category": "米/穀類"
+  },
+  {
+    "nameEN": "Genmai Rice",
+    "nameJP": "玄米",
+    "category": "米/穀類"
+  },
+  {
+    "nameEN": "White Rice",
+    "nameJP": "白米",
+    "category": "米/穀類"
+  },
+  {
+    "nameEN": "Millet",
+    "nameJP": "粟 (アワ)",
+    "category": "米/穀類"
+  },
+  {
+    "nameEN": "BBQ Steak",
+    "nameJP": "BBQステーキ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "T-Bone Steak",
+    "nameJP": "Tボーンステーキ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Albondigas",
+    "nameJP": "アルボンディガス",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Wiener Schnitzel",
+    "nameJP": "ウィーナーシュニッツェル",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Crispy Bacon",
+    "nameJP": "カリカリベーコン",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Gammon Steak",
+    "nameJP": "ガモンステーキ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Gyros",
+    "nameJP": "ギロス",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Grilled Steak",
+    "nameJP": "グリルステーキ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Grilled Chicken Breast",
+    "nameJP": "グリルチキンブレスト",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Coronation Chicken",
+    "nameJP": "コロネーションチキン",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Corned Beef",
+    "nameJP": "コーンドビーフ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Salami Sausage",
+    "nameJP": "サラミソーセージ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Saltimbocca",
+    "nameJP": "サルティンボッカ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Sirloin Steak",
+    "nameJP": "サーロインステーキ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Shepherds Pie",
+    "nameJP": "シェパーズパイ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Swedish Meatballs",
+    "nameJP": "スウェーデン風ミートボール",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Steak and Kidney Pie",
+    "nameJP": "ステーキキドニーパイ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Steak Frites",
+    "nameJP": "ステーク フリット",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Souvlaki",
+    "nameJP": "スブラキ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Sausage",
+    "nameJP": "ソーセージ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Ground Turkey",
+    "nameJP": "ターキーひき肉",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Turkey Breast",
+    "nameJP": "ターキーブレスト",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Chorizo",
+    "nameJP": "チョリソ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Deli Turkey",
+    "nameJP": "デリターキー",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Deli Ham",
+    "nameJP": "デリハム",
+    "category": "肉"
+  },
+  {
+    "nameEN": "New York Strip",
+    "nameJP": "ニューヨークストリップ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Ham",
+    "nameJP": "ハム",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Beef Curry",
+    "nameJP": "ビーフカレー",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Beef Sausages",
+    "nameJP": "ビーフソーセージ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Filet Mignon",
+    "nameJP": "フィレミニョン",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Bacon",
+    "nameJP": "ベーコン",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Hot Dog",
+    "nameJP": "ホットドッグ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Pork Sausages",
+    "nameJP": "ポークソーセージ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Porterhouse Steak",
+    "nameJP": "ポーターハウスステーキ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Moussaka",
+    "nameJP": "ムサカ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Lamb Curry",
+    "nameJP": "ラムカレー",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Lamb",
+    "nameJP": "ラム肉",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Rib Eye Beef",
+    "nameJP": "リブアイ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Ribeye Steak",
+    "nameJP": "リブアイステーキ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Braised Liver",
+    "nameJP": "レバーの煮込み",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Liver Pate",
+    "nameJP": "レバーパテ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Roast Chicken",
+    "nameJP": "ローストチキン",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Roast Beef",
+    "nameJP": "ローストビーフ",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Roast Pork",
+    "nameJP": "ローストポーク",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Roast Lamb",
+    "nameJP": "ローストラム",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Vitello Tonnato",
+    "nameJP": "ヴィテッロ トンナート",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Veal",
+    "nameJP": "仔牛肉",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Ground Beef ",
+    "nameJP": "牛ひき肉",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Lean Pork ",
+    "nameJP": "豚肉  (赤身)",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Duck",
+    "nameJP": "鴨肉",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Chicken Breast",
+    "nameJP": "鶏むね肉",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Chicken Thigh",
+    "nameJP": "鶏もも肉",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Venison",
+    "nameJP": "鹿肉",
+    "category": "肉"
+  },
+  {
+    "nameEN": "Osechi",
+    "nameJP": "おせち料理",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "La Vigilia",
+    "nameJP": "イタリアクリスマスイブ料理",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Easter Lunch",
+    "nameJP": "イースターランチ (イギリス)",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Eid al-Fitr",
+    "nameJP": "イード アル＝フィトル料理",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Christmas Dinner",
+    "nameJP": "クリスマスディナー (イギリス)",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Sunday Roast",
+    "nameJP": "サンデーロースト (イギリス)",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Chuseok",
+    "nameJP": "チュソク料理 (韓国)",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Diwali ",
+    "nameJP": "ディワリ料理 (インド)",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Weihnachtsessen",
+    "nameJP": "ドイツクリスマス料理",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Reveillon",
+    "nameJP": "フランスクリスマス料理 (レヴェイヨン)",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Ceia de Natal",
+    "nameJP": "ブラジルクリスマス料理",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Boxing Day Buffet",
+    "nameJP": "ボクシングデーブッフェ (イギリス)",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Nochebuena",
+    "nameJP": "メキシコクリスマス料理",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Thanksgiving Dinner",
+    "nameJP": "感謝祭ディナー (アメリカ)",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Chinese New Year",
+    "nameJP": "春節料理 (中国)",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Wedding Reception",
+    "nameJP": "結婚披露宴料理",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Birthday Meal",
+    "nameJP": "誕生日祝い料理",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "Passover Seder",
+    "nameJP": "過越の祭り (セデル)",
+    "category": "行事食"
+  },
+  {
+    "nameEN": "A1 Steak Sauce",
+    "nameJP": "A1ステーキソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "HP Brown Sauce",
+    "nameJP": "HPブラウンソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Aioli",
+    "nameJP": "アイオリ",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Apple Sauce",
+    "nameJP": "アップルソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Apple Butter",
+    "nameJP": "アップルバター",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Apricot Jam",
+    "nameJP": "アプリコットジャム",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Arrabiata Sauce",
+    "nameJP": "アラビアータソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Alfredo Sauce",
+    "nameJP": "アルフレードソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Almond Butter",
+    "nameJP": "アーモンドバター",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Italian Dressing",
+    "nameJP": "イタリアンドレッシング",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Vodka Sauce",
+    "nameJP": "ウォッカソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Worcestershire Sauce",
+    "nameJP": "ウスターソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Onion Gravy",
+    "nameJP": "オニオングレービー",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Hollandaise Sauce",
+    "nameJP": "オランデーズソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Olive Oil",
+    "nameJP": "オリーブオイル",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Orange Marmalade",
+    "nameJP": "オレンジマーマレード",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Cocktail Sauce",
+    "nameJP": "カクテルソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Garlic Butter",
+    "nameJP": "ガーリックバター",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Greek Dressing",
+    "nameJP": "ギリシャ風ドレッシング",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Cookie Butter",
+    "nameJP": "クッキーバター",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Cranberry Sauce",
+    "nameJP": "クランベリーソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Guacamole",
+    "nameJP": "グアカモレ",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Green Goddess Dressing",
+    "nameJP": "グリーンゴッデスドレッシング",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Gravy",
+    "nameJP": "グレービーソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Grape Jelly",
+    "nameJP": "グレープゼリー",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Ketchup",
+    "nameJP": "ケチャップ",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Compound Butter",
+    "nameJP": "コンパウンドバター",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Thousand Island Dressing",
+    "nameJP": "サウザンドアイランドドレッシング",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Salad Dressing",
+    "nameJP": "サラダドレッシング",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Salsa",
+    "nameJP": "サルサ",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Tzatziki",
+    "nameJP": "ザジキ",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Caesar Dressing",
+    "nameJP": "シーザードレッシング",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Stuffing Dressing",
+    "nameJP": "スタッフィング",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Strawberry Jam",
+    "nameJP": "ストロベリージャム",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Sriracha Sauce",
+    "nameJP": "スリラチャソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Tahini",
+    "nameJP": "タヒニ",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Tartar Sauce",
+    "nameJP": "タルタルソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Turkey Gravy",
+    "nameJP": "ターキーグレービー",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Chimichurri",
+    "nameJP": "チミチュリ",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Cream Cheese Chive",
+    "nameJP": "チャイブクリームチーズ",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Chocolate Spread",
+    "nameJP": "チョコレートスプレッド",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "BBQ Sauce",
+    "nameJP": "テキサスBBQソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Tomato Sauce",
+    "nameJP": "トマトソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Honey Mustard Dressing",
+    "nameJP": "ハニーマスタードドレッシング",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Herb Butter",
+    "nameJP": "ハーブバター",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Buffalo Sauce",
+    "nameJP": "バッファローソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Balsamic Vinaigrette",
+    "nameJP": "バルサミコドレッシング",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Barbecue Sauce",
+    "nameJP": "バーベキューソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Peanut Butter",
+    "nameJP": "ピーナッツバター (クリーミー)",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Hummus",
+    "nameJP": "フムス",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "French Dressing",
+    "nameJP": "フレンチドレッシング",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Brown Gravy",
+    "nameJP": "ブラウングレービー",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Blue Cheese Dressing",
+    "nameJP": "ブルーチーズドレッシング",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Bread Sauce",
+    "nameJP": "ブレッドソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Bearnaise Sauce",
+    "nameJP": "ベアルネーズソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Bechamel Sauce",
+    "nameJP": "ベシャメルソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Pesto Sauce",
+    "nameJP": "ペストソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Hot Sauce",
+    "nameJP": "ホットソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "White Gravy",
+    "nameJP": "ホワイトグレービー",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Horseradish Sauce",
+    "nameJP": "ホースラディッシュソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Bolognese Sauce",
+    "nameJP": "ボロネーゼソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Poppy Seed Dressing",
+    "nameJP": "ポピーシードドレッシング",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Mustard",
+    "nameJP": "マスタード",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Mushroom Gravy",
+    "nameJP": "マッシュルームグレービー",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Mayonnaise",
+    "nameJP": "マヨネーズ",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Marinara Sauce",
+    "nameJP": "マリナーラソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Mint Sauce",
+    "nameJP": "ミントソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Maple Syrup",
+    "nameJP": "メープルシロップ",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Mornay Sauce",
+    "nameJP": "モルネーソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Raspberry Jam",
+    "nameJP": "ラズベリージャム",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Ranch Dressing",
+    "nameJP": "ランチドレッシング",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Remoulade",
+    "nameJP": "レムラード",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Lemon Curd",
+    "nameJP": "レモンカード",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Russian Dressing",
+    "nameJP": "ロシアンドレッシング",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Teriyaki Sauce",
+    "nameJP": "照り焼きソース",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Vinegar",
+    "nameJP": "酢",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Soy Sauce",
+    "nameJP": "醤油",
+    "category": "調味料"
+  },
+  {
+    "nameEN": "Bean Paste",
+    "nameJP": "あんこ  (豆ペースト)",
+    "category": "豆類"
+  },
+  {
+    "nameEN": "Chickpeas",
+    "nameJP": "ひよこ豆",
+    "category": "豆類"
+  },
+  {
+    "nameEN": "Kidney Beans",
+    "nameJP": "キドニービーン (赤インゲン豆)",
+    "category": "豆類"
+  },
+  {
+    "nameEN": "Pinto Beans",
+    "nameJP": "ピント豆",
+    "category": "豆類"
+  },
+  {
+    "nameEN": "Frijoles",
+    "nameJP": "フリホーレス",
+    "category": "豆類"
+  },
+  {
+    "nameEN": "Lentils",
+    "nameJP": "レンズ豆",
+    "category": "豆類"
+  },
+  {
+    "nameEN": "Split Peas",
+    "nameJP": "割りグリンピース",
+    "category": "豆類"
+  },
+  {
+    "nameEN": "Adzuki Beans",
+    "nameJP": "小豆",
+    "category": "豆類"
+  },
+  {
+    "nameEN": "Edamame",
+    "nameJP": "枝豆",
+    "category": "豆類"
+  },
+  {
+    "nameEN": "Navy Beans",
+    "nameJP": "白インゲン豆",
+    "category": "豆類"
+  },
+  {
+    "nameEN": "Bean Curd",
+    "nameJP": "豆腐",
+    "category": "豆類"
+  },
+  {
+    "nameEN": "Black Beans",
+    "nameJP": "黒豆",
+    "category": "豆類"
+  },
+  {
+    "nameEN": "Avocado on Toast",
+    "nameJP": "アボカドトースト",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Egg Mayonnaise Sandwich",
+    "nameJP": "エッグマヨサンドウィッチ",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Curly Fries",
+    "nameJP": "カーリーフライ",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Popcorn Caramel",
+    "nameJP": "キャラメルポップコーン",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Quesadilla",
+    "nameJP": "ケサディーヤ",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Popcorn Kettle Corn",
+    "nameJP": "ケトルコーンポップコーン",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Kettle Chips",
+    "nameJP": "ケトルチップス",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Corn Chips",
+    "nameJP": "コーンチップス",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Scotch Eggs",
+    "nameJP": "スコッチエッグ",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Sausage Roll",
+    "nameJP": "ソーセージロール",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Tacos",
+    "nameJP": "タコス",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Chicken Nuggets",
+    "nameJP": "チキンナゲット",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Chip Butty",
+    "nameJP": "チップバティ",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Cheese Straws",
+    "nameJP": "チーズストロー",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Cheese on Toast",
+    "nameJP": "チーズトースト",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Cheeseburger",
+    "nameJP": "チーズバーガー",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Cheese Puffs",
+    "nameJP": "チーズパフ",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Popcorn Cheese",
+    "nameJP": "チーズポップコーン",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Tater Tots",
+    "nameJP": "テータートッツ",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Deli Sandwich",
+    "nameJP": "デリサンドウィッチ",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Tortilla Chips",
+    "nameJP": "トルティーヤチップス",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Doritos-style Chips",
+    "nameJP": "ドリトス風チップス",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Nachos",
+    "nameJP": "ナチョス",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Hamburger",
+    "nameJP": "ハンバーガー",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Popcorn Butter",
+    "nameJP": "バターポップコーン",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Bangers and Mash",
+    "nameJP": "バンガーズアンドマッシュ",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Patatas Bravas",
+    "nameJP": "パタタス ブラバス",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Padrón Peppers",
+    "nameJP": "パドロン唐辛子",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Pizza",
+    "nameJP": "ピザ",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Pita Chips",
+    "nameJP": "ピタチップス",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Fish & Chips",
+    "nameJP": "フィッシュアンドチップス",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Fried Chicken",
+    "nameJP": "フライドチキン",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Fried Bread",
+    "nameJP": "フライドブレッド",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "French Fries",
+    "nameJP": "フレンチフライ",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Burrito",
+    "nameJP": "ブリトー",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Ploughman's Lunch",
+    "nameJP": "プラウマンズランチ",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Bacon Butty",
+    "nameJP": "ベーコンバティ",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Popcorn Plain",
+    "nameJP": "ポップコーン (プレーン)",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Potato Chips BBQ",
+    "nameJP": "ポテトチップス (BBQ)",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Potato Chips Sour Cream",
+    "nameJP": "ポテトチップス (サワークリーム)",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Potato Chips Cheddar",
+    "nameJP": "ポテトチップス (チェダー)",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Potato Chips Plain",
+    "nameJP": "ポテトチップス (プレーン)",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Potato Chips Salt Vinegar",
+    "nameJP": "ポテトチップス (塩ビネガー)",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Mushy Peas",
+    "nameJP": "マッシーピース",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Marmite Toast",
+    "nameJP": "マーマイトトースト",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Loukoumades",
+    "nameJP": "ルクマデス",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Waffle Fries",
+    "nameJP": "ワッフルフライ",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Beans on Toast",
+    "nameJP": "豆トースト",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Veggie Chips",
+    "nameJP": "野菜チップス",
+    "category": "軽食"
+  },
+  {
+    "nameEN": "Pumpkin",
+    "nameJP": "かぼちゃ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Cucumber",
+    "nameJP": "きゅうり",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "French Beans",
+    "nameJP": "さやいんげん",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Broad Beans",
+    "nameJP": "そら豆",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Spinach",
+    "nameJP": "ほうれん草",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Asparagus",
+    "nameJP": "アスパラガス",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Green Beans",
+    "nameJP": "インゲン豆",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Au Gratin Potatoes",
+    "nameJP": "オーグラタンポテト",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Turnip",
+    "nameJP": "カブ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Cauliflower",
+    "nameJP": "カリフラワー",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Garlic Mashed Potatoes",
+    "nameJP": "ガーリックマッシュポテト",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Cabbage",
+    "nameJP": "キャベツ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Creamed Spinach",
+    "nameJP": "クリームほうれん草",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Peas",
+    "nameJP": "グリンピース",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Glazed Carrots",
+    "nameJP": "グレーズドキャロット",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Kale",
+    "nameJP": "ケール",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Collard Greens",
+    "nameJP": "コラードグリーン",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Succotash",
+    "nameJP": "サッコタッシュ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Sauerkraut",
+    "nameJP": "ザワークラウト",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Corn",
+    "nameJP": "スイートコーン",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Sweet Potato Fries",
+    "nameJP": "スイートポテトフライ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Zucchini",
+    "nameJP": "ズッキーニ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Celery",
+    "nameJP": "セロリ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Sauted Mushrooms",
+    "nameJP": "ソテーマッシュルーム",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Onion",
+    "nameJP": "タマネギ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Broccoli with Cheese Sauce",
+    "nameJP": "チーズソースブロッコリー",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Tomato",
+    "nameJP": "トマト",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Eggplant",
+    "nameJP": "ナス",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Carrots",
+    "nameJP": "ニンジン",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Bell Pepper",
+    "nameJP": "パプリカ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Parsnips",
+    "nameJP": "パースニップ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Beets",
+    "nameJP": "ビーツ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Pickled Beets",
+    "nameJP": "ピクルスビーツ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Broccoli",
+    "nameJP": "ブロッコリー",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Baked Potato Plain",
+    "nameJP": "ベイクドポテト (プレーン)",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Scalloped Potatoes",
+    "nameJP": "ポテトグラタン",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Potato Pancakes",
+    "nameJP": "ポテトパンケーキ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Mashed Potatoes",
+    "nameJP": "マッシュポテト",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Mushroom",
+    "nameJP": "マッシュルーム",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Radish",
+    "nameJP": "ラディッシュ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Leek",
+    "nameJP": "リーク",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Lettuce",
+    "nameJP": "レタス",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Roasted Asparagus",
+    "nameJP": "ローストアスパラガス",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Roasted Brussels Sprouts",
+    "nameJP": "ローストブリュッセルスプラウト",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Roasted Root Vegetables",
+    "nameJP": "ローストルートベジタブル",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Baked Potato Loaded",
+    "nameJP": "ローデッドベイクドポテト",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Twice-baked Potato",
+    "nameJP": "二度焼きポテト",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Fried Okra",
+    "nameJP": "揚げオクラ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Fried Green Tomatoes",
+    "nameJP": "揚げ青トマト",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Brussels Sprouts",
+    "nameJP": "芽キャベツ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Steamed Green Beans",
+    "nameJP": "蒸しインゲン",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Stuffed Paprika",
+    "nameJP": "詰め物パプリカ",
+    "category": "野菜"
+  },
+  {
+    "nameEN": "Iced Coffee",
+    "nameJP": "アイスコーヒー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Irish Coffee",
+    "nameJP": "アイリッシュコーヒー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Apple Juice",
+    "nameJP": "アップルジュース",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Americano",
+    "nameJP": "アメリカーノ",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Arnold Palmer",
+    "nameJP": "アーノルドパーマー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Almond Milk",
+    "nameJP": "アーモンドミルク",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Earl Grey",
+    "nameJP": "アールグレイ",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Whisky",
+    "nameJP": "ウィスキー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Espresso",
+    "nameJP": "エスプレッソコーヒー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Oreo Milkshake ",
+    "nameJP": "オレオミルクシェイク",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Orange Juice",
+    "nameJP": "オレンジジュース",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Oat Milk+A285",
+    "nameJP": "オーツミルク",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Cafe Latte",
+    "nameJP": "カフェラテ",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Cranberry Juice",
+    "nameJP": "クランベリージュース",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Cream Soda",
+    "nameJP": "クリームソーダ",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Green Smoothie ",
+    "nameJP": "グリーンスムージー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Grape Juice",
+    "nameJP": "グレープジュース",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Grapefruit Juice",
+    "nameJP": "グレープフルーツジュース",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Kombucha",
+    "nameJP": "コンブチャ",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Cola",
+    "nameJP": "コーラ",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Sweet Tea Southern",
+    "nameJP": "サザンスイートティー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Gin",
+    "nameJP": "ジン",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Ginger Ale",
+    "nameJP": "ジンジャーエール",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Strawberry Banana Smoothie ",
+    "nameJP": "ストロベリーバナナスムージー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Sports Drink",
+    "nameJP": "スポーツドリンク",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Double Espresso",
+    "nameJP": "ダブルエスプレッソ",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Chai Tea",
+    "nameJP": "チャイティー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Chai Latte",
+    "nameJP": "チャイラテ",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Tonic Water",
+    "nameJP": "トニックウォーター",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Tomato Juice",
+    "nameJP": "トマトジュース",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Herb Tea",
+    "nameJP": "ハーブティー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Pineapple Juice",
+    "nameJP": "パイナップルジュース",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Latte Pumpkin Spice",
+    "nameJP": "パンプキンスパイスラテ",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Bitter Beer",
+    "nameJP": "ビター",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Beer",
+    "nameJP": "ビール",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Flat White",
+    "nameJP": "フラットホワイト",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Fruit Punch",
+    "nameJP": "フルーツパンチ",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Brown Ale",
+    "nameJP": "ブラウンエール",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Black Coffee",
+    "nameJP": "ブラックコーヒー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Protein Smoothie",
+    "nameJP": "プロテインスムージー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Hot Chocolate",
+    "nameJP": "ホットチョコレート",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Port",
+    "nameJP": "ポートワイン",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Milo Hot Chocolate",
+    "nameJP": "マイロホットチョコレート",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Smoothie Green",
+    "nameJP": "マンゴースムージー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Milk Coffee",
+    "nameJP": "ミルクコーヒー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Milk Tea",
+    "nameJP": "ミルクティー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Malted Milkshake",
+    "nameJP": "モルトミルクシェイク",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Limeade",
+    "nameJP": "ライムエード",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Rum",
+    "nameJP": "ラム",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Lemonade",
+    "nameJP": "レモネード",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Lemon Tea",
+    "nameJP": "レモンティー",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "London Fog",
+    "nameJP": "ロンドンフォグ",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Matcha Latte",
+    "nameJP": "抹茶ラテ",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Sake",
+    "nameJP": "日本酒",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Water",
+    "nameJP": "水",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Seltzer",
+    "nameJP": "炭酸水",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Sweet Wine",
+    "nameJP": "甘口ワイン",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Black Tea",
+    "nameJP": "紅茶",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Green Tea",
+    "nameJP": "緑茶",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Soy Milk",
+    "nameJP": "豆乳",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Red Wine",
+    "nameJP": "赤ワイン",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Dry Wine",
+    "nameJP": "辛口ワイン",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Vegetable Juice",
+    "nameJP": "野菜ジュース",
+    "category": "飲み物"
+  },
+  {
+    "nameEN": "Clams",
+    "nameJP": "アサリ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Sardines",
+    "nameJP": "イワシ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Shrimp",
+    "nameJP": "エビ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Shrimp Scampi",
+    "nameJP": "エビのスカンピ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Oysters",
+    "nameJP": "カキ (牡蠣)",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Crab",
+    "nameJP": "カニ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Calamari",
+    "nameJP": "カラマリ  (イカリング)",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Plaice",
+    "nameJP": "カレイ ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Gambas al Ajillo",
+    "nameJP": "ガンバス アル アヒーヨ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Gravlax",
+    "nameJP": "グラブラックス",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Grilled Clams",
+    "nameJP": "グリルアサリ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Grilled Squid",
+    "nameJP": "グリルイカ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Grilled Oysters",
+    "nameJP": "グリルカキ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Grilled Crab Legs",
+    "nameJP": "グリルカニ脚",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Grilled Salmon",
+    "nameJP": "グリルサーモン",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Grilled Tuna",
+    "nameJP": "グリルマグロ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Grilled Mussels",
+    "nameJP": "グリルムール貝",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Grilled Swordfish",
+    "nameJP": "グリルメカジキ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Grilled Lobster Tail",
+    "nameJP": "グリルロブスターテール",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Grilled Prawns",
+    "nameJP": "グリル海老",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Mackerel",
+    "nameJP": "サバ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Salmon",
+    "nameJP": "サーモン (鮭)",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Paella Seafood",
+    "nameJP": "シーフードパエリア",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Scampi and Chips",
+    "nameJP": "スキャンピアンドチップス",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Smoked Salmon",
+    "nameJP": "スモークサーモン",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Cod",
+    "nameJP": "タラ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Tilapia",
+    "nameJP": "ティラピア",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Dover sole",
+    "nameJP": "ドーバーソール",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Herring",
+    "nameJP": "ニシン",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Halibut",
+    "nameJP": "ハリバット",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Flounder",
+    "nameJP": "ヒラメ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Prawn Cocktail",
+    "nameJP": "プローンカクテル",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Pollo al Ajillo",
+    "nameJP": "ポジョ アル アヒーヨ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Trout",
+    "nameJP": "マス",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Champinones al Ajillo",
+    "nameJP": "マッシュルームのガーリック炒め",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Mussels",
+    "nameJP": "ムール貝",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Moules Mariniere",
+    "nameJP": "ムール貝のマリニエール",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Lobster",
+    "nameJP": "ロブスター",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Prawns",
+    "nameJP": "海老  (大)",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Tuna",
+    "nameJP": "缶詰ツナ",
+    "category": "魚介類"
+  },
+  {
+    "nameEN": "Risotto Mushroom",
+    "nameJP": "きのこリゾット",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Spinach and Ricotta Ravioli",
+    "nameJP": "ほうれん草リコッタラビオリ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Amatriciana",
+    "nameJP": "アマトリチャーナ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Alfredo",
+    "nameJP": "アルフレード",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Pasta Aglio E Olio",
+    "nameJP": "アーリオ オーリオ ペペロンチーノ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Vodka Sauce Pasta",
+    "nameJP": "ウォッカソースパスタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Angel Hair",
+    "nameJP": "エンジェルヘアパスタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Orzo",
+    "nameJP": "オルゾ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Orecchiette",
+    "nameJP": "オレキエッテ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Cacio E Pepe",
+    "nameJP": "カチョ エ ペペ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Pot Noodles",
+    "nameJP": "カップ麺",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Capellini",
+    "nameJP": "カペッリーニ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Carbonara",
+    "nameJP": "カルボナーラ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Creamy Pasta",
+    "nameJP": "クリームパスタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Pasta with Peas",
+    "nameJP": "グリンピースパスタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Seafood Pasta",
+    "nameJP": "シーフードパスタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Risotto Seafood",
+    "nameJP": "シーフードリゾット",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Spaghetti",
+    "nameJP": "スパゲッティ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Spaghetti and Meatballs",
+    "nameJP": "スパゲッティミートボール",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Spanakopita",
+    "nameJP": "スパナコピタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Tagliatelle",
+    "nameJP": "タリアテッレ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Cheese Ravioli",
+    "nameJP": "チーズラビオリ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Truffle Pasta",
+    "nameJP": "トリュフパスタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Tortellini",
+    "nameJP": "トルテリーニ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Trofie",
+    "nameJP": "トロフィエ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Gnocchi",
+    "nameJP": "ニョッキ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Butternut Squash Ravioli",
+    "nameJP": "バターナッツかぼちゃラビオリ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Baked Pasta",
+    "nameJP": "パスタグラタン",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Pappardelle",
+    "nameJP": "パッパルデッレ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Fettuccine",
+    "nameJP": "フェットゥッチーネ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Fettuccine Alfredo",
+    "nameJP": "フェットゥッチーネアルフレード",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Putanesca",
+    "nameJP": "プッタネスカ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Primavera",
+    "nameJP": "プリマヴェーラ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Lasagna Vegetarian",
+    "nameJP": "ベジタリアンラザニア",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Pesto Pasta",
+    "nameJP": "ペストパスタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Penne",
+    "nameJP": "ペンネ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Penne Arrabbiata",
+    "nameJP": "ペンネアラビアータ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Scallop Pasta",
+    "nameJP": "ホタテパスタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Bolognese",
+    "nameJP": "ボロネーゼ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Lasagna Bolognese",
+    "nameJP": "ボロネーゼラザニア",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Linguine with Clams",
+    "nameJP": "ボンゴレビアンコ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Polenta",
+    "nameJP": "ポレンタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Macaroni",
+    "nameJP": "マカロニ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Marinara Pasta",
+    "nameJP": "マリナーラパスタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Meat Ravioli",
+    "nameJP": "ミートラビオリ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Lasagna",
+    "nameJP": "ラザニア",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Ratatouille",
+    "nameJP": "ラタトゥイユ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Ravioli",
+    "nameJP": "ラビオリ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Ramen Noodles",
+    "nameJP": "ラーメン",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Rigatoni",
+    "nameJP": "リガトーニ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Risotto",
+    "nameJP": "リゾット",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Risotto Alla Milanese",
+    "nameJP": "リゾット アッラ ミラネーゼ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Linguine",
+    "nameJP": "リングイーネ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Lobster Pasta",
+    "nameJP": "ロブスターパスタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Whole Wheat Pasta",
+    "nameJP": "全粒粉パスタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Egg Noodles",
+    "nameJP": "卵麺",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Rice Noodles",
+    "nameJP": "米麺",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Stuffed Pasta",
+    "nameJP": "詰め物パスタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Light Pasta",
+    "nameJP": "軽めのパスタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Wild Mushroom Pasta",
+    "nameJP": "野生きのこパスタ",
+    "category": "麺類"
+  },
+  {
+    "nameEN": "Pasta with Vegetables",
+    "nameJP": "野菜パスタ",
+    "category": "麺類"
+  }
+]

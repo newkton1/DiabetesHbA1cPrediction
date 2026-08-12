@@ -11,6 +11,9 @@ import CoreData
 /// Sentinel value for the "Recent" pseudo-category
 private let recentCategoryKey = "__recent__"
 
+/// Top-level database selector shown in Japanese locale
+private enum DatabaseMode { case washoku, yoshoku }
+
 /// View for searching and selecting multiple food items
 struct MultiSelectFoodSearchView: View {
     @ObservedObject var mealBuilder: MealBuilder
@@ -24,6 +27,12 @@ struct MultiSelectFoodSearchView: View {
     @State private var selectedCategory: String? = nil
     @State private var recentMeals: [RecentMeal] = []
     @State private var showFoodDbError = false
+    @State private var databaseMode: DatabaseMode = .washoku
+
+    /// True when the app is running in the Japanese locale
+    private var isJapaneseLocale: Bool {
+        Locale.current.language.languageCode?.identifier == "ja"
+    }
 
     private var isPortrait: Bool {
         verticalSizeClass != .compact
@@ -68,9 +77,22 @@ struct MultiSelectFoodSearchView: View {
         categoryChipLabels[category] ?? category
     }
 
-    // Get unique categories sorted alphabetically by chip label
-    // "My Menu" and "日本食" are excluded here because they get their own pinned chips
+    // Category chips list — locale and mode aware.
+    // In Japanese locale, 洋食 mode returns the user-ordered 26 Japanese categories;
+    // 和食 mode returns [] because FoodDatabase_JP.json has no sub-categories.
+    // In non-Japanese locale, original English category list.
     private var categories: [String] {
+        if isJapaneseLocale {
+            switch databaseMode {
+            case .washoku:
+                let available = Set(foodDatabase.japaneseFoodItems.map { $0.category })
+                return foodDatabase.japaneseCategories.filter { available.contains($0) }
+            case .yoshoku:
+                let available = Set(foodDatabase.westernJapaneseFoodItems.map { $0.category })
+                return foodDatabase.westernJapaneseCategories.filter { available.contains($0) }
+            }
+        }
+        // Non-Japanese: original alphabetical chip list (My Menu and 日本食 get pinned chips)
         let allCategories = Set(foodDatabase.allFoods.map { $0.category })
         return allCategories
             .filter { $0 != "My Menu" && $0 != "日本食" }
@@ -83,16 +105,31 @@ struct MultiSelectFoodSearchView: View {
     }
 
 
-    // Filtered foods based on search and category
+    // Filtered foods based on locale, database mode, category selection, and search text
     private var filteredFoods: [FoodItem] {
-        var foods = foodDatabase.allFoods
+        var foods: [FoodItem]
+
+        if isJapaneseLocale {
+            switch databaseMode {
+            case .washoku:
+                // 和食: use japaneseFoodItems (original JP sub-categories) + My Menu
+                let myMenu = foodDatabase.allFoods.filter { $0.category == "My Menu" }
+                foods = foodDatabase.japaneseFoodItems + myMenu
+            case .yoshoku:
+                // 洋食: western items with Japanese names + My Menu
+                let myMenu = foodDatabase.allFoods.filter { $0.category == "My Menu" }
+                foods = foodDatabase.westernJapaneseFoodItems + myMenu
+            }
+        } else {
+            foods = foodDatabase.allFoods
+        }
 
         // Filter by category if selected (skip for the Recent pseudo-category)
         if let category = selectedCategory, category != recentCategoryKey {
             foods = foods.filter { $0.category == category }
         }
 
-        // Filter by search text (live in portrait, on-submit in landscape)
+        // Filter by search text — scoped to the active database
         if !activeSearchText.isEmpty {
             foods = foods.filter { food in
                 food.name.localizedCaseInsensitiveContains(activeSearchText) ||
@@ -103,11 +140,21 @@ struct MultiSelectFoodSearchView: View {
         return foods
     }
 
-    // Group foods by category for display
+    // Group foods by category; in 洋食 mode preserve the user-defined category order
     private var groupedFoods: [(category: String, foods: [FoodItem])] {
         let grouped = Dictionary(grouping: filteredFoods) { $0.category }
-        return grouped.map { (category: $0.key, foods: $0.value) }
-            .sorted { $0.category < $1.category }
+        let pairs = grouped.map { (category: $0.key, foods: $0.value) }
+        if isJapaneseLocale {
+            let order = databaseMode == .washoku
+                ? foodDatabase.japaneseCategories
+                : foodDatabase.westernJapaneseCategories
+            return pairs.sorted {
+                let i1 = order.firstIndex(of: $0.category) ?? Int.max
+                let i2 = order.firstIndex(of: $1.category) ?? Int.max
+                return i1 < i2
+            }
+        }
+        return pairs.sorted { $0.category < $1.category }
     }
 
     @FocusState private var isSearchFieldFocused: Bool
@@ -171,7 +218,9 @@ struct MultiSelectFoodSearchView: View {
                     categories: categories,
                     groupedFoods: groupedFoods,
                     recentMeals: recentMeals,
-                    hasMyMeals: hasMyMeals
+                    hasMyMeals: hasMyMeals,
+                    isJapaneseLocale: isJapaneseLocale,
+                    databaseMode: $databaseMode
                 )
             }
             .navigationTitle("")
@@ -180,6 +229,22 @@ struct MultiSelectFoodSearchView: View {
                 recentMeals = RecentMealsProvider.fetchRecentMeals(context: viewContext, limit: 30)
                 if FoodDatabase.shared.loadError != nil {
                     showFoodDbError = true
+                }
+                // In Japanese locale, pre-load the 和食 DB so it shows immediately
+                if isJapaneseLocale {
+                    FoodDatabase.shared.loadJapaneseDatabaseIfNeeded()
+                }
+            }
+            .onChange(of: databaseMode) { _, newMode in
+                // Reset search and category when the user switches databases
+                selectedCategory = nil
+                searchText = ""
+                committedSearchText = ""
+                switch newMode {
+                case .washoku:
+                    FoodDatabase.shared.loadJapaneseDatabaseIfNeeded()
+                case .yoshoku:
+                    FoodDatabase.shared.loadWesternJapaneseDatabaseIfNeeded()
                 }
             }
             .alert("Food Database Error", isPresented: $showFoodDbError) {
@@ -223,6 +288,8 @@ private struct FoodSearchContentDirect: View {
     let groupedFoods: [(category: String, foods: [FoodItem])]
     let recentMeals: [RecentMeal]
     let hasMyMeals: Bool
+    let isJapaneseLocale: Bool
+    @Binding var databaseMode: DatabaseMode
 
     @State private var showOnlineSearch = false
 
@@ -247,49 +314,94 @@ private struct FoodSearchContentDirect: View {
                         .padding(.vertical, 6)
                 }
 
-                // Category filter
+                // 和食 / 洋食 top-level selector — Japanese locale only
+                if isJapaneseLocale {
+                    HStack(spacing: 16) {
+                        DatabaseModePill(title: "和食", isSelected: databaseMode == .washoku) {
+                            databaseMode = .washoku
+                        }
+                        DatabaseModePill(title: "洋食", isSelected: databaseMode == .yoshoku) {
+                            databaseMode = .yoshoku
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, 6)
+                    .padding(.bottom, 2)
+                }
+
+                // Category chip row — content depends on locale and database mode
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
-                        CategoryFilterChip(
-                            title: "All",
-                            isSelected: selectedCategory == nil,
-                            action: { selectedCategory = nil }
-                        )
-
-                        // My Menu chip — always visible for discoverability
-                        CategoryFilterChip(
-                            title: "My Menu",
-                            isSelected: selectedCategory == "My Menu",
-                            action: { selectedCategory = "My Menu" }
-                        )
-
-                        // Japanese food database chip — loaded lazily on first tap
-                        if Bundle.main.url(forResource: "FoodDatabase_JP", withExtension: "json") != nil {
+                        if isJapaneseLocale {
+                            // "All" chip label changes with active database
                             CategoryFilterChip(
-                                title: "日本食",
-                                isSelected: selectedCategory == "日本食",
-                                action: {
-                                    FoodDatabase.shared.loadJapaneseDatabaseIfNeeded()
-                                    selectedCategory = "日本食"
-                                }
+                                title: LocalizedStringKey(databaseMode == .washoku ? "全和食" : "全洋食"),
+                                isSelected: selectedCategory == nil,
+                                action: { selectedCategory = nil }
                             )
-                        }
 
-                        // Recent meals chip — only show if there are saved meals
-                        if !recentMeals.isEmpty {
                             CategoryFilterChip(
-                                title: "Recent",
-                                isSelected: isRecentSelected,
-                                action: { selectedCategory = recentCategoryKey }
+                                title: "マイメニュー",
+                                isSelected: selectedCategory == "My Menu",
+                                action: { selectedCategory = "My Menu" }
                             )
-                        }
 
-                        ForEach(categories, id: \.self) { category in
+                            if !recentMeals.isEmpty {
+                                CategoryFilterChip(
+                                    title: "最近",
+                                    isSelected: isRecentSelected,
+                                    action: { selectedCategory = recentCategoryKey }
+                                )
+                            }
+
+                            // In 洋食 mode, show the 26 Japanese category chips
+                            ForEach(categories, id: \.self) { category in
+                                CategoryFilterChip(
+                                    title: LocalizedStringKey(category),
+                                    isSelected: selectedCategory == category,
+                                    action: { selectedCategory = category }
+                                )
+                            }
+                        } else {
+                            // Non-Japanese: original chip layout
                             CategoryFilterChip(
-                                title: LocalizedStringKey(MultiSelectFoodSearchView.chipLabel(for: category)),
-                                isSelected: selectedCategory == category,
-                                action: { selectedCategory = category }
+                                title: "All",
+                                isSelected: selectedCategory == nil,
+                                action: { selectedCategory = nil }
                             )
+
+                            CategoryFilterChip(
+                                title: "My Menu",
+                                isSelected: selectedCategory == "My Menu",
+                                action: { selectedCategory = "My Menu" }
+                            )
+
+                            if Bundle.main.url(forResource: "FoodDatabase_JP", withExtension: "json") != nil {
+                                CategoryFilterChip(
+                                    title: "日本食",
+                                    isSelected: selectedCategory == "日本食",
+                                    action: {
+                                        FoodDatabase.shared.loadJapaneseDatabaseIfNeeded()
+                                        selectedCategory = "日本食"
+                                    }
+                                )
+                            }
+
+                            if !recentMeals.isEmpty {
+                                CategoryFilterChip(
+                                    title: "Recent",
+                                    isSelected: isRecentSelected,
+                                    action: { selectedCategory = recentCategoryKey }
+                                )
+                            }
+
+                            ForEach(categories, id: \.self) { category in
+                                CategoryFilterChip(
+                                    title: LocalizedStringKey(MultiSelectFoodSearchView.chipLabel(for: category)),
+                                    isSelected: selectedCategory == category,
+                                    action: { selectedCategory = category }
+                                )
+                            }
                         }
                     }
                     .padding(.horizontal)
@@ -678,6 +790,26 @@ enum ServingFormatter {
         }
         // Fallback for unexpected values
         return String(format: "%.2gx", quantity)
+    }
+}
+
+/// Large pill for switching between 和食 and 洋食 databases (Japanese locale only)
+private struct DatabaseModePill: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.headline)
+                .fontWeight(isSelected ? .bold : .medium)
+                .padding(.horizontal, 32)
+                .padding(.vertical, 10)
+                .background(isSelected ? Color.blue : Color(.systemGray5))
+                .foregroundColor(isSelected ? .white : .primary)
+                .cornerRadius(22)
+        }
     }
 }
 

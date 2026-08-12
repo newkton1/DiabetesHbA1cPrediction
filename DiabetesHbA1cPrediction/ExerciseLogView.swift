@@ -326,7 +326,7 @@ struct ExerciseLogView: View {
             }
 
             // Sync formal workout records from HealthKit to CoreData
-            let exerciseCount = await healthKitManager.syncExerciseToCorData(context: moc, days: 30)
+            let exerciseResult = await healthKitManager.syncExerciseToCorData(context: moc, days: 30)
 
             // Sync daily walking/step activity (ambient data from casual walking)
             let activityResult = await healthKitManager.syncDailyActivityToCorData(context: moc, days: 30)
@@ -336,14 +336,21 @@ struct ExerciseLogView: View {
 
             // Build a descriptive sync message
             var messageParts: [String] = []
-            if exerciseCount > 0 {
-                messageParts.append("\(exerciseCount) new workout\(exerciseCount == 1 ? "" : "s")")
+            if exerciseResult.count > 0 {
+                // Group imported types (e.g. "2 Cycling, 1 Running") for a clear message
+                let typeCounts = Dictionary(exerciseResult.types.map { ($0, 1) }, uniquingKeysWith: +)
+                let typeSummary = typeCounts
+                    .sorted { $0.key < $1.key }
+                    .map { "\($0.value) \($0.key)" }
+                    .joined(separator: ", ")
+                let workoutWord = exerciseResult.count == 1 ? "workout" : "workouts"
+                messageParts.append("\(exerciseResult.count) new \(workoutWord) (\(typeSummary))")
             }
             if activityResult.new > 0 {
-                messageParts.append("\(activityResult.new) day\(activityResult.new == 1 ? "" : "s") of walking activity")
+                messageParts.append("\(activityResult.new) day\(activityResult.new == 1 ? "" : "s") of ambient walking activity")
             }
             if activityResult.updated > 0 {
-                messageParts.append("\(activityResult.updated) day\(activityResult.updated == 1 ? "" : "s") of walking updated")
+                messageParts.append("\(activityResult.updated) day\(activityResult.updated == 1 ? "" : "s") of ambient walking updated")
             }
             if glucoseResult.newImported > 0 {
                 messageParts.append("\(glucoseResult.newImported) new glucose reading\(glucoseResult.newImported == 1 ? "" : "s")")

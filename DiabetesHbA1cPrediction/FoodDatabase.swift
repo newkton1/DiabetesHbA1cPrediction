@@ -58,6 +58,16 @@ struct FoodItem: Identifiable, Equatable, Codable {
     }
 }
 
+/// Decodable entry from FoodDatabase_Western_JP.json.
+/// Contains only the English name (for nutritional data lookup), the Japanese
+/// display name, and the Japanese category. Nutritional values are joined at
+/// load time from the original FoodDatabase.json entries.
+private struct WesternJPEntry: Decodable {
+    let nameEN: String
+    let nameJP: String
+    let category: String
+}
+
 /// Singleton class that manages the comprehensive food database
 /// Provides methods to search and filter foods by various criteria
 class FoodDatabase {
@@ -83,6 +93,52 @@ class FoodDatabase {
 
     /// Whether the Japanese database has been loaded into allFoods yet
     private var japaneseDatabaseLoaded = false
+
+    /// Japanese food items with their original sub-categories preserved (mapped to Japanese labels).
+    /// Populated alongside allFoods in loadJapaneseDatabaseIfNeeded().
+    /// Used in 和食 mode to provide sub-category chip filtering.
+    private(set) var japaneseFoodItems: [FoodItem] = []
+
+    /// Ordered category list for 和食 chip row.
+    let japaneseCategories: [String] = [
+        "米/穀類", "野菜", "果物", "肉類", "魚介類", "豆類",
+        "乳製品", "和食・アジア", "惣菜", "飲み物", "調味料",
+        "お菓子", "ナッツ類", "冷凍・調理品"
+    ]
+
+    /// Maps the English category names from FoodDatabase_JP.json to Japanese display labels.
+    static func jpCategoryLabel(for englishCategory: String) -> String {
+        switch englishCategory {
+        case "Asian & Japanese":       return "和食・アジア"
+        case "Beverages":              return "飲み物"
+        case "Dairy":                  return "乳製品"
+        case "Fish & Seafood":         return "魚介類"
+        case "Flavorings":             return "調味料"
+        case "Frozen & Prepared Meals": return "冷凍・調理品"
+        case "Fruits":                 return "果物"
+        case "Grains & Cereals":       return "米/穀類"
+        case "Legumes & Beans":        return "豆類"
+        case "Meat & Poultry":         return "肉類"
+        case "Nuts & Seeds":           return "ナッツ類"
+        case "Side Dishes":            return "惣菜"
+        case "Snacks & Sweets":        return "お菓子"
+        case "Vegetables":             return "野菜"
+        default:                       return englishCategory
+        }
+    }
+
+    /// Western foods with Japanese display names and categories.
+    /// Populated lazily by loadWesternJapaneseDatabaseIfNeeded().
+    private(set) var westernJapaneseFoodItems: [FoodItem] = []
+    private var westernJapaneseDatabaseLoaded = false
+
+    /// Ordered category list for 洋食 chip row (user-defined display order).
+    let westernJapaneseCategories: [String] = [
+        "米/穀類", "朝ご飯", "果物", "野菜", "乳製品", "惣菜",
+        "肉", "魚介類", "豆類", "ナッツ類", "飲み物", "お菓子",
+        "調味料", "軽食", "オーブン", "パン類", "麺類", "スープ",
+        "シチュー", "和食", "アジア", "行事食", "サラダ", "サンド", "バーガー"
+    ]
 
     /// Private initializer ensures only one instance of FoodDatabase exists
     private init() {
@@ -116,6 +172,8 @@ class FoodDatabase {
         do {
             let data = try Data(contentsOf: url)
             let raw = try JSONDecoder().decode([FoodItem].self, from: data)
+
+            // allFoods gets items tagged "日本食" for backward-compat with the non-JP locale chip
             let tagged = raw.map { item in
                 FoodItem(
                     name: item.name,
@@ -131,9 +189,69 @@ class FoodDatabase {
                 )
             }
             allFoods.append(contentsOf: tagged)
+
+            // japaneseFoodItems preserves the original category, mapped to Japanese labels,
+            // so the 和食 mode chip row can show meaningful sub-categories.
+            japaneseFoodItems = raw.map { item in
+                FoodItem(
+                    name: item.name,
+                    category: FoodDatabase.jpCategoryLabel(for: item.category),
+                    servingSize: item.servingSize,
+                    servingUnit: item.servingUnit,
+                    calories: item.calories,
+                    carbohydrates: item.carbohydrates,
+                    protein: item.protein,
+                    fat: item.fat,
+                    fiber: item.fiber,
+                    glycemicIndex: item.glycemicIndex
+                )
+            }
             japaneseDatabaseLoaded = true
         } catch {
             print("FoodDatabase: Could not load Japanese database — \(error.localizedDescription)")
+        }
+    }
+
+    /// Loads the western-foods-in-Japanese database (FoodDatabase_Western_JP.json) on first demand.
+    /// Each entry's nutritional data is joined from the matching English-named item already in
+    /// allFoods, so both JSON files must be present in the app bundle.
+    func loadWesternJapaneseDatabaseIfNeeded() {
+        guard !westernJapaneseDatabaseLoaded else { return }
+        guard let url = Bundle.main.url(forResource: "FoodDatabase_Western_JP", withExtension: "json") else {
+            print("FoodDatabase: FoodDatabase_Western_JP.json not found in bundle")
+            return
+        }
+        do {
+            let data = try Data(contentsOf: url)
+            let entries = try JSONDecoder().decode([WesternJPEntry].self, from: data)
+
+            // Build a fast lookup from English food name → FoodItem (western DB only)
+            let lookup: [String: FoodItem] = Dictionary(
+                allFoods
+                    .filter { $0.category != "日本食" && $0.category != "My Menu" }
+                    .map { ($0.name, $0) },
+                uniquingKeysWith: { first, _ in first }
+            )
+
+            westernJapaneseFoodItems = entries.compactMap { entry in
+                guard let original = lookup[entry.nameEN] else { return nil }
+                return FoodItem(
+                    name: entry.nameJP,
+                    category: entry.category,
+                    servingSize: original.servingSize,
+                    servingUnit: original.servingUnit,
+                    calories: original.calories,
+                    carbohydrates: original.carbohydrates,
+                    protein: original.protein,
+                    fat: original.fat,
+                    fiber: original.fiber,
+                    glycemicIndex: original.glycemicIndex
+                )
+            }
+            westernJapaneseDatabaseLoaded = true
+            print("FoodDatabase: Loaded \(westernJapaneseFoodItems.count) 洋食 items")
+        } catch {
+            print("FoodDatabase: Could not load western Japanese database — \(error.localizedDescription)")
         }
     }
 
