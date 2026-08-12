@@ -3,15 +3,36 @@ import Charts
 import CoreData
 
 /// Returns a display-friendly source name, shortening long labels for the UI
-/// while keeping the stored Core Data value unchanged
+/// while keeping the stored Core Data value unchanged.
+/// Uses String(localized:) rather than a bare literal so the result is
+/// looked up in the String Catalog for the active language.
 private func sourceDisplayName(_ source: String) -> String {
     switch source {
     case "Manual Finger Stick":
-        return "Finger\nStick"
+        return String(localized: "Finger\nStick")
     case "Continuous Glucose Monitor":
-        return "CGM"
+        return String(localized: "CGM")
     default:
         return source
+    }
+}
+
+/// Returns a display-friendly, localized trend name for the raw trend value
+/// stored in Core Data (e.g. "rising rapidly" -> "Rising Rapidly" / 「急上昇」).
+private func trendDisplayName(_ trend: String) -> String {
+    switch trend {
+    case "stable":
+        return String(localized: "Stable")
+    case "rising":
+        return String(localized: "Rising")
+    case "falling":
+        return String(localized: "Falling")
+    case "rising rapidly":
+        return String(localized: "Rising Rapidly")
+    case "falling rapidly":
+        return String(localized: "Falling Rapidly")
+    default:
+        return trend.capitalized
     }
 }
 
@@ -1771,7 +1792,10 @@ struct AddGlucoseReadingSheet: View {
                                 if type == .hba1c {
                                     Text("HbA1c ") + Text("Lab").foregroundColor(.red) + Text(" Result")
                                 } else {
-                                    Text(type.rawValue)
+                                    // type.rawValue is a runtime String, so it must be wrapped in
+                                    // LocalizedStringKey explicitly to pick up the String Catalog
+                                    // translation — Text(String) alone renders verbatim, un-localized.
+                                    Text(LocalizedStringKey(type.rawValue))
                                 }
                             }
                             .font(.footnote.weight(selectedEntryType == type ? .semibold : .regular))
@@ -1857,7 +1881,7 @@ struct AddGlucoseReadingSheet: View {
             Section("Trend") {
                 Picker("Trend", selection: $selectedTrend) {
                     ForEach(trendOptions, id: \.self) { trend in
-                        Text(trend.capitalized).tag(trend)
+                        Text(trendDisplayName(trend)).tag(trend)
                     }
                 }
             }
