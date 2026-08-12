@@ -186,56 +186,62 @@ final class ColdStartManager: ObservableObject {
     // MARK: - Refresh from Core Data
 
     /// Call this from views (e.g. onAppear) to refresh counts from Core Data.
+    ///
+    /// `context` is kept as a parameter for source compatibility with
+    /// existing call sites, but all the actual Core Data reads now happen
+    /// off the main thread — see `refreshAllCountsInBackground()`.
+    ///
+    /// Previously `countEntity`/`countLoggedMeals`/`hasHealthKitGlucose`/
+    /// `hasHealthKitExercise` ran synchronously here, each issuing its own
+    /// `context.count(for:)` call on the main thread. Individually these
+    /// looked cheap, but once `countPostMealGlucose` and
+    /// `countDistinctGlucoseDays` (the two biggest offenders) were already
+    /// moved to a background context, Instruments Time Profiler showed
+    /// these four — 300-500ms each on real data volumes — as the next
+    /// layer of main-thread cost on every `DashboardView.onAppear`. Same
+    /// fix as before: do the reads off the main thread, publish once.
     func refresh(context: NSManagedObjectContext) {
-        // Count distinct days with glucose readings
-        glucoseDaysLogged = countDistinctGlucoseDays(in: context)
-
-        // Count total glucose readings
-        glucoseReadingCount = countEntity("GlucoseReadingEntity", in: context)
-
-        // Count meals (excluding planned)
-        mealCount = countLoggedMeals(in: context)
-
-        // Count exercise sessions
-        exerciseCount = countEntity("ExerciseSessionEntity", in: context)
-
-        // Detect HealthKit data sources
-        glucoseFromHealthKit = hasHealthKitGlucose(in: context)
-        exerciseFromHealthKit = hasHealthKitExercise(in: context)
-
-        // Auto-set first-time milestones based on data
-        if glucoseReadingCount > 0 && !hasLoggedFirstGlucose {
-            hasLoggedFirstGlucose = true
-        }
-        if mealCount > 0 && !hasLoggedFirstMeal {
-            hasLoggedFirstMeal = true
-        }
-        if exerciseCount > 0 && !hasLoggedExercise {
-            hasLoggedExercise = true
-        }
-
-        // Post-meal glucose count used to be computed synchronously here via
-        // an O(meals × readings) nested loop, which caused multi-second
-        // main-thread hangs once enough data accumulated (confirmed via
-        // Instruments Time Profiler — see countPostMealGlucose below). It's
-        // now computed off the main thread on a background context; the
-        // published properties are updated once the result is ready.
-        refreshPostMealGlucoseCount()
+        refreshAllCountsInBackground()
     }
 
-    /// Recomputes `postMealGlucoseCount` on a background Core Data context
-    /// so the scan never runs on the main thread, then publishes the result
-    /// (and the derived `hasLoggedPostMealGlucose` milestone) back on the
-    /// main thread. Uses the shared persistent container directly rather
-    /// than the passed-in `context`, since the scan needs its own private
-    /// background context, not the caller's (typically main-thread) one.
-    private func refreshPostMealGlucoseCount() {
+    /// Recomputes every cold-start count together on a single background
+    /// Core Data context so none of it runs on the main thread, then
+    /// publishes all results (and their derived milestones) back on the
+    /// main thread in one hop. Uses the shared persistent container
+    /// directly rather than a passed-in context, since this needs its own
+    /// private background context, not the caller's (typically
+    /// main-thread) one.
+    private func refreshAllCountsInBackground() {
         PersistenceController.shared.container.performBackgroundTask { [weak self] bgContext in
-            let count = Self.countPostMealGlucose(in: bgContext)
+            let glucoseCount = Self.countEntity("GlucoseReadingEntity", in: bgContext)
+            let loggedMeals = Self.countLoggedMeals(in: bgContext)
+            let exerciseCount = Self.countEntity("ExerciseSessionEntity", in: bgContext)
+            let glucoseHK = Self.hasHealthKitGlucose(in: bgContext)
+            let exerciseHK = Self.hasHealthKitExercise(in: bgContext)
+            let daysLogged = Self.countDistinctGlucoseDays(in: bgContext)
+            let postMealCount = Self.countPostMealGlucose(in: bgContext)
+
             DispatchQueue.main.async {
                 guard let self = self else { return }
-                self.postMealGlucoseCount = count
-                if !self.hasLoggedPostMealGlucose && count > 0 {
+                self.glucoseReadingCount = glucoseCount
+                self.mealCount = loggedMeals
+                self.exerciseCount = exerciseCount
+                self.glucoseFromHealthKit = glucoseHK
+                self.exerciseFromHealthKit = exerciseHK
+                self.glucoseDaysLogged = daysLogged
+                self.postMealGlucoseCount = postMealCount
+
+                // Auto-set first-time milestones based on the fresh counts.
+                if self.glucoseReadingCount > 0 && !self.hasLoggedFirstGlucose {
+                    self.hasLoggedFirstGlucose = true
+                }
+                if self.mealCount > 0 && !self.hasLoggedFirstMeal {
+                    self.hasLoggedFirstMeal = true
+                }
+                if self.exerciseCount > 0 && !self.hasLoggedExercise {
+                    self.hasLoggedExercise = true
+                }
+                if !self.hasLoggedPostMealGlucose && postMealCount > 0 {
                     self.hasLoggedPostMealGlucose = true
                 }
             }
@@ -278,42 +284,52 @@ final class ColdStartManager: ObservableObject {
 
     // MARK: - Private Helpers
 
-    private func countEntity(_ name: String, in context: NSManagedObjectContext) -> Int {
+    private nonisolated static func countEntity(_ name: String, in context: NSManagedObjectContext) -> Int {
         let request = NSFetchRequest<NSManagedObject>(entityName: name)
         return (try? context.count(for: request)) ?? 0
     }
 
-    private func countLoggedMeals(in context: NSManagedObjectContext) -> Int {
+    private nonisolated static func countLoggedMeals(in context: NSManagedObjectContext) -> Int {
         let request = NSFetchRequest<NSManagedObject>(entityName: "MealEntity")
         request.predicate = NSPredicate(format: "mealType != %@", "plannedMeal")
         return (try? context.count(for: request)) ?? 0
     }
 
-    private func countDistinctGlucoseDays(in context: NSManagedObjectContext) -> Int {
-        let request = NSFetchRequest<NSDictionary>(entityName: "GlucoseReadingEntity")
-        request.resultType = .dictionaryResultType
-
-        let timestampDesc = NSExpressionDescription()
-        timestampDesc.name = "dayDate"
-        timestampDesc.expression = NSExpression(forFunction: "trunc:",
-                                                 arguments: [NSExpression(forKeyPath: "timestamp")])
-        timestampDesc.expressionResultType = .dateAttributeType
-
-        // Simpler approach: fetch all timestamps and count unique days in Swift
-        let tsRequest = NSFetchRequest<GlucoseReadingEntity>(entityName: "GlucoseReadingEntity")
-        tsRequest.propertiesToFetch = ["timestamp"]
-        guard let readings = try? context.fetch(tsRequest) else { return 0 }
+    /// Count of distinct calendar days (in the user's current calendar and
+    /// timezone) on which at least one glucose reading exists.
+    ///
+    /// Previously this fetched every reading's timestamp and called
+    /// `Calendar.dateComponents([.year, .month, .day], from:)` on each one
+    /// to build a `Set<DateComponents>`. `dateComponents` does real
+    /// Gregorian/ICU timezone work per call — individually cheap, but it
+    /// adds up to several seconds across thousands of readings, and this
+    /// ran synchronously on the main thread every time `refresh(context:)`
+    /// was called. Confirmed via Instruments Time Profiler as the
+    /// next-heaviest main-thread cost once `countPostMealGlucose` was fixed.
+    ///
+    /// `Calendar.ordinality(of: .day, in: .era, for:)` identifies the same
+    /// "which calendar day is this" bucket — still timezone/calendar-aware,
+    /// so day boundaries stay correct — but returns a plain `Int`, which is
+    /// far cheaper to compute and to hash/compare in a `Set` than a
+    /// `DateComponents` struct. `nonisolated` for the same reason as
+    /// `countPostMealGlucose` below: this project builds with
+    /// `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, and this now runs
+    /// inside `performBackgroundTask`'s closure, off the Main Actor.
+    private nonisolated static func countDistinctGlucoseDays(in context: NSManagedObjectContext) -> Int {
+        let request = NSFetchRequest<GlucoseReadingEntity>(entityName: "GlucoseReadingEntity")
+        request.propertiesToFetch = ["timestamp"]
+        guard let readings = try? context.fetch(request) else { return 0 }
 
         let calendar = Calendar.current
-        let uniqueDays = Set(readings.compactMap { reading -> DateComponents? in
+        let uniqueDays = Set(readings.compactMap { reading -> Int? in
             guard let ts = reading.timestamp else { return nil }
-            return calendar.dateComponents([.year, .month, .day], from: ts)
+            return calendar.ordinality(of: .day, in: .era, for: ts)
         })
         return uniqueDays.count
     }
 
     /// Whether any glucose readings came from HealthKit (CGM or similar).
-    private func hasHealthKitGlucose(in context: NSManagedObjectContext) -> Bool {
+    private nonisolated static func hasHealthKitGlucose(in context: NSManagedObjectContext) -> Bool {
         let request = NSFetchRequest<NSManagedObject>(entityName: "GlucoseReadingEntity")
         request.predicate = NSPredicate(format: "source == %@", "HealthKit")
         request.fetchLimit = 1
@@ -322,7 +338,10 @@ final class ColdStartManager: ObservableObject {
 
     /// Whether any exercise sessions came from HealthKit (Apple Watch, etc.).
     /// HealthKit-synced workouts have "HealthKit UUID:" in their notes field.
-    private func hasHealthKitExercise(in context: NSManagedObjectContext) -> Bool {
+    /// NOTE: `notes CONTAINS %@` can't use an index (substring match), so
+    /// this is a full-table scan — one more reason this belongs off the
+    /// main thread rather than in `refresh(context:)` directly.
+    private nonisolated static func hasHealthKitExercise(in context: NSManagedObjectContext) -> Bool {
         let request = NSFetchRequest<NSManagedObject>(entityName: "ExerciseSessionEntity")
         request.predicate = NSPredicate(format: "notes CONTAINS %@", "HealthKit UUID:")
         request.fetchLimit = 1
@@ -349,7 +368,15 @@ final class ColdStartManager: ObservableObject {
     /// roughly O((meals + readings) log(meals + readings)) instead of
     /// O(meals × readings), and callers now run it on a background context
     /// (see `refreshPostMealGlucoseCount`) rather than the main thread.
-    private static func countPostMealGlucose(in context: NSManagedObjectContext) -> Int {
+    /// Marked `nonisolated` because this project builds with
+    /// `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, which would otherwise
+    /// implicitly isolate this `static func` to the Main Actor — defeating
+    /// the whole point of running it inside `performBackgroundTask`'s
+    /// closure, which executes on Core Data's private background queue, not
+    /// the Main Actor. This function only ever touches the background
+    /// `context` passed in and no actor-isolated state, so it's safe to opt
+    /// out of Main Actor isolation entirely.
+    private nonisolated static func countPostMealGlucose(in context: NSManagedObjectContext) -> Int {
         let mealRequest = NSFetchRequest<NSDictionary>(entityName: "MealEntity")
         mealRequest.predicate = NSPredicate(format: "mealType != %@", "plannedMeal")
         mealRequest.resultType = .dictionaryResultType
