@@ -203,9 +203,6 @@ final class ColdStartManager: ObservableObject {
         glucoseFromHealthKit = hasHealthKitGlucose(in: context)
         exerciseFromHealthKit = hasHealthKitExercise(in: context)
 
-        // Count post-meal glucose readings
-        postMealGlucoseCount = countPostMealGlucose(in: context)
-
         // Auto-set first-time milestones based on data
         if glucoseReadingCount > 0 && !hasLoggedFirstGlucose {
             hasLoggedFirstGlucose = true
@@ -217,9 +214,31 @@ final class ColdStartManager: ObservableObject {
             hasLoggedExercise = true
         }
 
-        // Check for post-meal glucose
-        if !hasLoggedPostMealGlucose && postMealGlucoseCount > 0 {
-            hasLoggedPostMealGlucose = true
+        // Post-meal glucose count used to be computed synchronously here via
+        // an O(meals × readings) nested loop, which caused multi-second
+        // main-thread hangs once enough data accumulated (confirmed via
+        // Instruments Time Profiler — see countPostMealGlucose below). It's
+        // now computed off the main thread on a background context; the
+        // published properties are updated once the result is ready.
+        refreshPostMealGlucoseCount()
+    }
+
+    /// Recomputes `postMealGlucoseCount` on a background Core Data context
+    /// so the scan never runs on the main thread, then publishes the result
+    /// (and the derived `hasLoggedPostMealGlucose` milestone) back on the
+    /// main thread. Uses the shared persistent container directly rather
+    /// than the passed-in `context`, since the scan needs its own private
+    /// background context, not the caller's (typically main-thread) one.
+    private func refreshPostMealGlucoseCount() {
+        PersistenceController.shared.container.performBackgroundTask { [weak self] bgContext in
+            let count = Self.countPostMealGlucose(in: bgContext)
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.postMealGlucoseCount = count
+                if !self.hasLoggedPostMealGlucose && count > 0 {
+                    self.hasLoggedPostMealGlucose = true
+                }
+            }
         }
     }
 
@@ -293,34 +312,6 @@ final class ColdStartManager: ObservableObject {
         return uniqueDays.count
     }
 
-    private func checkPostMealGlucose(in context: NSManagedObjectContext) -> Bool {
-        // Get all meal timestamps
-        let mealRequest = NSFetchRequest<MealEntity>(entityName: "MealEntity")
-        mealRequest.predicate = NSPredicate(format: "mealType != %@", "plannedMeal")
-        guard let meals = try? context.fetch(mealRequest),
-              !meals.isEmpty else { return false }
-
-        // Get all glucose timestamps
-        let glucoseRequest = NSFetchRequest<GlucoseReadingEntity>(entityName: "GlucoseReadingEntity")
-        guard let readings = try? context.fetch(glucoseRequest),
-              !readings.isEmpty else { return false }
-
-        // Check if any glucose reading falls 1-3 hours after any meal
-        for meal in meals {
-            guard let mealTime = meal.timestamp else { continue }
-            let windowStart = mealTime.addingTimeInterval(60 * 60)      // 1 hour after
-            let windowEnd = mealTime.addingTimeInterval(3 * 60 * 60)    // 3 hours after
-
-            for reading in readings {
-                guard let readingTime = reading.timestamp else { continue }
-                if readingTime >= windowStart && readingTime <= windowEnd {
-                    return true
-                }
-            }
-        }
-        return false
-    }
-
     /// Whether any glucose readings came from HealthKit (CGM or similar).
     private func hasHealthKitGlucose(in context: NSManagedObjectContext) -> Bool {
         let request = NSFetchRequest<NSManagedObject>(entityName: "GlucoseReadingEntity")
@@ -338,29 +329,72 @@ final class ColdStartManager: ObservableObject {
         return ((try? context.count(for: request)) ?? 0) > 0
     }
 
-    /// Count glucose readings that fall 1–3 hours after any logged meal.
-    private func countPostMealGlucose(in context: NSManagedObjectContext) -> Int {
-        let mealRequest = NSFetchRequest<MealEntity>(entityName: "MealEntity")
+    /// Count of distinct glucose readings that fall 1–3 hours after any
+    /// logged meal.
+    ///
+    /// Previously this fetched every `MealEntity` and every
+    /// `GlucoseReadingEntity` and ran a full nested loop (every meal ×
+    /// every reading) synchronously on the caller's context — an
+    /// O(meals × readings) scan that, on real device data volumes, took
+    /// long enough to trip Instruments' Hang detector and eventually block
+    /// the main thread for 20+ seconds (confirmed via Time Profiler).
+    ///
+    /// This version fetches only timestamps (no full object materialisation),
+    /// sorts both lists once, merges each meal's 1–3 hour window into a
+    /// minimal set of non-overlapping intervals (meals are already sorted
+    /// ascending, so this is a single pass), then sweeps the sorted readings
+    /// once against those merged intervals. Every reading is still counted
+    /// at most once even if it falls inside more than one meal's window,
+    /// matching the original `Set`-based dedup — but the whole thing runs in
+    /// roughly O((meals + readings) log(meals + readings)) instead of
+    /// O(meals × readings), and callers now run it on a background context
+    /// (see `refreshPostMealGlucoseCount`) rather than the main thread.
+    private static func countPostMealGlucose(in context: NSManagedObjectContext) -> Int {
+        let mealRequest = NSFetchRequest<NSDictionary>(entityName: "MealEntity")
         mealRequest.predicate = NSPredicate(format: "mealType != %@", "plannedMeal")
-        guard let meals = try? context.fetch(mealRequest),
-              !meals.isEmpty else { return 0 }
+        mealRequest.resultType = .dictionaryResultType
+        mealRequest.propertiesToFetch = ["timestamp"]
+        mealRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
 
-        let glucoseRequest = NSFetchRequest<GlucoseReadingEntity>(entityName: "GlucoseReadingEntity")
-        guard let readings = try? context.fetch(glucoseRequest),
-              !readings.isEmpty else { return 0 }
+        let readingRequest = NSFetchRequest<NSDictionary>(entityName: "GlucoseReadingEntity")
+        readingRequest.resultType = .dictionaryResultType
+        readingRequest.propertiesToFetch = ["timestamp"]
+        readingRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
 
-        var matchedReadings = Set<NSManagedObjectID>()
-        for meal in meals {
-            guard let mealTime = meal.timestamp else { continue }
-            let windowStart = mealTime.addingTimeInterval(60 * 60)
-            let windowEnd = mealTime.addingTimeInterval(3 * 60 * 60)
-            for reading in readings {
-                guard let readingTime = reading.timestamp else { continue }
-                if readingTime >= windowStart && readingTime <= windowEnd {
-                    matchedReadings.insert(reading.objectID)
-                }
+        guard let mealDicts = try? context.fetch(mealRequest), !mealDicts.isEmpty,
+              let readingDicts = try? context.fetch(readingRequest), !readingDicts.isEmpty else {
+            return 0
+        }
+
+        let mealTimes = mealDicts.compactMap { $0["timestamp"] as? Date }
+        let readingTimes = readingDicts.compactMap { $0["timestamp"] as? Date }
+        guard !mealTimes.isEmpty, !readingTimes.isEmpty else { return 0 }
+
+        // Merge each meal's post-meal window into non-overlapping intervals.
+        var mergedWindows: [(start: Date, end: Date)] = []
+        for mealTime in mealTimes {
+            let windowStart = mealTime.addingTimeInterval(60 * 60)      // 1 hour after
+            let windowEnd = mealTime.addingTimeInterval(3 * 60 * 60)    // 3 hours after
+            if let last = mergedWindows.last, windowStart <= last.end {
+                mergedWindows[mergedWindows.count - 1].end = max(last.end, windowEnd)
+            } else {
+                mergedWindows.append((start: windowStart, end: windowEnd))
             }
         }
-        return matchedReadings.count
+
+        // Single forward sweep over the sorted readings against the merged,
+        // non-overlapping windows — each reading is visited at most once.
+        var matchCount = 0
+        var readingIndex = 0
+        for window in mergedWindows {
+            while readingIndex < readingTimes.count && readingTimes[readingIndex] < window.start {
+                readingIndex += 1
+            }
+            while readingIndex < readingTimes.count && readingTimes[readingIndex] <= window.end {
+                matchCount += 1
+                readingIndex += 1
+            }
+        }
+        return matchCount
     }
 }
