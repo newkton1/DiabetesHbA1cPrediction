@@ -23,9 +23,22 @@ struct DashboardView: View {
     // MARK: - Fetch Requests
 
     /// Fetch glucose readings — used by GMI card and stale data detection.
+    ///
+    /// Bounded to the last ~100 days: the widest window anything in this view
+    /// actually reads is the 90-day lab HbA1c lookback in `GMICardView`
+    /// (`labWindowDays`), with a small margin. Previously unbounded — on a
+    /// demo/CGM dataset spanning many months this meant every downstream
+    /// filter (`isActiveCGMUser`, `gmi`, `labResults`, the `Array(...)` copy
+    /// passed to `GMICardView`) re-scanned the *entire* reading history,
+    /// synchronously, on the main thread, every time this view rendered.
+    /// Bounding the fetch itself shrinks N for all of them at once.
     @FetchRequest(
         entity: GlucoseReadingEntity.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \GlucoseReadingEntity.timestamp, ascending: false)]
+        sortDescriptors: [NSSortDescriptor(keyPath: \GlucoseReadingEntity.timestamp, ascending: false)],
+        predicate: NSPredicate(
+            format: "timestamp >= %@",
+            Calendar.current.date(byAdding: .day, value: -100, to: Date())! as NSDate
+        )
     ) private var glucoseReadings: FetchedResults<GlucoseReadingEntity>
 
     /// Fetch meals logged today to show count in quick stats.
@@ -46,6 +59,25 @@ struct DashboardView: View {
 
     // MARK: - State
     @State private var showLastMealSheet = false
+
+    // MARK: - Cached derived state
+    //
+    // `isActiveCGMUser`, `mealsLoggedToday()`, and the `Array(glucoseReadings)`
+    // copy passed to GMICardView all used to be recomputed live, every single
+    // time `body` evaluated. Found via Instruments (Time Profiler) showing
+    // ~5-6s combined main-thread cost attributed to these on a single launch.
+    // Now computed once, in `refreshCachedDerivedState()`, and reused here.
+    @State private var cachedIsActiveCGMUser = false
+    @State private var cachedGlucoseReadingsArray: [GlucoseReadingEntity] = []
+    @State private var cachedMealsLoggedToday = 0
+
+    /// Recomputes all of the above. Called from `.onAppear` and whenever the
+    /// underlying fetched results actually change — not on every render.
+    private func refreshCachedDerivedState() {
+        cachedGlucoseReadingsArray = Array(glucoseReadings)
+        cachedIsActiveCGMUser = computeIsActiveCGMUser()
+        cachedMealsLoggedToday = computeMealsLoggedToday()
+    }
 
     /// CGM dropout warning toast — true while the sliding toast is visible
     @State private var showCGMDropoutToast = false
@@ -78,7 +110,7 @@ struct DashboardView: View {
     ///
     /// A 14-day recency window matches the GMI calculation window so the flag
     /// naturally expires when a user switches back to finger sticks.
-    private var isActiveCGMUser: Bool {
+    private func computeIsActiveCGMUser() -> Bool {
         let cutoff = Calendar.current.date(byAdding: .day, value: -14, to: Date()) ?? Date()
         let timestamps = glucoseReadings
             .filter { ($0.timestamp ?? .distantPast) >= cutoff }
@@ -110,7 +142,7 @@ struct DashboardView: View {
     /// The toast auto-dismisses after 3 seconds but repeats hourly until the
     /// user taps ✕ or readings resume.
     private func maybeTriggerCGMDropoutWarning() {
-        guard isActiveCGMUser, isGlucoseDataStale, !cgmDropoutWarningDismissed else { return }
+        guard cachedIsActiveCGMUser, isGlucoseDataStale, !cgmDropoutWarningDismissed else { return }
         let now = Date()
         if let lastShown = cgmDropoutLastShown {
             guard now.timeIntervalSince(lastShown) >= 3600 else { return }
@@ -174,7 +206,7 @@ struct DashboardView: View {
                         }
 
                         // Top section: GMI card (from glucose data), notices and disclaimer
-                        GMICardView(glucoseReadings: Array(glucoseReadings), onDawnEffectUpdated: { detected in
+                        GMICardView(glucoseReadings: cachedGlucoseReadingsArray, onDawnEffectUpdated: { detected in
                             dawnEffectDetected = detected
                         })
 
@@ -205,7 +237,7 @@ struct DashboardView: View {
                             .frame(maxWidth: .infinity)
 
                             QuickStatsView(
-                                mealsToday: mealsLoggedToday(),
+                                mealsToday: cachedMealsLoggedToday,
                                 exerciseMinutesWeek: exerciseMinutesThisWeek(),
                                 lastGlucoseReading: glucoseReadings.first
                             )
@@ -227,7 +259,7 @@ struct DashboardView: View {
                         }
 
                         // MARK: - GMI (Glucose Management Indicator) Card
-                        GMICardView(glucoseReadings: Array(glucoseReadings), onDawnEffectUpdated: { detected in
+                        GMICardView(glucoseReadings: cachedGlucoseReadingsArray, onDawnEffectUpdated: { detected in
                             dawnEffectDetected = detected
                         })
 
@@ -257,7 +289,7 @@ struct DashboardView: View {
 
                         // MARK: - Quick Stats Grid
                         QuickStatsView(
-                            mealsToday: mealsLoggedToday(),
+                            mealsToday: cachedMealsLoggedToday,
                             exerciseMinutesWeek: exerciseMinutesThisWeek(),
                             lastGlucoseReading: glucoseReadings.first
                         )
@@ -294,6 +326,9 @@ struct DashboardView: View {
                 }
             }
             .onAppear {
+                // Compute cached derived state before anything reads it below.
+                refreshCachedDerivedState()
+
                 // Check on every foreground appearance — catches the case where
                 // the app was backgrounded during a dropout and the timer never ticked
                 maybeTriggerCGMDropoutWarning()
@@ -301,6 +336,16 @@ struct DashboardView: View {
                 // Refresh cold-start milestone state
                 coldStart.refresh(context: viewContext)
                 isDemoData = DemoDataManager.isDemoDataLoaded
+            }
+            .onChange(of: glucoseReadings.count) { _, _ in
+                // FetchedResults<GlucoseReadingEntity> isn't Equatable, so we
+                // can't observe it directly with .onChange — watch .count
+                // instead (cheap Int comparison, covers additions/deletions,
+                // which is what actually invalidates the cached values below).
+                refreshCachedDerivedState()
+            }
+            .onChange(of: meals.count) { _, _ in
+                refreshCachedDerivedState()
             }
             .overlay(alignment: .top) {
                 if showCGMDropoutToast {
@@ -332,12 +377,16 @@ struct DashboardView: View {
 
     /// Calculate the number of meals logged today.
     /// - Returns: Count of meals with today's date.
-    private func mealsLoggedToday() -> Int {
+    private func computeMealsLoggedToday() -> Int {
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
+        // `ordinality(of:.day, in:.era, for:)` is a cheap integer comparison —
+        // avoids building a Date via `startOfDay(for:)` for every meal, which
+        // is the same per-item Calendar-call anti-pattern already fixed in
+        // ColdStartManager.countDistinctGlucoseDays.
+        let todayOrdinal = calendar.ordinality(of: .day, in: .era, for: Date())
         return meals.filter { meal in
             guard let mealDate = meal.timestamp else { return false }
-            return calendar.startOfDay(for: mealDate) == today
+            return calendar.ordinality(of: .day, in: .era, for: mealDate) == todayOrdinal
         }.count
     }
 
@@ -429,6 +478,20 @@ private struct GMICardView: View {
     @State private var recalcFlash = false
     @State private var showLabSheet = false
 
+    // Cached derived state — `gmi` and `labResults` used to be recomputed
+    // live on every `body` evaluation (each an O(n) filter/reduce over
+    // `glucoseReadings`). Instruments showed both still costing real
+    // main-thread time even after the earlier fix, which only removed the
+    // Core Data *write* from `gmi`, not the read/computation cost. Now
+    // computed once in `refreshComputedState()` and reused below.
+    @State private var cachedGmiResult: GMIResult?
+    @State private var cachedLabResults: [(date: Date, ifcc: Double)] = []
+
+    private func refreshComputedState() {
+        cachedGmiResult = computeGmi()
+        cachedLabResults = computeLabResults()
+    }
+
     private var isNgsp: Bool { profile.effectiveUnit == .ngsp }
 
     /// Maximum age (in days) for a cached GMI to remain useful. Beyond this the
@@ -445,7 +508,7 @@ private struct GMICardView: View {
     /// Accepts both mg/dL and mmol/L readings, converting mmol/L → mg/dL (×18)
     /// before averaging. Returns nil when there is insufficient glucose data.
     /// On success, caches the result to UserDefaults for the stale-data fallback.
-    private var gmi: GMIResult? {
+    private func computeGmi() -> GMIResult? {
         let cutoff = Calendar.current.date(byAdding: .day, value: -Self.windowDays, to: Date()) ?? Date()
         // Include both mg/dL and mmol/L glucose readings; exclude lab HbA1c entries ("NGSP %" / "mmol/mol").
         let windowReadings = glucoseReadings.filter { reading in
@@ -469,15 +532,33 @@ private struct GMICardView: View {
             windowDays: Self.windowDays
         )
 
-        // Cache this successful computation for the stale-data fallback
+        // Cache this successful computation for the stale-data fallback.
+        // NOTE: this function must stay side-effect-free with respect to
+        // Core Data. It used to also call `persistGmiIfNeeded` (a Core Data
+        // fetch + possible save) right here — but any Core Data save
+        // triggers a change notification that re-renders this view via
+        // `automaticallyMergesChangesFromParent`, which could re-trigger
+        // this computation, which could save again, and so on. That
+        // save→notify→re-render loop is exactly what produced the severe
+        // hang seen after deleting a meal (confirmed via Instruments Time
+        // Profiler). The Core Data write now happens separately in
+        // `persistGmiToCoreDataIfNeeded()`, triggered from `.onAppear`/
+        // `.onChange`, never from inside this computation.
         UserDefaults.standard.set(result.gmiNgsp, forKey: Self.cachedGmiNgspKey)
         UserDefaults.standard.set(result.gmiIfcc, forKey: Self.cachedGmiIfccKey)
         UserDefaults.standard.set(Date(), forKey: Self.cachedGmiDateKey)
 
-        // Persist to Core Data for export (max once per calendar day)
-        Self.persistGmiIfNeeded(ngsp: result.gmiNgsp, ifcc: result.gmiIfcc, context: viewContext)
-
         return result
+    }
+
+    /// Persists today's GMI estimate to Core Data (at most once per
+    /// calendar day — see `persistGmiIfNeeded`'s guard). Called from
+    /// `.onAppear`/`.onChange` rather than from the `gmi` getter itself,
+    /// so the write happens as a controlled side effect of data changing,
+    /// not as a side effect of SwiftUI evaluating `body`.
+    private func persistGmiToCoreDataIfNeeded() {
+        guard let result = cachedGmiResult else { return }
+        Self.persistGmiIfNeeded(ngsp: result.gmiNgsp, ifcc: result.gmiIfcc, context: viewContext)
     }
 
     /// Saves a GMI estimate to Core Data if one hasn't already been saved today.
@@ -537,7 +618,7 @@ private struct GMICardView: View {
     /// Lab HbA1c results recorded in the last 90 days, sorted oldest → newest.
     /// Each value is converted to the canonical IFCC mmol/mol for comparison,
     /// then to the user's display unit when rendered.
-    private var labResults: [(date: Date, ifcc: Double)] {
+    private func computeLabResults() -> [(date: Date, ifcc: Double)] {
         let cutoff = Calendar.current.date(byAdding: .day, value: -Self.labWindowDays, to: Date()) ?? Date()
         return glucoseReadings.compactMap { reading in
             guard let ts = reading.timestamp,
@@ -557,11 +638,26 @@ private struct GMICardView: View {
         profile.formatHbA1c(ifcc)
     }
 
+    // `DateFormatter()` init does real locale/calendar/timezone setup and is
+    // documented as expensive to allocate repeatedly — Instruments showed
+    // `shortDate(_:)` costing over a second of main-thread time once other,
+    // bigger culprits were fixed and this became visible as the next layer.
+    // Cached once per formatting style instead of allocated on every call.
+    private static let shortDateFormatterEN: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "dd MMM"
+        return f
+    }()
+    private static let shortDateFormatterJA: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "M月d日"
+        return f
+    }()
+
     /// Short date string, e.g. "02 Apr" (English) or "4月2日" (Japanese).
     private func shortDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
         let isJapanese = Locale.current.language.languageCode?.identifier == "ja"
-        formatter.dateFormat = isJapanese ? "M月d日" : "dd MMM"
+        let formatter = isJapanese ? Self.shortDateFormatterJA : Self.shortDateFormatterEN
         return formatter.string(from: date)
     }
 
@@ -630,6 +726,11 @@ private struct GMICardView: View {
     }
 
     var body: some View {
+        // Reads the cached value computed by `refreshComputedState()`
+        // (via .onAppear / .onChange below) rather than recomputing GMI
+        // live on every body evaluation.
+        let currentGmi = cachedGmiResult
+
         VStack(spacing: 8) {
             // ── GMI section ──
             HStack(spacing: 5) {
@@ -642,7 +743,7 @@ private struct GMICardView: View {
                     .foregroundColor(.secondary)
             }
 
-            if let gmi = gmi {
+            if let gmi = currentGmi {
                 // Tap the GMI value to force recalculation
                 Button(action: recalculateGMI) {
                     HStack(alignment: .center, spacing: 4) {
@@ -759,7 +860,7 @@ private struct GMICardView: View {
         .padding(.horizontal)
         .accessibilityElement(children: .combine)
         .accessibilityLabel({
-            if let gmi = gmi {
+            if let gmi = currentGmi {
                 return "Glucose Management Indicator: \(formatDisplayValue(gmi)) \(unitSuffix), based on \(gmi.readingCount) readings over the last \(gmi.windowDays) days."
             } else if let cached = cachedGmi {
                 let displayValue = isNgsp ? String(format: "%.1f", cached.ngsp) : String(format: "%.0f", cached.ifcc)
@@ -771,13 +872,21 @@ private struct GMICardView: View {
         .sheet(isPresented: $showLabSheet) {
             LabResultsSheet(labReadings: labReadingEntities)
         }
+        .onAppear {
+            refreshComputedState()
+            persistGmiToCoreDataIfNeeded()
+        }
+        .onChange(of: glucoseReadings) { _, _ in
+            refreshComputedState()
+            persistGmiToCoreDataIfNeeded()
+        }
     }
 
     // MARK: - Lab HbA1c row
 
     @ViewBuilder
     private var labHbA1cRow: some View {
-        let labs = labResults
+        let labs = cachedLabResults
 
         // Centred heading — same visual weight as the GMI section above
         HStack(spacing: 5) {

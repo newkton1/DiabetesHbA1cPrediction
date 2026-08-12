@@ -137,13 +137,32 @@ struct GlucoseLogView: View {
 
     // MARK: - Spike ↔ Meal Correlations
 
-    /// Lookup of glucose reading → high-GI meal that preceded a spike.
-    /// Only populated for readings ≥170 mg/dL (or mmol/L equivalent) with
-    /// a high-GI meal 90–120 minutes before.
-    private var spikeCorrelations: [NSManagedObjectID: SpikeCorrelation] {
-        SpikeCorrelator.correlate(
-            readings: Array(glucoseReadings),
-            meals: Array(meals),
+    /// Lookup of glucose reading → high-GI meal that preceded a spike, scoped
+    /// to the readings actually visible in the current chart window (plus a
+    /// margin on meals so the 90–120 min lookback still finds matches near
+    /// the window edge).
+    ///
+    /// Previously this was a computed property re-run over the *entire*
+    /// unbounded `glucoseReadings`/`meals` history, and — worse — it was
+    /// read as `spikeCorrelations[reading.objectID]` from inside the
+    /// `ForEach` row closure in `readingsList`, meaning that full O(n×m)
+    /// scan reran from scratch for every single row. Found via Instruments:
+    /// deleting a meal invalidates the `meals` fetch, re-rendering this
+    /// list, which redid the full scan dozens of times over — the same
+    /// "expensive live computation inside body" pattern already fixed in
+    /// ColdStartManager and DashboardView. Now computed once per render,
+    /// scoped to the visible window, and passed in as a plain dictionary.
+    private func spikeCorrelations(forVisibleReadings windowReadings: [GlucoseReadingEntity]) -> [NSManagedObjectID: SpikeCorrelation] {
+        guard !windowReadings.isEmpty else { return [:] }
+        let mealWindowStart = chartWindowStart.addingTimeInterval(-3 * 3600)
+        let mealWindowEnd = chartWindowEnd
+        let nearbyMeals = meals.filter { meal in
+            guard let ts = meal.timestamp else { return false }
+            return ts >= mealWindowStart && ts <= mealWindowEnd
+        }
+        return SpikeCorrelator.correlate(
+            readings: windowReadings,
+            meals: nearbyMeals,
             isMgDl: isMgdlRegion
         )
     }
@@ -1216,6 +1235,8 @@ struct GlucoseLogView: View {
             .padding(.vertical, 20)
         } else {
             let windowReadings = chartWindowReadings
+            // Computed once here, not per-row — see spikeCorrelations(forVisibleReadings:) doc comment.
+            let correlations = spikeCorrelations(forVisibleReadings: windowReadings)
             List {
                 // Reading count header
                 HStack {
@@ -1262,7 +1283,7 @@ struct GlucoseLogView: View {
                         }
 
                         // Centre: high-GI meal that likely caused this spike
-                        if let correlation = spikeCorrelations[reading.objectID] {
+                        if let correlation = correlations[reading.objectID] {
                             VStack(alignment: .center, spacing: 2) {
                                 Image(systemName: "fork.knife")
                                     .font(.caption2)
@@ -1603,11 +1624,20 @@ struct GlucoseLogView: View {
         }
     }
 
+    // Cached rather than allocated per call — this is invoked once per row
+    // in the readings list, and `DateFormatter()` init is expensive enough
+    // that doing it per-row measurably showed up in Instruments once other
+    // bigger costs in this view were fixed (see GMICardView.shortDate for
+    // the same fix applied earlier).
+    private static let timeFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm MM/dd"
+        return f
+    }()
+
     /// Formats a Date to "HH:mm MM/dd" format
     func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm MM/dd"
-        return formatter.string(from: date)
+        Self.timeFormatter.string(from: date)
     }
 
     /// Syncs glucose data from HealthKit (CGM and manual entries)
