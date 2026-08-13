@@ -32,16 +32,23 @@ struct SelectedFoodRow: View {
                     .font(.headline)
 
                 HStack(spacing: 8) {
-                    Text("\(Int(selectedFood.totalCarbs)) g carbs")
+                    // Reuses the same "%lld g carbs" / "%lld cal" catalog keys
+                    // already translated and in use elsewhere (e.g. the food
+                    // search selected-count banner) — this row was building
+                    // the equivalent text via plain interpolation instead,
+                    // which can never localize.
+                    Text(String(format: NSLocalizedString("%lld g carbs", comment: ""), Int64(selectedFood.totalCarbs)))
                         .font(.caption)
                         .foregroundColor(.orange)
 
-                    Text("\(formatNumber(Int(selectedFood.totalCalories))) cal")
+                    Text(String(format: NSLocalizedString("%lld cal", comment: ""), Int64(selectedFood.totalCalories)))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
 
-                Text("\(selectedFood.foodItem.servingSize, specifier: "%.1f") \(selectedFood.foodItem.servingUnit) per serving")
+                Text(String(format: NSLocalizedString("%@ %@ per serving", comment: ""),
+                            String(format: "%.1f", selectedFood.foodItem.servingSize),
+                            NSLocalizedString(selectedFood.foodItem.servingUnit, comment: "")))
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -51,7 +58,7 @@ struct SelectedFoodRow: View {
                 onIncrement: isAtMax ? nil : onIncrement,
                 onDecrement: isAtMin ? nil : onDecrement
             ) {
-                Text("\(ServingFormatter.displayString(for: selectedFood.quantity)) serving")
+                Text(String(format: NSLocalizedString("%@ serving", comment: ""), ServingFormatter.displayString(for: selectedFood.quantity)))
                     .font(.body)
                     .fontWeight(.semibold)
             }

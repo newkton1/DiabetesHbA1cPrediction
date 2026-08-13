@@ -417,7 +417,7 @@ private struct FoodSearchContentDirect: View {
                         .foregroundColor(.blue)
                         .accessibilityHidden(true)
 
-                    Text("\(mealBuilder.foodCount) item\(mealBuilder.foodCount == 1 ? "" : "s") selected")
+                    Text(String(format: NSLocalizedString("%lld item(s) selected", comment: ""), Int64(mealBuilder.foodCount)))
                         .font(.subheadline)
 
                     Spacer()
@@ -696,7 +696,12 @@ struct FoodSelectionRow: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                Text("\(food.servingSize, specifier: "%.0f") ") + Text(LocalizedStringKey(food.servingUnit))
+                // `%.0f` uses round-half-to-even (banker's rounding), so a
+                // servingSize of exactly 0.5 (e.g. Avocado, Grapefruit — half
+                // a fruit is one serving) printed as "0", not "1". Int(...
+                // .rounded()) uses round-half-away-from-zero instead, so 0.5
+                // now correctly displays as "1".
+                Text("\(Int(food.servingSize.rounded())) ") + Text(LocalizedStringKey(food.servingUnit))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

@@ -912,8 +912,9 @@ struct AddExerciseSessionSheet: View {
                         HStack {
                             Slider(value: $distance, in: 0.5...20, step: 0.5)
                             Text(String(format: "%.1f km", distance))
-                                .frame(width: 60)
+                                .frame(width: 75, alignment: .trailing)
                                 .font(.headline)
+                                .lineLimit(1)
                         }
                     }
                 } else {

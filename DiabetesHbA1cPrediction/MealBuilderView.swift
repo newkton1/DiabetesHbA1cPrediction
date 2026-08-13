@@ -72,7 +72,11 @@ struct MealBuilderView: View {
                     ToolbarItem(placement: .confirmationAction) {
                         if mealType == .feast && mealBuilder.canSave {
                             Button(action: { showSimilarImpact = true }) {
-                                Text(isPortrait ? "Similar Meal" : "Similar Impact Meal")
+                                // Ternary of two literals inside a Text() call can resolve
+                                // to the plain-String initializer rather than
+                                // LocalizedStringKey depending on inference — wrap
+                                // explicitly so both branches always hit the catalog.
+                                Text(LocalizedStringKey(isPortrait ? "Similar Meal" : "Similar Impact Meal"))
                                     .font(isPortrait ? .caption : .callout)
                             }
                             .fontWeight(.semibold)
@@ -955,7 +959,10 @@ struct NutritionBulletRow: View {
             Circle()
                 .fill(color)
                 .frame(width: 8, height: 8)
-            Text(label)
+            // `label` is a String parameter (different literal at each call
+            // site: "GL", "Carbs", "Fiber", "Protein", "Fat", "Cal") — wrap
+            // once here so every call site becomes localizable.
+            Text(LocalizedStringKey(label))
                 .foregroundColor(color)
                 .fontWeight(.semibold)
             Text(value)

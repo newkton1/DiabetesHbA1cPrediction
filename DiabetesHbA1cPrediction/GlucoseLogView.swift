@@ -458,6 +458,7 @@ struct GlucoseLogView: View {
                     }
 
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
 
                 if !curvePoints.isEmpty {
@@ -1651,7 +1652,7 @@ struct GlucoseLogView: View {
             let authorized = await healthKitManager.requestAuthorization()
             guard authorized else {
                 await MainActor.run {
-                    syncMessage = "HealthKit authorization denied. Please enable access in Settings > Health > Data Access & Devices."
+                    syncMessage = NSLocalizedString("HealthKit authorization denied. Please enable access in Settings > Health > Data Access & Devices.", comment: "")
                     showSyncAlert = true
                     isSyncing = false
                 }
@@ -1662,16 +1663,21 @@ struct GlucoseLogView: View {
             let syncResult = await healthKitManager.syncGlucoseToCorData(context: moc, days: 30)
 
             await MainActor.run {
-                // Check for sync save errors
+                // Each of these used to be a plain interpolated string, which
+                // can never localize since the exact runtime text has to
+                // match a catalog key. Rebuilt from NSLocalizedString/
+                // String(format:) templates — several of these keys already
+                // had ja translations sitting unused in the String Catalog
+                // because nothing in code was actually looking them up.
                 if let syncError = healthKitManager.lastSyncError {
-                    syncMessage = "Sync encountered an error: \(syncError)"
+                    syncMessage = String(format: NSLocalizedString("Sync encountered an error: %@", comment: ""), syncError)
                     healthKitManager.lastSyncError = nil
                 } else if syncResult.newImported > 0 {
-                    syncMessage = "Sync completed successfully! Imported \(syncResult.newImported) new glucose reading\(syncResult.newImported == 1 ? "" : "s") from HealthKit."
+                    syncMessage = String(format: NSLocalizedString("Sync completed successfully! Imported %d new glucose reading(s) from HealthKit.", comment: ""), Int32(syncResult.newImported))
                 } else if syncResult.totalFound > 0 {
-                    syncMessage = "Sync completed. Your glucose readings are already up to date (\(syncResult.totalFound) reading\(syncResult.totalFound == 1 ? "" : "s") in HealthKit, all previously synced)."
+                    syncMessage = String(format: NSLocalizedString("Sync completed. Your glucose readings are already up to date (%d reading(s) in HealthKit, all previously synced).", comment: ""), Int32(syncResult.totalFound))
                 } else {
-                    syncMessage = "Sync completed. No glucose readings found in HealthKit for the last 30 days."
+                    syncMessage = NSLocalizedString("Sync completed. No glucose readings found in HealthKit for the last 30 days.", comment: "")
                 }
                 showSyncAlert = true
                 isSyncing = false
