@@ -130,11 +130,15 @@ struct CGMSetupView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(path.title)
+                        // path.title/subtitle are runtime String values (from
+                        // the enum's computed properties), not literals, so
+                        // they need explicit LocalizedStringKey wrapping to
+                        // reach the String Catalog.
+                        Text(LocalizedStringKey(path.title))
                             .font(.subheadline)
                             .fontWeight(.semibold)
                             .foregroundColor(.primary)
-                        Text(path.subtitle)
+                        Text(LocalizedStringKey(path.subtitle))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -388,7 +392,10 @@ struct CGMSetupView: View {
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(.blue)
             }
-            Text(text)
+            // `text` is a String parameter, passed a different literal at
+            // each call site — wrapping here (once) makes every call site
+            // localizable without touching them individually.
+            Text(LocalizedStringKey(text))
                 .font(.subheadline)
                 .foregroundColor(.primary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -403,7 +410,7 @@ struct CGMSetupView: View {
                 .foregroundColor(color)
                 .frame(width: 18)
                 .padding(.top, 1)
-            Text(text)
+            Text(LocalizedStringKey(text))
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -418,7 +425,7 @@ struct CGMSetupView: View {
             HStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.caption)
-                Text(label)
+                Text(LocalizedStringKey(label))
                     .font(.caption)
                     .fontWeight(.medium)
             }

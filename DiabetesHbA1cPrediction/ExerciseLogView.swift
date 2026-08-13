@@ -334,36 +334,45 @@ struct ExerciseLogView: View {
             // Also sync glucose data while we're at it
             let glucoseResult = await healthKitManager.syncGlucoseToCorData(context: moc, days: 30)
 
-            // Build a descriptive sync message
+            // Build a descriptive sync message. Previously built via plain
+            // string interpolation ("2 new workouts (2 Cycling, 1 Running)"),
+            // which can never be localized no matter what's in the String
+            // Catalog — the exact runtime string has to match a catalog key.
+            // Each part is now built from a localizable %-format template
+            // instead, and the per-type breakdown (e.g. "2 Cycling, 1
+            // Running") is reordered for Japanese ("サイクリング2件、ランニング1件")
+            // since count-before-noun doesn't read naturally there.
+            let isJapanese = Locale.current.language.languageCode?.identifier == "ja"
             var messageParts: [String] = []
             if exerciseResult.count > 0 {
-                // Group imported types (e.g. "2 Cycling, 1 Running") for a clear message
                 let typeCounts = Dictionary(exerciseResult.types.map { ($0, 1) }, uniquingKeysWith: +)
                 let typeSummary = typeCounts
                     .sorted { $0.key < $1.key }
-                    .map { "\($0.value) \($0.key)" }
-                    .joined(separator: ", ")
-                let workoutWord = exerciseResult.count == 1 ? "workout" : "workouts"
-                messageParts.append("\(exerciseResult.count) new \(workoutWord) (\(typeSummary))")
+                    .map { type, count -> String in
+                        let localizedType = NSLocalizedString(type, comment: "")
+                        return isJapanese ? "\(localizedType)\(count)件" : "\(count) \(localizedType)"
+                    }
+                    .joined(separator: isJapanese ? "、" : ", ")
+                messageParts.append(String(format: NSLocalizedString("%lld new workout(s) (%@)", comment: ""), Int64(exerciseResult.count), typeSummary))
             }
             if activityResult.new > 0 {
-                messageParts.append("\(activityResult.new) day\(activityResult.new == 1 ? "" : "s") of ambient walking activity")
+                messageParts.append(String(format: NSLocalizedString("%lld day(s) of ambient walking activity", comment: ""), Int64(activityResult.new)))
             }
             if activityResult.updated > 0 {
-                messageParts.append("\(activityResult.updated) day\(activityResult.updated == 1 ? "" : "s") of ambient walking updated")
+                messageParts.append(String(format: NSLocalizedString("%lld day(s) of ambient walking updated", comment: ""), Int64(activityResult.updated)))
             }
             if glucoseResult.newImported > 0 {
-                messageParts.append("\(glucoseResult.newImported) new glucose reading\(glucoseResult.newImported == 1 ? "" : "s")")
+                messageParts.append(String(format: NSLocalizedString("%lld new glucose reading(s)", comment: ""), Int64(glucoseResult.newImported)))
             }
 
             // Check for sync save errors
             if let syncError = healthKitManager.lastSyncError {
-                syncMessage = "Sync encountered an error: \(syncError)"
+                syncMessage = String(format: NSLocalizedString("Sync encountered an error: %@", comment: ""), syncError)
                 healthKitManager.lastSyncError = nil
             } else if messageParts.isEmpty {
-                syncMessage = "Sync completed. No new data found in HealthKit for the last 30 days."
+                syncMessage = NSLocalizedString("Sync completed. No new data found in HealthKit for the last 30 days.", comment: "")
             } else {
-                syncMessage = "Sync completed successfully! \(messageParts.joined(separator: ", "))."
+                syncMessage = String(format: NSLocalizedString("Sync completed successfully! %@.", comment: ""), messageParts.joined(separator: isJapanese ? "、" : ", "))
             }
 
             showSyncAlert = true
@@ -861,7 +870,12 @@ struct AddExerciseSessionSheet: View {
                 Section("Exercise Type") {
                     Picker("Type", selection: $selectedType) {
                         ForEach(exerciseTypes, id: \.self) { type in
-                            Text(type).tag(type)
+                            // `type` is a runtime String, not a literal, so it bypasses
+                            // the String Catalog unless explicitly wrapped as a
+                            // LocalizedStringKey — same fix as the exercise row list
+                            // below (Text(LocalizedStringKey(exercise.type ?? ...))),
+                            // which already relies on these same catalog entries.
+                            Text(LocalizedStringKey(type)).tag(type)
                         }
                     }
                 }
