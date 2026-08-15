@@ -44,7 +44,7 @@ struct MultiSelectFoodSearchView: View {
         isPortrait ? searchText : committedSearchText
     }
 
-    private let foodDatabase = FoodDatabase.shared
+    @ObservedObject private var foodDatabase = FoodDatabase.shared
 
     /// Short labels for category filter chips to save horizontal space
     private static let categoryChipLabels: [String: String] = [

@@ -32,5 +32,14 @@
 - [ ] Camera-based meal recognition via Apple Vision (future version)
 - [ ] Write fingerstick data to Apple HealthKit (post-approval, point release)
 
+## v3 Candidates (low priority — revisit only if requested)
+- [ ] **Manual in-app language switch (EN/JA)** — scoped in
+  `FUTURE_APP_LANGUAGE_SWITCH.md`. Skeleton (profile object + menu row) is
+  small, but full coverage also needs migrating 6 `Locale.current`-based
+  branches and deciding how to handle `NSLocalizedString`-driven dynamic
+  strings, which don't follow SwiftUI's locale override. Likely audience
+  is very small (effectively Robert); not worth building unless Japanese
+  users specifically ask for it.
+
 ## Housekeeping
 - [ ] Regenerate GitHub token (was exposed) and remove from git remote URL

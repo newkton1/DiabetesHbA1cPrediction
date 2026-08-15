@@ -307,6 +307,13 @@ struct GlucoseLogView: View {
                         .disabled(isSyncing)
                         .accessibilityLabel(isSyncing ? "Syncing with Apple Health" : syncSuccess ? "Health data synced successfully" : "Sync from Apple Health")
 
+                        Button(action: { showCGMSetup = true }) {
+                            Image(systemName: "sensor.tag.radiowaves.forward.fill")
+                                .font(.subheadline)
+                                .foregroundColor(.blue)
+                                .accessibilityLabel("CGM setup")
+                        }
+
                         Button(action: {
                             if DemoDataManager.isDemoDataLoaded {
                                 showDemoAlert = true
@@ -330,6 +337,9 @@ struct GlucoseLogView: View {
         }
         .sheet(isPresented: $showAddSheet) {
             AddGlucoseReadingSheet(isPresented: $showAddSheet, moc: moc)
+        }
+        .sheet(isPresented: $showCGMSetup) {
+            CGMSetupView()
         }
         .alert("Sync Status", isPresented: $showSyncAlert) {
             Button("OK") { }

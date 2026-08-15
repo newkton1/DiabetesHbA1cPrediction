@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Combine
 
 /// Represents a single food item with comprehensive nutritional information per serving
 /// This struct is used to store and retrieve nutritional data for foods in the diabetes app
@@ -70,17 +71,27 @@ private struct WesternJPEntry: Decodable {
 
 /// Singleton class that manages the comprehensive food database
 /// Provides methods to search and filter foods by various criteria
-class FoodDatabase {
+///
+/// Conforms to `ObservableObject` so SwiftUI views that hold it via
+/// `@ObservedObject` re-render automatically whenever a lazy-loaded
+/// database finishes loading or a favorite is added/removed. Previously
+/// this was a plain class, which meant views mutating it directly (e.g.
+/// `loadWesternJapaneseDatabaseIfNeeded()`, `removeFavorite(named:)`) had
+/// no reliable way to tell SwiftUI a re-render was needed — symptoms
+/// included the 洋食 category chip row staying empty until an unrelated
+/// state change forced a refresh, and removed My Menu items lingering in
+/// the list until the sheet was closed and reopened.
+class FoodDatabase: ObservableObject {
     /// Shared singleton instance - provides global access to the food database
     static let shared = FoodDatabase()
 
     /// Array containing all common foods with their nutritional data
     /// Data is loaded from FoodDatabase.json bundled with the app
-    private(set) var allFoods: [FoodItem] = []
+    @Published private(set) var allFoods: [FoodItem] = []
 
     /// User's favorite foods added from online searches
     /// Stored separately in the Documents directory so they persist across app updates
-    private(set) var favorites: [FoodItem] = []
+    @Published private(set) var favorites: [FoodItem] = []
 
     /// Error message if the food database failed to load
     private(set) var loadError: String?
@@ -97,7 +108,7 @@ class FoodDatabase {
     /// Japanese food items with their original sub-categories preserved (mapped to Japanese labels).
     /// Populated alongside allFoods in loadJapaneseDatabaseIfNeeded().
     /// Used in 和食 mode to provide sub-category chip filtering.
-    private(set) var japaneseFoodItems: [FoodItem] = []
+    @Published private(set) var japaneseFoodItems: [FoodItem] = []
 
     /// Ordered category list for 和食 chip row.
     let japaneseCategories: [String] = [
@@ -129,7 +140,7 @@ class FoodDatabase {
 
     /// Western foods with Japanese display names and categories.
     /// Populated lazily by loadWesternJapaneseDatabaseIfNeeded().
-    private(set) var westernJapaneseFoodItems: [FoodItem] = []
+    @Published private(set) var westernJapaneseFoodItems: [FoodItem] = []
     private var westernJapaneseDatabaseLoaded = false
 
     /// Ordered category list for 洋食 chip row (user-defined display order).
