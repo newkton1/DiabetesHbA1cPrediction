@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Combine
 
 /// Represents a single food item with comprehensive nutritional information per serving
 /// This struct is used to store and retrieve nutritional data for foods in the diabetes app
@@ -60,17 +61,25 @@ struct FoodItem: Identifiable, Equatable, Codable {
 
 /// Singleton class that manages the comprehensive food database
 /// Provides methods to search and filter foods by various criteria
-class FoodDatabase {
+///
+/// Conforms to `ObservableObject` so SwiftUI views that hold it via
+/// `@ObservedObject` re-render automatically whenever a favorite is
+/// added or removed. Previously this was a plain class, which meant
+/// views mutating it directly (e.g. `removeFavorite(named:)`) had no
+/// reliable way to tell SwiftUI a re-render was needed — the symptom
+/// was removed My Menu items lingering in the list until the sheet was
+/// closed and reopened.
+class FoodDatabase: ObservableObject {
     /// Shared singleton instance - provides global access to the food database
     static let shared = FoodDatabase()
 
     /// Array containing all common foods with their nutritional data
     /// Data is loaded from FoodDatabase.json bundled with the app
-    private(set) var allFoods: [FoodItem] = []
+    @Published private(set) var allFoods: [FoodItem] = []
 
     /// User's favorite foods added from online searches
     /// Stored separately in the Documents directory so they persist across app updates
-    private(set) var favorites: [FoodItem] = []
+    @Published private(set) var favorites: [FoodItem] = []
 
     /// Error message if the food database failed to load
     private(set) var loadError: String?

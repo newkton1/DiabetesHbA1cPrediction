@@ -326,7 +326,7 @@ struct ExerciseLogView: View {
             }
 
             // Sync formal workout records from HealthKit to CoreData
-            let exerciseCount = await healthKitManager.syncExerciseToCorData(context: moc, days: 30)
+            let exerciseResult = await healthKitManager.syncExerciseToCorData(context: moc, days: 30)
 
             // Sync daily walking/step activity (ambient data from casual walking)
             let activityResult = await healthKitManager.syncDailyActivityToCorData(context: moc, days: 30)
@@ -336,8 +336,14 @@ struct ExerciseLogView: View {
 
             // Build a descriptive sync message
             var messageParts: [String] = []
-            if exerciseCount > 0 {
-                messageParts.append("\(exerciseCount) new workout\(exerciseCount == 1 ? "" : "s")")
+            if exerciseResult.count > 0 {
+                // Break down the imported workouts by type, e.g. "2 new workouts (2 Cycling, 1 Running)"
+                let typeCounts = Dictionary(exerciseResult.types.map { ($0, 1) }, uniquingKeysWith: +)
+                let typeSummary = typeCounts
+                    .sorted { $0.key < $1.key }
+                    .map { type, count in "\(count) \(type)" }
+                    .joined(separator: ", ")
+                messageParts.append("\(exerciseResult.count) new workout\(exerciseResult.count == 1 ? "" : "s") (\(typeSummary))")
             }
             if activityResult.new > 0 {
                 messageParts.append("\(activityResult.new) day\(activityResult.new == 1 ? "" : "s") of walking activity")
@@ -890,8 +896,9 @@ struct AddExerciseSessionSheet: View {
                         HStack {
                             Slider(value: $distance, in: 0.5...20, step: 0.5)
                             Text(String(format: "%.1f km", distance))
-                                .frame(width: 60)
+                                .frame(width: 75, alignment: .trailing)
                                 .font(.headline)
+                                .lineLimit(1)
                         }
                     }
                 } else {

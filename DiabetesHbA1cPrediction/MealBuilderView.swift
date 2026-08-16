@@ -358,13 +358,26 @@ struct MealBuilderView: View {
                             Stepper("", value: $mealBuilder.timeSinceLastMeal, in: 0...48, step: 0.5)
                                 .labelsHidden()
                         }
-                        HStack(spacing: 8) {
-                            QuickTimeButton(title: "Now", hours: 0, selectedHours: $mealBuilder.timeSinceLastMeal)
-                            QuickTimeButton(title: "1 h", hours: 1, selectedHours: $mealBuilder.timeSinceLastMeal)
-                            QuickTimeButton(title: "2 h", hours: 2, selectedHours: $mealBuilder.timeSinceLastMeal)
-                            QuickTimeButton(title: "3 h", hours: 3, selectedHours: $mealBuilder.timeSinceLastMeal)
-                            QuickTimeButton(title: "24 h", hours: 24, selectedHours: $mealBuilder.timeSinceLastMeal)
-                            QuickTimeButton(title: "48 h", hours: 48, selectedHours: $mealBuilder.timeSinceLastMeal)
+                        if isPortrait {
+                            // Portrait: 5 equal-width buttons (3 h removed to fit one line)
+                            HStack(spacing: 6) {
+                                ForEach([
+                                    ("Now", 0.0), ("1 h", 1.0), ("2 h", 2.0), ("24 h", 24.0), ("48 h", 48.0)
+                                ], id: \.0) { label, hours in
+                                    QuickTimeButton(title: label, hours: hours, selectedHours: $mealBuilder.timeSinceLastMeal)
+                                        .frame(maxWidth: .infinity)
+                                }
+                            }
+                        } else {
+                            // Landscape: all 6 buttons, natural sizing
+                            HStack(spacing: 8) {
+                                QuickTimeButton(title: "Now", hours: 0, selectedHours: $mealBuilder.timeSinceLastMeal)
+                                QuickTimeButton(title: "1 h", hours: 1, selectedHours: $mealBuilder.timeSinceLastMeal)
+                                QuickTimeButton(title: "2 h", hours: 2, selectedHours: $mealBuilder.timeSinceLastMeal)
+                                QuickTimeButton(title: "3 h", hours: 3, selectedHours: $mealBuilder.timeSinceLastMeal)
+                                QuickTimeButton(title: "24 h", hours: 24, selectedHours: $mealBuilder.timeSinceLastMeal)
+                                QuickTimeButton(title: "48 h", hours: 48, selectedHours: $mealBuilder.timeSinceLastMeal)
+                            }
                         }
                     }
                     .padding(.vertical, 4)
@@ -967,6 +980,7 @@ struct QuickTimeButton: View {
             Text(title)
                 .font(.caption)
                 .fontWeight(isSelected ? .semibold : .regular)
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(isSelected ? Color.blue : Color(.systemGray5))

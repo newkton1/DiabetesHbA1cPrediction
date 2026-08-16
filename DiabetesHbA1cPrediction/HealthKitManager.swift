@@ -530,15 +530,15 @@ class HealthKitManager: ObservableObject {
     /// - Parameters:
     ///   - context: NSManagedObjectContext for CoreData operations
     ///   - days: Number of days back to sync (default: 30)
-    /// - Returns: Count of newly imported workouts
+    /// - Returns: Tuple of (count: newly imported workout count, types: list of imported workout type names)
     /// - Note: Operates on a background thread; context should be created for background operations
-    func syncExerciseToCorData(context: NSManagedObjectContext, days: Int = 30) async -> Int {
+    func syncExerciseToCorData(context: NSManagedObjectContext, days: Int = 30) async -> (count: Int, types: [String]) {
         guard isAuthorized else {
-            return 0
+            return (0, [])
         }
 
         let workouts = await fetchRecentWorkouts(days: days)
-        
+
         // Extract workout data into Sendable struct before crossing isolation boundary
         let workoutDataList: [WorkoutData] = workouts.map { workout in
             var calories: Double = 0
@@ -548,8 +548,18 @@ class HealthKitManager: ObservableObject {
                 calories = sumQuantity.doubleValue(for: HKUnit.kilocalorie())
             }
 
+            // Use the correct distance identifier for each workout type
             var distanceKm: Double = 0
-            if let distanceType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning),
+            let distanceIdentifier: HKQuantityTypeIdentifier
+            switch workout.workoutActivityType {
+            case .cycling, .handCycling:
+                distanceIdentifier = .distanceCycling
+            case .swimming:
+                distanceIdentifier = .distanceSwimming
+            default:
+                distanceIdentifier = .distanceWalkingRunning
+            }
+            if let distanceType = HKQuantityType.quantityType(forIdentifier: distanceIdentifier),
                let statistics = workout.statistics(for: distanceType),
                let sumQuantity = statistics.sumQuantity() {
                 distanceKm = sumQuantity.doubleValue(for: HKUnit.meterUnit(with: .kilo))
@@ -566,19 +576,19 @@ class HealthKitManager: ObservableObject {
             )
         }
 
-        let count = await Self.importWorkoutsToCoreData(workoutDataList: workoutDataList, context: context)
-        if count < 0 {
+        let result = await Self.importWorkoutsToCoreData(workoutDataList: workoutDataList, context: context)
+        if result.count < 0 {
             self.lastSyncError = "Failed to save exercise data. Please try syncing again."
-            return 0
+            return (0, [])
         }
-        return count
+        return result
     }
 
     /// Legacy completion-based exercise sync for backward compatibility
     func syncExerciseToCorData(context: NSManagedObjectContext, days: Int = 30, completion: @escaping (Int) -> Void) {
         Task {
-            let count = await syncExerciseToCorData(context: context, days: days)
-            completion(count)
+            let result = await syncExerciseToCorData(context: context, days: days)
+            completion(result.count)
         }
     }
     
@@ -636,11 +646,13 @@ class HealthKitManager: ObservableObject {
     // MARK: - Private CoreData Import Helpers
     
     /// Imports workout data to CoreData (nonisolated to work with context.perform)
-    private static nonisolated func importWorkoutsToCoreData(workoutDataList: [WorkoutData], context: NSManagedObjectContext) async -> Int {
+    /// Returns (count, types) where types is the list of newly-imported workout type names.
+    private static nonisolated func importWorkoutsToCoreData(workoutDataList: [WorkoutData], context: NSManagedObjectContext) async -> (count: Int, types: [String]) {
         await withCheckedContinuation { continuation in
             context.perform {
                 var count = 0
-                
+                var importedTypes: [String] = []
+
                 for workoutData in workoutDataList {
                     // Check if this workout already exists in CoreData using its UUID
                     let fetchRequest = NSFetchRequest<ExerciseSessionEntity>(
@@ -687,6 +699,7 @@ class HealthKitManager: ObservableObject {
                     }
                     entity.notes = noteParts.joined(separator: " | ")
 
+                    importedTypes.append(workoutData.type)
                     count += 1
                 }
 
@@ -694,11 +707,11 @@ class HealthKitManager: ObservableObject {
                 do {
                     try context.save()
                 } catch {
-                    continuation.resume(returning: -1)
+                    continuation.resume(returning: (-1, []))
                     return
                 }
 
-                continuation.resume(returning: count)
+                continuation.resume(returning: (count, importedTypes))
             }
         }
     }

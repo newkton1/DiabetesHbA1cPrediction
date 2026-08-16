@@ -35,7 +35,7 @@ struct MultiSelectFoodSearchView: View {
         isPortrait ? searchText : committedSearchText
     }
 
-    private let foodDatabase = FoodDatabase.shared
+    @ObservedObject private var foodDatabase = FoodDatabase.shared
 
     /// Short labels for category filter chips to save horizontal space
     private static let categoryChipLabels: [String: String] = [
@@ -571,7 +571,12 @@ struct FoodSelectionRow: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                Text("\(food.servingSize, specifier: "%.0f") \(food.servingUnit)")
+                // `%.0f` uses round-half-to-even (banker's rounding), so a
+                // servingSize of exactly 0.5 (e.g. Avocado, Grapefruit — half
+                // a fruit is one serving) printed as "0", not "1". Int(...
+                // .rounded()) uses round-half-away-from-zero instead, so 0.5
+                // now correctly displays as "1".
+                (Text("\(Int(food.servingSize.rounded())) ") + Text(food.servingUnit))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
