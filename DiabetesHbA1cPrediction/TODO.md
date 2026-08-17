@@ -41,5 +41,8 @@
   is very small (effectively Robert); not worth building unless Japanese
   users specifically ask for it.
 
+## v1.1-hotfix Sync
+- [x] **Ported UI polish from v1.1-hotfix** (17 Aug 2026, commit `ebaca7b`) — exercise distance display in ExerciseLogView rows, DashboardView Exercise (week) card merge + landscape 3x2 Actions grid, GlucoseLogView "Lab Test Date" red label + "Enter test date" field, UserProfileView Tobacco Use relabels, ExerciseOffsetType -ing labels, and the Nagasaki Sara Udon JP-text data cleanup.
+
 ## Housekeeping
 - [ ] Regenerate GitHub token (was exposed) and remove from git remote URL
