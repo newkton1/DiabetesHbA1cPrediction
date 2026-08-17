@@ -33,7 +33,7 @@
 - [ ] Write fingerstick data to Apple HealthKit (post-approval, point release)
 
 ## v1.1-hotfix → v2-dev Sync
-- [ ] **Port exercise distance display to v2-dev** — added to `v1.1-hotfix` (16 Aug 2026): ExerciseLogView's portrait/landscape rows now show distance (e.g. "5.0 km") for Walking/Running/Cycling entries when `exercise.distance > 0`. Portrait puts it on its own line to avoid crowding; landscape shows it inline with duration/calories. Needs the same change applied to v2-dev (plus JP label localization, consistent with v2-dev's existing pattern for this screen).
+- [x] **Port exercise distance display + Dashboard/Glucose/User UI polish to v2-dev** (17 Aug 2026) — ported to v2-dev (commit `ebaca7b`): ExerciseLogView distance display, DashboardView Exercise (week) card merge + landscape 3x2 Actions grid, GlucoseLogView "Lab Test Date" red label + "Enter test date" field, UserProfileView Tobacco Use relabels, ExerciseOffsetType -ing labels, and the Nagasaki Sara Udon JP-text data cleanup. No JP-specific label work was needed — all touched code was still plain English on v2-dev in these exact spots.
 
 ## Housekeeping
 - [ ] Regenerate GitHub token (was exposed) and remove from git remote URL
