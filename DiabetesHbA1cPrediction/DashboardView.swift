@@ -228,22 +228,12 @@ struct DashboardView: View {
                             exerciseSessions: exerciseSessions
                         )
 
-                        // Action cards side by side in landscape
-                        HStack(alignment: .top, spacing: 8) {
-                            MealQuickActionsView(
-                                onAddMeal: { showLastMealSheet = true },
-                                onPlanFeast: { selectedTab = .meals }
-                            )
-                            .frame(maxWidth: .infinity)
-
-                            QuickStatsView(
-                                mealsToday: cachedMealsLoggedToday,
-                                exerciseMinutesWeek: exerciseMinutesThisWeek(),
-                                lastGlucoseReading: glucoseReadings.first
-                            )
-                            .frame(maxWidth: .infinity)
-                        }
-                        .padding(.horizontal)
+                        // Action cards in a 3-column x 2-row grid in landscape
+                        LandscapeActionsGrid(
+                            onAddMeal: { showLastMealSheet = true },
+                            onPlanFeast: { selectedTab = .meals },
+                            exerciseMinutesWeek: exerciseMinutesThisWeek()
+                        )
 
                         Spacer(minLength: 20)
                     }
@@ -1003,14 +993,11 @@ private struct QuickStatsView: View {
                                 .font(isLandscape ? .caption : .body)
                                 .foregroundColor(.blue)
                                 .accessibilityHidden(true)
-                            Text("Exercise")
+                            Text("Exercise (week)")
                                 .font(isLandscape ? .caption2 : .caption)
                                 .fontWeight(.semibold)
                             Spacer()
                         }
-                        Text("(Week)")
-                            .font(isLandscape ? .caption2 : .caption)
-                            .fontWeight(.semibold)
                         Text("\(exerciseMinutesWeek) min")
                             .font(isLandscape ? .caption2 : .caption)
                             .fontWeight(.semibold)
@@ -1238,6 +1225,109 @@ private struct MealQuickActionsView: View {
                 .buttonStyle(.plain)
             }
             .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal)
+        }
+    }
+}
+
+// MARK: - DashboardActionCardContent Component
+/// Shared visual content (icon + title, optional subtitle) for a single
+/// dashboard action card. Callers wrap this in a Button or NavigationLink
+/// depending on the action, and apply the standard card background/frame.
+private struct DashboardActionCardContent: View {
+    let icon: String
+    let iconColor: Color
+    let title: String
+    let subtitle: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.caption)
+                    .foregroundColor(iconColor)
+                    .accessibilityHidden(true)
+                Text(title)
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Spacer()
+            }
+            if let subtitle {
+                Text(subtitle)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+        }
+        .foregroundColor(.primary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(minHeight: 80)
+        .padding(6)
+        .background(Color(.systemGray6))
+        .cornerRadius(10)
+    }
+}
+
+// MARK: - LandscapeActionsGrid Component
+/// Landscape-only 3-column x 2-row arrangement of all six dashboard action
+/// cards, with equal horizontal and vertical gutters throughout:
+///   Add Meal | Glucose | Exercise (week)
+///   What if? | Meals History | User
+private struct LandscapeActionsGrid: View {
+    let onAddMeal: () -> Void
+    let onPlanFeast: () -> Void
+    let exerciseMinutesWeek: Int
+
+    private let columns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Actions")
+                .font(.headline)
+                .padding(.horizontal)
+                .accessibilityAddTraits(.isHeader)
+
+            LazyVGrid(columns: columns, spacing: 12) {
+                Button(action: onAddMeal) {
+                    DashboardActionCardContent(icon: "plus.circle.fill", iconColor: .orange, title: "Add Meal", subtitle: "Log what you just ate")
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                NavigationLink(destination: GlucoseLogView()) {
+                    DashboardActionCardContent(icon: "drop.fill", iconColor: .red, title: "Glucose", subtitle: nil)
+                }
+                .buttonStyle(.plain)
+
+                NavigationLink(destination: ExerciseLogView()) {
+                    DashboardActionCardContent(icon: "figure.walk", iconColor: .blue, title: "Exercise (week)", subtitle: "\(exerciseMinutesWeek) min")
+                }
+                .buttonStyle(.plain)
+
+                Button(action: onPlanFeast) {
+                    DashboardActionCardContent(icon: "party.popper.fill", iconColor: .blue, title: "What if?", subtitle: "Plan Feast Treat")
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                NavigationLink(destination: MealLogView()) {
+                    DashboardActionCardContent(icon: "fork.knife", iconColor: .orange, title: "Meals History", subtitle: nil)
+                }
+                .buttonStyle(.plain)
+
+                NavigationLink(destination: UserProfileView()) {
+                    DashboardActionCardContent(icon: "person.fill", iconColor: .green, title: "User", subtitle: nil)
+                }
+                .buttonStyle(.plain)
+            }
             .padding(.horizontal)
         }
     }

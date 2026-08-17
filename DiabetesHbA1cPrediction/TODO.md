@@ -32,5 +32,8 @@
 - [ ] Camera-based meal recognition via Apple Vision (future version)
 - [ ] Write fingerstick data to Apple HealthKit (post-approval, point release)
 
+## v1.1-hotfix → v2-dev Sync
+- [ ] **Port exercise distance display to v2-dev** — added to `v1.1-hotfix` (16 Aug 2026): ExerciseLogView's portrait/landscape rows now show distance (e.g. "5.0 km") for Walking/Running/Cycling entries when `exercise.distance > 0`. Portrait puts it on its own line to avoid crowding; landscape shows it inline with duration/calories. Needs the same change applied to v2-dev (plus JP label localization, consistent with v2-dev's existing pattern for this screen).
+
 ## Housekeeping
 - [ ] Regenerate GitHub token (was exposed) and remove from git remote URL

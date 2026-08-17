@@ -25,14 +25,16 @@ enum ExerciseOffsetType: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    /// Human-readable label for the picker
+    /// Human-readable label for the picker.
+    /// -ing forms match the wording used in the Exercise Type list
+    /// (Exercise Log's "Add Exercise Session" picker) for consistency.
     var label: String {
         switch self {
-        case .walk:   return "Walk"
-        case .run:    return "Run"
-        case .cycle:  return "Cycle"
-        case .swim:   return "Swim"
-        case .garden:          return "Garden"
+        case .walk:   return "Walking"
+        case .run:    return "Running"
+        case .cycle:  return "Cycling"
+        case .swim:   return "Swimming"
+        case .garden:          return "Gardening"
         case .strengthTraining: return "Strength Training"
         }
     }
@@ -63,7 +65,7 @@ enum ExerciseOffsetType: String, CaseIterable, Identifiable {
 
     /// Default pace when no personal history is available.
     /// Walk/Run/Cycle: km per minute.  Swim: metres per minute.
-    /// Garden: 0 — gardening has no meaningful pace/distance.
+    /// Garden/Strength Training: 0 — no meaningful pace/distance.
     var defaultPace: Double {
         switch self {
         case .walk:   return 5.0 / 60.0    // 5 km/h

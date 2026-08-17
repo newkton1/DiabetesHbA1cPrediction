@@ -694,6 +694,15 @@ struct ExerciseRowView: View {
                         .font(.caption)
                         .foregroundColor(flameColor)
                 }
+
+                // Distance, on its own line to avoid crowding the row on
+                // narrow screens — only shown for distance-based exercises
+                // (Walking/Running/Cycling) where HealthKit provided a value.
+                if exercise.distance > 0 {
+                    Label(String(format: "%.1f km", exercise.distance), systemImage: "location.fill")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
 
             Spacer()
@@ -746,6 +755,12 @@ struct ExerciseRowView: View {
                     Label("\(formatNoComma(Int(exercise.caloriesBurned))) cal", systemImage: "flame.fill")
                         .font(.caption)
                         .foregroundColor(flameColor)
+
+                    if exercise.distance > 0 {
+                        Label(String(format: "%.1f km", exercise.distance), systemImage: "location.fill")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
 
