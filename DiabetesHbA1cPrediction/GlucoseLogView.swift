@@ -2002,10 +2002,10 @@ struct AddGlucoseReadingSheet: View {
             }
 
             Section {
-                DatePicker("Lab Test Date", selection: $hba1cLabDate, in: ...Date(),
+                DatePicker("Enter test date", selection: $hba1cLabDate, in: ...Date(),
                            displayedComponents: [.date])
             } header: {
-                Text("Lab Test Date")
+                Text("Lab").foregroundColor(.red) + Text(" Test Date")
             }
         }
         .alert("Confirm Lab Result", isPresented: $showLabConfirmAlert) {

@@ -217,8 +217,8 @@ struct UserProfileView: View {
 
                 Picker(selection: $tobaccoUse, label: Label("Tobacco Use", systemImage: "smoke.fill")) {
                     Text("Never").tag("Never")
-                    Text("Former").tag("Former")
-                    Text("Current").tag("Current")
+                    Text("Quit more than 1 year").tag("Former")
+                    Text("Smoking more than 1 year").tag("Current")
                 }
 
                 HStack {
