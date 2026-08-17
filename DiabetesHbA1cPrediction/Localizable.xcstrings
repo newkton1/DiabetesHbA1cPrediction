@@ -2689,6 +2689,17 @@
         }
       }
     },
+    "Exercise (week)" : {
+      "comment" : "Dashboard exercise stat card title, merges the previously separate \"Exercise\" + \"(Week)\" lines into one.",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "運動（今週）"
+          }
+        }
+      }
+    },
     "Exercise Log" : {
       "localizations" : {
         "ja" : {
@@ -3073,6 +3084,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "元喫煙者"
+          }
+        }
+      }
+    },
+    "Quit more than 1 year" : {
+      "comment" : "Tobacco Use picker option, replaces the old \"Former\" label with more specific wording.",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1年以上前に禁煙"
+          }
+        }
+      }
+    },
+    "Smoking more than 1 year" : {
+      "comment" : "Tobacco Use picker option, replaces the old \"Current\" label with more specific wording.",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1年以上喫煙中"
           }
         }
       }

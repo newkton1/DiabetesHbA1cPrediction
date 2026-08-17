@@ -1242,8 +1242,8 @@ private struct MealQuickActionsView: View {
 private struct DashboardActionCardContent: View {
     let icon: String
     let iconColor: Color
-    let title: String
-    let subtitle: String?
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
