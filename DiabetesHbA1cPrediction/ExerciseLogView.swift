@@ -346,10 +346,10 @@ struct ExerciseLogView: View {
                 messageParts.append("\(exerciseResult.count) new workout\(exerciseResult.count == 1 ? "" : "s") (\(typeSummary))")
             }
             if activityResult.new > 0 {
-                messageParts.append("\(activityResult.new) day\(activityResult.new == 1 ? "" : "s") of walking activity")
+                messageParts.append("\(activityResult.new) day\(activityResult.new == 1 ? "" : "s") of ambient walking activity")
             }
             if activityResult.updated > 0 {
-                messageParts.append("\(activityResult.updated) day\(activityResult.updated == 1 ? "" : "s") of walking updated")
+                messageParts.append("\(activityResult.updated) day\(activityResult.updated == 1 ? "" : "s") of ambient walking updated")
             }
             if glucoseResult.newImported > 0 {
                 messageParts.append("\(glucoseResult.newImported) new glucose reading\(glucoseResult.newImported == 1 ? "" : "s")")
