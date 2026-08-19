@@ -2993,7 +2993,17 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "指先\n穿刺"
+            "value" : "指先採血"
+          }
+        }
+      }
+    },
+    "Hospital Lab Test" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "病院検査"
           }
         }
       }

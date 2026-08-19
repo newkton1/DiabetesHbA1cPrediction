@@ -12,6 +12,8 @@ private func sourceDisplayName(_ source: String) -> String {
         return String(localized: "Finger\nStick")
     case "Continuous Glucose Monitor":
         return String(localized: "CGM")
+    case "Hospital Lab Test":
+        return String(localized: "Hospital Lab Test")
     default:
         return source
     }
