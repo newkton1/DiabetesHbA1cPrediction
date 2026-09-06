@@ -12,7 +12,13 @@ import WebKit
 
 struct PrivacyPolicyView: View {
 
-    private let url = URL(string: "https://newkton1.github.io/diabetes-feast-privacy/")!
+    private let url: URL = {
+        let isJapanese = Locale.preferredLanguages.first?.hasPrefix("ja") ?? false
+        let urlString = isJapanese
+            ? "https://newkton1.github.io/diabetes-feast-privacy/PrivacyPolicy_JA.html"
+            : "https://newkton1.github.io/diabetes-feast-privacy/"
+        return URL(string: urlString)!
+    }()
 
     var body: some View {
         PrivacyWebView(url: url)

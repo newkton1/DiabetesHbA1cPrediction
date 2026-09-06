@@ -424,26 +424,28 @@ struct GlucoseLogView: View {
             VStack(alignment: .leading, spacing: 8) {
                 // Header: date navigation row (Sync moved to nav bar toolbar)
                 HStack(spacing: 6) {
-                    // Back arrow — scroll chart earlier (up to 30 days)
-                    Button(action: { shiftChart(byDays: -chartWindowDays) }) {
-                        Image(systemName: "chevron.left")
-                            .font(.caption)
-                            .accessibilityLabel("Scroll chart earlier")
+                    // Back arrow — single tap or hold-to-repeat (scroll chart earlier)
+                    HoldRepeatChevron(
+                        systemImage: "chevron.left",
+                        accessibilityLabel: "Scroll chart earlier",
+                        isDisabled: chartWindowStart <= (glucoseReadings.last?.timestamp ?? Date())
+                    ) {
+                        shiftChart(byDays: -chartWindowDays)
                     }
-                    .disabled(chartWindowStart <= (glucoseReadings.last?.timestamp ?? Date()))
 
                     Text(chartWindowLabel)
                         .font(.subheadline.bold())
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
 
-                    // Forward arrow — scroll chart later (up to "now")
-                    Button(action: { shiftChart(byDays: chartWindowDays) }) {
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .accessibilityLabel("Scroll chart later")
+                    // Forward arrow — single tap or hold-to-repeat (scroll chart later)
+                    HoldRepeatChevron(
+                        systemImage: "chevron.right",
+                        accessibilityLabel: "Scroll chart later",
+                        isDisabled: chartAnchorDate == nil
+                    ) {
+                        shiftChart(byDays: chartWindowDays)
                     }
-                    .disabled(chartAnchorDate == nil)
 
                     // Reset to "now" — hidden in landscape to save space
                     if chartAnchorDate != nil && isPortrait {
@@ -922,10 +924,13 @@ struct GlucoseLogView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         // Line 1: icon + type + duration + timing
                         Label {
-                            let timing = exercise.minutesBeforeReading >= 0
-                                ? "\(exercise.minutesBeforeReading) min before"
-                                : "\(abs(exercise.minutesBeforeReading)) min after"
-                            Text("\(exercise.type) \(exercise.durationMinutes) min · \(timing)")
+                            let mins = Int(exercise.minutesBeforeReading)
+                            let timing = mins >= 0
+                                ? String(format: NSLocalizedString("%d min before", comment: "Exercise timing"), mins)
+                                : String(format: NSLocalizedString("%d min after", comment: "Exercise timing"), abs(mins))
+                            let exerciseType = exercise.type.isEmpty ? "Other" : exercise.type
+                            let localType = NSLocalizedString(exerciseType, comment: "Exercise type")
+                            Text(String(format: NSLocalizedString("%@ %d min · %@", comment: "Exercise summary"), localType, Int(exercise.durationMinutes), timing))
                         } icon: {
                             Image(systemName: "figure.walk")
                         }
@@ -2075,6 +2080,76 @@ struct AddGlucoseReadingSheet: View {
             saveErrorMessage = "Could not save HbA1c lab result. Please try again."
             showSaveError = true
         }
+    }
+}
+
+// MARK: - HoldRepeatChevron
+
+/// A chevron button that fires once on tap and repeats with gentle acceleration
+/// while held — same behaviour as the iOS keyboard delete key.
+///
+/// Timing:
+///  - Hold threshold : 0.40 s  (how long before repeating starts)
+///  - Initial interval: 0.35 s  (first repeat gap)
+///  - Acceleration   : ×0.93 per step (floor 0.15 s — reached after ~10 fires)
+private struct HoldRepeatChevron: View {
+    let systemImage: String
+    let accessibilityLabel: String
+    let isDisabled: Bool
+    let action: () -> Void
+
+    private let holdThreshold:   TimeInterval = 0.40
+    private let initialInterval: TimeInterval = 0.35
+    private let minimumInterval: TimeInterval = 0.15
+    private let acceleration:    Double       = 0.93
+
+    @State private var holdTimer:   Timer?
+    @State private var repeatTimer: Timer?
+    @State private var isRepeating = false
+
+    var body: some View {
+        Image(systemName: systemImage)
+            .font(.caption)
+            .foregroundColor(isDisabled ? Color(.systemGray3) : .accentColor)
+            .accessibilityLabel(LocalizedStringKey(accessibilityLabel))
+            .contentShape(Rectangle())
+            .padding(6) // generous hit area without visual change
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        // Guard: only start once per press
+                        guard !isDisabled, holdTimer == nil, !isRepeating else { return }
+                        // Schedule hold recognition
+                        holdTimer = Timer.scheduledTimer(withTimeInterval: holdThreshold,
+                                                         repeats: false) { _ in
+                            isRepeating = true
+                            fireRepeat(interval: initialInterval)
+                        }
+                    }
+                    .onEnded { _ in
+                        if !isDisabled && !isRepeating {
+                            action() // normal tap — fire once on release
+                        }
+                        cancelTimers()
+                    }
+            )
+    }
+
+    /// Fires the action then reschedules itself with a shorter interval.
+    private func fireRepeat(interval: TimeInterval) {
+        guard isRepeating else { return }
+        action()
+        let next = max(minimumInterval, interval * acceleration)
+        repeatTimer = Timer.scheduledTimer(withTimeInterval: interval,
+                                           repeats: false) { _ in
+            fireRepeat(interval: next)
+        }
+    }
+
+    private func cancelTimers() {
+        holdTimer?.invalidate();   holdTimer = nil
+        repeatTimer?.invalidate(); repeatTimer = nil
+        isRepeating = false
     }
 }
 

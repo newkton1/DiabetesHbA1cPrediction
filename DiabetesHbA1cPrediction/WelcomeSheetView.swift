@@ -53,10 +53,7 @@ struct WelcomeSheetView: View {
             .foregroundStyle(AppTheme.textPrimary)
 
             // Subtitle
-            VStack(spacing: 2) {
-                Text("Monitor your GMI & glucose trends,")
-                Text("plan meals, treats, etc.")
-            }
+            Text("Monitor your GMI & glucose trends, plan meals, treats, etc.")
             .font(.subheadline)
             .multilineTextAlignment(.center)
             .foregroundStyle(AppTheme.textSecondary)

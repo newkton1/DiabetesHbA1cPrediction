@@ -754,11 +754,11 @@ private struct GMICardView: View {
                 .buttonStyle(.plain)
                 .accessibilityHint("Tap to recalculate GMI")
 
-                Text("Based on \(gmi.readingCount) glucose readings · last \(gmi.windowDays) days")
+                Text(String(format: NSLocalizedString("Based on %lld glucose readings · last %lld days", comment: "GMI reading count"), Int64(gmi.readingCount), Int64(gmi.windowDays)))
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                Text("Mean glucose: \(Int(gmi.meanMgDl.rounded())) mg/dL")
+                Text(String(format: NSLocalizedString("Mean glucose: %lld mg/dL", comment: "Mean glucose value"), Int64(gmi.meanMgDl.rounded())))
                     .font(.caption2)
                     .foregroundColor(.secondary)
 

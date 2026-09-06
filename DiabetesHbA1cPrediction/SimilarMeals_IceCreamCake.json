@@ -1,0 +1,1142 @@
+{
+  "meals": [
+    {
+      "id": "d16621e3-d163-4c18-b048-07bfcf069337",
+      "name": "Dessert at party",
+      "calories": 765.0,
+      "timestamp": "2026-07-21T18:00:00.000Z",
+      "mealType": "Snack",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "unitString": null,
+      "foodItems": [
+        {
+          "foodName": "Ice Cream Cake",
+          "foodCategory": "Desserts",
+          "quantity": 3.0,
+          "servingSize": 1.0,
+          "servingUnit": "cup",
+          "caloriesPerServing": 255.0,
+          "carbsPerServing": 32.0,
+          "proteinPerServing": 2.5,
+          "fatPerServing": 13.0,
+          "fiberPerServing": 1.0,
+          "glycemicIndex": 60
+        }
+      ],
+      "macronutrients": []
+    },
+    {
+      "id": "ccc4244c-275b-40a0-bdd5-b3071d9ec301",
+      "name": "Dessert at party",
+      "calories": 765.0,
+      "timestamp": "2026-07-14T18:00:00.000Z",
+      "mealType": "Snack",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "unitString": null,
+      "foodItems": [
+        {
+          "foodName": "Ice Cream Cake",
+          "foodCategory": "Desserts",
+          "quantity": 3.0,
+          "servingSize": 1.0,
+          "servingUnit": "cup",
+          "caloriesPerServing": 255.0,
+          "carbsPerServing": 32.0,
+          "proteinPerServing": 2.5,
+          "fatPerServing": 13.0,
+          "fiberPerServing": 1.0,
+          "glycemicIndex": 60
+        }
+      ],
+      "macronutrients": []
+    },
+    {
+      "id": "0f90519a-d847-42e1-bec2-db6d4d169d28",
+      "name": "Dessert at party",
+      "calories": 765.0,
+      "timestamp": "2026-07-07T18:00:00.000Z",
+      "mealType": "Snack",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "unitString": null,
+      "foodItems": [
+        {
+          "foodName": "Ice Cream Cake",
+          "foodCategory": "Desserts",
+          "quantity": 3.0,
+          "servingSize": 1.0,
+          "servingUnit": "cup",
+          "caloriesPerServing": 255.0,
+          "carbsPerServing": 32.0,
+          "proteinPerServing": 2.5,
+          "fatPerServing": 13.0,
+          "fiberPerServing": 1.0,
+          "glycemicIndex": 60
+        }
+      ],
+      "macronutrients": []
+    },
+    {
+      "id": "a534ae1c-c2ce-4258-9d06-feb4f6a21690",
+      "name": "Dessert at party",
+      "calories": 765.0,
+      "timestamp": "2026-06-30T18:00:00.000Z",
+      "mealType": "Snack",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "unitString": null,
+      "foodItems": [
+        {
+          "foodName": "Ice Cream Cake",
+          "foodCategory": "Desserts",
+          "quantity": 3.0,
+          "servingSize": 1.0,
+          "servingUnit": "cup",
+          "caloriesPerServing": 255.0,
+          "carbsPerServing": 32.0,
+          "proteinPerServing": 2.5,
+          "fatPerServing": 13.0,
+          "fiberPerServing": 1.0,
+          "glycemicIndex": 60
+        }
+      ],
+      "macronutrients": []
+    },
+    {
+      "id": "41f64cad-9f51-4f14-b898-94ad15fcd6f7",
+      "name": "Dessert at party",
+      "calories": 765.0,
+      "timestamp": "2026-06-23T18:00:00.000Z",
+      "mealType": "Snack",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "unitString": null,
+      "foodItems": [
+        {
+          "foodName": "Ice Cream Cake",
+          "foodCategory": "Desserts",
+          "quantity": 3.0,
+          "servingSize": 1.0,
+          "servingUnit": "cup",
+          "caloriesPerServing": 255.0,
+          "carbsPerServing": 32.0,
+          "proteinPerServing": 2.5,
+          "fatPerServing": 13.0,
+          "fiberPerServing": 1.0,
+          "glycemicIndex": 60
+        }
+      ],
+      "macronutrients": []
+    },
+    {
+      "id": "f60beb6e-0530-497c-8564-3f0e471b2b1a",
+      "name": "Dessert at party",
+      "calories": 765.0,
+      "timestamp": "2026-06-15T18:00:00.000Z",
+      "mealType": "Snack",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "unitString": null,
+      "foodItems": [
+        {
+          "foodName": "Ice Cream Cake",
+          "foodCategory": "Desserts",
+          "quantity": 3.0,
+          "servingSize": 1.0,
+          "servingUnit": "cup",
+          "caloriesPerServing": 255.0,
+          "carbsPerServing": 32.0,
+          "proteinPerServing": 2.5,
+          "fatPerServing": 13.0,
+          "fiberPerServing": 1.0,
+          "glycemicIndex": 60
+        }
+      ],
+      "macronutrients": []
+    }
+  ],
+  "glucoseReadings": [
+    {
+      "id": "77de7cc2-f55a-4429-8eaa-03fc2af4f257",
+      "timestamp": "2026-07-21T17:50:00.000Z",
+      "value": 138.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "b0b96cb0-df47-4085-b2da-0adcd7169371",
+      "timestamp": "2026-07-21T18:00:00.000Z",
+      "value": 138.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "64ac512f-ea65-41ba-8f4f-871d27e2c297",
+      "timestamp": "2026-07-21T18:10:00.000Z",
+      "value": 145.8,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "673f0647-e8de-4859-a934-e6ba40a19603",
+      "timestamp": "2026-07-21T18:20:00.000Z",
+      "value": 153.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "a1f034db-5dd7-4a00-822d-b17ad5516194",
+      "timestamp": "2026-07-21T18:30:00.000Z",
+      "value": 159.2,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "fa29b475-da02-4ffb-ac10-7a4379d8d0d3",
+      "timestamp": "2026-07-21T18:40:00.000Z",
+      "value": 164.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "4be382ef-d734-4f57-a061-12f1ff578110",
+      "timestamp": "2026-07-21T18:50:00.000Z",
+      "value": 167.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "1a27a693-ca57-485d-b368-833b25f5183f",
+      "timestamp": "2026-07-21T19:00:00.000Z",
+      "value": 168.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "f768b1b9-9683-40bb-a1d1-99ee2adcf846",
+      "timestamp": "2026-07-21T19:10:00.000Z",
+      "value": 193.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "2acaf33f-0f0c-4987-9499-72bd7d3762cb",
+      "timestamp": "2026-07-21T19:20:00.000Z",
+      "value": 218.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "d654a72b-5e92-4e3d-906a-861cba170e5e",
+      "timestamp": "2026-07-21T19:30:00.000Z",
+      "value": 243.0,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "73d5d871-d6d7-4b4f-b62b-3181a36d8a17",
+      "timestamp": "2026-07-21T19:40:00.000Z",
+      "value": 231.9,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "f4a29805-a588-4f40-91a6-662fc9a48575",
+      "timestamp": "2026-07-21T19:50:00.000Z",
+      "value": 198.6,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "2314165f-c857-447c-a905-013e09539a4e",
+      "timestamp": "2026-07-21T20:00:00.000Z",
+      "value": 143.0,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "bb4bf7c4-294d-45bb-876c-71610629cb9e",
+      "timestamp": "2026-07-21T20:15:00.000Z",
+      "value": 137.4,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "e22106d5-637f-422f-b9e5-ed1b431ab3a4",
+      "timestamp": "2026-07-21T20:30:00.000Z",
+      "value": 131.9,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "a5184ce1-72f4-4c32-8a05-fce1d628c159",
+      "timestamp": "2026-07-21T20:45:00.000Z",
+      "value": 130.0,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "6a736aa0-3da3-43e0-8e90-22b94a35383d",
+      "timestamp": "2026-07-21T21:00:00.000Z",
+      "value": 130.0,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "0c178e62-7ad3-422f-a9bf-4e97063cda35",
+      "timestamp": "2026-07-21T21:30:00.000Z",
+      "value": 130.0,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "af4607c7-0e9b-4fdc-88ca-abfa161eca2d",
+      "timestamp": "2026-07-14T17:50:00.000Z",
+      "value": 141.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "fa314d2e-b537-4cc4-9d79-95a0990f16a9",
+      "timestamp": "2026-07-14T18:00:00.000Z",
+      "value": 141.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "9f25ea77-74ae-497f-9329-d2ac6eca46f8",
+      "timestamp": "2026-07-14T18:10:00.000Z",
+      "value": 149.3,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "13653ca1-d190-409d-bf3e-4d080e7b1e29",
+      "timestamp": "2026-07-14T18:20:00.000Z",
+      "value": 156.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "34d1c2d5-a341-4e66-8f47-79f299089669",
+      "timestamp": "2026-07-14T18:30:00.000Z",
+      "value": 162.7,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "ee4d4357-996f-45ae-9a30-9e3a4ec043ea",
+      "timestamp": "2026-07-14T18:40:00.000Z",
+      "value": 167.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "2e03aee7-18d7-46e4-8409-1ccae47169a1",
+      "timestamp": "2026-07-14T18:50:00.000Z",
+      "value": 170.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "b0c808cf-28f5-4067-994e-5f01261c7867",
+      "timestamp": "2026-07-14T19:00:00.000Z",
+      "value": 171.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "1591e115-a528-4bb4-9bda-e767eb3dfc09",
+      "timestamp": "2026-07-14T19:10:00.000Z",
+      "value": 196.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "06974edc-55ca-4779-a3bc-0da0c66115a7",
+      "timestamp": "2026-07-14T19:20:00.000Z",
+      "value": 221.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "21337b15-4bab-40d6-9fcd-cbe8283ef5f8",
+      "timestamp": "2026-07-14T19:30:00.000Z",
+      "value": 246.5,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "c7096142-bba4-4e53-8821-266bcf651e4b",
+      "timestamp": "2026-07-14T19:40:00.000Z",
+      "value": 235.4,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "864e48c0-dddd-454c-b513-8c60b6f93231",
+      "timestamp": "2026-07-14T19:50:00.000Z",
+      "value": 202.1,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "244c1d37-8d16-49f1-866d-255aa243c681",
+      "timestamp": "2026-07-14T20:00:00.000Z",
+      "value": 146.5,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "75b47ff1-2465-4812-8ac9-270b9e2ba737",
+      "timestamp": "2026-07-14T20:15:00.000Z",
+      "value": 140.9,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "9253c1a6-f10b-46a6-8115-41a0a77fdc31",
+      "timestamp": "2026-07-14T20:30:00.000Z",
+      "value": 135.4,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "7b300093-aae1-455e-9e69-3ba53aa2959c",
+      "timestamp": "2026-07-14T20:45:00.000Z",
+      "value": 133.5,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "6299bfd7-37dd-4714-9541-55f5f9ad347c",
+      "timestamp": "2026-07-14T21:00:00.000Z",
+      "value": 133.5,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "8f4d0526-8b6d-4d9f-bb6d-617adf233f80",
+      "timestamp": "2026-07-14T21:30:00.000Z",
+      "value": 133.5,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "5c21f529-7ff6-479a-a86f-64703ff6ace5",
+      "timestamp": "2026-07-07T17:50:00.000Z",
+      "value": 138.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "14f55abe-3fab-47b4-81e9-79e8b096d438",
+      "timestamp": "2026-07-07T18:00:00.000Z",
+      "value": 138.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "58f539d9-ccb0-4ddf-b5b5-ae36dfbbb436",
+      "timestamp": "2026-07-07T18:10:00.000Z",
+      "value": 146.3,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "0526e23f-f510-4740-a033-6bd2a0b76c13",
+      "timestamp": "2026-07-07T18:20:00.000Z",
+      "value": 153.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "15d894b5-4bf1-4887-8fda-15ec40249a10",
+      "timestamp": "2026-07-07T18:30:00.000Z",
+      "value": 159.7,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "4186cfcb-db67-42dd-a8c6-0ce26bafaa2c",
+      "timestamp": "2026-07-07T18:40:00.000Z",
+      "value": 164.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "f0f5ce8d-f21f-457f-b0c4-c2e6a75203f9",
+      "timestamp": "2026-07-07T18:50:00.000Z",
+      "value": 167.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "b217af44-6183-4467-8ffa-9424e6faf218",
+      "timestamp": "2026-07-07T19:00:00.000Z",
+      "value": 168.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "5611dbfc-f812-4b10-a651-4f18c7e20708",
+      "timestamp": "2026-07-07T19:10:00.000Z",
+      "value": 193.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "3c9eb7e1-f434-4a63-a370-99cd6367f673",
+      "timestamp": "2026-07-07T19:20:00.000Z",
+      "value": 218.5,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "d746db3f-03b6-41d1-946b-393d586fc290",
+      "timestamp": "2026-07-07T19:30:00.000Z",
+      "value": 243.5,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "41e7123c-2a2e-49b9-927b-06c836d45fd0",
+      "timestamp": "2026-07-07T19:40:00.000Z",
+      "value": 232.4,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "de035638-b93c-4114-b709-cafc656e4671",
+      "timestamp": "2026-07-07T19:50:00.000Z",
+      "value": 199.1,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "e417c38b-18e1-4f0a-979c-a38dd9dd6106",
+      "timestamp": "2026-07-07T20:00:00.000Z",
+      "value": 143.5,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "e334eb0f-4175-4cb2-9092-5a69ee510579",
+      "timestamp": "2026-07-07T20:15:00.000Z",
+      "value": 137.9,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "8f9bab66-e0b8-49f2-87e6-1c9da5c42b00",
+      "timestamp": "2026-07-07T20:30:00.000Z",
+      "value": 132.4,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "a7dcc938-0ed8-47d7-851a-4ba215480ff3",
+      "timestamp": "2026-07-07T20:45:00.000Z",
+      "value": 130.5,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "e6afad76-743c-4aea-8a4c-1a95634e691f",
+      "timestamp": "2026-07-07T21:00:00.000Z",
+      "value": 130.5,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "8052df34-4e42-4bd3-afd2-d3d3541477c1",
+      "timestamp": "2026-07-07T21:30:00.000Z",
+      "value": 130.5,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "f74d9fd2-5552-4043-816d-bfd1a30f7c13",
+      "timestamp": "2026-06-30T17:50:00.000Z",
+      "value": 142.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "ebc1b89f-5cbb-4177-b7a3-c21e51f95a34",
+      "timestamp": "2026-06-30T18:00:00.000Z",
+      "value": 142.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "08c57587-7467-4daf-8af9-051b29900316",
+      "timestamp": "2026-06-30T18:10:00.000Z",
+      "value": 149.8,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "84465a2e-a727-483e-b0cf-d577dc6823c4",
+      "timestamp": "2026-06-30T18:20:00.000Z",
+      "value": 157.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "2844c773-107b-4f4b-8df0-4959750f11dc",
+      "timestamp": "2026-06-30T18:30:00.000Z",
+      "value": 163.2,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "25494d93-d2bf-41f9-883f-0e875802d05b",
+      "timestamp": "2026-06-30T18:40:00.000Z",
+      "value": 168.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "755aa0ed-1908-45d4-96a5-2d328bac6209",
+      "timestamp": "2026-06-30T18:50:00.000Z",
+      "value": 171.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "c071b017-c0bf-4e2f-8be3-5194fb64e468",
+      "timestamp": "2026-06-30T19:00:00.000Z",
+      "value": 172.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "30a2534d-7cea-4226-9097-49906f32c938",
+      "timestamp": "2026-06-30T19:10:00.000Z",
+      "value": 197.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "1751eaa6-c0bb-450e-aa19-e815bb42d920",
+      "timestamp": "2026-06-30T19:20:00.000Z",
+      "value": 222.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "9391b22f-0592-4262-aebc-0849cf964162",
+      "timestamp": "2026-06-30T19:30:00.000Z",
+      "value": 247.0,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "a2b7810c-8e1c-4723-a7e9-6f106a7411e9",
+      "timestamp": "2026-06-30T19:40:00.000Z",
+      "value": 235.9,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "754624df-e141-47b0-9cdf-fbfc55bc7247",
+      "timestamp": "2026-06-30T19:50:00.000Z",
+      "value": 202.6,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "1ac7f72d-ff92-4f23-b0fa-d6d11af4247f",
+      "timestamp": "2026-06-30T20:00:00.000Z",
+      "value": 147.0,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "0c81d6f6-b022-41a9-8192-ff65dc3ca926",
+      "timestamp": "2026-06-30T20:15:00.000Z",
+      "value": 141.4,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "14f01e4b-690f-4298-ac75-fb225000a31f",
+      "timestamp": "2026-06-30T20:30:00.000Z",
+      "value": 135.9,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "89ceb406-6218-48f8-a26b-67298f6c26d0",
+      "timestamp": "2026-06-30T20:45:00.000Z",
+      "value": 134.0,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "6ef6d197-6152-42d9-babb-02414b043aa9",
+      "timestamp": "2026-06-30T21:00:00.000Z",
+      "value": 134.0,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "4270f8f8-69ab-4d89-8089-6e1edd5d60b5",
+      "timestamp": "2026-06-30T21:30:00.000Z",
+      "value": 134.0,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "0d53dcb8-2e99-41d5-8311-06f893e7b5ba",
+      "timestamp": "2026-06-23T17:50:00.000Z",
+      "value": 139.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "7841e2aa-6dbd-46fe-b830-08af308ff5be",
+      "timestamp": "2026-06-23T18:00:00.000Z",
+      "value": 139.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "21877847-bbc2-4761-9717-94c081507ae5",
+      "timestamp": "2026-06-23T18:10:00.000Z",
+      "value": 146.8,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "0b656f9a-6789-400b-bed5-9369e6b1a4f8",
+      "timestamp": "2026-06-23T18:20:00.000Z",
+      "value": 154.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "0bb7013f-d652-433f-903a-75bc9250de36",
+      "timestamp": "2026-06-23T18:30:00.000Z",
+      "value": 160.2,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "bf991070-59d0-4199-8e14-ac7aa003dc71",
+      "timestamp": "2026-06-23T18:40:00.000Z",
+      "value": 165.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "fe4aafa8-2ec4-4d93-8cf6-65e14b59dbf9",
+      "timestamp": "2026-06-23T18:50:00.000Z",
+      "value": 168.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "24ed918c-8eab-4848-8fbb-024923e1757a",
+      "timestamp": "2026-06-23T19:00:00.000Z",
+      "value": 169.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "0967ee0b-f7d9-4176-b57b-485f630de649",
+      "timestamp": "2026-06-23T19:10:00.000Z",
+      "value": 194.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "b2acfe28-80dd-483b-ae24-a053c7b26449",
+      "timestamp": "2026-06-23T19:20:00.000Z",
+      "value": 219.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "97c5ce4e-bdb9-4be9-bde2-f22a3a60c92f",
+      "timestamp": "2026-06-23T19:30:00.000Z",
+      "value": 244.0,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "4a0ecfb9-b496-458a-89b2-ed5a9490aba0",
+      "timestamp": "2026-06-23T19:40:00.000Z",
+      "value": 232.9,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "2471326d-e211-4241-9d31-5564b98ede0d",
+      "timestamp": "2026-06-23T19:50:00.000Z",
+      "value": 199.6,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "96a45f81-cfbf-414d-ae60-2e3ead3e5124",
+      "timestamp": "2026-06-23T20:00:00.000Z",
+      "value": 144.0,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "a2891248-48d1-4a56-a119-d76eee90eaec",
+      "timestamp": "2026-06-23T20:15:00.000Z",
+      "value": 138.4,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "0454f4ac-5105-4930-be3c-c1ad52efa9ca",
+      "timestamp": "2026-06-23T20:30:00.000Z",
+      "value": 132.9,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "c3cef5c8-ca56-43aa-97d2-ca8ec9dc54f6",
+      "timestamp": "2026-06-23T20:45:00.000Z",
+      "value": 131.0,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "dabecfad-8dae-4017-b21b-3b730821e495",
+      "timestamp": "2026-06-23T21:00:00.000Z",
+      "value": 131.0,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "966f6bd9-1624-415a-9348-ff92a3acdf4b",
+      "timestamp": "2026-06-23T21:30:00.000Z",
+      "value": 131.0,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "76d799a8-84a2-4a0b-8c46-14768c8de282",
+      "timestamp": "2026-06-15T17:50:00.000Z",
+      "value": 141.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "f31a812d-ca2e-4475-803d-099009ec99f9",
+      "timestamp": "2026-06-15T18:00:00.000Z",
+      "value": 141.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "6a73dea8-78c4-4d00-8954-15059582d3dd",
+      "timestamp": "2026-06-15T18:10:00.000Z",
+      "value": 148.8,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "2be74773-e0b8-478d-8935-0c45b15777ad",
+      "timestamp": "2026-06-15T18:20:00.000Z",
+      "value": 156.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "fa52f3ce-663d-4862-8bd3-a773f7856113",
+      "timestamp": "2026-06-15T18:30:00.000Z",
+      "value": 162.2,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "93f96ea1-1633-4a84-b4f8-00eb759884cd",
+      "timestamp": "2026-06-15T18:40:00.000Z",
+      "value": 167.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "421ace04-6ba8-4b81-99aa-416b538917e3",
+      "timestamp": "2026-06-15T18:50:00.000Z",
+      "value": 170.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "8d496814-af5a-4bd9-baab-6b2d961b3cfc",
+      "timestamp": "2026-06-15T19:00:00.000Z",
+      "value": 171.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "4025fb40-8e47-43ab-b84c-d6877ebb34a3",
+      "timestamp": "2026-06-15T19:10:00.000Z",
+      "value": 196.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "fc15ab80-b2a7-4f2e-89b7-40e326c62dc5",
+      "timestamp": "2026-06-15T19:20:00.000Z",
+      "value": 221.0,
+      "unit": "mg/dL",
+      "trend": "rising",
+      "source": "LibreLink"
+    },
+    {
+      "id": "2e0a1603-e18d-4703-b683-38d542a8193d",
+      "timestamp": "2026-06-15T19:30:00.000Z",
+      "value": 246.0,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "4dbb9738-9093-4c66-9d54-54cddb58ee4a",
+      "timestamp": "2026-06-15T19:40:00.000Z",
+      "value": 234.9,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "e7b81097-48ea-4b56-a624-17ad76351053",
+      "timestamp": "2026-06-15T19:50:00.000Z",
+      "value": 201.6,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "a15d23dc-41fa-46be-9f1f-3fb6279585cd",
+      "timestamp": "2026-06-15T20:00:00.000Z",
+      "value": 146.0,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "0fe471ed-89f4-47e5-96e9-161bd91dd110",
+      "timestamp": "2026-06-15T20:15:00.000Z",
+      "value": 140.4,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "59512ee0-748b-45d9-b3d9-43bb71893b7b",
+      "timestamp": "2026-06-15T20:30:00.000Z",
+      "value": 134.9,
+      "unit": "mg/dL",
+      "trend": "falling",
+      "source": "LibreLink"
+    },
+    {
+      "id": "0b885de9-f7a8-4158-951e-6315288cc336",
+      "timestamp": "2026-06-15T20:45:00.000Z",
+      "value": 133.0,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "d5a3ca0d-720a-4a36-b0ef-831ab9cf7dbd",
+      "timestamp": "2026-06-15T21:00:00.000Z",
+      "value": 133.0,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    },
+    {
+      "id": "5d4c550b-f597-432f-afbb-33da6fcbe611",
+      "timestamp": "2026-06-15T21:30:00.000Z",
+      "value": 133.0,
+      "unit": "mg/dL",
+      "trend": "stable",
+      "source": "LibreLink"
+    }
+  ],
+  "exerciseSessions": [
+    {
+      "id": "3bd5bfce-f198-42b4-941b-6adfcd92e54e",
+      "type": "Walking",
+      "startDate": "2026-07-21T19:30:00.000Z",
+      "endDate": "2026-07-21T20:35:00.000Z",
+      "duration": 65.0,
+      "distance": 4.9,
+      "intensity": 0.45,
+      "caloriesBurned": 240.0,
+      "notes": "Post-meal walk"
+    },
+    {
+      "id": "6e63a5f0-2840-49cc-8f6e-0d47af1c09ab",
+      "type": "Walking",
+      "startDate": "2026-07-14T19:30:00.000Z",
+      "endDate": "2026-07-14T20:35:00.000Z",
+      "duration": 65.0,
+      "distance": 4.9,
+      "intensity": 0.45,
+      "caloriesBurned": 240.0,
+      "notes": "Post-meal walk"
+    },
+    {
+      "id": "b0c0aee5-709c-4668-bb77-d1c95f68a719",
+      "type": "Walking",
+      "startDate": "2026-07-07T19:30:00.000Z",
+      "endDate": "2026-07-07T20:35:00.000Z",
+      "duration": 65.0,
+      "distance": 4.9,
+      "intensity": 0.45,
+      "caloriesBurned": 240.0,
+      "notes": "Post-meal walk"
+    },
+    {
+      "id": "a407072d-a9b4-4eae-b03b-6f5458242e87",
+      "type": "Walking",
+      "startDate": "2026-06-30T19:30:00.000Z",
+      "endDate": "2026-06-30T20:35:00.000Z",
+      "duration": 65.0,
+      "distance": 4.9,
+      "intensity": 0.45,
+      "caloriesBurned": 240.0,
+      "notes": "Post-meal walk"
+    },
+    {
+      "id": "697c8253-e6ed-4259-97f4-cc6ea8a2ca66",
+      "type": "Walking",
+      "startDate": "2026-06-23T19:30:00.000Z",
+      "endDate": "2026-06-23T20:35:00.000Z",
+      "duration": 65.0,
+      "distance": 4.9,
+      "intensity": 0.45,
+      "caloriesBurned": 240.0,
+      "notes": "Post-meal walk"
+    },
+    {
+      "id": "72add6ff-bcf2-493f-ad3d-3ee94951685e",
+      "type": "Walking",
+      "startDate": "2026-06-15T19:30:00.000Z",
+      "endDate": "2026-06-15T20:35:00.000Z",
+      "duration": 65.0,
+      "distance": 4.9,
+      "intensity": 0.45,
+      "caloriesBurned": 240.0,
+      "notes": "Post-meal walk"
+    }
+  ]
+}

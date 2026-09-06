@@ -1,0 +1,5 @@
+/* Japanese localisation for Info.plist usage description strings */
+
+NSHealthShareUsageDescription = "Diabetes Feastは、ラボ検査結果間の健康トレンドを表示するために、Apple Healthから血糖値とアクティビティデータを読み取ります。これはウェルネスアプリであり、医療機器ではありません。";
+
+NSHealthUpdateUsageDescription = "Diabetes FeastはApple Healthにデータを書き込みません。";

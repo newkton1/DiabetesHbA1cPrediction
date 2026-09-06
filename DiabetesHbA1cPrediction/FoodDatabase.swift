@@ -141,6 +141,11 @@ class FoodDatabase: ObservableObject {
     /// Western foods with Japanese display names and categories.
     /// Populated lazily by loadWesternJapaneseDatabaseIfNeeded().
     @Published private(set) var westernJapaneseFoodItems: [FoodItem] = []
+
+    /// Maps Japanese food name → English food name for 洋食 items.
+    /// Used in the search filter so typing "Tiramisu" finds "ティラミス".
+    @Published private(set) var westernJapaneseNameEN: [String: String] = [:]
+
     private var westernJapaneseDatabaseLoaded = false
 
     /// Ordered category list for 洋食 chip row (user-defined display order).
@@ -244,8 +249,10 @@ class FoodDatabase: ObservableObject {
                 uniquingKeysWith: { first, _ in first }
             )
 
+            var nameENLookup: [String: String] = [:]
             westernJapaneseFoodItems = entries.compactMap { entry in
                 guard let original = lookup[entry.nameEN] else { return nil }
+                nameENLookup[entry.nameJP] = entry.nameEN
                 return FoodItem(
                     name: entry.nameJP,
                     category: entry.category,
@@ -259,6 +266,7 @@ class FoodDatabase: ObservableObject {
                     glycemicIndex: original.glycemicIndex
                 )
             }
+            westernJapaneseNameEN = nameENLookup
             westernJapaneseDatabaseLoaded = true
             print("FoodDatabase: Loaded \(westernJapaneseFoodItems.count) 洋食 items")
         } catch {

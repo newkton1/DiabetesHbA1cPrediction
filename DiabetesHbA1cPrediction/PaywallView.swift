@@ -190,7 +190,12 @@ struct PaywallView: View {
 
             HStack(spacing: 16) {
                 Link("Privacy Policy",
-                     destination: URL(string: "https://newkton1.github.io/diabetes-feast-privacy/")!)
+                     destination: {
+                         let isJapanese = Locale.preferredLanguages.first?.hasPrefix("ja") ?? false
+                         return isJapanese
+                             ? URL(string: "https://newkton1.github.io/diabetes-feast-privacy/PrivacyPolicy_JA.html")!
+                             : URL(string: "https://newkton1.github.io/diabetes-feast-privacy/")!
+                     }())
                 Link("Terms of Use",
                      destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
             }

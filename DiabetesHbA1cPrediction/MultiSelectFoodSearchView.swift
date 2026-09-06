@@ -29,6 +29,23 @@ struct MultiSelectFoodSearchView: View {
     @State private var showFoodDbError = false
     @State private var databaseMode: DatabaseMode = .washoku
 
+    /// Recently-added individual food item names (JP locale), persisted in UserDefaults.
+    @State private var recentFoodItemNames: [String] = []
+
+    private static let recentFoodItemsKey = "recentFoodItemNames_JP"
+    private static let recentFoodItemsMax = 10
+
+    /// Prepend a food to the recently-added list, capped at max 10, most-recent first.
+    private func recordRecentFood(_ food: FoodItem) {
+        guard isJapaneseLocale else { return }
+        var names = recentFoodItemNames
+        names.removeAll { $0 == food.name }
+        names.insert(food.name, at: 0)
+        if names.count > Self.recentFoodItemsMax { names = Array(names.prefix(Self.recentFoodItemsMax)) }
+        recentFoodItemNames = names
+        UserDefaults.standard.set(names, forKey: Self.recentFoodItemsKey)
+    }
+
     /// True when the app is running in the Japanese locale
     private var isJapaneseLocale: Bool {
         Locale.current.language.languageCode?.identifier == "ja"
@@ -124,16 +141,31 @@ struct MultiSelectFoodSearchView: View {
             foods = foodDatabase.allFoods
         }
 
-        // Filter by category if selected (skip for the Recent pseudo-category)
-        if let category = selectedCategory, category != recentCategoryKey {
-            foods = foods.filter { $0.category == category }
+        // Filter by category if selected.
+        // In JP locale the 最近 pseudo-category shows recently added individual food items.
+        // In non-JP locale the 最近/Recent pseudo-category is handled by RecentMealsList.
+        if let category = selectedCategory {
+            if category == recentCategoryKey {
+                if isJapaneseLocale {
+                    let recentSet = Set(recentFoodItemNames)
+                    foods = foods.filter { recentSet.contains($0.name) }
+                }
+                // non-JP: no filtering — RecentMealsList is shown instead of the food list
+            } else {
+                foods = foods.filter { $0.category == category }
+            }
         }
 
-        // Filter by search text — scoped to the active database
+        // Filter by search text — scoped to the active database.
+        // In 洋食 mode, also check the English name (via lookup) so "Tiramisu" finds "ティラミス".
         if !activeSearchText.isEmpty {
+            let enLookup = (isJapaneseLocale && databaseMode == .yoshoku)
+                ? foodDatabase.westernJapaneseNameEN
+                : [String: String]()
             foods = foods.filter { food in
                 food.name.localizedCaseInsensitiveContains(activeSearchText) ||
-                food.category.localizedCaseInsensitiveContains(activeSearchText)
+                food.category.localizedCaseInsensitiveContains(activeSearchText) ||
+                (enLookup[food.name]?.localizedCaseInsensitiveContains(activeSearchText) ?? false)
             }
         }
 
@@ -218,9 +250,11 @@ struct MultiSelectFoodSearchView: View {
                     categories: categories,
                     groupedFoods: groupedFoods,
                     recentMeals: recentMeals,
+                    recentFoodItemNames: recentFoodItemNames,
                     hasMyMeals: hasMyMeals,
                     isJapaneseLocale: isJapaneseLocale,
-                    databaseMode: $databaseMode
+                    databaseMode: $databaseMode,
+                    onFoodAdded: recordRecentFood
                 )
             }
             .navigationTitle("")
@@ -233,6 +267,7 @@ struct MultiSelectFoodSearchView: View {
                 // In Japanese locale, pre-load the 和食 DB so it shows immediately
                 if isJapaneseLocale {
                     FoodDatabase.shared.loadJapaneseDatabaseIfNeeded()
+                    recentFoodItemNames = UserDefaults.standard.stringArray(forKey: Self.recentFoodItemsKey) ?? []
                 }
             }
             .onChange(of: databaseMode) { _, newMode in
@@ -287,9 +322,13 @@ private struct FoodSearchContentDirect: View {
     let categories: [String]
     let groupedFoods: [(category: String, foods: [FoodItem])]
     let recentMeals: [RecentMeal]
+    /// Recently added individual food item names (JP locale only), most-recent first.
+    let recentFoodItemNames: [String]
     let hasMyMeals: Bool
     let isJapaneseLocale: Bool
     @Binding var databaseMode: DatabaseMode
+    /// Called whenever a food item is added so the parent can record it as recently used.
+    let onFoodAdded: (FoodItem) -> Void
 
     @State private var showOnlineSearch = false
 
@@ -298,9 +337,11 @@ private struct FoodSearchContentDirect: View {
         selectedCategory == recentCategoryKey
     }
 
-    /// Show category chips when search text is empty and field is not focused
+    /// Show category chips while no search text has been entered.
+    /// Chips remain visible even when the keyboard is open so the user can
+    /// always see which database / category filter is active.
     private var showCategoryChips: Bool {
-        searchText.isEmpty && !isSearchFieldFocused
+        searchText.isEmpty
     }
 
     var body: some View {
@@ -346,7 +387,7 @@ private struct FoodSearchContentDirect: View {
                                 action: { selectedCategory = "My Menu" }
                             )
 
-                            if !recentMeals.isEmpty {
+                            if !recentFoodItemNames.isEmpty {
                                 CategoryFilterChip(
                                     title: "最近",
                                     isSelected: isRecentSelected,
@@ -431,8 +472,8 @@ private struct FoodSearchContentDirect: View {
                 .background(Color.blue.opacity(0.1))
             }
 
-            if isRecentSelected {
-                // Recent meals list
+            if isRecentSelected && !isJapaneseLocale {
+                // Non-JP locale: recent whole-meal sessions from CoreData
                 RecentMealsList(recentMeals: recentMeals, mealBuilder: mealBuilder)
             } else if selectedCategory == "My Menu" && !hasMyMeals {
                 // Empty My Menu — show helpful onboarding message
@@ -498,6 +539,7 @@ private struct FoodSearchContentDirect: View {
                                     quantity: mealBuilder.quantityFor(food),
                                     onTap: {
                                         mealBuilder.addFood(food)
+                                        onFoodAdded(food)
                                     },
                                     onIncrement: {
                                         if let index = mealBuilder.selectedFoods.firstIndex(where: { $0.foodItem.id == food.id }) {

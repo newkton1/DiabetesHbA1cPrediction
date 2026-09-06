@@ -75,7 +75,7 @@ struct DemoClearedTransitionView: View {
                 ForEach(Array(milestones.enumerated()), id: \.element.id) { index, milestone in
                     HStack(spacing: 14) {
                         // Day badge
-                        Text(milestone.days)
+                        Text(LocalizedStringKey(milestone.days))
                             .font(.caption.bold())
                             .foregroundStyle(.white)
                             .padding(.horizontal, 8)
@@ -83,7 +83,7 @@ struct DemoClearedTransitionView: View {
                             .background(milestone.color)
                             .clipShape(Capsule())
                             .frame(width: 68, alignment: .center)
-                            .accessibilityLabel("\(milestone.days) milestone")
+                            .accessibilityLabel(Text(LocalizedStringKey(milestone.days)))
 
                         // Icon
                         Image(systemName: milestone.icon)
@@ -94,9 +94,9 @@ struct DemoClearedTransitionView: View {
 
                         // Text
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(milestone.title)
+                            Text(LocalizedStringKey(milestone.title))
                                 .font(.subheadline).fontWeight(.medium)
-                            Text(milestone.detail)
+                            Text(LocalizedStringKey(milestone.detail))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }

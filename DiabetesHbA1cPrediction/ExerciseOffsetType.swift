@@ -94,15 +94,15 @@ enum ExerciseOffsetType: String, CaseIterable, Identifiable {
         }
     }
 
-    /// The verb for the recommendation text
+    /// The verb for the recommendation text, localized for the current language.
     var actionVerb: String {
         switch self {
-        case .walk:   return "walk"
-        case .run:    return "run"
-        case .cycle:  return "cycle"
-        case .swim:   return "swim"
-        case .garden:          return "gardening session"
-        case .strengthTraining: return "strength training session"
+        case .walk:             return NSLocalizedString("walk", comment: "Exercise action verb — walking")
+        case .run:              return NSLocalizedString("run", comment: "Exercise action verb — running")
+        case .cycle:            return NSLocalizedString("cycle", comment: "Exercise action verb — cycling")
+        case .swim:             return NSLocalizedString("swim", comment: "Exercise action verb — swimming")
+        case .garden:           return NSLocalizedString("gardening session", comment: "Exercise action verb — gardening")
+        case .strengthTraining: return NSLocalizedString("strength training session", comment: "Exercise action verb — strength training")
         }
     }
 

@@ -8,11 +8,10 @@
 //    Sheet 3: Exercise
 //
 //  Uses minimal OOXML (Office Open XML) — xlsx is just zipped XML.
-//  Requires ZIPFoundation SPM package for the final zip step.
+//  ZIP is written in pure Swift (Store method + CRC-32) — no external dependencies.
 //
 
 import Foundation
-import ZIPFoundation
 
 // MARK: - Public API
 
@@ -89,7 +88,7 @@ enum XLSXExporter {
         let xlsxURL = tempDir.appendingPathComponent(filename)
         try? fm.removeItem(at: xlsxURL)
 
-        try fm.zipItem(at: workDir, to: xlsxURL)
+        try zipDirectory(workDir, to: xlsxURL)
 
         // Clean up build directory
         try? fm.removeItem(at: workDir)
@@ -413,5 +412,128 @@ private extension XLSXExporter {
             .replacingOccurrences(of: ">", with: "&gt;")
             .replacingOccurrences(of: "\"", with: "&quot;")
             .replacingOccurrences(of: "'", with: "&apos;")
+    }
+}
+
+// MARK: - Pure-Swift ZIP Writer (replaces ZIPFoundation dependency)
+
+private extension XLSXExporter {
+
+    /// Creates a ZIP archive at `destinationURL` containing all files under `sourceDir`.
+    /// Uses Store (no compression) so no external library is needed.
+    static func zipDirectory(_ sourceDir: URL, to destinationURL: URL) throws {
+        var zipData = Data()
+        var centralDirectory = Data()
+        var entryCount: UInt16 = 0
+
+        let fm = FileManager.default
+        guard let enumerator = fm.enumerator(
+            at: sourceDir,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: []
+        ) else {
+            throw NSError(domain: "XLSXExporter", code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "Cannot enumerate xlsx build directory"])
+        }
+
+        for case let fileURL as URL in enumerator {
+            let rv = try fileURL.resourceValues(forKeys: [.isDirectoryKey])
+            if rv.isDirectory == true { continue }
+
+            // Relative path inside the zip (forward slashes, no leading slash)
+            let relativePath = String(fileURL.path.dropFirst(sourceDir.path.count + 1))
+            let fileData = try Data(contentsOf: fileURL)
+            let crc = crc32Swift(fileData)
+            let fileSize = UInt32(fileData.count)
+            let nameData = Data(relativePath.utf8)
+            let localHeaderOffset = UInt32(zipData.count)
+
+            // Local file header
+            var lh = Data()
+            lh.appendLE32(0x04034b50) // signature
+            lh.appendLE16(20)          // version needed
+            lh.appendLE16(0)           // flags
+            lh.appendLE16(0)           // method: Store
+            lh.appendLE16(0)           // mod time
+            lh.appendLE16(0)           // mod date
+            lh.appendLE32(crc)
+            lh.appendLE32(fileSize)    // compressed size
+            lh.appendLE32(fileSize)    // uncompressed size
+            lh.appendLE16(UInt16(nameData.count))
+            lh.appendLE16(0)           // extra length
+            lh.append(nameData)
+            zipData.append(lh)
+            zipData.append(fileData)
+
+            // Central directory entry
+            var cd = Data()
+            cd.appendLE32(0x02014b50) // signature
+            cd.appendLE16(20)          // version made by
+            cd.appendLE16(20)          // version needed
+            cd.appendLE16(0)           // flags
+            cd.appendLE16(0)           // method: Store
+            cd.appendLE16(0)           // mod time
+            cd.appendLE16(0)           // mod date
+            cd.appendLE32(crc)
+            cd.appendLE32(fileSize)    // compressed size
+            cd.appendLE32(fileSize)    // uncompressed size
+            cd.appendLE16(UInt16(nameData.count))
+            cd.appendLE16(0)           // extra length
+            cd.appendLE16(0)           // comment length
+            cd.appendLE16(0)           // disk number start
+            cd.appendLE16(0)           // internal attrs
+            cd.appendLE32(0)           // external attrs
+            cd.appendLE32(localHeaderOffset)
+            cd.append(nameData)
+            centralDirectory.append(cd)
+            entryCount += 1
+        }
+
+        let cdOffset = UInt32(zipData.count)
+        let cdSize   = UInt32(centralDirectory.count)
+        zipData.append(centralDirectory)
+
+        // End of central directory record
+        var eocd = Data()
+        eocd.appendLE32(0x06054b50) // signature
+        eocd.appendLE16(0)           // disk number
+        eocd.appendLE16(0)           // disk with CD
+        eocd.appendLE16(entryCount)  // entries this disk
+        eocd.appendLE16(entryCount)  // total entries
+        eocd.appendLE32(cdSize)
+        eocd.appendLE32(cdOffset)
+        eocd.appendLE16(0)           // comment length
+        zipData.append(eocd)
+
+        try zipData.write(to: destinationURL)
+    }
+
+    /// CRC-32/ISO-HDLC — pure Swift, no imports needed.
+    static func crc32Swift(_ data: Data) -> UInt32 {
+        var crc: UInt32 = 0xFFFF_FFFF
+        for byte in data {
+            crc ^= UInt32(byte)
+            for _ in 0..<8 {
+                crc = (crc >> 1) ^ (0xEDB8_8320 * (crc & 1))
+            }
+        }
+        return crc ^ 0xFFFF_FFFF
+    }
+}
+
+// MARK: - Data little-endian helpers
+
+private extension Data {
+    mutating func appendLE16(_ value: UInt16) {
+        let v = value.littleEndian
+        append(UInt8(v & 0xFF))
+        append(UInt8((v >> 8) & 0xFF))
+    }
+    mutating func appendLE32(_ value: UInt32) {
+        let v = value.littleEndian
+        append(UInt8(v & 0xFF))
+        append(UInt8((v >> 8) & 0xFF))
+        append(UInt8((v >> 16) & 0xFF))
+        append(UInt8((v >> 24) & 0xFF))
     }
 }

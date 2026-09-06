@@ -1,0 +1,81 @@
+{
+  "exerciseSessions": [
+    {
+      "id": "da6a0eaa-b6af-4ffc-ac71-f07d33dbe701",
+      "type": "Walking",
+      "startDate": "2026-07-31T08:20:00.000Z",
+      "endDate": "2026-07-31T09:20:00.000Z",
+      "duration": 60.0,
+      "distance": 4.8,
+      "intensity": 0.41,
+      "caloriesBurned": 238.0,
+      "notes": ""
+    },
+    {
+      "id": "bdf1ea9e-ad4b-41e1-b93f-ea397bd4c5ce",
+      "type": "Walking",
+      "startDate": "2026-07-30T08:23:00.000Z",
+      "endDate": "2026-07-30T09:26:00.000Z",
+      "duration": 63.0,
+      "distance": 5.1,
+      "intensity": 0.43,
+      "caloriesBurned": 249.0,
+      "notes": ""
+    },
+    {
+      "id": "87ea1902-3a16-418d-80a6-14dec1d4b7c5",
+      "type": "Walking",
+      "startDate": "2026-07-29T08:07:00.000Z",
+      "endDate": "2026-07-29T09:05:00.000Z",
+      "duration": 58.0,
+      "distance": 4.6,
+      "intensity": 0.41,
+      "caloriesBurned": 229.0,
+      "notes": ""
+    },
+    {
+      "id": "97f01998-ef5b-4ba0-a4c1-28b6c60f7bed",
+      "type": "Walking",
+      "startDate": "2026-07-28T08:03:00.000Z",
+      "endDate": "2026-07-28T09:08:00.000Z",
+      "duration": 65.0,
+      "distance": 5.3,
+      "intensity": 0.47,
+      "caloriesBurned": 257.0,
+      "notes": ""
+    },
+    {
+      "id": "bed0b050-0485-48dc-afc8-e6e4214df04f",
+      "type": "Walking",
+      "startDate": "2026-07-27T08:28:00.000Z",
+      "endDate": "2026-07-27T09:25:00.000Z",
+      "duration": 57.0,
+      "distance": 4.7,
+      "intensity": 0.45,
+      "caloriesBurned": 226.0,
+      "notes": ""
+    },
+    {
+      "id": "c2ba1d62-3812-432a-909d-b61684d51559",
+      "type": "Walking",
+      "startDate": "2026-07-26T08:18:00.000Z",
+      "endDate": "2026-07-26T09:20:00.000Z",
+      "duration": 62.0,
+      "distance": 5.0,
+      "intensity": 0.44,
+      "caloriesBurned": 245.0,
+      "notes": ""
+    },
+    {
+      "id": "474fd76e-b0b2-44a6-9f41-df33fef8c2b6",
+      "type": "Walking",
+      "startDate": "2026-07-25T08:00:00.000Z",
+      "endDate": "2026-07-25T08:59:00.000Z",
+      "duration": 59.0,
+      "distance": 4.9,
+      "intensity": 0.41,
+      "caloriesBurned": 233.0,
+      "notes": ""
+    }
+  ]
+}

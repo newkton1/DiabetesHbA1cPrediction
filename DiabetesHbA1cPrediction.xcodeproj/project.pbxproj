@@ -6,11 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		930E568B2FD26A3800BE4C7F /* StoreKitConfig.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 930E568A2FD26A3800BE4C7F /* StoreKitConfig.storekit */; };
-		93508EF02FCE3B88006DC104 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 93508EEF2FCE3B88006DC104 /* ZIPFoundation */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		93CC10402F400B22003B36A4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,8 +24,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		930E568A2FD26A3800BE4C7F /* StoreKitConfig.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = StoreKitConfig.storekit; sourceTree = "<group>"; };
-		93CC102D2F400B20003B36A4 /* DiabetesFeast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiabetesFeast.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		93CC102D2F400B20003B36A4 /* DiabetesHbA1cPrediction.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiabetesHbA1cPrediction.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		93CC103F2F400B22003B36A4 /* DiabetesHbA1cPredictionTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DiabetesHbA1cPredictionTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		93CC10492F400B22003B36A4 /* DiabetesHbA1cPredictionUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DiabetesHbA1cPredictionUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -39,7 +33,6 @@
 		932B8B0B2F50F8830076353B /* Exceptions for "DiabetesHbA1cPrediction" folder in "DiabetesHbA1cPrediction" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				index.html,
 				Info.plist,
 			);
 			target = 93CC102C2F400B20003B36A4 /* DiabetesHbA1cPrediction */;
@@ -72,7 +65,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				93508EF02FCE3B88006DC104 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,7 +88,6 @@
 		93CC10242F400B20003B36A4 = {
 			isa = PBXGroup;
 			children = (
-				930E568A2FD26A3800BE4C7F /* StoreKitConfig.storekit */,
 				93CC102F2F400B20003B36A4 /* DiabetesHbA1cPrediction */,
 				93CC10422F400B22003B36A4 /* DiabetesHbA1cPredictionTests */,
 				93CC104C2F400B22003B36A4 /* DiabetesHbA1cPredictionUITests */,
@@ -107,7 +98,7 @@
 		93CC102E2F400B20003B36A4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				93CC102D2F400B20003B36A4 /* DiabetesFeast.app */,
+				93CC102D2F400B20003B36A4 /* DiabetesHbA1cPrediction.app */,
 				93CC103F2F400B22003B36A4 /* DiabetesHbA1cPredictionTests.xctest */,
 				93CC10492F400B22003B36A4 /* DiabetesHbA1cPredictionUITests.xctest */,
 			);
@@ -134,10 +125,9 @@
 			);
 			name = DiabetesHbA1cPrediction;
 			packageProductDependencies = (
-				93508EEF2FCE3B88006DC104 /* ZIPFoundation */,
 			);
 			productName = DiabetesHbA1cPrediction;
-			productReference = 93CC102D2F400B20003B36A4 /* DiabetesFeast.app */;
+			productReference = 93CC102D2F400B20003B36A4 /* DiabetesHbA1cPrediction.app */;
 			productType = "com.apple.product-type.application";
 		};
 		93CC103E2F400B22003B36A4 /* DiabetesHbA1cPredictionTests */ = {
@@ -209,20 +199,15 @@
 					};
 				};
 			};
-			buildConfigurationList = 93CC10282F400B20003B36A4 /* Build configuration list for PBXProject "14" */;
+			buildConfigurationList = 93CC10282F400B20003B36A4 /* Build configuration list for PBXProject "DiabetesHbA1cPrediction" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
-				ja,
-				"ja 2",
 			);
 			mainGroup = 93CC10242F400B20003B36A4;
 			minimizedProjectReferenceProxies = 1;
-			packageReferences = (
-				93508EEE2FCE3B88006DC104 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
-			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 93CC102E2F400B20003B36A4 /* Products */;
 			projectDirPath = "";
@@ -240,7 +225,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				930E568B2FD26A3800BE4C7F /* StoreKitConfig.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -351,7 +335,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -409,7 +393,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -427,32 +411,32 @@
 				CODE_SIGN_ENTITLEMENTS = DiabetesHbA1cPrediction/DiabetesHbA1cPrediction.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 33;
 				DEVELOPMENT_TEAM = QN365Z622F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DiabetesHbA1cPrediction/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Diabetes Feast";
+				INFOPLIST_KEY_CFBundleDisplayName = PredictHbA1c;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "This app reads your health data from ​Apple ​Health to provide personalized ​Hb​A1c predictions and diabetes insights. ";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "This app writes exercise and meal data to ​Apple ​Health to help track your diabetes management and predict ​Hb​A1c levels.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.diabetesfeastjp.DiabetesFeast;
-				PRODUCT_NAME = DiabetesFeast;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diabeteshba1c.DiabetesHbA1cPrediction;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -471,32 +455,32 @@
 				CODE_SIGN_ENTITLEMENTS = DiabetesHbA1cPrediction/DiabetesHbA1cPrediction.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 33;
 				DEVELOPMENT_TEAM = QN365Z622F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DiabetesHbA1cPrediction/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Diabetes Feast";
+				INFOPLIST_KEY_CFBundleDisplayName = PredictHbA1c;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "This app reads your health data from ​Apple ​Health to provide personalized ​Hb​A1c predictions and diabetes insights. ";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "This app writes exercise and meal data to ​Apple ​Health to help track your diabetes management and predict ​Hb​A1c levels.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.diabetesfeastjp.DiabetesFeast;
-				PRODUCT_NAME = DiabetesFeast;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diabeteshba1c.DiabetesHbA1cPrediction;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -515,7 +499,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QN365Z622F;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.diabeteshba1c.DiabetesHbA1cPredictionTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -537,7 +521,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QN365Z622F;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.diabeteshba1c.DiabetesHbA1cPredictionTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -594,7 +578,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		93CC10282F400B20003B36A4 /* Build configuration list for PBXProject "14" */ = {
+		93CC10282F400B20003B36A4 /* Build configuration list for PBXProject "DiabetesHbA1cPrediction" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				93CC10512F400B22003B36A4 /* Debug */,
@@ -631,25 +615,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		93508EEE2FCE3B88006DC104 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.9.20;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		93508EEF2FCE3B88006DC104 /* ZIPFoundation */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 93508EEE2FCE3B88006DC104 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
-			productName = ZIPFoundation;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 93CC10252F400B20003B36A4 /* Project object */;
 }
