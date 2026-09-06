@@ -535,22 +535,9 @@ private struct FoodSearchContentDirect: View {
                         Section(header: Text(LocalizedStringKey(MultiSelectFoodSearchView.chipLabel(for: group.category)))) {
                             ForEach(group.foods) { food in
                                 FoodSelectionRow(
+                                    mealBuilder: mealBuilder,
                                     food: food,
-                                    quantity: mealBuilder.quantityFor(food),
-                                    onTap: {
-                                        mealBuilder.addFood(food)
-                                        onFoodAdded(food)
-                                    },
-                                    onIncrement: {
-                                        if let index = mealBuilder.selectedFoods.firstIndex(where: { $0.foodItem.id == food.id }) {
-                                            mealBuilder.incrementQuantity(at: index)
-                                        }
-                                    },
-                                    onDecrement: {
-                                        if let index = mealBuilder.selectedFoods.firstIndex(where: { $0.foodItem.id == food.id }) {
-                                            mealBuilder.decrementQuantity(at: index)
-                                        }
-                                    }
+                                    onFoodAdded: onFoodAdded
                                 )
                                 .contextMenu {
                                     if FoodDatabase.shared.isFavorite(named: food.name) {
@@ -706,13 +693,17 @@ private struct RecentMealRow: View {
     }
 }
 
-/// Row for displaying a food item with quantity and up/down stepper
+/// Row for displaying a food item with quantity and up/down stepper.
+/// Holds a direct `@ObservedObject` reference to `mealBuilder` so the row
+/// re-renders immediately when any food is added/removed — without depending
+/// on the parent view passing a new `quantity` value through a re-render.
 struct FoodSelectionRow: View {
+    @ObservedObject var mealBuilder: MealBuilder
     let food: FoodItem
-    let quantity: Double
-    let onTap: () -> Void
-    let onIncrement: () -> Void
-    let onDecrement: () -> Void
+    /// Called after a food is added so the parent can record it as recently used.
+    let onFoodAdded: (FoodItem) -> Void
+
+    private var quantity: Double { mealBuilder.quantityFor(food) }
 
     /// Display carbs adjusted for quantity
     private var displayCarbs: Int {
@@ -753,7 +744,11 @@ struct FoodSelectionRow: View {
     /// The vertical stepper control (+ on top, – on bottom)
     private var servingStepper: some View {
         VStack(spacing: 0) {
-            Button(action: onIncrement) {
+            Button {
+                if let index = mealBuilder.selectedFoods.firstIndex(where: { $0.foodItem.id == food.id }) {
+                    mealBuilder.incrementQuantity(at: index)
+                }
+            } label: {
                 Image(systemName: "plus")
                     .font(.footnote)
                     .fontWeight(.bold)
@@ -761,13 +756,17 @@ struct FoodSelectionRow: View {
                     .foregroundColor(quantity >= 4.0 ? .gray : .blue)
                     .accessibilityLabel("Increase serving")
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(.plain)
             .disabled(quantity >= 4.0)
 
             Divider()
                 .frame(width: 36)
 
-            Button(action: onDecrement) {
+            Button {
+                if let index = mealBuilder.selectedFoods.firstIndex(where: { $0.foodItem.id == food.id }) {
+                    mealBuilder.decrementQuantity(at: index)
+                }
+            } label: {
                 Image(systemName: "minus")
                     .font(.footnote)
                     .fontWeight(.bold)
@@ -775,7 +774,7 @@ struct FoodSelectionRow: View {
                     .foregroundColor(quantity <= 0.25 ? .gray : .blue)
                     .accessibilityLabel("Decrease serving")
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(.plain)
             .disabled(quantity <= 0.25)
         }
         .background(Color(.systemGray5))
@@ -796,7 +795,8 @@ struct FoodSelectionRow: View {
                 .contentShape(Rectangle())
                 .onTapGesture {
                     if quantity <= 0 {
-                        onTap()
+                        mealBuilder.addFood(food)
+                        onFoodAdded(food)
                     }
                 }
 
@@ -811,13 +811,16 @@ struct FoodSelectionRow: View {
                     servingStepper
                 }
             } else {
-                Button(action: onTap) {
+                Button {
+                    mealBuilder.addFood(food)
+                    onFoodAdded(food)
+                } label: {
                     Image(systemName: "plus.circle")
                         .foregroundColor(.blue)
                         .font(.title2)
                         .accessibilityLabel("Add food")
                 }
-                .buttonStyle(.borderless)
+                .buttonStyle(.plain)
             }
         }
     }
