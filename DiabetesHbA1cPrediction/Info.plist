@@ -22,6 +22,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Diabetes Feast reads your glucose and activity data from Apple Health to show wellness trends between your lab results. This is a wellness app — not a medical device.</string>
 	<key>NSHealthUpdateUsageDescription</key>
@@ -31,8 +33,6 @@
 		<string>processing</string>
 	</array>
 	<key>UIFileSharingEnabled</key>
-	<true/>
-	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>UILaunchScreen</key>
 	<dict/>

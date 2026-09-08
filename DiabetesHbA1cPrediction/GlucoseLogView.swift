@@ -1006,10 +1006,14 @@ struct GlucoseLogView: View {
         return (idx + 1, sorted.count)
     }
 
-    /// Formats a date for the popover: "Wed 16 Apr, 14:32"
+    /// Formats a date for the popover: "Wed 16 Apr, 14:32" (en) / "9月7日（月）22:00" (ja)
     private func formatPopoverTime(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "EEE d MMM, HH:mm"
+        if Locale.current.language.languageCode?.identifier == "ja" {
+            formatter.dateFormat = "M月d日（E）HH:mm"
+        } else {
+            formatter.dateFormat = "EEE d MMM, HH:mm"
+        }
         return formatter.string(from: date)
     }
 

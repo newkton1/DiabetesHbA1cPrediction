@@ -25,8 +25,8 @@
 
 /* Begin PBXFileReference section */
 		93CC102D2F400B20003B36A4 /* DiabetesHbA1cPrediction.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiabetesHbA1cPrediction.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		93CC103F2F400B22003B36A4 /* DiabetesHbA1cPredictionTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DiabetesHbA1cPredictionTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		93CC10492F400B22003B36A4 /* DiabetesHbA1cPredictionUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DiabetesHbA1cPredictionUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		93CC103F2F400B22003B36A4 /* com.diabetesfeastjp.DiabetesFeastTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = com.diabetesfeastjp.DiabetesFeastTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		93CC10492F400B22003B36A4 /*  com.diabetesfeastjp.DiabetesFeastUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = " com.diabetesfeastjp.DiabetesFeastUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -99,8 +99,8 @@
 			isa = PBXGroup;
 			children = (
 				93CC102D2F400B20003B36A4 /* DiabetesHbA1cPrediction.app */,
-				93CC103F2F400B22003B36A4 /* DiabetesHbA1cPredictionTests.xctest */,
-				93CC10492F400B22003B36A4 /* DiabetesHbA1cPredictionUITests.xctest */,
+				93CC103F2F400B22003B36A4 /* com.diabetesfeastjp.DiabetesFeastTests.xctest */,
+				93CC10492F400B22003B36A4 /*  com.diabetesfeastjp.DiabetesFeastUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -130,9 +130,9 @@
 			productReference = 93CC102D2F400B20003B36A4 /* DiabetesHbA1cPrediction.app */;
 			productType = "com.apple.product-type.application";
 		};
-		93CC103E2F400B22003B36A4 /* DiabetesHbA1cPredictionTests */ = {
+		93CC103E2F400B22003B36A4 /* com.diabetesfeastjp.DiabetesFeastTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 93CC10562F400B22003B36A4 /* Build configuration list for PBXNativeTarget "DiabetesHbA1cPredictionTests" */;
+			buildConfigurationList = 93CC10562F400B22003B36A4 /* Build configuration list for PBXNativeTarget "com.diabetesfeastjp.DiabetesFeastTests" */;
 			buildPhases = (
 				93CC103B2F400B22003B36A4 /* Sources */,
 				93CC103C2F400B22003B36A4 /* Frameworks */,
@@ -146,16 +146,16 @@
 			fileSystemSynchronizedGroups = (
 				93CC10422F400B22003B36A4 /* DiabetesHbA1cPredictionTests */,
 			);
-			name = DiabetesHbA1cPredictionTests;
+			name = com.diabetesfeastjp.DiabetesFeastTests;
 			packageProductDependencies = (
 			);
 			productName = DiabetesHbA1cPredictionTests;
-			productReference = 93CC103F2F400B22003B36A4 /* DiabetesHbA1cPredictionTests.xctest */;
+			productReference = 93CC103F2F400B22003B36A4 /* com.diabetesfeastjp.DiabetesFeastTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		93CC10482F400B22003B36A4 /* DiabetesHbA1cPredictionUITests */ = {
+		93CC10482F400B22003B36A4 /*  com.diabetesfeastjp.DiabetesFeastUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 93CC10592F400B22003B36A4 /* Build configuration list for PBXNativeTarget "DiabetesHbA1cPredictionUITests" */;
+			buildConfigurationList = 93CC10592F400B22003B36A4 /* Build configuration list for PBXNativeTarget " com.diabetesfeastjp.DiabetesFeastUITests" */;
 			buildPhases = (
 				93CC10452F400B22003B36A4 /* Sources */,
 				93CC10462F400B22003B36A4 /* Frameworks */,
@@ -169,11 +169,11 @@
 			fileSystemSynchronizedGroups = (
 				93CC104C2F400B22003B36A4 /* DiabetesHbA1cPredictionUITests */,
 			);
-			name = DiabetesHbA1cPredictionUITests;
+			name = " com.diabetesfeastjp.DiabetesFeastUITests";
 			packageProductDependencies = (
 			);
 			productName = DiabetesHbA1cPredictionUITests;
-			productReference = 93CC10492F400B22003B36A4 /* DiabetesHbA1cPredictionUITests.xctest */;
+			productReference = 93CC10492F400B22003B36A4 /*  com.diabetesfeastjp.DiabetesFeastUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -205,7 +205,6 @@
 			knownRegions = (
 				en,
 				Base,
-				"ja 2",
 				ja,
 			);
 			mainGroup = 93CC10242F400B20003B36A4;
@@ -216,8 +215,8 @@
 			projectRoot = "";
 			targets = (
 				93CC102C2F400B20003B36A4 /* DiabetesHbA1cPrediction */,
-				93CC103E2F400B22003B36A4 /* DiabetesHbA1cPredictionTests */,
-				93CC10482F400B22003B36A4 /* DiabetesHbA1cPredictionUITests */,
+				93CC103E2F400B22003B36A4 /* com.diabetesfeastjp.DiabetesFeastTests */,
+				93CC10482F400B22003B36A4 /*  com.diabetesfeastjp.DiabetesFeastUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -413,7 +412,7 @@
 				CODE_SIGN_ENTITLEMENTS = DiabetesHbA1cPrediction/DiabetesHbA1cPrediction.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 36;
 				DEVELOPMENT_TEAM = QN365Z622F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -427,13 +426,13 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.diabeteshba1c.DiabetesHbA1cPrediction;
+				MARKETING_VERSION = 2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diabetesfeastjp.DiabetesFeast;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -457,7 +456,7 @@
 				CODE_SIGN_ENTITLEMENTS = DiabetesHbA1cPrediction/DiabetesHbA1cPrediction.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 36;
 				DEVELOPMENT_TEAM = QN365Z622F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -471,13 +470,13 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.diabeteshba1c.DiabetesHbA1cPrediction;
+				MARKETING_VERSION = 2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diabetesfeastjp.DiabetesFeast;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -503,7 +502,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.diabeteshba1c.DiabetesHbA1cPredictionTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diabetesfeastjp.DiabetesFeast;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -525,7 +524,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.diabeteshba1c.DiabetesHbA1cPredictionTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diabetesfeastjp.DiabetesFeast;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -545,7 +544,7 @@
 				DEVELOPMENT_TEAM = QN365Z622F;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.diabeteshba1c.DiabetesHbA1cPredictionUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diabetesfeastjp.DiabetesFeast;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -565,7 +564,7 @@
 				DEVELOPMENT_TEAM = QN365Z622F;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.diabeteshba1c.DiabetesHbA1cPredictionUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diabetesfeastjp.DiabetesFeast;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -598,7 +597,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		93CC10562F400B22003B36A4 /* Build configuration list for PBXNativeTarget "DiabetesHbA1cPredictionTests" */ = {
+		93CC10562F400B22003B36A4 /* Build configuration list for PBXNativeTarget "com.diabetesfeastjp.DiabetesFeastTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				93CC10572F400B22003B36A4 /* Debug */,
@@ -607,7 +606,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		93CC10592F400B22003B36A4 /* Build configuration list for PBXNativeTarget "DiabetesHbA1cPredictionUITests" */ = {
+		93CC10592F400B22003B36A4 /* Build configuration list for PBXNativeTarget " com.diabetesfeastjp.DiabetesFeastUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				93CC105A2F400B22003B36A4 /* Debug */,

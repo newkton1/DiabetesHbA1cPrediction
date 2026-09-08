@@ -35,6 +35,18 @@ struct MultiSelectFoodSearchView: View {
     private static let recentFoodItemsKey = "recentFoodItemNames_JP"
     private static let recentFoodItemsMax = 10
 
+    /// Remove a food from the recently-added list and update UserDefaults.
+    /// If the list becomes empty, deselects the 最近 category automatically.
+    private func removeRecentFood(_ food: FoodItem) {
+        var names = recentFoodItemNames
+        names.removeAll { $0 == food.name }
+        recentFoodItemNames = names
+        UserDefaults.standard.set(names, forKey: Self.recentFoodItemsKey)
+        if names.isEmpty {
+            selectedCategory = nil
+        }
+    }
+
     /// Prepend a food to the recently-added list, capped at max 10, most-recent first.
     private func recordRecentFood(_ food: FoodItem) {
         guard isJapaneseLocale else { return }
@@ -254,7 +266,8 @@ struct MultiSelectFoodSearchView: View {
                     hasMyMeals: hasMyMeals,
                     isJapaneseLocale: isJapaneseLocale,
                     databaseMode: $databaseMode,
-                    onFoodAdded: recordRecentFood
+                    onFoodAdded: recordRecentFood,
+                    onRemoveFromRecent: removeRecentFood
                 )
             }
             .navigationTitle("")
@@ -329,6 +342,8 @@ private struct FoodSearchContentDirect: View {
     @Binding var databaseMode: DatabaseMode
     /// Called whenever a food item is added so the parent can record it as recently used.
     let onFoodAdded: (FoodItem) -> Void
+    /// Called when the user long-presses a food in the 最近 list to remove it.
+    let onRemoveFromRecent: (FoodItem) -> Void
 
     @State private var showOnlineSearch = false
 
@@ -540,17 +555,26 @@ private struct FoodSearchContentDirect: View {
                                     onFoodAdded: onFoodAdded
                                 )
                                 .contextMenu {
+                                    // My Menu add/remove — available in all categories.
                                     if FoodDatabase.shared.isFavorite(named: food.name) {
                                         Button(role: .destructive) {
                                             FoodDatabase.shared.removeFavorite(named: food.name)
                                         } label: {
-                                            Label("Remove from My Menu", systemImage: "heart.slash")
+                                            Label("マイメニューから削除", systemImage: "heart.slash")
                                         }
                                     } else {
                                         Button {
                                             FoodDatabase.shared.addFavorite(food)
                                         } label: {
-                                            Label("Add to My Menu", systemImage: "heart")
+                                            Label("マイメニューに追加", systemImage: "heart")
+                                        }
+                                    }
+                                    // 最近 mode: also offer removal from the recent list.
+                                    if isRecentSelected {
+                                        Button(role: .destructive) {
+                                            onRemoveFromRecent(food)
+                                        } label: {
+                                            Label("最近から削除", systemImage: "clock.badge.xmark")
                                         }
                                     }
                                 }

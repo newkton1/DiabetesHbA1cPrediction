@@ -1,0 +1,1027 @@
+{
+  "appVersion": "2.0",
+  "exportDate": "2026-09-08T09:00:00.000Z",
+  "glucoseReadings": [
+    {
+      "id": "06518624-1FB7-4800-BF9B-D02BD182FF51",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-07T12:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 143.0
+    },
+    {
+      "id": "F7762A28-5DD8-4B79-AFA9-B9A888C9C2FB",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-07T13:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 176.0
+    },
+    {
+      "id": "EA076B05-AEFF-4D01-8995-17B62F519F08",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-07T13:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 162.0
+    },
+    {
+      "id": "8703FDF8-E936-4A24-8A09-F89BF779B6B6",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-05T12:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 134.0
+    },
+    {
+      "id": "C531B90A-81D1-44A1-9798-87EF6AB6D4EB",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-05T13:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 166.0
+    },
+    {
+      "id": "ED22A7BF-6E03-48CC-B3EF-F9BDB98232E5",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-05T13:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 144.0
+    },
+    {
+      "id": "47BC4AAA-9AC3-453D-9686-957564AFF401",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-03T12:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 132.0
+    },
+    {
+      "id": "25BF55AC-4A3B-495D-8F37-D79002F62860",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-03T13:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 169.0
+    },
+    {
+      "id": "2A4A9A19-1344-424D-A267-351B888F5A35",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-03T13:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 151.0
+    },
+    {
+      "id": "5ED9378E-5FD2-4CB3-9525-3F9122C7531B",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-01T12:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 134.0
+    },
+    {
+      "id": "EE389710-AD81-4F55-87F1-06640D32A6BA",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-01T13:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 166.0
+    },
+    {
+      "id": "30F41269-8D81-4636-821D-859FBB3901E4",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-01T13:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 144.0
+    },
+    {
+      "id": "BCB9430A-38B6-4357-ACB9-9129BACDA324",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-30T12:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 134.0
+    },
+    {
+      "id": "C36440E5-FA4F-417B-8643-8B0745D0207F",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-30T13:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 166.0
+    },
+    {
+      "id": "37284DF5-82BD-4E1C-82C9-4CAC2C79BB80",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-30T13:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 151.0
+    },
+    {
+      "id": "EA39C790-DE55-48A6-8624-C7607D140E35",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-27T12:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 135.0
+    },
+    {
+      "id": "E4491193-3744-4D05-BA71-EDE671268F31",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-27T13:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 161.0
+    },
+    {
+      "id": "C8287B02-6703-47D2-B615-A894DD8AE4FB",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-27T13:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 149.0
+    },
+    {
+      "id": "92C2B5DB-ECA1-40BA-923B-5C016D41B7DC",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-25T12:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 135.0
+    },
+    {
+      "id": "93127F28-F0A1-4FE1-82DF-BFDA6868F9E2",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-25T13:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 161.0
+    },
+    {
+      "id": "8DC6D7F1-779A-430E-A225-C59DA5720DE4",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-25T13:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 148.0
+    },
+    {
+      "id": "985137E9-753C-4C55-946F-F0250E09CEB0",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-22T12:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 141.0
+    },
+    {
+      "id": "AADFC86F-6F72-44A0-8DC0-26908B23695D",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-22T13:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 171.0
+    },
+    {
+      "id": "83F16A9B-8D0C-4871-AE0C-F9A92741B58C",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-22T13:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 161.0
+    },
+    {
+      "id": "AFB3B831-60DC-4D05-A104-CBA5A1CE8D32",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-20T12:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 145.0
+    },
+    {
+      "id": "A2CBA8F9-3E1F-44F2-9A63-B614FFA838CF",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-20T13:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 179.0
+    },
+    {
+      "id": "C06760C9-539F-4893-8788-74D256A0AD7A",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-20T13:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 166.0
+    },
+    {
+      "id": "B6CDFFA0-EFE1-47D4-B1CF-7F798002F887",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-18T12:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 130.0
+    },
+    {
+      "id": "280E542D-CD62-4FB0-ADAE-116491FF84BB",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-18T13:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 163.0
+    },
+    {
+      "id": "FBA66C9B-2AAA-4B47-BF8B-EBA72E06F086",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-18T13:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 145.0
+    },
+    {
+      "id": "3C1DC22B-973D-4725-AA38-8FF6EE8E47F7",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-15T12:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 145.0
+    },
+    {
+      "id": "A061627F-DE04-4DE0-B2E0-A243B8ADB8C7",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-15T13:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 183.0
+    },
+    {
+      "id": "DF4318D6-5C8F-4508-9005-CCED05739348",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-15T13:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 162.0
+    },
+    {
+      "id": "9F296C84-42C6-4FD9-9061-21BE55795D3C",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-12T12:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 139.0
+    },
+    {
+      "id": "15F9827B-E8A9-4B66-B17B-7C86D9EBF78C",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-12T13:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 176.0
+    },
+    {
+      "id": "14D0040A-64FB-4B98-818F-31AB20E96257",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-12T13:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 149.0
+    },
+    {
+      "id": "CA2BA31F-93D3-4CCD-AB09-16621DE2C70C",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-25T07:15:00.000Z",
+      "unit": "mg/dL",
+      "value": 118.0
+    },
+    {
+      "id": "189B5405-E23E-4368-BAEC-7F280C8899D0",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-26T07:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 125.0
+    },
+    {
+      "id": "CAA95BB1-C689-49F8-A8DE-012F3DF96F0E",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-27T07:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 112.0
+    },
+    {
+      "id": "2F622072-FBD8-4CBE-8D5B-C8BE47C9EDDA",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-28T07:20:00.000Z",
+      "unit": "mg/dL",
+      "value": 130.0
+    },
+    {
+      "id": "F794BA93-7124-4D7C-932D-2973D6356CBD",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-29T07:10:00.000Z",
+      "unit": "mg/dL",
+      "value": 121.0
+    },
+    {
+      "id": "A0ED4A27-351D-4DC5-853D-ADD7A20DD889",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-30T07:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 116.0
+    },
+    {
+      "id": "CE211AF1-6993-4376-9616-325DFC1DB55F",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-08-31T07:15:00.000Z",
+      "unit": "mg/dL",
+      "value": 128.0
+    },
+    {
+      "id": "FE662308-C486-4277-A226-830B663E8405",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-01T07:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 119.0
+    },
+    {
+      "id": "3CE00DFB-6B73-4614-B34C-D07E5B842E13",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-02T07:20:00.000Z",
+      "unit": "mg/dL",
+      "value": 124.0
+    },
+    {
+      "id": "9CA9ECC5-7913-4031-926D-3C3E411D5877",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-03T07:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 117.0
+    },
+    {
+      "id": "21CA90BA-C9EC-49A6-9724-5FC6733B5700",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-04T07:10:00.000Z",
+      "unit": "mg/dL",
+      "value": 122.0
+    },
+    {
+      "id": "91CEA9CC-776B-4573-9BE9-92C84B67BB4E",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-05T07:00:00.000Z",
+      "unit": "mg/dL",
+      "value": 115.0
+    },
+    {
+      "id": "B176AFE0-A000-435A-A2E3-92E370D7A08C",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-06T07:20:00.000Z",
+      "unit": "mg/dL",
+      "value": 126.0
+    },
+    {
+      "id": "94B92F82-A036-4CD6-8F81-36445D34D4AE",
+      "source": "Manual Finger Stick",
+      "timestamp": "2026-09-07T07:30:00.000Z",
+      "unit": "mg/dL",
+      "value": 113.0
+    }
+  ],
+  "meals": [
+    {
+      "id": "285EF87E-7CE9-4BBE-A835-744741B59728",
+      "name": "おやつ",
+      "timestamp": "2026-09-07T11:30:00.000Z",
+      "mealType": "feast",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "calories": 320.0,
+      "unitString": "mg/dL",
+      "foodItems": [
+        {
+          "id": "062B1C52-49BD-4A4B-9B8C-0DBEF904571E",
+          "foodName": "ショートケーキ（いちご）",
+          "foodCategory": "菓子類",
+          "quantity": 1.0,
+          "servingSize": 100.0,
+          "servingUnit": "g",
+          "caloriesPerServing": 320.0,
+          "carbsPerServing": 45.0,
+          "proteinPerServing": 6.0,
+          "fatPerServing": 11.0,
+          "fiberPerServing": 1.2,
+          "glycemicIndex": 46
+        }
+      ],
+      "macronutrients": [
+        {
+          "type": "carbohydrates",
+          "amount": 45.0,
+          "unit": "g"
+        },
+        {
+          "type": "protein",
+          "amount": 6.0,
+          "unit": "g"
+        },
+        {
+          "type": "fat",
+          "amount": 11.0,
+          "unit": "g"
+        },
+        {
+          "type": "fiber",
+          "amount": 1.2,
+          "unit": "g"
+        }
+      ]
+    },
+    {
+      "id": "F159BCC9-7028-4335-8A75-A9E6E464D67E",
+      "name": "おやつ",
+      "timestamp": "2026-09-05T11:30:00.000Z",
+      "mealType": "feast",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "calories": 235.0,
+      "unitString": "mg/dL",
+      "foodItems": [
+        {
+          "id": "7D06F462-F1D5-4E42-B969-30D25288AD8D",
+          "foodName": "大福（つぶあん）",
+          "foodCategory": "菓子類",
+          "quantity": 1.0,
+          "servingSize": 100.0,
+          "servingUnit": "g",
+          "caloriesPerServing": 235.0,
+          "carbsPerServing": 37.0,
+          "proteinPerServing": 5.0,
+          "fatPerServing": 0.5,
+          "fiberPerServing": 2.5,
+          "glycemicIndex": 57
+        }
+      ],
+      "macronutrients": [
+        {
+          "type": "carbohydrates",
+          "amount": 37.0,
+          "unit": "g"
+        },
+        {
+          "type": "protein",
+          "amount": 5.0,
+          "unit": "g"
+        },
+        {
+          "type": "fat",
+          "amount": 0.5,
+          "unit": "g"
+        },
+        {
+          "type": "fiber",
+          "amount": 2.5,
+          "unit": "g"
+        }
+      ]
+    },
+    {
+      "id": "2D6A8750-4B11-43ED-B1AE-B3185773F3AE",
+      "name": "おやつ",
+      "timestamp": "2026-09-03T11:30:00.000Z",
+      "mealType": "feast",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "calories": 380.0,
+      "unitString": "mg/dL",
+      "foodItems": [
+        {
+          "id": "BFD1E252-D056-4453-BEF7-4BCC1642A05D",
+          "foodName": "チョコレートケーキ",
+          "foodCategory": "菓子類",
+          "quantity": 1.0,
+          "servingSize": 100.0,
+          "servingUnit": "g",
+          "caloriesPerServing": 380.0,
+          "carbsPerServing": 50.0,
+          "proteinPerServing": 5.0,
+          "fatPerServing": 18.0,
+          "fiberPerServing": 2.0,
+          "glycemicIndex": 38
+        }
+      ],
+      "macronutrients": [
+        {
+          "type": "carbohydrates",
+          "amount": 50.0,
+          "unit": "g"
+        },
+        {
+          "type": "protein",
+          "amount": 5.0,
+          "unit": "g"
+        },
+        {
+          "type": "fat",
+          "amount": 18.0,
+          "unit": "g"
+        },
+        {
+          "type": "fiber",
+          "amount": 2.0,
+          "unit": "g"
+        }
+      ]
+    },
+    {
+      "id": "7192DDEF-389E-47EB-B01C-76A56443D1AF",
+      "name": "おやつ",
+      "timestamp": "2026-09-01T11:30:00.000Z",
+      "mealType": "feast",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "calories": 480.0,
+      "unitString": "mg/dL",
+      "foodItems": [
+        {
+          "id": "ECCBD7A9-0F82-401E-9A0B-3A6E54F7B0B8",
+          "foodName": "クッキー（バター）",
+          "foodCategory": "菓子類",
+          "quantity": 1.0,
+          "servingSize": 100.0,
+          "servingUnit": "g",
+          "caloriesPerServing": 480.0,
+          "carbsPerServing": 37.0,
+          "proteinPerServing": 6.0,
+          "fatPerServing": 25.0,
+          "fiberPerServing": 1.0,
+          "glycemicIndex": 57
+        }
+      ],
+      "macronutrients": [
+        {
+          "type": "carbohydrates",
+          "amount": 37.0,
+          "unit": "g"
+        },
+        {
+          "type": "protein",
+          "amount": 6.0,
+          "unit": "g"
+        },
+        {
+          "type": "fat",
+          "amount": 25.0,
+          "unit": "g"
+        },
+        {
+          "type": "fiber",
+          "amount": 1.0,
+          "unit": "g"
+        }
+      ]
+    },
+    {
+      "id": "B150E2B3-142B-44EB-91DE-19B402B856A0",
+      "name": "夜のおやつ",
+      "timestamp": "2026-08-30T11:30:00.000Z",
+      "mealType": "lastMeal",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "calories": 250.0,
+      "unitString": "mg/dL",
+      "foodItems": [
+        {
+          "id": "D0C0C700-83FB-45DA-A0D8-91101D941C5E",
+          "foodName": "パンケーキ（メープルシロップがけ）",
+          "foodCategory": "菓子類",
+          "quantity": 1.0,
+          "servingSize": 100.0,
+          "servingUnit": "g",
+          "caloriesPerServing": 250.0,
+          "carbsPerServing": 32.0,
+          "proteinPerServing": 6.0,
+          "fatPerServing": 8.0,
+          "fiberPerServing": 1.5,
+          "glycemicIndex": 67
+        }
+      ],
+      "macronutrients": [
+        {
+          "type": "carbohydrates",
+          "amount": 32.0,
+          "unit": "g"
+        },
+        {
+          "type": "protein",
+          "amount": 6.0,
+          "unit": "g"
+        },
+        {
+          "type": "fat",
+          "amount": 8.0,
+          "unit": "g"
+        },
+        {
+          "type": "fiber",
+          "amount": 1.5,
+          "unit": "g"
+        }
+      ]
+    },
+    {
+      "id": "F7BB1E13-5204-4C8C-84EB-7051FCEF1E92",
+      "name": "夜のおやつ",
+      "timestamp": "2026-08-27T11:30:00.000Z",
+      "mealType": "lastMeal",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "calories": 285.0,
+      "unitString": "mg/dL",
+      "foodItems": [
+        {
+          "id": "EC8B1630-DB16-46A0-9EB0-537369A23440",
+          "foodName": "どら焼き",
+          "foodCategory": "菓子類",
+          "quantity": 1.0,
+          "servingSize": 100.0,
+          "servingUnit": "g",
+          "caloriesPerServing": 285.0,
+          "carbsPerServing": 38.0,
+          "proteinPerServing": 6.0,
+          "fatPerServing": 3.0,
+          "fiberPerServing": 2.0,
+          "glycemicIndex": 55
+        }
+      ],
+      "macronutrients": [
+        {
+          "type": "carbohydrates",
+          "amount": 38.0,
+          "unit": "g"
+        },
+        {
+          "type": "protein",
+          "amount": 6.0,
+          "unit": "g"
+        },
+        {
+          "type": "fat",
+          "amount": 3.0,
+          "unit": "g"
+        },
+        {
+          "type": "fiber",
+          "amount": 2.0,
+          "unit": "g"
+        }
+      ]
+    },
+    {
+      "id": "AEDC5D97-2EF2-4F7D-88B8-022C650FC1C9",
+      "name": "おやつ",
+      "timestamp": "2026-08-25T11:30:00.000Z",
+      "mealType": "lastMeal",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "calories": 621.0,
+      "unitString": "mg/dL",
+      "foodItems": [
+        {
+          "id": "16FAE2EA-8037-404A-BCA0-F3DB76D7F0E4",
+          "foodName": "アイスクリーム（バニラ）",
+          "foodCategory": "菓子類",
+          "quantity": 3.0,
+          "servingSize": 100.0,
+          "servingUnit": "g",
+          "caloriesPerServing": 207.0,
+          "carbsPerServing": 22.0,
+          "proteinPerServing": 4.0,
+          "fatPerServing": 11.0,
+          "fiberPerServing": 0.0,
+          "glycemicIndex": 37
+        }
+      ],
+      "macronutrients": [
+        {
+          "type": "carbohydrates",
+          "amount": 66.0,
+          "unit": "g"
+        },
+        {
+          "type": "protein",
+          "amount": 12.0,
+          "unit": "g"
+        },
+        {
+          "type": "fat",
+          "amount": 33.0,
+          "unit": "g"
+        },
+        {
+          "type": "fiber",
+          "amount": 0.0,
+          "unit": "g"
+        }
+      ]
+    },
+    {
+      "id": "F8001954-6747-4788-86E4-C3C379725FE6",
+      "name": "夜のおやつ",
+      "timestamp": "2026-08-22T11:30:00.000Z",
+      "mealType": "lastMeal",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "calories": 185.0,
+      "unitString": "mg/dL",
+      "foodItems": [
+        {
+          "id": "22B8F05D-D4C2-49B7-AC1E-4A4BBC14CA5A",
+          "foodName": "みたらし団子",
+          "foodCategory": "菓子類",
+          "quantity": 1.0,
+          "servingSize": 100.0,
+          "servingUnit": "g",
+          "caloriesPerServing": 185.0,
+          "carbsPerServing": 30.0,
+          "proteinPerServing": 3.0,
+          "fatPerServing": 0.5,
+          "fiberPerServing": 0.5,
+          "glycemicIndex": 65
+        }
+      ],
+      "macronutrients": [
+        {
+          "type": "carbohydrates",
+          "amount": 30.0,
+          "unit": "g"
+        },
+        {
+          "type": "protein",
+          "amount": 3.0,
+          "unit": "g"
+        },
+        {
+          "type": "fat",
+          "amount": 0.5,
+          "unit": "g"
+        },
+        {
+          "type": "fiber",
+          "amount": 0.5,
+          "unit": "g"
+        }
+      ]
+    },
+    {
+      "id": "28BA552B-A495-4820-A24D-9B71BE7E6C28",
+      "name": "おやつ",
+      "timestamp": "2026-08-20T11:30:00.000Z",
+      "mealType": "lastMeal",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "calories": 296.0,
+      "unitString": "mg/dL",
+      "foodItems": [
+        {
+          "id": "C8737F05-9C7B-4F92-B559-52E2B0960879",
+          "foodName": "羊羹",
+          "foodCategory": "菓子類",
+          "quantity": 1.0,
+          "servingSize": 100.0,
+          "servingUnit": "g",
+          "caloriesPerServing": 296.0,
+          "carbsPerServing": 42.0,
+          "proteinPerServing": 3.5,
+          "fatPerServing": 0.2,
+          "fiberPerServing": 2.0,
+          "glycemicIndex": 50
+        }
+      ],
+      "macronutrients": [
+        {
+          "type": "carbohydrates",
+          "amount": 42.0,
+          "unit": "g"
+        },
+        {
+          "type": "protein",
+          "amount": 3.5,
+          "unit": "g"
+        },
+        {
+          "type": "fat",
+          "amount": 0.2,
+          "unit": "g"
+        },
+        {
+          "type": "fiber",
+          "amount": 2.0,
+          "unit": "g"
+        }
+      ]
+    },
+    {
+      "id": "F1112097-0287-40BD-8EE8-E4C6DDBB8DF2",
+      "name": "夜のおやつ",
+      "timestamp": "2026-08-18T11:30:00.000Z",
+      "mealType": "lastMeal",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "calories": 290.0,
+      "unitString": "mg/dL",
+      "foodItems": [
+        {
+          "id": "8C67127E-8F05-402A-BB34-60C08880F668",
+          "foodName": "ティラミス",
+          "foodCategory": "菓子類",
+          "quantity": 1.0,
+          "servingSize": 100.0,
+          "servingUnit": "g",
+          "caloriesPerServing": 290.0,
+          "carbsPerServing": 40.0,
+          "proteinPerServing": 5.0,
+          "fatPerServing": 14.0,
+          "fiberPerServing": 0.5,
+          "glycemicIndex": 45
+        }
+      ],
+      "macronutrients": [
+        {
+          "type": "carbohydrates",
+          "amount": 40.0,
+          "unit": "g"
+        },
+        {
+          "type": "protein",
+          "amount": 5.0,
+          "unit": "g"
+        },
+        {
+          "type": "fat",
+          "amount": 14.0,
+          "unit": "g"
+        },
+        {
+          "type": "fiber",
+          "amount": 0.5,
+          "unit": "g"
+        }
+      ]
+    },
+    {
+      "id": "517D0C0A-AA08-4477-9982-F44A875B7F85",
+      "name": "おやつ",
+      "timestamp": "2026-08-15T11:30:00.000Z",
+      "mealType": "lastMeal",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "calories": 320.0,
+      "unitString": "mg/dL",
+      "foodItems": [
+        {
+          "id": "F9E95E16-6F80-4B8D-8518-D97CD792889B",
+          "foodName": "クリームブリュレ",
+          "foodCategory": "菓子類",
+          "quantity": 1.0,
+          "servingSize": 100.0,
+          "servingUnit": "g",
+          "caloriesPerServing": 320.0,
+          "carbsPerServing": 36.0,
+          "proteinPerServing": 5.0,
+          "fatPerServing": 18.0,
+          "fiberPerServing": 0.0,
+          "glycemicIndex": 46
+        }
+      ],
+      "macronutrients": [
+        {
+          "type": "carbohydrates",
+          "amount": 36.0,
+          "unit": "g"
+        },
+        {
+          "type": "protein",
+          "amount": 5.0,
+          "unit": "g"
+        },
+        {
+          "type": "fat",
+          "amount": 18.0,
+          "unit": "g"
+        },
+        {
+          "type": "fiber",
+          "amount": 0.0,
+          "unit": "g"
+        }
+      ]
+    },
+    {
+      "id": "14A9DB81-6709-4EC5-ABED-DADF00D7CC43",
+      "name": "夜のおやつ",
+      "timestamp": "2026-08-12T11:30:00.000Z",
+      "mealType": "lastMeal",
+      "timeSinceLastMeal": 4.0,
+      "plannedDateTime": null,
+      "calories": 350.0,
+      "unitString": "mg/dL",
+      "foodItems": [
+        {
+          "id": "341B7B23-2614-45F3-934F-57DB47294EFA",
+          "foodName": "チーズケーキ（ベイクド）",
+          "foodCategory": "菓子類",
+          "quantity": 1.0,
+          "servingSize": 100.0,
+          "servingUnit": "g",
+          "caloriesPerServing": 350.0,
+          "carbsPerServing": 37.0,
+          "proteinPerServing": 7.0,
+          "fatPerServing": 20.0,
+          "fiberPerServing": 0.5,
+          "glycemicIndex": 46
+        }
+      ],
+      "macronutrients": [
+        {
+          "type": "carbohydrates",
+          "amount": 37.0,
+          "unit": "g"
+        },
+        {
+          "type": "protein",
+          "amount": 7.0,
+          "unit": "g"
+        },
+        {
+          "type": "fat",
+          "amount": 20.0,
+          "unit": "g"
+        },
+        {
+          "type": "fiber",
+          "amount": 0.5,
+          "unit": "g"
+        }
+      ]
+    }
+  ],
+  "exerciseSessions": [
+    {
+      "id": "DCB978DB-4BE9-493E-884F-9C927D9FFCF9",
+      "type": "Walking",
+      "startDate": "2026-09-07T08:00:00.000Z",
+      "endDate": "2026-09-07T08:45:00.000Z",
+      "duration": 2700.0,
+      "distance": 3200.0,
+      "intensity": 3.5,
+      "caloriesBurned": 180.0,
+      "notes": ""
+    },
+    {
+      "id": "6CA30495-34FB-4E27-A81F-86DDE2D2E316",
+      "type": "Walking",
+      "startDate": "2026-09-06T08:00:00.000Z",
+      "endDate": "2026-09-06T08:50:00.000Z",
+      "duration": 3000.0,
+      "distance": 3500.0,
+      "intensity": 3.5,
+      "caloriesBurned": 195.0,
+      "notes": ""
+    },
+    {
+      "id": "275856EB-E7A5-4213-8F4F-68A729D48F7A",
+      "type": "Walking",
+      "startDate": "2026-09-04T07:55:00.000Z",
+      "endDate": "2026-09-04T08:40:00.000Z",
+      "duration": 2700.0,
+      "distance": 3100.0,
+      "intensity": 3.5,
+      "caloriesBurned": 178.0,
+      "notes": ""
+    },
+    {
+      "id": "0033384B-BBB5-44CB-A8DD-81CAD83ECBF6",
+      "type": "Walking",
+      "startDate": "2026-09-02T08:05:00.000Z",
+      "endDate": "2026-09-02T08:50:00.000Z",
+      "duration": 2700.0,
+      "distance": 3250.0,
+      "intensity": 3.5,
+      "caloriesBurned": 182.0,
+      "notes": ""
+    },
+    {
+      "id": "6DC12886-8E86-45C3-BF95-20DE2B221279",
+      "type": "Walking",
+      "startDate": "2026-08-31T08:00:00.000Z",
+      "endDate": "2026-08-31T08:48:00.000Z",
+      "duration": 2880.0,
+      "distance": 3400.0,
+      "intensity": 3.5,
+      "caloriesBurned": 188.0,
+      "notes": ""
+    },
+    {
+      "id": "536C36F4-80B4-43E6-954A-98D8B1A89EA4",
+      "type": "Walking",
+      "startDate": "2026-08-29T07:50:00.000Z",
+      "endDate": "2026-08-29T08:35:00.000Z",
+      "duration": 2700.0,
+      "distance": 3150.0,
+      "intensity": 3.5,
+      "caloriesBurned": 176.0,
+      "notes": ""
+    },
+    {
+      "id": "CF4D0870-846D-4F10-A0AD-911CAF6C87BB",
+      "type": "Walking",
+      "startDate": "2026-08-27T08:00:00.000Z",
+      "endDate": "2026-08-27T08:45:00.000Z",
+      "duration": 2700.0,
+      "distance": 3200.0,
+      "intensity": 3.5,
+      "caloriesBurned": 180.0,
+      "notes": ""
+    },
+    {
+      "id": "58765995-D662-4F86-9D8A-02897CA92950",
+      "type": "Walking",
+      "startDate": "2026-08-25T08:10:00.000Z",
+      "endDate": "2026-08-25T08:55:00.000Z",
+      "duration": 2700.0,
+      "distance": 3100.0,
+      "intensity": 3.5,
+      "caloriesBurned": 175.0,
+      "notes": ""
+    }
+  ],
+  "hba1cPredictions": [],
+  "healthConditions": [],
+  "userProfile": {}
+}
