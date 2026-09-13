@@ -30,6 +30,10 @@ struct DiabetesHbA1cPredictionApp: App {
     /// state is visible across the app.
     @StateObject private var healthKitManager = HealthKitManager.shared
 
+    // MARK: - Scene phase (for exercise reminder checks)
+
+    @Environment(\.scenePhase) private var scenePhase
+
     // MARK: - Welcome Sheet
 
     /// Controls whether the first-launch welcome sheet is visible.
@@ -54,10 +58,21 @@ struct DiabetesHbA1cPredictionApp: App {
                 .sheet(isPresented: $showWelcomeSheet) {
                     WelcomeSheetView()
                 }
+                // Cancel pending exercise nudges if the user has been active
+                // since their feast start time.
+                .onChange(of: scenePhase) { _, newPhase in
+                    if newPhase == .active {
+                        ExerciseReminderManager.shared.cancelIfExercised()
+                    }
+                }
                 // Request HealthKit permissions on first appearance,
                 // then start the glucose observer for live sync.
                 // Skip during UI test screenshot runs (avoids the auth dialog).
                 .onAppear {
+                    // Ensure the exercise reminder delegate is live before
+                    // any notification response is delivered at cold launch.
+                    ExerciseReminderManager.shared.setup()
+
                     let isUITestRun = ProcessInfo.processInfo.environment["IS_UI_SCREENSHOT_TEST"] == "1"
                         || ProcessInfo.processInfo.arguments.contains("-SkipHealthKitAuth")
                     if HealthKitManager.isHealthKitAvailable() && !isUITestRun {

@@ -99,7 +99,7 @@ struct PaywallView: View {
                     Image(systemName: feature.icon)
                         .foregroundColor(.blue)
                         .frame(width: 24)
-                    Text(feature.text)
+                    Text(LocalizedStringKey(feature.text))
                         .font(.subheadline)
                         .foregroundColor(.primary)
                 }
@@ -170,7 +170,7 @@ struct PaywallView: View {
     // MARK: - Trial Note
 
     private var trialNote: some View {
-        Text("Try free for 1 month, then \(subscriptionManager.product?.displayPrice ?? "—")/year.\nCancel anytime in Settings > Apple ID > Subscriptions.")
+        Text(String(format: NSLocalizedString("Try free for 1 month, then %@/year.\nCancel anytime in Settings > Apple ID > Subscriptions.", comment: ""), subscriptionManager.product?.displayPrice ?? "—"))
             .font(.caption)
             .foregroundColor(.secondary)
             .multilineTextAlignment(.center)

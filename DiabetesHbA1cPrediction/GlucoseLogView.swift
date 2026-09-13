@@ -2096,6 +2096,7 @@ struct AddGlucoseReadingSheet: View {
 ///  - Hold threshold : 0.40 s  (how long before repeating starts)
 ///  - Initial interval: 0.35 s  (first repeat gap)
 ///  - Acceleration   : ×0.93 per step (floor 0.15 s — reached after ~10 fires)
+@MainActor
 private struct HoldRepeatChevron: View {
     let systemImage: String
     let accessibilityLabel: String
@@ -2126,8 +2127,10 @@ private struct HoldRepeatChevron: View {
                         // Schedule hold recognition
                         holdTimer = Timer.scheduledTimer(withTimeInterval: holdThreshold,
                                                          repeats: false) { _ in
-                            isRepeating = true
-                            fireRepeat(interval: initialInterval)
+                            MainActor.assumeIsolated {
+                                isRepeating = true
+                                fireRepeat(interval: initialInterval)
+                            }
                         }
                     }
                     .onEnded { _ in
@@ -2146,7 +2149,9 @@ private struct HoldRepeatChevron: View {
         let next = max(minimumInterval, interval * acceleration)
         repeatTimer = Timer.scheduledTimer(withTimeInterval: interval,
                                            repeats: false) { _ in
-            fireRepeat(interval: next)
+            MainActor.assumeIsolated {
+                fireRepeat(interval: next)
+            }
         }
     }
 

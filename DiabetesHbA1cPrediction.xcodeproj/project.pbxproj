@@ -24,18 +24,18 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		93CC102D2F400B20003B36A4 /* DiabetesHbA1cPrediction.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiabetesHbA1cPrediction.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		93CC102D2F400B20003B36A4 /* DiabetesFeastv2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiabetesFeastv2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		93CC103F2F400B22003B36A4 /* com.diabetesfeastjp.DiabetesFeastTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = com.diabetesfeastjp.DiabetesFeastTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		93CC10492F400B22003B36A4 /*  com.diabetesfeastjp.DiabetesFeastUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = " com.diabetesfeastjp.DiabetesFeastUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		932B8B0B2F50F8830076353B /* Exceptions for "DiabetesHbA1cPrediction" folder in "DiabetesHbA1cPrediction" target */ = {
+		932B8B0B2F50F8830076353B /* Exceptions for "DiabetesHbA1cPrediction" folder in "DiabetesFeastv2" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 93CC102C2F400B20003B36A4 /* DiabetesHbA1cPrediction */;
+			target = 93CC102C2F400B20003B36A4 /* DiabetesFeastv2 */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -43,7 +43,7 @@
 		93CC102F2F400B20003B36A4 /* DiabetesHbA1cPrediction */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				932B8B0B2F50F8830076353B /* Exceptions for "DiabetesHbA1cPrediction" folder in "DiabetesHbA1cPrediction" target */,
+				932B8B0B2F50F8830076353B /* Exceptions for "DiabetesHbA1cPrediction" folder in "DiabetesFeastv2" target */,
 			);
 			path = DiabetesHbA1cPrediction;
 			sourceTree = "<group>";
@@ -98,7 +98,7 @@
 		93CC102E2F400B20003B36A4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				93CC102D2F400B20003B36A4 /* DiabetesHbA1cPrediction.app */,
+				93CC102D2F400B20003B36A4 /* DiabetesFeastv2.app */,
 				93CC103F2F400B22003B36A4 /* com.diabetesfeastjp.DiabetesFeastTests.xctest */,
 				93CC10492F400B22003B36A4 /*  com.diabetesfeastjp.DiabetesFeastUITests.xctest */,
 			);
@@ -108,9 +108,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		93CC102C2F400B20003B36A4 /* DiabetesHbA1cPrediction */ = {
+		93CC102C2F400B20003B36A4 /* DiabetesFeastv2 */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 93CC10532F400B22003B36A4 /* Build configuration list for PBXNativeTarget "DiabetesHbA1cPrediction" */;
+			buildConfigurationList = 93CC10532F400B22003B36A4 /* Build configuration list for PBXNativeTarget "DiabetesFeastv2" */;
 			buildPhases = (
 				93CC10292F400B20003B36A4 /* Sources */,
 				93CC102A2F400B20003B36A4 /* Frameworks */,
@@ -123,11 +123,11 @@
 			fileSystemSynchronizedGroups = (
 				93CC102F2F400B20003B36A4 /* DiabetesHbA1cPrediction */,
 			);
-			name = DiabetesHbA1cPrediction;
+			name = DiabetesFeastv2;
 			packageProductDependencies = (
 			);
 			productName = DiabetesHbA1cPrediction;
-			productReference = 93CC102D2F400B20003B36A4 /* DiabetesHbA1cPrediction.app */;
+			productReference = 93CC102D2F400B20003B36A4 /* DiabetesFeastv2.app */;
 			productType = "com.apple.product-type.application";
 		};
 		93CC103E2F400B22003B36A4 /* com.diabetesfeastjp.DiabetesFeastTests */ = {
@@ -206,6 +206,7 @@
 				en,
 				Base,
 				ja,
+				"ja 2",
 			);
 			mainGroup = 93CC10242F400B20003B36A4;
 			minimizedProjectReferenceProxies = 1;
@@ -214,7 +215,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				93CC102C2F400B20003B36A4 /* DiabetesHbA1cPrediction */,
+				93CC102C2F400B20003B36A4 /* DiabetesFeastv2 */,
 				93CC103E2F400B22003B36A4 /* com.diabetesfeastjp.DiabetesFeastTests */,
 				93CC10482F400B22003B36A4 /*  com.diabetesfeastjp.DiabetesFeastUITests */,
 			);
@@ -272,12 +273,12 @@
 /* Begin PBXTargetDependency section */
 		93CC10412F400B22003B36A4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 93CC102C2F400B20003B36A4 /* DiabetesHbA1cPrediction */;
+			target = 93CC102C2F400B20003B36A4 /* DiabetesFeastv2 */;
 			targetProxy = 93CC10402F400B22003B36A4 /* PBXContainerItemProxy */;
 		};
 		93CC104B2F400B22003B36A4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 93CC102C2F400B20003B36A4 /* DiabetesHbA1cPrediction */;
+			target = 93CC102C2F400B20003B36A4 /* DiabetesFeastv2 */;
 			targetProxy = 93CC104A2F400B22003B36A4 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -417,7 +418,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DiabetesHbA1cPrediction/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = PredictHbA1c;
+				INFOPLIST_KEY_CFBundleDisplayName = "Diabetes Feast";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "This app reads your health data from ​Apple ​Health to provide personalized ​Hb​A1c predictions and diabetes insights. ";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "This app writes exercise and meal data to ​Apple ​Health to help track your diabetes management and predict ​Hb​A1c levels.";
@@ -461,7 +462,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DiabetesHbA1cPrediction/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = PredictHbA1c;
+				INFOPLIST_KEY_CFBundleDisplayName = "Diabetes Feast";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "This app reads your health data from ​Apple ​Health to provide personalized ​Hb​A1c predictions and diabetes insights. ";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "This app writes exercise and meal data to ​Apple ​Health to help track your diabetes management and predict ​Hb​A1c levels.";
@@ -588,7 +589,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		93CC10532F400B22003B36A4 /* Build configuration list for PBXNativeTarget "DiabetesHbA1cPrediction" */ = {
+		93CC10532F400B22003B36A4 /* Build configuration list for PBXNativeTarget "DiabetesFeastv2" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				93CC10542F400B22003B36A4 /* Debug */,

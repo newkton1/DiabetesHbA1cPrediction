@@ -431,6 +431,9 @@ struct MealBuilderView: View {
             if mealType == .feast {
                 try mealBuilder.save(to: viewContext)
 
+                // Schedule offset exercise nudge notifications (T+90 and T+150 min)
+                ExerciseReminderManager.shared.scheduleReminders()
+
                 // Show auto-dismissing warning for high glycemic load feasts
                 if mealBuilder.totalGlycemicLoad >= 50 {
                     withAnimation(.easeInOut(duration: 0.3)) { showGlycemicWarning = true }

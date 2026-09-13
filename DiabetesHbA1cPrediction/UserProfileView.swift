@@ -73,6 +73,10 @@ struct UserProfileView: View {
     @State private var showSaveSuccess = false
     @FocusState private var isTextFieldFocused: Bool
 
+    // Paywall backdoor (hidden 5-tap on Version row for App Store review)
+    @State private var paywallTapCount = 0
+    @State private var showPaywallBackdoor = false
+
     // Share state
     @State private var showShareWarning = false
     @State private var showShareSheet = false
@@ -338,9 +342,6 @@ struct UserProfileView: View {
                     Label("Export All Data", systemImage: "square.and.arrow.up")
                         .foregroundColor(.primary)
                 }
-                .navigationDestination(isPresented: $navigateToExport) {
-                    DataExportView()
-                }
                 NavigationLink(destination: DataImportView()) {
                     Label("Import Data from JSON", systemImage: "square.and.arrow.down")
                 }
@@ -448,6 +449,14 @@ struct UserProfileView: View {
                     Text("1.0")
                         .foregroundColor(.secondary)
                 }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    paywallTapCount += 1
+                    if paywallTapCount >= 5 {
+                        paywallTapCount = 0
+                        showPaywallBackdoor = true
+                    }
+                }
             }
         }
         }
@@ -510,8 +519,14 @@ struct UserProfileView: View {
         .sheet(isPresented: $showShareSheet) {
             ShareSheetView(activityItems: [shareSummaryText])
         }
+        .navigationDestination(isPresented: $navigateToExport) {
+            DataExportView()
+        }
         .onAppear {
             loadExistingProfile()
+        }
+        .sheet(isPresented: $showPaywallBackdoor) {
+            PaywallView()
         }
     }
 
