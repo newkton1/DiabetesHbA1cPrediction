@@ -13,6 +13,7 @@
 
 import SwiftUI
 import CoreData
+import UserNotifications
 
 /// The @main attribute marks this struct as the application entry point.
 @main
@@ -60,18 +61,28 @@ struct DiabetesHbA1cPredictionApp: App {
                 }
                 // Cancel pending exercise nudges if the user has been active
                 // since their feast start time.
+                // Posted via NotificationCenter — ERM.swift is in a separate Swift
+                // compilation batch (Xcode 26) and cannot be referenced by name here.
                 .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .active {
-                        ExerciseReminderManager.shared.cancelIfExercised()
+                        NotificationCenter.default.post(
+                            name: Notification.Name("com.diabetesfeast.cancelIfExercised"),
+                            object: nil)
                     }
                 }
                 // Request HealthKit permissions on first appearance,
                 // then start the glucose observer for live sync.
                 // Skip during UI test screenshot runs (avoids the auth dialog).
                 .onAppear {
-                    // Ensure the exercise reminder delegate is live before
-                    // any notification response is delivered at cold launch.
-                    ExerciseReminderManager.shared.setup()
+                    // Request notification permission early so the app appears
+                    // in Settings → Notifications from the very first launch.
+                    // Called directly on UNUserNotificationCenter rather than via
+                    // ExerciseReminderManager, which lives in a separate Swift
+                    // compilation batch (Xcode 26) and cannot be referenced here.
+                    Task {
+                        _ = try? await UNUserNotificationCenter.current()
+                            .requestAuthorization(options: [.alert, .sound])
+                    }
 
                     let isUITestRun = ProcessInfo.processInfo.environment["IS_UI_SCREENSHOT_TEST"] == "1"
                         || ProcessInfo.processInfo.arguments.contains("-SkipHealthKitAuth")
@@ -87,6 +98,11 @@ struct DiabetesHbA1cPredictionApp: App {
                                 healthKitManager.startGlucoseObserver(
                                     context: persistenceController.container.viewContext
                                 )
+                                // Start observing HealthKit for new workouts so
+                                // the app is woken in the background when the user
+                                // completes a walk/run and can cancel the T+150
+                                // "Have you exercised?" nudge before it fires.
+                                healthKitManager.startExerciseObserver()
                             }
                         }
                     }

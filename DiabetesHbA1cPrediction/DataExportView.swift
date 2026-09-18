@@ -131,7 +131,7 @@ struct DataExportView: View {
     private func exportAllData() {
         let export: [String: Any] = [
             "exportDate": iso8601.string(from: Date()),
-            "appVersion": "1.0",
+            "appVersion": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0",
             "userProfile": exportUserProfiles(),
             "healthConditions": exportHealthConditions(),
             "glucoseReadings": exportGlucoseReadings(),

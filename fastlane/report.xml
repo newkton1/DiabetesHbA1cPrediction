@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="fastlane.lanes">
+    
+    
+    
+      
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000251">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="1: xcrun simctl boot &apos;iPhone 17 Pro Max&apos; 2&gt;/dev/null || true" time="0.44048">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="2: xcrun simctl ui &apos;iPhone 17 Pro Max&apos; appearance light" time="1.386494">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="3: snapshot" time="992.956259">
+        
+      </testcase>
+    
+  </testsuite>
+</testsuites>

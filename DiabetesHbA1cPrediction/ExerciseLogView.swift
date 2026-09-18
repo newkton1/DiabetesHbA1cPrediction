@@ -29,6 +29,7 @@ struct ExerciseLogView: View {
     @State private var showSaveError = false
     @State private var saveErrorMessage = ""
     @State private var showHealthKitError = false
+    @State private var showOffsetReward = false
 
     private var isPortrait: Bool {
         verticalSizeClass == .regular && horizontalSizeClass == .compact
@@ -70,7 +71,7 @@ struct ExerciseLogView: View {
                 }
             }
             .sheet(isPresented: $showAddSheet) {
-                AddExerciseSessionSheet(isPresented: $showAddSheet, moc: moc)
+                AddExerciseSessionSheet(isPresented: $showAddSheet, showOffsetReward: $showOffsetReward, moc: moc)
             }
             .alert("Sync Status", isPresented: $showSyncAlert) {
                 Button("OK") { }
@@ -95,6 +96,11 @@ struct ExerciseLogView: View {
             } message: {
                 Text(saveErrorMessage)
             }
+            .alert(NSLocalizedString("Offset Exercise Complete!", comment: "Reward alert title"), isPresented: $showOffsetReward) {
+                Button("OK") { }
+            } message: {
+                Text(NSLocalizedString("Great work! Your offset exercise helps manage your glucose response. Remaining nudges have been cancelled.", comment: "Reward alert message shown when offset exercise is detected"))
+            }
             .alert("HealthKit Error", isPresented: $showHealthKitError) {
                 Button("OK", role: .cancel) { }
             } message: {
@@ -103,6 +109,14 @@ struct ExerciseLogView: View {
             .onAppear {
                 if let error = HealthKitManager.shared.authorizationError, !error.isEmpty {
                     showHealthKitError = true
+                }
+                // Show reward if a background exercise check fired while the app was closed.
+                // Reads UserDefaults directly — ExerciseReminderManager.swift is in a
+                // separate Swift compilation batch (Xcode 26) and cannot be referenced here.
+                let _rewardKey = "offsetExerciseRewardPending"
+                if UserDefaults.standard.bool(forKey: _rewardKey) {
+                    UserDefaults.standard.removeObject(forKey: _rewardKey)
+                    showOffsetReward = true
                 }
             }
         }
@@ -365,6 +379,22 @@ struct ExerciseLogView: View {
                 messageParts.append(String(format: NSLocalizedString("%lld new glucose reading(s)", comment: ""), Int64(glucoseResult.newImported)))
             }
 
+            // If we're in an active feast monitoring window, post a notification so
+            // ExerciseReminderManager can cancel nudges if sufficient activity is found.
+            // ERM.swift is in a separate Swift compilation batch (Xcode 26) so it
+            // cannot be referenced directly; use UserDefaults to read the feast state.
+            let _feastKey = "exerciseReminderFeastStartTime"
+            let offsetRewardEarned: Bool
+            if let feastTime = UserDefaults.standard.object(forKey: _feastKey) as? Date,
+               Date().timeIntervalSince(feastTime) < 180 * 60 {
+                // Post notification; ERM will do the HealthKit check and set the reward flag.
+                NotificationCenter.default.post(
+                    name: Notification.Name("com.diabetesfeast.workoutDetected"), object: nil)
+                offsetRewardEarned = false  // reward surfaced via notification if earned
+            } else {
+                offsetRewardEarned = false
+            }
+
             // Check for sync save errors
             if let syncError = healthKitManager.lastSyncError {
                 syncMessage = String(format: NSLocalizedString("Sync encountered an error: %@", comment: ""), syncError)
@@ -375,6 +405,13 @@ struct ExerciseLogView: View {
                 syncMessage = String(format: NSLocalizedString("Sync completed successfully! %@.", comment: ""), messageParts.joined(separator: isJapanese ? "、" : ", "))
             }
 
+            // If offset exercise was detected, append congratulations to the sync
+            // message — avoids a second simultaneous alert that SwiftUI may suppress.
+            if offsetRewardEarned {
+                syncMessage += "\n\n🎉 " + NSLocalizedString(
+                    "Great work! Your offset exercise helps manage your glucose response.",
+                    comment: "Reward appended to sync message when offset exercise detected")
+            }
             showSyncAlert = true
             isSyncing = false
             syncSuccess = healthKitManager.lastSyncError == nil
@@ -847,6 +884,7 @@ struct ExerciseRowView: View {
 /// Sheet for manually adding a new exercise session
 struct AddExerciseSessionSheet: View {
     @Binding var isPresented: Bool
+    @Binding var showOffsetReward: Bool
     var moc: NSManagedObjectContext
     @State private var showSaveError = false
     @State private var saveErrorMessage = ""
@@ -1007,6 +1045,21 @@ struct AddExerciseSessionSheet: View {
 
         do {
             try moc.save()
+            // If this exercise falls in the feast offset window, cancel remaining nudges
+            // and surface a reward to the parent view.
+            // UserDefaults read directly — ERM.swift is in a separate Swift compilation
+            // batch (Xcode 26) so the type cannot be referenced here at compile time.
+            let _fKey = "exerciseReminderFeastStartTime"
+            if let feastTime = UserDefaults.standard.object(forKey: _fKey) as? Date {
+                let lower = feastTime.addingTimeInterval(60 * 60)
+                let upper = feastTime.addingTimeInterval(180 * 60)
+                if selectedStartDate >= lower && selectedStartDate <= upper {
+                    NotificationCenter.default.post(
+                        name: Notification.Name("com.diabetesfeast.cancelFeastReminders"),
+                        object: nil)
+                    showOffsetReward = true
+                }
+            }
             isPresented = false
         } catch {
             saveErrorMessage = "Could not save exercise session. Please try again."

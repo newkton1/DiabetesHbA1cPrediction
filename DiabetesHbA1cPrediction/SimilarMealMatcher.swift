@@ -33,7 +33,7 @@ enum SimilarMealMatcher {
     /// Carbohydrate tolerance (grams) used as the window around the
     /// planned meal's carbs. Past meals whose carbs fall within
     /// plannedCarbs ± `carbToleranceGrams` are eligible for matching.
-    static let carbToleranceGrams: Double = 15.0
+    static let carbToleranceGrams: Double = 20.0
 
     /// Glycaemic-load tolerance (fraction of planned GL).
     /// Past meals whose GL falls within ±`glTolerancePct` of the

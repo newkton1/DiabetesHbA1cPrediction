@@ -35,17 +35,6 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "93CC103E2F400B22003B36A4"
-               BuildableName = "com.diabetesfeastjp.DiabetesFeastTests.xctest"
-               BlueprintName = "com.diabetesfeastjp.DiabetesFeastTests"
-               ReferencedContainer = "container:DiabetesHbA1cPrediction.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "93CC10482F400B22003B36A4"
                BuildableName = " com.diabetesfeastjp.DiabetesFeastUITests.xctest"
                BlueprintName = " com.diabetesfeastjp.DiabetesFeastUITests"

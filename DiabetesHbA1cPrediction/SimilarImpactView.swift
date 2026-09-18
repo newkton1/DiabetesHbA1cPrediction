@@ -107,8 +107,57 @@ struct SimilarImpactView: View {
                         .padding(.horizontal)
                         .padding(.top, 8)
                     } else {
-                        // Not enough history — show only the cold-start card
+                        // No similar meal found — show cold-start card but still
+                        // allow the user to save the feast and receive exercise nudges.
                         noHistoryCard
+
+                        // Planned Date & Time
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Planned Date & Time")
+                                .font(.headline)
+                                .padding(.horizontal)
+
+                            HStack {
+                                Text("Date and time of this treat")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                            }
+                            .padding(.horizontal)
+
+                            HStack {
+                                Spacer()
+                                DatePicker(
+                                    "Date & Time",
+                                    selection: $mealBuilder.plannedDateTime,
+                                    displayedComponents: [.date, .hourAndMinute]
+                                )
+                                .labelsHidden()
+                                .datePickerStyle(.compact)
+                                Spacer()
+                            }
+                            .padding(.vertical, 4)
+                        }
+                        .padding(.vertical, 4)
+                        .padding(.horizontal, 4)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+
+                        Button(action: onEatTreat) {
+                            HStack {
+                                Image(systemName: "fork.knife")
+                                Text("Eat Treat")
+                                    .fontWeight(.bold)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(14)
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 8)
                     }
 
                     Spacer(minLength: 20)
@@ -147,7 +196,7 @@ struct SimilarImpactView: View {
                     // Progress indicator
                     let daysLogged = ColdStartManager.shared.glucoseDaysLogged
                     let required = ColdStartManager.similarMealDaysRequired
-                    Text("\(daysLogged) of \(required) days of meal + glucose data")
+                    Text(String(format: NSLocalizedString("%1$d of %2$d days of meal + glucose data", comment: "Progress label on Similar Meal Patterns cold-start screen"), daysLogged, required))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                         .padding(.top, 4)
@@ -396,14 +445,14 @@ struct SimilarImpactView: View {
             let sessions = try viewContext.fetch(fetchRequest)
             guard !sessions.isEmpty else { return 0 }
             var totalMinutes = 0.0
-            var totalDistance = 0.0
+            var totalDistanceKm = 0.0
             for session in sessions {
                 guard session.duration > 0 else { continue }
-                totalMinutes += session.duration
-                totalDistance += session.distance
+                totalMinutes += session.duration / 60.0   // seconds → minutes
+                totalDistanceKm += session.distance / 1000.0  // metres → km
             }
-            guard totalMinutes > 0 && totalDistance > 0 else { return 0 }
-            return totalDistance / totalMinutes
+            guard totalMinutes > 0 && totalDistanceKm > 0 else { return 0 }
+            return totalDistanceKm / totalMinutes   // km per minute
         } catch {
             return 0
         }
@@ -641,7 +690,7 @@ struct SimilarImpactView: View {
 
             let windowStart = mealTime.addingTimeInterval(60 * 60)    // 60 min
             let windowEnd   = mealTime.addingTimeInterval(120 * 60)   // 120 min
-            let baselineStart = mealTime.addingTimeInterval(-15 * 60) // 15 min before
+            let baselineStart = mealTime.addingTimeInterval(-45 * 60) // up to 45 min before
             let baselineEnd = mealTime
 
             // Glucose readings in the 60–120 min window (normalised to mg/dL)
@@ -652,7 +701,8 @@ struct SimilarImpactView: View {
                 return ts >= windowStart && ts <= windowEnd
             }
 
-            // Baseline reading (closest to meal time, up to 15 min before)
+            // Baseline reading (closest to meal time, up to 45 min before — covers T-30
+            // readings from CGM data and cases where the user logs a meal mid-way through eating)
             let baselineReadings = allGlucoseReadings.filter { reading in
                 guard let ts = reading.timestamp,
                       let unit = reading.unit,

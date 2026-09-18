@@ -228,6 +228,12 @@ struct DashboardView: View {
                             exerciseSessions: exerciseSessions
                         )
 
+                        // Feast encouragement banner (landscape)
+                        FeastEncouragementBanner(
+                            daysSinceLastFeast: daysSinceLastFeast,
+                            onPlanFeast: { selectedTab = .meals }
+                        )
+
                         // Action cards in a 3-column x 2-row grid in landscape
                         LandscapeActionsGrid(
                             onAddMeal: { showLastMealSheet = true },
@@ -269,6 +275,12 @@ struct DashboardView: View {
                         ActivitySnapshotCard(
                             meals: meals,
                             exerciseSessions: exerciseSessions
+                        )
+
+                        // MARK: - Feast Encouragement Banner (0 feasts in 14 days)
+                        FeastEncouragementBanner(
+                            daysSinceLastFeast: daysSinceLastFeast,
+                            onPlanFeast: { selectedTab = .meals }
                         )
 
                         // MARK: - Quick Action Cards for Meals
@@ -352,6 +364,25 @@ struct DashboardView: View {
     /// Get the most recent logged meal (not planned)
     private var lastLoggedMeal: MealEntity? {
         meals.first { $0.mealType != "plannedMeal" }
+    }
+
+    /// Count of feast meals logged in the last 14 days.
+    /// Used to decide whether to show the feast encouragement banner.
+    private var feastsInLast14Days: Int {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -14, to: Date()) ?? Date()
+        return meals.filter {
+            $0.mealType == "feast" && ($0.timestamp ?? .distantPast) >= cutoff
+        }.count
+    }
+
+    /// Days since the most recent feast was logged (999 if never logged).
+    private var daysSinceLastFeast: Int {
+        let lastFeast = meals
+            .filter { $0.mealType == "feast" }
+            .compactMap { $0.timestamp }
+            .max()
+        guard let lastFeast else { return 999 }
+        return Calendar.current.dateComponents([.day], from: lastFeast, to: Date()).day ?? 999
     }
     
     /// Get the next upcoming planned meal
@@ -1111,6 +1142,89 @@ private struct StatCard: View {
 }
 
 // MARK: - MealQuickActionsView Component
+// MARK: - Feast Encouragement Banner
+
+/// Shown when no feast treats have been logged in the last 14 days.
+/// Reminds the user that it is fine to enjoy a treat when paired with offset exercise.
+/// Dismissable; reappears after another 14-day feast-free period.
+private struct FeastEncouragementBanner: View {
+
+    let daysSinceLastFeast: Int
+    let onPlanFeast: () -> Void
+
+    private let dismissKey   = "feastEncouragementDismissedDate"
+    private let cooldownDays = 14
+
+    /// Immediate local dismiss state so the banner vanishes without waiting
+    /// for a UserDefaults-driven recompose.
+    @State private var dismissed = false
+
+    private var shouldShow: Bool {
+        guard daysSinceLastFeast >= 14, !dismissed else { return false }
+        let lastDismissed = UserDefaults.standard.object(forKey: dismissKey) as? Date ?? .distantPast
+        let daysSince = Calendar.current.dateComponents([.day], from: lastDismissed, to: Date()).day ?? 999
+        return daysSince >= cooldownDays
+    }
+
+    var body: some View {
+        if shouldShow {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "party.popper.fill")
+                    .font(.title3)
+                    .foregroundColor(.feastAccent)
+                    .accessibilityHidden(true)
+                    .padding(.top, 2)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(String(format: NSLocalizedString("What If? treat not logged in %d days.", comment: "Feast encouragement banner — days since last feast"), daysSinceLastFeast))
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Button(action: {
+                        dismiss()
+                        onPlanFeast()
+                    }) {
+                        Text("Plan a Feast Treat →")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.feastAccent)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 2)
+                }
+
+                Spacer()
+
+                Button(action: dismiss) {
+                    Image(systemName: "xmark")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(6)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Dismiss")
+            }
+            .padding(14)
+            .background(Color.feastAccent.opacity(0.08))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.feastAccent.opacity(0.25), lineWidth: 1)
+            )
+            .padding(.horizontal)
+            .transition(.opacity.combined(with: .scale(scale: 0.97)))
+        }
+    }
+
+    private func dismiss() {
+        withAnimation(.easeInOut(duration: 0.2)) { dismissed = true }
+        UserDefaults.standard.set(Date(), forKey: dismissKey)
+    }
+}
+
 /// Quick action cards for adding meals and planning feasts
 private struct MealQuickActionsView: View {
     let onAddMeal: () -> Void

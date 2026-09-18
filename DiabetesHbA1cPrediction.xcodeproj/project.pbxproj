@@ -413,7 +413,7 @@
 				CODE_SIGN_ENTITLEMENTS = DiabetesHbA1cPrediction/DiabetesHbA1cPrediction.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 36;
+				CURRENT_PROJECT_VERSION = 37;
 				DEVELOPMENT_TEAM = QN365Z622F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -457,7 +457,7 @@
 				CODE_SIGN_ENTITLEMENTS = DiabetesHbA1cPrediction/DiabetesHbA1cPrediction.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 36;
+				CURRENT_PROJECT_VERSION = 37;
 				DEVELOPMENT_TEAM = QN365Z622F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -553,7 +553,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = DiabetesHbA1cPrediction;
+				TEST_TARGET_NAME = DiabetesFeastv2;
 			};
 			name = Debug;
 		};
@@ -573,7 +573,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = DiabetesHbA1cPrediction;
+				TEST_TARGET_NAME = DiabetesFeastv2;
 			};
 			name = Release;
 		};

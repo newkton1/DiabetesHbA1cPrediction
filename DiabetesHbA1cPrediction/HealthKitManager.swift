@@ -59,6 +59,12 @@ class HealthKitManager: ObservableObject {
     /// Tracks whether the glucose observer has already been started
     private var isGlucoseObserverRunning = false
 
+    /// Active observer query for workout data (kept alive for the app's lifetime)
+    private var exerciseObserverQuery: HKObserverQuery?
+
+    /// Tracks whether the exercise observer has already been started
+    private var isExerciseObserverRunning = false
+
     /// Minimum time between consecutive observer-triggered syncs. HealthKit's
     /// `.immediate` background delivery can call the observer far more often
     /// than a genuinely new reading exists; without this throttle, every
@@ -179,6 +185,74 @@ class HealthKitManager: ObservableObject {
             #if DEBUG
             print("[HealthKit] Glucose observer query stopped.")
             #endif
+        }
+    }
+
+    // MARK: - Exercise Background Observer
+
+    /// Starts an HKObserverQuery for workout data so the app is woken in the background
+    /// whenever a new workout is saved to HealthKit (e.g. Apple Watch auto-detecting a walk).
+    ///
+    /// On each background wake, checks whether the user has exercised within the feast
+    /// offset window and cancels any remaining nudge notifications if so. This prevents
+    /// the T+150 "Have you exercised?" notification from firing after the user has already
+    /// completed their walk — even when the app was never opened between the walk and T+150.
+    ///
+    /// - Note: Safe to call multiple times — subsequent calls are no-ops.
+    func startExerciseObserver() {
+        guard !isExerciseObserverRunning else { return }
+        let workoutType = HKWorkoutType.workoutType()
+
+        isExerciseObserverRunning = true
+
+        // Enable background delivery so iOS wakes us when a workout is saved
+        healthStore.enableBackgroundDelivery(for: workoutType, frequency: .immediate) { success, error in
+            #if DEBUG
+            if success {
+                print("[HealthKit] Background delivery enabled for workouts.")
+            } else if let error = error {
+                print("[HealthKit] Failed to enable workout background delivery: \(error.localizedDescription)")
+            }
+            #endif
+        }
+
+        let query = HKObserverQuery(sampleType: workoutType, predicate: nil) { _, completionHandler, error in
+            if let error = error {
+                #if DEBUG
+                print("[HealthKit] Exercise observer error: \(error.localizedDescription)")
+                #endif
+                completionHandler()
+                return
+            }
+
+            // Signal HealthKit immediately — our check is brief enough that we
+            // don't need the extended background window a delayed call would provide.
+            completionHandler()
+
+            // Call the free function defined in ExerciseReminderManager.swift.
+            // ExerciseReminderManager is not referenced by type name here because
+            // ExerciseReminderManager.swift lands in a separate parallel Swift
+            // compilation batch (Xcode 26 batch mode), so neither the ERM type nor
+            // any free function defined in that file is visible here at compile time.
+            // Post a notification instead; ERM observes it in its own init().
+            NotificationCenter.default.post(
+                name: Notification.Name("com.diabetesfeast.workoutDetected"), object: nil)
+        }
+
+        exerciseObserverQuery = query
+        healthStore.execute(query)
+
+        #if DEBUG
+        print("[HealthKit] Exercise observer query started.")
+        #endif
+    }
+
+    /// Stops the exercise observer query if running.
+    func stopExerciseObserver() {
+        if let query = exerciseObserverQuery {
+            healthStore.stop(query)
+            exerciseObserverQuery = nil
+            isExerciseObserverRunning = false
         }
     }
 

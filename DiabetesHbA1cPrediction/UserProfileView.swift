@@ -446,7 +446,7 @@ struct UserProfileView: View {
                     Text("Version")
                         .foregroundColor(.primary)
                     Spacer()
-                    Text("1.0")
+                    Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—")
                         .foregroundColor(.secondary)
                 }
                 .contentShape(Rectangle())

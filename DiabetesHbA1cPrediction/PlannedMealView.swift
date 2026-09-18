@@ -165,7 +165,11 @@ struct PlannedMealView: View {
             disclaimerAcknowledged = false
             showHighFeastSheet = true
         } else if count >= 2 {
-            feastWarningMessage = "This is your \(ordinal(count + 1)) feast in the last 7 days. You can review your glucose and GMI trends from similar past meals."
+            let nth = count + 1
+            let template = NSLocalizedString(
+                "feast_frequency_warning_%d",
+                comment: "Warning shown when user is about to log their Nth feast in 7 days. %d = feast number (2, 3, …)")
+            feastWarningMessage = String(format: template, nth)
             showFeastWarning = true
         } else {
             showingFeastPlanner = true
@@ -174,20 +178,15 @@ struct PlannedMealView: View {
 
     /// Returns ordinal string for a number (1st, 2nd, 3rd, etc.)
     private func ordinal(_ n: Int) -> String {
-        let suffix: String
         let ones = n % 10
         let tens = (n / 10) % 10
-        if tens == 1 {
-            suffix = "th"
-        } else {
-            switch ones {
-            case 1: suffix = "st"
-            case 2: suffix = "nd"
-            case 3: suffix = "rd"
-            default: suffix = "th"
-            }
+        if tens == 1 { return "\(n)th" }
+        switch ones {
+        case 1: return "\(n)st"
+        case 2: return "\(n)nd"
+        case 3: return "\(n)rd"
+        default: return "\(n)th"
         }
-        return "\(n)\(suffix)"
     }
 }
 

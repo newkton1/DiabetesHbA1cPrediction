@@ -1,0 +1,19 @@
+default_platform(:ios)
+
+DEVICE = "iPhone 17 Pro Max"
+
+platform :ios do
+
+  desc "Capture App Store screenshots in light mode with correct date"
+  lane :screenshots do
+    # Ensure simulator is booted
+    sh "xcrun simctl boot '#{DEVICE}' 2>/dev/null || true"
+
+    # Force light mode — must be done BEFORE snapshot launches the app
+    sh "xcrun simctl ui '#{DEVICE}' appearance light"
+
+    # Capture screenshots (uses Snapfile for device/locale/output config)
+    snapshot
+  end
+
+end

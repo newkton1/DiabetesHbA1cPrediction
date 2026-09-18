@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import SwiftUI
 
 /// Manages user preferences for height and weight measurement units.
 /// Auto-detects locale (US → imperial, elsewhere → metric) with manual override.
@@ -19,7 +20,7 @@ final class HeightWeightUnitProfile: ObservableObject {
 
         var id: String { rawValue }
 
-        var label: String {
+        var label: LocalizedStringKey {
             switch self {
             case .kg: return "Kilograms (kg)"
             case .lbs: return "Pounds (lbs)"
@@ -35,7 +36,7 @@ final class HeightWeightUnitProfile: ObservableObject {
 
         var id: String { rawValue }
 
-        var label: String {
+        var label: LocalizedStringKey {
             switch self {
             case .cm: return "Centimetres (cm)"
             case .ftIn: return "Feet & Inches (ft-in)"

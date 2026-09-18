@@ -520,43 +520,34 @@ struct GlucoseLogView: View {
                                     Rectangle()
                                         .fill(Color.clear)
                                         .contentShape(Rectangle())
-                                        .gesture(
-                                            DragGesture(minimumDistance: 0)
+                                        .simultaneousGesture(
+                                            SpatialTapGesture()
                                                 .onEnded { value in
                                                     let tapX = value.location.x - plotFrame.origin.x
-                                                    let tapY = value.location.y - plotFrame.origin.y
+                                                    guard plotFrame.width > 0 else { return }
 
-                                                    // Map screen position to data coordinates
-                                                    guard let tapDate: Date = proxy.value(atX: tapX),
-                                                          let tapGlucose: Double = proxy.value(atY: tapY) else { return }
-
-                                                    // Find nearest hotspot using 2D distance (time + glucose)
-                                                    // Normalise both axes to the plot frame so they contribute equally
+                                                    // Compute tap time directly from chart geometry —
+                                                    // avoids proxy.value(atX:) which returns nil on iOS 26.
                                                     let windowSeconds = Double(chartWindowDays) * 86400
-                                                    let glucoseRange = 200.0  // typical chart range in mg/dL
-                                                    let tapTolerance: Double = 0.06  // ~6% of plot frame in normalised coords
+                                                    let frac = Double(tapX / plotFrame.width)
+                                                    let tapTime = chartWindowStart.addingTimeInterval(frac * windowSeconds)
+
+                                                    // 6 % of the window in seconds as the snap tolerance
+                                                    let tolerance = windowSeconds * 0.06
 
                                                     let nearest = hotspots
-                                                        .map { hotspot -> (CurveHotspot, Double) in
-                                                            let dtNorm = hotspot.point.timestamp.timeIntervalSince(tapDate) / windowSeconds
-                                                            let dgNorm = (hotspot.point.valueMgDl - tapGlucose) / glucoseRange
-                                                            let dist = sqrt(dtNorm * dtNorm + dgNorm * dgNorm)
-                                                            return (hotspot, dist)
-                                                        }
-                                                        .filter { $0.1 < tapTolerance }
+                                                        .map { ($0, abs($0.point.timestamp.timeIntervalSince(tapTime))) }
+                                                        .filter { $0.1 < tolerance }
                                                         .min(by: { $0.1 < $1.1 })
 
                                                     withAnimation(.easeInOut(duration: 0.2)) {
-                                                        selectedReadingDate = nil  // clear list-tap indicator
+                                                        selectedReadingDate = nil
                                                         if let match = nearest {
                                                             if selectedHotspot?.id == match.0.id {
                                                                 selectedHotspot = nil
                                                             } else {
                                                                 selectedHotspot = match.0
-                                                                // Position popover on the side with more room
                                                                 popoverAnchorRight = tapX > plotFrame.width / 2
-
-                                                                // Future: scroll the list to the matching reading
                                                             }
                                                         } else {
                                                             selectedHotspot = nil
@@ -1175,8 +1166,8 @@ struct GlucoseLogView: View {
                             Rectangle()
                                 .fill(Color.clear)
                                 .contentShape(Rectangle())
-                                .gesture(
-                                    DragGesture(minimumDistance: 0)
+                                .simultaneousGesture(
+                                    SpatialTapGesture()
                                         .onEnded { value in
                                             let tapX = value.location.x - plotFrame.origin.x
                                             guard let tapDate: Date = proxy.value(atX: tapX) else { return }
@@ -1743,6 +1734,13 @@ enum GlucoseUnitType: String, CaseIterable {
         }
     }
 
+    var displayName: LocalizedStringKey {
+        switch self {
+        case .mgdl:  return "mg/dL (US/Japan)"
+        case .mmoll: return "mmol/L (Europe/World)"
+        }
+    }
+
     /// Returns the locale-appropriate default unit
     static var localeDefault: GlucoseUnitType {
         let region = Locale.current.region?.identifier ?? ""
@@ -1913,7 +1911,7 @@ struct AddGlucoseReadingSheet: View {
             Section("Glucose Value Units") {
                 Picker("Unit System", selection: $selectedUnit) {
                     ForEach(GlucoseUnitType.allCases, id: \.self) { unit in
-                        Text(unit.rawValue).tag(unit)
+                        Text(unit.displayName).tag(unit)
                     }
                 }
             }

@@ -431,8 +431,12 @@ struct MealBuilderView: View {
             if mealType == .feast {
                 try mealBuilder.save(to: viewContext)
 
-                // Schedule offset exercise nudge notifications (T+90 and T+150 min)
-                ExerciseReminderManager.shared.scheduleReminders()
+                // Schedule offset exercise nudge notifications (T+90 and T+150 min).
+                // Posted via NotificationCenter so MealBuilderView.swift has no compile-time
+                // dependency on ExerciseReminderManager (which lands in a separate Swift
+                // compilation batch and causes "Cannot find in scope" in Xcode 26 batch mode).
+                NotificationCenter.default.post(
+                    name: Notification.Name("com.diabetesfeast.feastMealSaved"), object: nil)
 
                 // Show auto-dismissing warning for high glycemic load feasts
                 if mealBuilder.totalGlycemicLoad >= 50 {

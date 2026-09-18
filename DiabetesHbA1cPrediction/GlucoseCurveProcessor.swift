@@ -108,9 +108,11 @@ struct GlucoseCurveProcessor {
     // MARK: - Tunables
 
     /// Minimum relative rise (mg/dL) from the 30-min moving average to qualify
-    /// as a spike peak. Based on Robert's clinical experience: baseline ~120,
-    /// a ≥50 rise approaches the 180 mg/dL threshold.
-    static let spikeThresholdMgDl: Double = 50.0
+    /// as a spike peak. 30 mg/dL catches clinically meaningful post-meal
+    /// excursions for a well-controlled T2D patient (HbA1c ~6–7%), where peaks
+    /// often reach 150–165 mg/dL from a baseline of ~120.  The previous value
+    /// of 50 was too conservative and missed moderate meal responses entirely.
+    static let spikeThresholdMgDl: Double = 30.0
 
     /// Window (minutes) over which the local baseline is computed as a simple
     /// moving average of preceding readings.
@@ -137,8 +139,10 @@ struct GlucoseCurveProcessor {
     /// Absolute glucose threshold (mg/dL) above which a reading is always
     /// marked as a hotspot, even if the relative delta from the moving average
     /// is below `spikeThresholdMgDl`.  This catches gradual rises that the
-    /// relative detector misses (e.g. 130→186 over 90 minutes).
-    static let absoluteHighThresholdMgDl: Double = 170.0
+    /// relative detector misses (e.g. 130→160 over 90 minutes).
+    /// Lowered from 170 to 155 to match the typical post-meal peak for a
+    /// well-controlled T2D patient.
+    static let absoluteHighThresholdMgDl: Double = 155.0
 
     /// Readings-per-hour threshold that distinguishes CGM from fingerstick density.
     /// Above this → CGM mode (thinning + spike-only hotspots).

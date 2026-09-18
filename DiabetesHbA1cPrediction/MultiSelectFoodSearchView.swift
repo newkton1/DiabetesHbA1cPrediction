@@ -549,32 +549,34 @@ private struct FoodSearchContentDirect: View {
                     ForEach(groupedFoods, id: \.category) { group in
                         Section(header: Text(LocalizedStringKey(MultiSelectFoodSearchView.chipLabel(for: group.category)))) {
                             ForEach(group.foods) { food in
+                                // contextMenu for long-press My Menu actions.
+                                // The +/– stepper inside FoodSelectionRow uses
+                                // SwiftUI's built-in Stepper, which has proper
+                                // gesture isolation and never leaks into this menu.
                                 FoodSelectionRow(
                                     mealBuilder: mealBuilder,
                                     food: food,
                                     onFoodAdded: onFoodAdded
                                 )
                                 .contextMenu {
-                                    // My Menu add/remove — available in all categories.
                                     if FoodDatabase.shared.isFavorite(named: food.name) {
                                         Button(role: .destructive) {
                                             FoodDatabase.shared.removeFavorite(named: food.name)
                                         } label: {
-                                            Label("マイメニューから削除", systemImage: "heart.slash")
+                                            Label("Remove from My Menu", systemImage: "heart.slash")
                                         }
                                     } else {
                                         Button {
                                             FoodDatabase.shared.addFavorite(food)
                                         } label: {
-                                            Label("マイメニューに追加", systemImage: "heart")
+                                            Label("Add to My Menu", systemImage: "heart")
                                         }
                                     }
-                                    // 最近 mode: also offer removal from the recent list.
                                     if isRecentSelected {
                                         Button(role: .destructive) {
                                             onRemoveFromRecent(food)
                                         } label: {
-                                            Label("最近から削除", systemImage: "clock.badge.xmark")
+                                            Label("Remove from Recent", systemImage: "clock.badge.xmark")
                                         }
                                     }
                                 }
@@ -765,55 +767,11 @@ struct FoodSelectionRow: View {
         }
     }
 
-    /// The vertical stepper control (+ on top, – on bottom)
-    private var servingStepper: some View {
-        VStack(spacing: 0) {
-            Button {
-                if let index = mealBuilder.selectedFoods.firstIndex(where: { $0.foodItem.id == food.id }) {
-                    mealBuilder.incrementQuantity(at: index)
-                }
-            } label: {
-                Image(systemName: "plus")
-                    .font(.footnote)
-                    .fontWeight(.bold)
-                    .frame(width: 36, height: 28)
-                    .foregroundColor(quantity >= 4.0 ? .gray : .blue)
-                    .accessibilityLabel("Increase serving")
-            }
-            .buttonStyle(.plain)
-            .disabled(quantity >= 4.0)
-
-            Divider()
-                .frame(width: 36)
-
-            Button {
-                if let index = mealBuilder.selectedFoods.firstIndex(where: { $0.foodItem.id == food.id }) {
-                    mealBuilder.decrementQuantity(at: index)
-                }
-            } label: {
-                Image(systemName: "minus")
-                    .font(.footnote)
-                    .fontWeight(.bold)
-                    .frame(width: 36, height: 28)
-                    .foregroundColor(quantity <= 0.25 ? .gray : .blue)
-                    .accessibilityLabel("Decrease serving")
-            }
-            .buttonStyle(.plain)
-            .disabled(quantity <= 0.25)
-        }
-        .background(Color(.systemGray5))
-        .cornerRadius(8)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color(.systemGray3), lineWidth: 0.5)
-        )
-    }
-
     var body: some View {
         HStack {
             // Food info area — tappable to add when not yet selected.
             // onTapGesture is scoped here so it never competes with
-            // the stepper Buttons on the trailing side.
+            // the stepper on the trailing side.
             foodInfoColumn
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
@@ -825,14 +783,25 @@ struct FoodSelectionRow: View {
                 }
 
             if quantity > 0 {
-                HStack(spacing: 8) {
-                    // Green serving size display
+                // SwiftUI's built-in Stepper has proper gesture isolation —
+                // its +/– touches never leak into the parent row's contextMenu.
+                // Replaces the old custom vertical VStack stepper.
+                Stepper(
+                    onIncrement: quantity >= 4.0 ? nil : {
+                        if let index = mealBuilder.selectedFoods.firstIndex(where: { $0.foodItem.id == food.id }) {
+                            mealBuilder.incrementQuantity(at: index)
+                        }
+                    },
+                    onDecrement: quantity <= 0.25 ? nil : {
+                        if let index = mealBuilder.selectedFoods.firstIndex(where: { $0.foodItem.id == food.id }) {
+                            mealBuilder.decrementQuantity(at: index)
+                        }
+                    }
+                ) {
                     Text(ServingFormatter.displayString(for: quantity))
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .foregroundColor(.green)
-
-                    servingStepper
                 }
             } else {
                 Button {

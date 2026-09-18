@@ -21,13 +21,14 @@ final class ExerciseReminderManager: NSObject {
 
     // MARK: - Constants
 
-    private let center       = UNUserNotificationCenter.current()
-    private let healthStore  = HKHealthStore()
-    private let nudge1ID     = "feastExerciseNudge1"
-    private let nudge2ID     = "feastExerciseNudge2"
-    private let feastTimeKey = "exerciseReminderFeastStartTime"
-    private let categoryID   = "feastExerciseNudgeCategory"
-    private let actionID     = "FEAST_EXERCISE_DONE"
+    private let center           = UNUserNotificationCenter.current()
+    private let healthStore      = HKHealthStore()
+    private let nudge1ID         = "feastExerciseNudge1"
+    private let nudge2ID         = "feastExerciseNudge2"
+    private let feastTimeKey     = "exerciseReminderFeastStartTime"
+    private let categoryID       = "feastExerciseNudgeCategory"
+    private let actionID         = "FEAST_EXERCISE_DONE"
+    private let rewardPendingKey = "offsetExerciseRewardPending"
 
     /// Minimum step count since feast start to consider the user active.
     private let minSteps: Double = 500
@@ -37,13 +38,62 @@ final class ExerciseReminderManager: NSObject {
         // Must set delegate before any notification response can be delivered.
         center.delegate = self
         registerCategory()
+        // All callers below post notifications instead of referencing ERM types
+        // directly, because ERM.swift is compiled in a separate parallel Swift batch
+        // (Xcode 26 batch mode) and its type is not visible to those files at build time.
+        // Closures hop to @MainActor explicitly so Swift 6 actor-isolation is satisfied.
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("com.diabetesfeast.feastMealSaved"),
+            object: nil, queue: nil
+        ) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor [weak self] in
+                self?.scheduleReminders()
+            }
+        }
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("com.diabetesfeast.workoutDetected"),
+            object: nil, queue: nil
+        ) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor [weak self] in
+                guard let self, self.isMonitoring else { return }
+                await self.performBackgroundExerciseCheck()
+            }
+        }
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("com.diabetesfeast.cancelIfExercised"),
+            object: nil, queue: nil
+        ) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor [weak self] in
+                self?.cancelIfExercised()
+            }
+        }
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("com.diabetesfeast.cancelFeastReminders"),
+            object: nil, queue: nil
+        ) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor [weak self] in
+                self?.cancelAll()
+            }
+        }
     }
 
     // MARK: - Setup
 
-    /// Call at app launch to ensure the singleton (and its delegate) is live
-    /// before iOS delivers any pending notification response.
-    func setup() { /* forces init */ }
+    /// Called by the Objective-C runtime when the binary is loaded — before main()
+    /// and before any SwiftUI scene code runs. Forces the singleton to initialise so
+    /// its UNUserNotificationCenterDelegate and NotificationCenter observers are live
+    /// before iOS delivers any pending notification response at cold launch.
+    /// No external caller needed; no compile-time reference to this type from other files.
+    @objc class func load() {
+        _ = shared
+    }
+
+    /// Kept for source compatibility. The ObjC +load hook above makes this a no-op.
+    func setup() { }
 
     // MARK: - Schedule
 
@@ -225,6 +275,124 @@ final class ExerciseReminderManager: NSObject {
             }
         }
     }
+
+    // MARK: - Background exercise check (called from HealthKitManager observer)
+
+    /// Async version of the offset-exercise check designed for background wakes.
+    /// Unlike `cancelIfExercised()` (which spawns its own inner Task), this method
+    /// is fully awaitable so the HealthKit observer can call `finish()` only after
+    /// the HealthKit query and notification work are truly complete.
+    ///
+    /// If activity is detected:
+    ///   1. Cancels remaining nudge notifications.
+    ///   2. Posts an immediate reward notification visible on the lock screen.
+    func performBackgroundExerciseCheck() async {
+        guard let feastTime = UserDefaults.standard.object(forKey: feastTimeKey) as? Date else { return }
+        let elapsed = Date().timeIntervalSince(feastTime)
+        guard elapsed > 0 else { return }
+        if elapsed >= 180 * 60 {
+            cancelAll()
+            return
+        }
+        let active = await hasActivitySince(feastTime)
+        guard active else { return }
+        // Set the reward flag BEFORE cancelAll() clears the feast key,
+        // so the in-app alert can still fire if the notification was missed.
+        UserDefaults.standard.set(true, forKey: rewardPendingKey)
+        cancelAll()
+        scheduleRewardNotification()
+        #if DEBUG
+        print("ExerciseReminderManager: offset exercise detected in background — nudges cancelled, reward sent.")
+        #endif
+    }
+
+    /// Posts an immediate local notification congratulating the user on completing
+    /// their offset exercise.
+    private func scheduleRewardNotification() {
+        let content      = UNMutableNotificationContent()
+        content.title    = NSLocalizedString("Offset Exercise Complete!", comment: "")
+        content.body     = NSLocalizedString(
+            "Great work! Your offset exercise helps manage your glucose response.", comment: "")
+        content.sound    = .default
+        content.userInfo = ["type": "feastOffsetReward"]
+
+        let request = UNNotificationRequest(
+            identifier: "feastOffsetReward_\(Date().timeIntervalSince1970)",
+            content: content,
+            trigger: nil   // nil trigger = deliver immediately
+        )
+        center.add(request) { error in
+            #if DEBUG
+            if let error { print("ExerciseReminderManager: reward notification error: \(error)") }
+            #endif
+        }
+    }
+
+    // MARK: - Reward flag (survives background→foreground transition)
+
+    /// Returns true if a background exercise check set the reward pending flag,
+    /// and clears the flag so the alert only shows once.
+    func consumePendingReward() -> Bool {
+        let pending = UserDefaults.standard.bool(forKey: rewardPendingKey)
+        if pending { UserDefaults.standard.removeObject(forKey: rewardPendingKey) }
+        return pending
+    }
+
+    // MARK: - Offset-exercise helpers
+
+    /// True while a feast plan is active and the monitoring window (< 180 min) hasn't expired.
+    var isMonitoring: Bool {
+        guard let feastTime = UserDefaults.standard.object(forKey: feastTimeKey) as? Date else { return false }
+        let elapsed = Date().timeIntervalSince(feastTime)
+        return elapsed >= 0 && elapsed < 180 * 60
+    }
+
+    /// Returns `true` if `date` falls within the offset exercise window [feastTime+60min, feastTime+180min].
+    func isOffsetExercise(at date: Date) -> Bool {
+        guard let feastTime = UserDefaults.standard.object(forKey: feastTimeKey) as? Date else { return false }
+        let lower = feastTime.addingTimeInterval(60 * 60)
+        let upper = feastTime.addingTimeInterval(180 * 60)
+        return date >= lower && date <= upper
+    }
+
+    /// Checks HealthKit for activity since feast start. Cancels pending nudges if activity is
+    /// found and returns `true` so the caller can show a reward message.
+    func cancelIfExercisedReturning() async -> Bool {
+        guard let feastTime = UserDefaults.standard.object(forKey: feastTimeKey) as? Date else { return false }
+        let elapsed = Date().timeIntervalSince(feastTime)
+        guard elapsed > 0 && elapsed < 180 * 60 else {
+            if elapsed >= 180 * 60 { cancelAll() }
+            return false
+        }
+        let active = await hasActivitySince(feastTime)
+        if active {
+            UserDefaults.standard.set(true, forKey: rewardPendingKey)
+            cancelAll()
+        }
+        return active
+    }
+
+    /// Returns true if `mealTimestamp` matches the currently monitored feast start
+    /// time (within a 60-second tolerance).
+    func isActiveFeast(mealTimestamp: Date) -> Bool {
+        guard let feastTime = UserDefaults.standard.object(forKey: feastTimeKey) as? Date else { return false }
+        return abs(feastTime.timeIntervalSince(mealTimestamp)) < 60
+    }
+
+    // MARK: - Permission (async, for app launch)
+
+    @discardableResult
+    func requestPermissionIfNeeded() async -> Bool {
+        let settings = await center.notificationSettings()
+        switch settings.authorizationStatus {
+        case .authorized, .provisional, .ephemeral:
+            return true
+        case .notDetermined:
+            return (try? await center.requestAuthorization(options: [.alert, .sound])) ?? false
+        default:
+            return false
+        }
+    }
 }
 
 // MARK: - UNUserNotificationCenterDelegate
@@ -247,16 +415,14 @@ extension ExerciseReminderManager: UNUserNotificationCenterDelegate {
         completionHandler()
     }
 
-    /// Show nudge banners even when the app is in the foreground (e.g. during testing).
+    /// Show nudge and reward banners even when the app is in the foreground.
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        guard notification.request.content.userInfo["type"] as? String == "feastExerciseNudge" else {
-            completionHandler([])
-            return
-        }
-        completionHandler([.banner, .sound])
+        let type = notification.request.content.userInfo["type"] as? String
+        let isFeastNotification = type == "feastExerciseNudge" || type == "feastOffsetReward"
+        completionHandler(isFeastNotification ? [.banner, .sound] : [])
     }
 }

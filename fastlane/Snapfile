@@ -3,15 +3,16 @@
 # Output: fastlane/screenshots/
 
 # ── Target ───────────────────────────────────────────────────────────────────
-project("./14.xcodeproj")
-scheme("DiabetesHbA1cPrediction")
+project("./DiabetesHbA1cPrediction.xcodeproj")
+scheme("DiabetesFeastv2")
 
 # The UI test class that calls snapshot()
 # (must match the class name in DiabetesFeastScreenshots.swift)
 
 # ── Devices ──────────────────────────────────────────────────────────────────
+# Apple requires 6.9" and 6.5" as minimum for App Store submission
 devices([
-  "iPhone 16"
+  "iPhone 17 Pro Max"    # 6.9" — confirmed installed, required for App Store
 ])
 
 # ── Locales ──────────────────────────────────────────────────────────────────

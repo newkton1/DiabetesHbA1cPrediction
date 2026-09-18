@@ -24,7 +24,7 @@ struct MealLogView: View {
         ]
     ) private var allMeals: FetchedResults<MealEntity>
 
-    @State private var expandedMealId: UUID? = nil
+    @State private var expandedMealIds: Set<UUID> = []
     @State private var showSaveError = false
     @State private var saveErrorMessage = ""
 
@@ -132,13 +132,15 @@ struct MealLogView: View {
                             ForEach(mealsByDate[date] ?? []) { meal in
                                 MealRowView(
                                     meal: meal,
-                                    isExpanded: expandedMealId == meal.id,
+                                    isExpanded: expandedMealIds.contains(meal.id ?? UUID()),
                                     onTap: {
                                         withAnimation {
-                                            if expandedMealId == meal.id {
-                                                expandedMealId = nil
-                                            } else {
-                                                expandedMealId = meal.id
+                                            if let id = meal.id {
+                                                if expandedMealIds.contains(id) {
+                                                    expandedMealIds.remove(id)
+                                                } else {
+                                                    expandedMealIds.insert(id)
+                                                }
                                             }
                                         }
                                     },
@@ -146,6 +148,19 @@ struct MealLogView: View {
                                 )
                                 .contextMenu {
                                     Button(role: .destructive) {
+                                        // Cancel pending exercise nudges if this is the active feast.
+                                        // UserDefaults read directly — ERM.swift is in a separate
+                                        // Swift compilation batch (Xcode 26) and cannot be referenced here.
+                                        if meal.mealType == "feast",
+                                           let ts = meal.timestamp {
+                                            let _fKey = "exerciseReminderFeastStartTime"
+                                            if let ft = UserDefaults.standard.object(forKey: _fKey) as? Date,
+                                               abs(ft.timeIntervalSince(ts)) < 60 {
+                                                NotificationCenter.default.post(
+                                                    name: Notification.Name("com.diabetesfeast.cancelFeastReminders"),
+                                                    object: nil)
+                                            }
+                                        }
                                         viewContext.delete(meal)
                                         do {
                                             try viewContext.save()
@@ -199,13 +214,15 @@ struct MealLogView: View {
                 ForEach(mealsByDate[date] ?? []) { meal in
                     MealRowView(
                         meal: meal,
-                        isExpanded: expandedMealId == meal.id,
+                        isExpanded: expandedMealIds.contains(meal.id ?? UUID()),
                         onTap: {
                             withAnimation {
-                                if expandedMealId == meal.id {
-                                    expandedMealId = nil
-                                } else {
-                                    expandedMealId = meal.id
+                                if let id = meal.id {
+                                    if expandedMealIds.contains(id) {
+                                        expandedMealIds.remove(id)
+                                    } else {
+                                        expandedMealIds.insert(id)
+                                    }
                                 }
                             }
                         },
@@ -280,15 +297,15 @@ struct MealLogView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 0) {
                         MacroBulletRow(label: "Carbs", value: getTotalMacro(from: meal, type: "carbs"), color: .orange)
-                        Spacer()
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         MacroBulletRow(label: "Proteins", value: getTotalMacro(from: meal, type: "protein"), color: .blue)
-                        Spacer()
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     HStack(spacing: 0) {
                         MacroBulletRow(label: "Fiber", value: getTotalMacroOptional(from: meal, type: "fiber") ?? 0, color: .green)
-                        Spacer()
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         MacroBulletRow(label: "Fats", value: getTotalMacro(from: meal, type: "fat"), color: .purple)
-                        Spacer()
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
                 .font(.caption)
@@ -355,6 +372,18 @@ struct MealLogView: View {
 
         for index in offsets {
             let mealToDelete = mealsForDate[index]
+            // Cancel pending exercise nudges if this is the active feast.
+            // UserDefaults read directly — ERM.swift is in a separate Swift batch.
+            if mealToDelete.mealType == "feast",
+               let ts = mealToDelete.timestamp {
+                let _fKey = "exerciseReminderFeastStartTime"
+                if let ft = UserDefaults.standard.object(forKey: _fKey) as? Date,
+                   abs(ft.timeIntervalSince(ts)) < 60 {
+                    NotificationCenter.default.post(
+                        name: Notification.Name("com.diabetesfeast.cancelFeastReminders"),
+                        object: nil)
+                }
+            }
             viewContext.delete(mealToDelete)
         }
 
@@ -420,17 +449,24 @@ struct MealRowView: View {
             Button(action: onTap) {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        HStack {
+                        HStack(spacing: 6) {
                             Text(meal.name ?? "Meal")
                                 .font(.headline)
                                 .foregroundColor(.primary)
-                            
+
                             if !foodItems.isEmpty {
                                 Text(foodItems.count == 1
                     ? String(format: NSLocalizedString("(%lld item)", comment: ""), Int64(foodItems.count))
                     : String(format: NSLocalizedString("(%lld items)", comment: ""), Int64(foodItems.count)))
                                     .font(.caption)
                                     .foregroundColor(.secondary)
+                            }
+
+                            if meal.mealType == "feast" {
+                                Image(systemName: "party.popper")
+                                    .foregroundColor(.blue)
+                                    .font(.subheadline)
+                                    .accessibilityLabel(NSLocalizedString("Feast treat meal", comment: "Accessibility label for feast badge icon in Meal History"))
                             }
                         }
                         
@@ -467,13 +503,22 @@ struct MealRowView: View {
             }
             .buttonStyle(.plain)
             
-            // Macro summary — portrait: single-column bulleted list; landscape: horizontal badges
+            // Macro summary — portrait: 2×2 grid (saves two rows of height vs single column);
+            // landscape: horizontal badges
             if isPortrait {
-                VStack(alignment: .leading, spacing: 4) {
-                    MacroBulletRow(label: "Carbs", value: totalCarbs, color: .orange)
-                    MacroBulletRow(label: "Fiber", value: totalFiber, color: .green)
-                    MacroBulletRow(label: "Proteins", value: totalProtein, color: .blue)
-                    MacroBulletRow(label: "Fats", value: totalFat, color: .purple)
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 0) {
+                        MacroBulletRow(label: "Carbs", value: totalCarbs, color: .orange)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        MacroBulletRow(label: "Proteins", value: totalProtein, color: .blue)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    HStack(spacing: 0) {
+                        MacroBulletRow(label: "Fiber", value: totalFiber, color: .green)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        MacroBulletRow(label: "Fats", value: totalFat, color: .purple)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
                 .font(.caption)
             } else {
