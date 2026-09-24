@@ -42,6 +42,17 @@ struct RecentMeal: Identifiable {
 /// Provides deduplicated, frequency-sorted recent meals from Core Data
 class RecentMealsProvider {
 
+    /// UserDefaults key for meal signatures hidden from the Recent list
+    private static let hiddenSignaturesKey = "hiddenRecentMealSignatures"
+
+    /// Hide a meal composition from appearing in the Recent list (non-destructive —
+    /// the underlying MealEntity log records are untouched).
+    static func hideRecentMeal(_ meal: RecentMeal) {
+        var hidden = Set(UserDefaults.standard.stringArray(forKey: hiddenSignaturesKey) ?? [])
+        hidden.insert(meal.id)
+        UserDefaults.standard.set(Array(hidden), forKey: hiddenSignaturesKey)
+    }
+
     /// Fetch up to `limit` distinct meals sorted by frequency (most frequent first).
     /// Meals are deduplicated by their sorted food-name signature.
     static func fetchRecentMeals(context: NSManagedObjectContext, limit: Int = 30) -> [RecentMeal] {
@@ -51,6 +62,8 @@ class RecentMealsProvider {
         request.predicate = NSPredicate(format: "foodItems.@count > 0")
 
         guard let meals = try? context.fetch(request) else { return [] }
+
+        let hiddenSignatures = Set(UserDefaults.standard.stringArray(forKey: hiddenSignaturesKey) ?? [])
 
         // Group meals by their food composition signature
         var signatureMap: [String: (meals: [MealEntity], foods: [(name: String, category: String,
@@ -93,8 +106,10 @@ class RecentMealsProvider {
             }
         }
 
-        // Convert to RecentMeal array sorted by frequency then recency
+        // Convert to RecentMeal array sorted by frequency then recency,
+        // excluding any signatures the user has hidden via long-press → Delete from Recent.
         var recentMeals: [RecentMeal] = signatureMap.compactMap { signature, data in
+            guard !hiddenSignatures.contains(signature) else { return nil }
             let sortedNames = data.foods.map { $0.name }
             let latestDate = data.meals.compactMap { $0.timestamp }.max() ?? Date.distantPast
 

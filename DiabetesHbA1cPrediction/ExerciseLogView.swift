@@ -119,6 +119,12 @@ struct ExerciseLogView: View {
                     showOffsetReward = true
                 }
             }
+            .onReceive(NotificationCenter.default.publisher(
+                for: Notification.Name("com.diabetesfeast.offsetRewardEarned"))) { _ in
+                // ERM posts this when it detects offset exercise — covers the case where
+                // this view is already on screen (onAppear won't re-fire for a visible view).
+                showOffsetReward = true
+            }
         }
         .demoRedirect(isPresented: $showDemoAlert)
     }

@@ -14,6 +14,7 @@
 import SwiftUI
 import CoreData
 import UserNotifications
+import BackgroundTasks
 
 /// The @main attribute marks this struct as the application entry point.
 @main
@@ -34,6 +35,31 @@ struct DiabetesHbA1cPredictionApp: App {
     // MARK: - Scene phase (for exercise reminder checks)
 
     @Environment(\.scenePhase) private var scenePhase
+
+    // MARK: - ERM Bootstrap
+
+    /// Touch the ERM singleton here — before any scene code runs — so its
+    /// NotificationCenter observers are registered before the first
+    /// feastMealSaved / cancelIfExercised notification can fire.
+    /// ERMLoader.m (+load) does the same job at binary-load time; this call
+    /// is a belt-and-suspenders fallback in case NSClassFromString returns nil
+    /// on a specific device/OS combination.
+    init() {
+        ExerciseReminderManager.bootstrap()
+        // Register the BGAppRefreshTask handler that ERM uses to check for
+        // in-progress exercise around T+80, before the T+90 nudge fires.
+        // Must be registered here — before the first scene is created.
+        BGTaskScheduler.shared.register(
+            forTaskWithIdentifier: ExerciseReminderManager.nudgeCheckTaskID,
+            using: nil
+        ) { task in
+            // Hop to MainActor before calling ERM — its properties are main-actor-isolated.
+            Task { @MainActor in
+                ExerciseReminderManager.shared.handleNudgeCheckBackground(
+                    task: task as! BGAppRefreshTask)
+            }
+        }
+    }
 
     // MARK: - Welcome Sheet
 
@@ -103,6 +129,10 @@ struct DiabetesHbA1cPredictionApp: App {
                                 // completes a walk/run and can cancel the T+150
                                 // "Have you exercised?" nudge before it fires.
                                 healthKitManager.startExerciseObserver()
+                                // Also observe step count changes so nudges can be
+                                // cancelled while a walk is still in progress —
+                                // before the workout is saved and the workout observer fires.
+                                healthKitManager.startStepObserver()
                             }
                         }
                     }

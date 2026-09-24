@@ -62,6 +62,13 @@ class HealthKitManager: ObservableObject {
     /// Active observer query for workout data (kept alive for the app's lifetime)
     private var exerciseObserverQuery: HKObserverQuery?
 
+    /// Active observer query for step count (used to detect in-progress walks
+    /// before the workout is saved to HealthKit, so nudges can be cancelled early)
+    private var stepObserverQuery: HKObserverQuery?
+
+    /// Tracks whether the step observer has already been started
+    private var isStepObserverRunning = false
+
     /// Tracks whether the exercise observer has already been started
     private var isExerciseObserverRunning = false
 
@@ -254,6 +261,61 @@ class HealthKitManager: ObservableObject {
             exerciseObserverQuery = nil
             isExerciseObserverRunning = false
         }
+    }
+
+    // MARK: - Step Observer (early nudge cancellation)
+
+    /// Starts an HKObserverQuery for step count so the app can detect an
+    /// in-progress walk BEFORE the workout is saved to HealthKit.
+    ///
+    /// The workout observer only fires when a workout is *completed and saved*,
+    /// which can be after a T+90 nudge has already fired even though the user
+    /// is mid-walk.  Step data is written continuously by the pedometer, so
+    /// this observer wakes the app earlier and lets ERM cancel the nudge while
+    /// the user is still walking.
+    ///
+    /// - Note: Safe to call multiple times — subsequent calls are no-ops.
+    func startStepObserver() {
+        guard !isStepObserverRunning,
+              let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) else { return }
+
+        isStepObserverRunning = true
+
+        healthStore.enableBackgroundDelivery(for: stepType, frequency: .immediate) { success, error in
+            #if DEBUG
+            if success {
+                print("[HealthKit] Background delivery enabled for step count.")
+            } else if let error = error {
+                print("[HealthKit] Failed to enable step background delivery: \(error.localizedDescription)")
+            }
+            #endif
+        }
+
+        let query = HKObserverQuery(sampleType: stepType, predicate: nil) { _, completionHandler, error in
+            guard error == nil else {
+                completionHandler()
+                return
+            }
+            // Post BEFORE calling completionHandler() so the background-execution
+            // window stays open while ERM runs its async HealthKit check.
+            // We then delay completionHandler() by 3 s — well within HealthKit's
+            // tolerance — giving ERM's Task time to query step count and cancel
+            // any pending nudge before iOS can suspend the app again.
+            // (Previously completionHandler() was called first, which let iOS
+            // suspend the app before the ERM Task reached removePendingNotifications.)
+            NotificationCenter.default.post(
+                name: Notification.Name("com.diabetesfeast.workoutDetected"), object: nil)
+            DispatchQueue.global().asyncAfter(deadline: .now() + 3.0) {
+                completionHandler()
+            }
+        }
+
+        stepObserverQuery = query
+        healthStore.execute(query)
+
+        #if DEBUG
+        print("[HealthKit] Step observer query started.")
+        #endif
     }
 
     // MARK: - Authorization

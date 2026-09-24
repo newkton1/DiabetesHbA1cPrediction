@@ -39,8 +39,8 @@ class MealBuilder: ObservableObject {
     /// Hours since last meal (for lastMeal type)
     @Published var timeSinceLastMeal: Double = 0
     
-    /// Planned date and time (for plannedMeal type)
-    @Published var plannedDateTime: Date = Date().addingTimeInterval(3600) // 1 hour from now
+    /// Planned date and time (for plannedMeal type); feast meals default to now
+    @Published var plannedDateTime: Date = Date()
     
     // MARK: - Computed Totals
     
@@ -164,7 +164,7 @@ class MealBuilder: ObservableObject {
         selectedFoods.removeAll()
         mealName = ""
         timeSinceLastMeal = 0
-        plannedDateTime = Date().addingTimeInterval(3600)
+        plannedDateTime = Date()
     }
     
     // MARK: - Core Data Persistence
@@ -182,7 +182,7 @@ class MealBuilder: ObservableObject {
         if mealType == .lastMeal && timeSinceLastMeal > 0 {
             mealEntity.timestamp = Date().addingTimeInterval(-timeSinceLastMeal * 3600)
         } else if mealType == .feast {
-            mealEntity.timestamp = plannedDateTime
+            mealEntity.timestamp = Date()
         } else {
             mealEntity.timestamp = Date()
         }

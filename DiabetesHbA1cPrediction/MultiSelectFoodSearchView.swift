@@ -47,6 +47,15 @@ struct MultiSelectFoodSearchView: View {
         }
     }
 
+    /// Hide a recent meal combo from the Recent list and refresh the displayed list.
+    private func deleteRecentMeal(_ meal: RecentMeal) {
+        RecentMealsProvider.hideRecentMeal(meal)
+        recentMeals = RecentMealsProvider.fetchRecentMeals(context: viewContext, limit: 30)
+        if recentMeals.isEmpty {
+            selectedCategory = nil
+        }
+    }
+
     /// Prepend a food to the recently-added list, capped at max 10, most-recent first.
     private func recordRecentFood(_ food: FoodItem) {
         guard isJapaneseLocale else { return }
@@ -267,7 +276,8 @@ struct MultiSelectFoodSearchView: View {
                     isJapaneseLocale: isJapaneseLocale,
                     databaseMode: $databaseMode,
                     onFoodAdded: recordRecentFood,
-                    onRemoveFromRecent: removeRecentFood
+                    onRemoveFromRecent: removeRecentFood,
+                    onDeleteRecentMeal: deleteRecentMeal
                 )
             }
             .navigationTitle("")
@@ -344,6 +354,8 @@ private struct FoodSearchContentDirect: View {
     let onFoodAdded: (FoodItem) -> Void
     /// Called when the user long-presses a food in the 最近 list to remove it.
     let onRemoveFromRecent: (FoodItem) -> Void
+    /// Called when the user long-presses a recent meal and chooses Delete from Recent.
+    let onDeleteRecentMeal: (RecentMeal) -> Void
 
     @State private var showOnlineSearch = false
 
@@ -489,7 +501,35 @@ private struct FoodSearchContentDirect: View {
 
             if isRecentSelected && !isJapaneseLocale {
                 // Non-JP locale: recent whole-meal sessions from CoreData
-                RecentMealsList(recentMeals: recentMeals, mealBuilder: mealBuilder)
+                RecentMealsList(
+                    recentMeals: recentMeals,
+                    mealBuilder: mealBuilder,
+                    onAddToMyMenu: { meal in
+                        // Add every food in this recent meal to My Menu (favourites)
+                        let db = FoodDatabase.shared
+                        for food in meal.foods {
+                            if let dbFood = db.allFoods.first(where: {
+                                $0.name == food.name && $0.category == food.category
+                            }) {
+                                if !db.isFavorite(named: dbFood.name) {
+                                    db.addFavorite(dbFood)
+                                }
+                            } else {
+                                let reconstructed = FoodItem(
+                                    name: food.name, category: food.category,
+                                    servingSize: food.servingSize, servingUnit: food.servingUnit,
+                                    calories: food.calories, carbohydrates: food.carbs,
+                                    protein: food.protein, fat: food.fat,
+                                    fiber: food.fiber, glycemicIndex: food.glycemicIndex
+                                )
+                                if !db.isFavorite(named: reconstructed.name) {
+                                    db.addFavorite(reconstructed)
+                                }
+                            }
+                        }
+                    },
+                    onDeleteFromRecent: onDeleteRecentMeal
+                )
             } else if selectedCategory == "My Menu" && !hasMyMeals {
                 // Empty My Menu — show helpful onboarding message
                 VStack(spacing: 16) {
@@ -595,6 +635,8 @@ private struct FoodSearchContentDirect: View {
 private struct RecentMealsList: View {
     let recentMeals: [RecentMeal]
     @ObservedObject var mealBuilder: MealBuilder
+    let onAddToMyMenu: (RecentMeal) -> Void
+    let onDeleteFromRecent: (RecentMeal) -> Void
     @State private var loadedMealId: String? = nil
 
     var body: some View {
@@ -608,6 +650,18 @@ private struct RecentMealsList: View {
                             loadRecentMeal(meal)
                         }
                     )
+                    .contextMenu {
+                        Button {
+                            onAddToMyMenu(meal)
+                        } label: {
+                            Label("Add to My Menu", systemImage: "heart")
+                        }
+                        Button(role: .destructive) {
+                            onDeleteFromRecent(meal)
+                        } label: {
+                            Label("Delete from Recent", systemImage: "clock.badge.xmark")
+                        }
+                    }
                 }
             }
         }

@@ -14,12 +14,17 @@
 import Foundation
 import UserNotifications
 import HealthKit
+import BackgroundTasks
 
+@MainActor
 final class ExerciseReminderManager: NSObject {
 
     static let shared = ExerciseReminderManager()
 
     // MARK: - Constants
+
+    /// BGTaskScheduler identifier — must match Info.plist BGTaskSchedulerPermittedIdentifiers.
+    static let nudgeCheckTaskID = "com.diabetesfeast.healthkit.refresh"
 
     private let center           = UNUserNotificationCenter.current()
     private let healthStore      = HKHealthStore()
@@ -83,16 +88,15 @@ final class ExerciseReminderManager: NSObject {
 
     // MARK: - Setup
 
-    /// Called by the Objective-C runtime when the binary is loaded — before main()
-    /// and before any SwiftUI scene code runs. Forces the singleton to initialise so
-    /// its UNUserNotificationCenterDelegate and NotificationCenter observers are live
-    /// before iOS delivers any pending notification response at cold launch.
-    /// No external caller needed; no compile-time reference to this type from other files.
-    @objc class func load() {
+    /// Called from DiabetesHbA1cPredictionApp.init() via ObjC runtime (NSClassFromString +
+    /// perform) so the singleton initialises before any SwiftUI scene code runs.
+    /// Using a named method avoids the Swift 6 prohibition on defining +load.
+    /// No compile-time reference to this type is needed from external files.
+    @objc static func bootstrap() {
         _ = shared
     }
 
-    /// Kept for source compatibility. The ObjC +load hook above makes this a no-op.
+    /// Kept for source compatibility. The bootstrap() call above makes this a no-op.
     func setup() { }
 
     // MARK: - Schedule
@@ -102,6 +106,12 @@ final class ExerciseReminderManager: NSObject {
     func scheduleReminders(feastTime: Date = Date()) {
         cancelPendingOnly()
         UserDefaults.standard.set(feastTime, forKey: feastTimeKey)
+
+        // Schedule a BGAppRefreshTask for T+80 so iOS wakes the app and can
+        // cancel the T+90 nudge if the user is already mid-walk at that point.
+        // HKObserverQuery alone is unreliable here because Apple Watch step data
+        // doesn't sync to iPhone HealthKit in real-time during a walk.
+        submitNudgeCheckTask(earliestStart: feastTime.addingTimeInterval(80 * 60))
 
         requestPermissionIfNeeded { [weak self] granted in
             guard granted, let self else { return }
@@ -133,7 +143,8 @@ final class ExerciseReminderManager: NSObject {
     // MARK: - Cancel if exercised (foreground check)
 
     /// Call when app enters foreground. Checks HealthKit for activity since
-    /// feast time; cancels remaining nudges silently if sufficient activity found.
+    /// feast time; cancels remaining nudges and fires the reward notification
+    /// if sufficient activity is found.
     func cancelIfExercised() {
         guard let feastTime = UserDefaults.standard.object(forKey: feastTimeKey) as? Date else { return }
 
@@ -148,9 +159,27 @@ final class ExerciseReminderManager: NSObject {
         Task {
             let active = await hasActivitySince(feastTime)
             if active {
-                await MainActor.run { self.cancelAll() }
+                await MainActor.run {
+                    // Double-fire guard: another path (BGTask/observer) may have already
+                    // sent the reward while we were awaiting the HealthKit query.
+                    // cancelAll() clears feastTimeKey, so its absence means we lost the race.
+                    guard UserDefaults.standard.object(forKey: self.feastTimeKey) != nil else {
+                        #if DEBUG
+                        print("ExerciseReminderManager: cancelIfExercised — reward already sent by another path, skipping.")
+                        #endif
+                        return
+                    }
+                    // Set reward flag BEFORE cancelAll() clears the feast key.
+                    UserDefaults.standard.set(true, forKey: self.rewardPendingKey)
+                    self.cancelAll()
+                    self.scheduleRewardNotification()
+                    // Notify ExerciseLogView in case it is already on screen
+                    // (onAppear won't re-fire for a view that's already visible).
+                    NotificationCenter.default.post(
+                        name: Notification.Name("com.diabetesfeast.offsetRewardEarned"), object: nil)
+                }
                 #if DEBUG
-                print("ExerciseReminderManager: activity detected — nudges cancelled.")
+                print("ExerciseReminderManager: activity detected on foreground — nudges cancelled, reward sent.")
                 #endif
             }
         }
@@ -158,10 +187,83 @@ final class ExerciseReminderManager: NSObject {
 
     // MARK: - Public cancel
 
-    /// Cancels all pending nudges and clears the stored feast time.
+    /// Cancels all pending nudges, removes any already-delivered nudge banners
+    /// from Notification Centre, and clears the stored feast time.
     func cancelAll() {
         center.removePendingNotificationRequests(withIdentifiers: [nudge1ID, nudge2ID])
+        center.removeDeliveredNotifications(withIdentifiers: [nudge1ID, nudge2ID])
         UserDefaults.standard.removeObject(forKey: feastTimeKey)
+    }
+
+    // MARK: - BGTask (scheduled nudge-check at T+80)
+
+    /// Submits a BGAppRefreshTask that fires at or after `earliestStart`, giving
+    /// iOS a dedicated background-wake opportunity to cancel the T+90 nudge if
+    /// the user is already exercising.  Safe to call multiple times — any
+    /// existing pending BGAppRefreshTask with the same identifier is replaced.
+    private func submitNudgeCheckTask(earliestStart: Date) {
+        let request = BGAppRefreshTaskRequest(identifier: Self.nudgeCheckTaskID)
+        request.earliestBeginDate = earliestStart
+        do {
+            try BGTaskScheduler.shared.submit(request)
+            #if DEBUG
+            print("ExerciseReminderManager: BGAppRefreshTask submitted for \(earliestStart).")
+            #endif
+        } catch {
+            #if DEBUG
+            print("ExerciseReminderManager: failed to submit BGAppRefreshTask: \(error)")
+            #endif
+        }
+    }
+
+    /// Called by the BGTaskScheduler handler registered in DiabetesHbA1cPredictionApp.init().
+    /// Checks for activity since feast time; if found, cancels remaining nudges and
+    /// posts the reward notification — exactly like performBackgroundExerciseCheck(),
+    /// but driven by BGTaskScheduler rather than HealthKit observer.
+    func handleNudgeCheckBackground(task: BGAppRefreshTask) {
+        task.expirationHandler = {
+            task.setTaskCompleted(success: false)
+        }
+        Task { @MainActor [weak self] in
+            guard let self else {
+                task.setTaskCompleted(success: false)
+                return
+            }
+            defer { task.setTaskCompleted(success: true) }
+            guard self.isMonitoring,
+                  let feastTime = UserDefaults.standard.object(forKey: self.feastTimeKey) as? Date
+            else { return }
+
+            #if DEBUG
+            let elapsed = Date().timeIntervalSince(feastTime)
+            print("ExerciseReminderManager: BGTask fired at T+\(Int(elapsed/60)) min.")
+            #endif
+
+            let active = await self.hasActivitySince(feastTime)
+            guard active else {
+                #if DEBUG
+                print("ExerciseReminderManager: BGTask — no activity detected, nudges remain scheduled.")
+                #endif
+                return
+            }
+            // Double-fire guard: another path may have already sent the reward
+            // while we were awaiting the HealthKit query. cancelAll() clears
+            // feastTimeKey, so its absence means we lost the race — bail out.
+            guard UserDefaults.standard.object(forKey: self.feastTimeKey) != nil else {
+                #if DEBUG
+                print("ExerciseReminderManager: BGTask — reward already sent by another path, skipping.")
+                #endif
+                return
+            }
+            UserDefaults.standard.set(true, forKey: self.rewardPendingKey)
+            self.cancelAll()
+            self.scheduleRewardNotification()
+            NotificationCenter.default.post(
+                name: Notification.Name("com.diabetesfeast.offsetRewardEarned"), object: nil)
+            #if DEBUG
+            print("ExerciseReminderManager: BGTask — activity detected, nudges cancelled, reward sent.")
+            #endif
+        }
     }
 
     // MARK: - HealthKit activity check
@@ -296,11 +398,23 @@ final class ExerciseReminderManager: NSObject {
         }
         let active = await hasActivitySince(feastTime)
         guard active else { return }
+        // Double-fire guard: another path (BGTask) may have already sent the reward
+        // while we were awaiting the HealthKit query. cancelAll() clears feastTimeKey,
+        // so its absence means we lost the race — bail out.
+        guard UserDefaults.standard.object(forKey: feastTimeKey) != nil else {
+            #if DEBUG
+            print("ExerciseReminderManager: performBackgroundExerciseCheck — reward already sent by another path, skipping.")
+            #endif
+            return
+        }
         // Set the reward flag BEFORE cancelAll() clears the feast key,
         // so the in-app alert can still fire if the notification was missed.
         UserDefaults.standard.set(true, forKey: rewardPendingKey)
         cancelAll()
         scheduleRewardNotification()
+        // Notify ExerciseLogView in case it is already on screen.
+        NotificationCenter.default.post(
+            name: Notification.Name("com.diabetesfeast.offsetRewardEarned"), object: nil)
         #if DEBUG
         print("ExerciseReminderManager: offset exercise detected in background — nudges cancelled, reward sent.")
         #endif
