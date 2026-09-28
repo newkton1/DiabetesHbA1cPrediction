@@ -458,6 +458,30 @@ struct UserProfileView: View {
                     }
                 }
             }
+
+            // MARK: - DEBUG: ERM Logger (remove before App Store submission)
+            #if DEBUG
+            Section(header: Text("🔧 ERM Debug Log")) {
+                Button {
+                    ERMLogger.shared.clearLog()
+                } label: {
+                    Label("Clear Log (start fresh test)", systemImage: "trash")
+                        .foregroundColor(.red)
+                }
+
+                ShareLink(
+                    item: ERMLogger.shared.logFileURL(),
+                    subject: Text("ERM Debug Log"),
+                    message: Text("DiabetesFeast ERM debug log")
+                ) {
+                    Label("Share Log File", systemImage: "square.and.arrow.up")
+                }
+
+                Text("Log is written to erm_debug.log in the app's Documents folder. Clear it before each test walk, then share after.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            #endif
         }
         }
         .navigationTitle("")
