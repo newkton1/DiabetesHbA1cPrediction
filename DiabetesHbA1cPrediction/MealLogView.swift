@@ -28,6 +28,12 @@ struct MealLogView: View {
     @State private var showSaveError = false
     @State private var saveErrorMessage = ""
 
+    // MARK: - Party-popper animation state
+    /// Meal UUIDs currently mid-animation (scale + rotation pulse).
+    @State private var animatingMealIDs: Set<UUID> = []
+    /// Meal UUIDs whose offset exercise completed this session (icon stays green).
+    @State private var completedMealIDs: Set<UUID> = []
+
     // MARK: - Meals (logged only, excludes planned/feast)
 
     /// All logged meals (not planned meals — feasts appear after they are saved)
@@ -61,6 +67,38 @@ struct MealLogView: View {
                 portraitBody
             } else {
                 landscapeBody
+            }
+        }
+        .onAppear { triggerPartyPopperIfNeeded() }
+    }
+
+    // MARK: - Party-popper animation trigger
+
+    /// Checks UserDefaults for a pending animation written by ERM after a reward,
+    /// finds the matching feast meal by timestamp, and plays a one-shot pop animation.
+    private func triggerPartyPopperIfNeeded() {
+        let key = "offsetExerciseAnimationPendingFeastTime"
+        guard let feastTime = UserDefaults.standard.object(forKey: key) as? Date else { return }
+        UserDefaults.standard.removeObject(forKey: key)   // consume — fire once only
+
+        // Match feast meal by timestamp (within 5 s tolerance).
+        guard let match = loggedMeals.first(where: {
+            $0.mealType == "feast" &&
+            abs(($0.timestamp ?? .distantPast).timeIntervalSince(feastTime)) < 5
+        }) else { return }
+        guard let matchID = match.id else { return }
+
+        // Short delay lets the list finish rendering before the animation begins.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.35)) {
+                _ = animatingMealIDs.insert(matchID)
+                _ = completedMealIDs.insert(matchID)   // icon stays green this session
+            }
+            // Let the spring settle, then release the scale/rotation back to rest.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
+                    _ = animatingMealIDs.remove(matchID)
+                }
             }
         }
     }
@@ -133,6 +171,8 @@ struct MealLogView: View {
                                 MealRowView(
                                     meal: meal,
                                     isExpanded: expandedMealIds.contains(meal.id ?? UUID()),
+                                    isFeastAnimating: animatingMealIDs.contains(meal.id ?? UUID()),
+                                    isFeastCompleted: completedMealIDs.contains(meal.id ?? UUID()),
                                     onTap: {
                                         withAnimation {
                                             if let id = meal.id {
@@ -215,6 +255,8 @@ struct MealLogView: View {
                     MealRowView(
                         meal: meal,
                         isExpanded: expandedMealIds.contains(meal.id ?? UUID()),
+                        isFeastAnimating: animatingMealIDs.contains(meal.id ?? UUID()),
+                        isFeastCompleted: completedMealIDs.contains(meal.id ?? UUID()),
                         onTap: {
                             withAnimation {
                                 if let id = meal.id {
@@ -405,6 +447,8 @@ struct MealRowView: View {
 
     let meal: MealEntity
     let isExpanded: Bool
+    let isFeastAnimating: Bool
+    let isFeastCompleted: Bool
     let onTap: () -> Void
     let timeFormatter: DateFormatter
 
@@ -464,8 +508,10 @@ struct MealRowView: View {
 
                             if meal.mealType == "feast" {
                                 Image(systemName: "party.popper")
-                                    .foregroundColor(.blue)
+                                    .foregroundColor(isFeastCompleted ? .green : .blue)
                                     .font(.subheadline)
+                                    .scaleEffect(isFeastAnimating ? 1.5 : 1.0)
+                                    .rotationEffect(.degrees(isFeastAnimating ? 15 : 0))
                                     .accessibilityLabel(NSLocalizedString("Feast treat meal", comment: "Accessibility label for feast badge icon in Meal History"))
                             }
                         }

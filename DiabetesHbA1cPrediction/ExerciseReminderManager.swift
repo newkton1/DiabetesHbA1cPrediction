@@ -12,14 +12,9 @@
 //  Philosophy: motivate, never scold.
 
 import Foundation
-import UserNotifications
+@preconcurrency import UserNotifications
 import HealthKit
 import BackgroundTasks
-
-// Convenience alias so log calls are short.
-private func elog(_ msg: String, function: String = #function) {
-    ERMLogger.shared.log(msg, function: function)
-}
 
 @MainActor
 final class ExerciseReminderManager: NSObject {
@@ -38,7 +33,10 @@ final class ExerciseReminderManager: NSObject {
     private let feastTimeKey     = "exerciseReminderFeastStartTime"
     private let categoryID       = "feastExerciseNudgeCategory"
     private let actionID         = "FEAST_EXERCISE_DONE"
-    private let rewardPendingKey = "offsetExerciseRewardPending"
+    private let rewardPendingKey     = "offsetExerciseRewardPending"
+    /// Written just before cancelAll() in every reward path.
+    /// MealLogView reads this on appear to animate the matching feast's party-popper icon.
+    private let animationPendingKey  = "offsetExerciseAnimationPendingFeastTime"
 
     /// Minimum step count since feast start to consider the user active.
     /// ~1,200 steps ≈ 10 min of purposeful walking at average adult stride (75 cm),
@@ -47,7 +45,6 @@ final class ExerciseReminderManager: NSObject {
 
     private override init() {
         super.init()
-        elog("ERM singleton initialised")
         // Must set delegate before any notification response can be delivered.
         center.delegate = self
         registerCategory()
@@ -69,10 +66,8 @@ final class ExerciseReminderManager: NSObject {
             object: nil, queue: nil
         ) { [weak self] _ in
             guard let self else { return }
-            elog("NC workoutDetected received — isMonitoring=\(self.isMonitoring)")
             Task { @MainActor [weak self] in
                 guard let self, self.isMonitoring else {
-                    elog("workoutDetected: not monitoring, skipping check")
                     return
                 }
                 await self.performBackgroundExerciseCheck()
@@ -83,7 +78,6 @@ final class ExerciseReminderManager: NSObject {
             object: nil, queue: nil
         ) { [weak self] _ in
             guard let self else { return }
-            elog("NC cancelIfExercised received — isMonitoring=\(self.isMonitoring)")
             Task { @MainActor [weak self] in
                 self?.cancelIfExercised()
             }
@@ -93,7 +87,6 @@ final class ExerciseReminderManager: NSObject {
             object: nil, queue: nil
         ) { [weak self] _ in
             guard let self else { return }
-            elog("NC cancelFeastReminders received")
             Task { @MainActor [weak self] in
                 self?.cancelAll()
             }
@@ -118,7 +111,6 @@ final class ExerciseReminderManager: NSObject {
     /// Call immediately after a feast plan is saved.
     /// `feastTime` defaults to `Date()` (the moment of saving).
     func scheduleReminders(feastTime: Date = Date()) {
-        elog("scheduleReminders called — feastTime=\(feastTime)")
         cancelPendingOnly()
         UserDefaults.standard.set(feastTime, forKey: feastTimeKey)
 
@@ -128,7 +120,6 @@ final class ExerciseReminderManager: NSObject {
         // doesn't sync to iPhone HealthKit in real-time during a walk.
         let bgTaskTime = feastTime.addingTimeInterval(80 * 60)
         submitNudgeCheckTask(earliestStart: bgTaskTime)
-        elog("BGTask scheduled for T+80 = \(bgTaskTime)")
 
         // Nudge1 (T+90) is NOT pre-scheduled here.
         // The BGTask fires at T+80, checks for activity, and conditionally fires
@@ -136,26 +127,22 @@ final class ExerciseReminderManager: NSObject {
         // from firing during a mid-walk via the OS-level UNCalendarNotificationTrigger,
         // which cannot be cancelled if the app is killed while the user walks.
         let nudge2Time = feastTime.addingTimeInterval(95 * 60)
-        elog("Nudge1 (T+90): will be fired conditionally by BGTask at T+80")
-        elog("Nudge2 (T+95) scheduled for \(nudge2Time)")
 
         requestPermissionIfNeeded { [weak self] granted in
-            guard granted, let self else {
-                elog("scheduleReminders: notification permission NOT granted")
-                return
+            guard granted, let self else { return }
+            // Hop back to the main actor so scheduleNudge (which is @MainActor-isolated) can be called.
+            Task { @MainActor [self] in
+                self.scheduleNudge(
+                    identifier: self.nudge2ID,
+                    fireDate:   nudge2Time,
+                    title: NSLocalizedString(
+                        "Blood Glucose May Be Peaking",
+                        comment: "Exercise nudge 2 title — shown 95 min after feast start"),
+                    body: NSLocalizedString(
+                        "Your blood glucose may be peaking right now. A short walk would really help — any movement counts.",
+                        comment: "Exercise nudge 2 body — gentle urgency")
+                )
             }
-
-            // Only nudge2 is pre-scheduled. Nudge1 is handled by the BGTask.
-            self.scheduleNudge(
-                identifier: self.nudge2ID,
-                fireDate:   nudge2Time,
-                title: NSLocalizedString(
-                    "Blood Glucose May Be Peaking",
-                    comment: "Exercise nudge 2 title — shown 95 min after feast start"),
-                body: NSLocalizedString(
-                    "Your blood glucose may be peaking right now. A short walk would really help — any movement counts.",
-                    comment: "Exercise nudge 2 body — gentle urgency")
-            )
         }
     }
 
@@ -166,34 +153,31 @@ final class ExerciseReminderManager: NSObject {
     /// if sufficient activity is found.
     func cancelIfExercised() {
         guard let feastTime = UserDefaults.standard.object(forKey: feastTimeKey) as? Date else {
-            elog("cancelIfExercised: no feastTimeKey — not monitoring, returning")
             return
         }
 
         let elapsed = Date().timeIntervalSince(feastTime)
-        elog("cancelIfExercised: elapsed=\(Int(elapsed/60))min since feast")
         guard elapsed > 0 else { return }
 
         if elapsed >= 180 * 60 {
-            elog("cancelIfExercised: T+180 elapsed — calling cancelAll()")
             cancelAll()
             return
         }
 
         Task {
-            elog("cancelIfExercised: querying hasActivitySince \(feastTime)…")
             let active = await hasActivitySince(feastTime)
-            elog("cancelIfExercised: hasActivitySince returned active=\(active)")
             if active {
                 await MainActor.run {
                     // Double-fire guard: another path (BGTask/observer) may have already
                     // sent the reward while we were awaiting the HealthKit query.
                     // cancelAll() clears feastTimeKey, so its absence means we lost the race.
                     guard UserDefaults.standard.object(forKey: self.feastTimeKey) != nil else {
-                        elog("cancelIfExercised: feastTimeKey gone — reward already sent by another path, skipping")
                         return
                     }
-                    elog("cancelIfExercised: SENDING REWARD — cancelling nudges")
+                    // Save feast time for party-popper animation BEFORE cancelAll() clears it.
+                    if let ft = UserDefaults.standard.object(forKey: self.feastTimeKey) as? Date {
+                        UserDefaults.standard.set(ft, forKey: self.animationPendingKey)
+                    }
                     // Set reward flag BEFORE cancelAll() clears the feast key.
                     UserDefaults.standard.set(true, forKey: self.rewardPendingKey)
                     self.cancelAll()
@@ -212,7 +196,6 @@ final class ExerciseReminderManager: NSObject {
     /// Cancels all pending nudges, removes any already-delivered nudge banners
     /// from Notification Centre, and clears the stored feast time.
     func cancelAll() {
-        elog("cancelAll() called — removing nudge1+nudge2, clearing feastTimeKey")
         center.removePendingNotificationRequests(withIdentifiers: [nudge1ID, nudge2ID])
         center.removeDeliveredNotifications(withIdentifiers: [nudge1ID, nudge2ID])
         UserDefaults.standard.removeObject(forKey: feastTimeKey)
@@ -229,9 +212,7 @@ final class ExerciseReminderManager: NSObject {
         request.earliestBeginDate = earliestStart
         do {
             try BGTaskScheduler.shared.submit(request)
-            elog("BGAppRefreshTask submitted for \(earliestStart)")
         } catch {
-            elog("BGAppRefreshTask submit FAILED: \(error)")
         }
     }
 
@@ -240,14 +221,11 @@ final class ExerciseReminderManager: NSObject {
     /// posts the reward notification — exactly like performBackgroundExerciseCheck(),
     /// but driven by BGTaskScheduler rather than HealthKit observer.
     func handleNudgeCheckBackground(task: BGAppRefreshTask) {
-        elog("handleNudgeCheckBackground: BGTask FIRED by iOS")
         task.expirationHandler = {
-            elog("handleNudgeCheckBackground: BGTask EXPIRED by iOS")
             task.setTaskCompleted(success: false)
         }
         Task { @MainActor [weak self] in
             guard let self else {
-                elog("handleNudgeCheckBackground: self is nil — completing failed")
                 task.setTaskCompleted(success: false)
                 return
             }
@@ -255,22 +233,15 @@ final class ExerciseReminderManager: NSObject {
             guard self.isMonitoring,
                   let feastTime = UserDefaults.standard.object(forKey: self.feastTimeKey) as? Date
             else {
-                elog("handleNudgeCheckBackground: not monitoring or no feastTime — exiting early")
                 return
             }
 
-            let elapsed = Date().timeIntervalSince(feastTime)
-            elog("handleNudgeCheckBackground: T+\(Int(elapsed/60))min since feast (\(feastTime))")
-
-            elog("handleNudgeCheckBackground: querying hasActivitySince…")
             let active = await self.hasActivitySince(feastTime)
-            elog("handleNudgeCheckBackground: hasActivitySince returned active=\(active)")
 
             if !active {
                 // User is NOT exercising — fire nudge1 NOW (immediate delivery).
                 // Because nudge1 is no longer pre-scheduled via UNCalendarNotificationTrigger,
                 // this is the only place it can fire, so it can never appear mid-walk.
-                elog("handleNudgeCheckBackground: no activity — firing nudge1 NOW")
                 self.scheduleNudge(
                     identifier: self.nudge1ID,
                     fireDate:   Date(),   // immediate (scheduleNudge uses nil trigger for past dates)
@@ -288,10 +259,11 @@ final class ExerciseReminderManager: NSObject {
             // while we were awaiting the HealthKit query. cancelAll() clears
             // feastTimeKey, so its absence means we lost the race — bail out.
             guard UserDefaults.standard.object(forKey: self.feastTimeKey) != nil else {
-                elog("handleNudgeCheckBackground: feastTimeKey gone — reward already sent by another path, skipping")
                 return
             }
-            elog("handleNudgeCheckBackground: ACTIVITY DETECTED — sending reward, cancelling nudges")
+            if let ft = UserDefaults.standard.object(forKey: self.feastTimeKey) as? Date {
+                UserDefaults.standard.set(ft, forKey: self.animationPendingKey)
+            }
             UserDefaults.standard.set(true, forKey: self.rewardPendingKey)
             self.cancelAll()
             self.scheduleRewardNotification()
@@ -304,14 +276,11 @@ final class ExerciseReminderManager: NSObject {
 
     private func hasActivitySince(_ startDate: Date) async -> Bool {
         guard HKHealthStore.isHealthDataAvailable() else {
-            elog("hasActivitySince: HealthKit not available")
             return false
         }
         let workout = await hasWorkoutSince(startDate)
-        elog("hasActivitySince: hasWorkoutSince=\(workout)")
         if workout { return true }
         let steps = await stepCountSince(startDate)
-        elog("hasActivitySince: stepCount=\(Int(steps)) (min=\(Int(minSteps)))")
         return steps >= minSteps
     }
 
@@ -326,8 +295,6 @@ final class ExerciseReminderManager: NSObject {
                 sortDescriptors: nil
             ) { _, samples, error in
                 let found = !(samples ?? []).isEmpty
-                if let error { elog("hasWorkoutSince HK error: \(error)") }
-                elog("hasWorkoutSince: found=\(found) (samples=\(samples?.count ?? 0))")
                 continuation.resume(returning: found)
             }
             self.healthStore.execute(query)
@@ -345,8 +312,6 @@ final class ExerciseReminderManager: NSObject {
                 options:                 .cumulativeSum
             ) { _, stats, error in
                 let count = stats?.sumQuantity()?.doubleValue(for: .count()) ?? 0
-                if let error { elog("stepCountSince HK error: \(error)") }
-                elog("stepCountSince: steps=\(Int(count)) since \(startDate)")
                 continuation.resume(returning: count)
             }
             self.healthStore.execute(query)
@@ -388,37 +353,30 @@ final class ExerciseReminderManager: NSObject {
             let components = Calendar.current.dateComponents(
                 [.year, .month, .day, .hour, .minute, .second], from: fireDate)
             trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-            elog("scheduleNudge: scheduling \(identifier) for \(fireDate) via calendar trigger")
         } else {
             trigger = nil
-            elog("scheduleNudge: scheduling \(identifier) for immediate delivery (nil trigger)")
         }
 
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
 
-        center.add(request) { error in
-            if let error {
-                elog("scheduleNudge: FAILED to schedule \(identifier): \(error)")
-            } else {
-                elog("scheduleNudge: SUCCESS — \(identifier) delivered/scheduled")
-            }
-        }
+        center.add(request) { _ in }
     }
 
     /// Cancels pending notifications without touching the stored feast time
     /// (used when rescheduling for a new feast).
     private func cancelPendingOnly() {
-        elog("cancelPendingOnly: removing pending nudge1+nudge2")
         center.removePendingNotificationRequests(withIdentifiers: [nudge1ID, nudge2ID])
     }
 
-    private func requestPermissionIfNeeded(completion: @escaping (Bool) -> Void) {
+    private func requestPermissionIfNeeded(completion: @escaping @Sendable (Bool) -> Void) {
+        // Capture center locally so the @Sendable callbacks below don't cross the @MainActor boundary.
+        let center = self.center
         center.getNotificationSettings { settings in
             switch settings.authorizationStatus {
             case .authorized, .provisional, .ephemeral:
                 completion(true)
             case .notDetermined:
-                self.center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
+                center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
                     completion(granted)
                 }
             default:
@@ -438,34 +396,29 @@ final class ExerciseReminderManager: NSObject {
     ///   1. Cancels remaining nudge notifications.
     ///   2. Posts an immediate reward notification visible on the lock screen.
     func performBackgroundExerciseCheck() async {
-        elog("performBackgroundExerciseCheck: entered")
         guard let feastTime = UserDefaults.standard.object(forKey: feastTimeKey) as? Date else {
-            elog("performBackgroundExerciseCheck: no feastTimeKey — returning")
             return
         }
         let elapsed = Date().timeIntervalSince(feastTime)
-        elog("performBackgroundExerciseCheck: T+\(Int(elapsed/60))min since feast")
         guard elapsed > 0 else { return }
         if elapsed >= 180 * 60 {
-            elog("performBackgroundExerciseCheck: T+180 elapsed — calling cancelAll()")
             cancelAll()
             return
         }
-        elog("performBackgroundExerciseCheck: querying hasActivitySince…")
         let active = await hasActivitySince(feastTime)
-        elog("performBackgroundExerciseCheck: hasActivitySince returned active=\(active)")
         guard active else {
-            elog("performBackgroundExerciseCheck: no activity — returning without cancelling")
             return
         }
         // Double-fire guard: another path (BGTask) may have already sent the reward
         // while we were awaiting the HealthKit query. cancelAll() clears feastTimeKey,
         // so its absence means we lost the race — bail out.
         guard UserDefaults.standard.object(forKey: feastTimeKey) != nil else {
-            elog("performBackgroundExerciseCheck: feastTimeKey gone — reward already sent by another path, skipping")
             return
         }
-        elog("performBackgroundExerciseCheck: ACTIVITY DETECTED — sending reward, cancelling nudges")
+        // Save feast time for party-popper animation BEFORE cancelAll() clears it.
+        if let ft = UserDefaults.standard.object(forKey: feastTimeKey) as? Date {
+            UserDefaults.standard.set(ft, forKey: animationPendingKey)
+        }
         // Set the reward flag BEFORE cancelAll() clears the feast key,
         // so the in-app alert can still fire if the notification was missed.
         UserDefaults.standard.set(true, forKey: rewardPendingKey)
@@ -479,7 +432,6 @@ final class ExerciseReminderManager: NSObject {
     /// Posts an immediate local notification congratulating the user on completing
     /// their offset exercise.
     private func scheduleRewardNotification() {
-        elog("scheduleRewardNotification: posting reward notification NOW")
         let content      = UNMutableNotificationContent()
         content.title    = NSLocalizedString("Offset Exercise Complete!", comment: "")
         content.body     = NSLocalizedString(
@@ -492,13 +444,7 @@ final class ExerciseReminderManager: NSObject {
             content: content,
             trigger: nil   // nil trigger = deliver immediately
         )
-        center.add(request) { error in
-            if let error {
-                elog("scheduleRewardNotification: ERROR \(error)")
-            } else {
-                elog("scheduleRewardNotification: reward notification delivered successfully")
-            }
-        }
+        center.add(request) { _ in }
     }
 
     // MARK: - Reward flag (survives background→foreground transition)
@@ -507,7 +453,6 @@ final class ExerciseReminderManager: NSObject {
     /// and clears the flag so the alert only shows once.
     func consumePendingReward() -> Bool {
         let pending = UserDefaults.standard.bool(forKey: rewardPendingKey)
-        elog("consumePendingReward: pending=\(pending)")
         if pending { UserDefaults.standard.removeObject(forKey: rewardPendingKey) }
         return pending
     }
@@ -581,10 +526,7 @@ extension ExerciseReminderManager: UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        let type = response.notification.request.content.userInfo["type"] as? String ?? "unknown"
-        elog("didReceive notification response: identifier=\(response.notification.request.identifier) type=\(type) action=\(response.actionIdentifier)")
         if response.actionIdentifier == actionID {
-            elog("'Done — I exercised' tapped — calling cancelAll()")
             cancelAll()
         }
         completionHandler()
@@ -597,8 +539,6 @@ extension ExerciseReminderManager: UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
         let type = notification.request.content.userInfo["type"] as? String ?? "unknown"
-        let id   = notification.request.identifier
-        elog("willPresent notification: id=\(id) type=\(type)")
         let isFeastNotification = type == "feastExerciseNudge" || type == "feastOffsetReward"
         completionHandler(isFeastNotification ? [.banner, .sound] : [])
     }

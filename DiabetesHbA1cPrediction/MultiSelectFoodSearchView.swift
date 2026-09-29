@@ -444,17 +444,6 @@ private struct FoodSearchContentDirect: View {
                                 action: { selectedCategory = "My Menu" }
                             )
 
-                            if Bundle.main.url(forResource: "FoodDatabase_JP", withExtension: "json") != nil {
-                                CategoryFilterChip(
-                                    title: "日本食",
-                                    isSelected: selectedCategory == "日本食",
-                                    action: {
-                                        FoodDatabase.shared.loadJapaneseDatabaseIfNeeded()
-                                        selectedCategory = "日本食"
-                                    }
-                                )
-                            }
-
                             if !recentMeals.isEmpty {
                                 CategoryFilterChip(
                                     title: "Recent",
@@ -468,6 +457,17 @@ private struct FoodSearchContentDirect: View {
                                     title: LocalizedStringKey(MultiSelectFoodSearchView.chipLabel(for: category)),
                                     isSelected: selectedCategory == category,
                                     action: { selectedCategory = category }
+                                )
+                            }
+
+                            if Bundle.main.url(forResource: "FoodDatabase_JP", withExtension: "json") != nil {
+                                CategoryFilterChip(
+                                    title: "日本食",
+                                    isSelected: selectedCategory == "日本食",
+                                    action: {
+                                        FoodDatabase.shared.loadJapaneseDatabaseIfNeeded()
+                                        selectedCategory = "日本食"
+                                    }
                                 )
                             }
                         }
