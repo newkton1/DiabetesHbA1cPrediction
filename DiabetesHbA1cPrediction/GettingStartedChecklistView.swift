@@ -20,6 +20,7 @@ import SwiftUI
 struct GettingStartedChecklistView: View {
 
     @ObservedObject var coldStart: ColdStartManager
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Binding var selectedTab: ContentView.Tab
     @Environment(\.managedObjectContext) private var viewContext
 
@@ -129,7 +130,7 @@ struct GettingStartedChecklistView: View {
             Spacer().frame(width: 12)
 
             Button {
-                withAnimation(.easeInOut(duration: 0.3)) {
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
                     coldStart.checklistDismissed = true
                 }
             } label: {
@@ -172,7 +173,7 @@ struct GettingStartedChecklistView: View {
             if let current = coldStart.currentStep,
                let info = steps[current] {
                 Button {
-                    withAnimation {
+                    withAnimation(reduceMotion ? nil : .default) {
                         selectedTab = info.tab
                     }
                 } label: {

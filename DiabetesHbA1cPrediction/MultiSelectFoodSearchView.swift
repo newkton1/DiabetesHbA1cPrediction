@@ -17,6 +17,7 @@ private enum DatabaseMode { case washoku, yoshoku }
 /// View for searching and selecting multiple food items
 struct MultiSelectFoodSearchView: View {
     @ObservedObject var mealBuilder: MealBuilder
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var mealType: MealType = .lastMeal
     @Environment(\.dismiss) private var dismiss
     @Environment(\.verticalSizeClass) private var verticalSizeClass
@@ -711,9 +712,9 @@ private struct RecentMealsList: View {
             }
         }
         // Brief visual feedback
-        withAnimation { loadedMealId = meal.id }
+        withAnimation(reduceMotion ? nil : .default) { loadedMealId = meal.id }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            withAnimation { loadedMealId = nil }
+            withAnimation(reduceMotion ? nil : .default) { loadedMealId = nil }
         }
     }
 }

@@ -50,6 +50,7 @@ private func trendDisplayName(_ trend: String) -> String {
 /// - Swipe to delete functionality
 struct GlucoseLogView: View {
     @Environment(\.managedObjectContext) var moc
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
 
@@ -450,7 +451,7 @@ struct GlucoseLogView: View {
                     // Reset to "now" — hidden in landscape to save space
                     if chartAnchorDate != nil && isPortrait {
                         Button(action: {
-                            withAnimation { chartAnchorDate = nil }
+                            withAnimation(reduceMotion ? nil : .default) { chartAnchorDate = nil }
                             selectedHotspot = nil
                             selectedReadingDate = nil
                         }) {
@@ -540,7 +541,7 @@ struct GlucoseLogView: View {
                                                         .filter { $0.1 < tolerance }
                                                         .min(by: { $0.1 < $1.1 })
 
-                                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                                    withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
                                                         selectedReadingDate = nil
                                                         if let match = nearest {
                                                             if selectedHotspot?.id == match.0.id {
@@ -630,7 +631,7 @@ struct GlucoseLogView: View {
                             .min(by: { $0.1 < $1.1 })
 
                         if let match = nearest {
-                            withAnimation(.easeInOut(duration: 0.3)) {
+                            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
                                 selectedHotspot = match.0
                                 // Position popover on the left side (reading is centred)
                                 popoverAnchorRight = false
@@ -658,7 +659,7 @@ struct GlucoseLogView: View {
                             .foregroundColor(.secondary)
                         if chartDaySetting < 7 {
                             Button("Try last 7 days") {
-                                withAnimation { chartDaySetting = 7 }
+                                withAnimation(reduceMotion ? nil : .default) { chartDaySetting = 7 }
                             }
                             .font(.caption)
                         }
@@ -843,7 +844,7 @@ struct GlucoseLogView: View {
                 Spacer()
 
                 // Close button
-                Button(action: { withAnimation { selectedHotspot = nil } }) {
+                Button(action: { withAnimation(reduceMotion ? nil : .default) { selectedHotspot = nil } }) {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(.secondary)
                         .font(.body)
@@ -955,7 +956,7 @@ struct GlucoseLogView: View {
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isModal)
         .accessibilityAction(.escape) {
-            withAnimation { selectedHotspot = nil }
+            withAnimation(reduceMotion ? nil : .default) { selectedHotspot = nil }
         }
         .accessibilityAction(named: "Next hotspot") {
             navigateHotspot(forward: true, in: allHotspots)
@@ -978,12 +979,12 @@ struct GlucoseLogView: View {
            let currentIndex = sorted.firstIndex(where: { $0.id == current.id }) {
             let nextIndex = forward ? currentIndex + 1 : currentIndex - 1
             guard sorted.indices.contains(nextIndex) else { return }
-            withAnimation(.easeInOut(duration: 0.2)) {
+            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
                 selectedHotspot = sorted[nextIndex]
             }
         } else {
             // No hotspot selected — select the first or last
-            withAnimation(.easeInOut(duration: 0.2)) {
+            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
                 selectedHotspot = forward ? sorted.first : sorted.last
             }
         }
@@ -1178,7 +1179,7 @@ struct GlucoseLogView: View {
                                                 .min(by: { $0.1 < $1.1 })
 
                                             if let match = nearest, match.1 < Double(chartWindowDays) * 86400 / 10 {
-                                                withAnimation(.easeInOut(duration: 0.2)) {
+                                                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
                                                     if selectedWeightTrend?.id == match.0.id {
                                                         selectedWeightTrend = nil  // toggle off
                                                     } else {
@@ -1186,7 +1187,7 @@ struct GlucoseLogView: View {
                                                     }
                                                 }
                                             } else {
-                                                withAnimation { selectedWeightTrend = nil }
+                                                withAnimation(reduceMotion ? nil : .default) { selectedWeightTrend = nil }
                                             }
                                         }
                                 )
@@ -1209,7 +1210,7 @@ struct GlucoseLogView: View {
                         )
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
                         .onTapGesture {
-                            withAnimation { selectedWeightTrend = nil }
+                            withAnimation(reduceMotion ? nil : .default) { selectedWeightTrend = nil }
                         }
                         .padding(.top, 24)
                 }
@@ -1399,12 +1400,12 @@ struct GlucoseLogView: View {
 
         if newEnd >= now {
             // Moving forward past "now" → reset to live
-            withAnimation { chartAnchorDate = nil }
+            withAnimation(reduceMotion ? nil : .default) { chartAnchorDate = nil }
         } else if newEnd.addingTimeInterval(TimeInterval(-chartWindowDays * 86400)) < earliestAllowed {
             // Would go past earliest glucose reading — clamp
             return
         } else {
-            withAnimation { chartAnchorDate = newEnd }
+            withAnimation(reduceMotion ? nil : .default) { chartAnchorDate = newEnd }
         }
         selectedHotspot = nil
         selectedReadingDate = nil
@@ -1423,7 +1424,7 @@ struct GlucoseLogView: View {
         var newEnd = ts.addingTimeInterval(halfWindow)
         if newEnd > now { newEnd = now }
 
-        withAnimation {
+        withAnimation(reduceMotion ? nil : .default) {
             chartAnchorDate = (newEnd >= now ? nil : newEnd)
             selectedReadingDate = ts
         }

@@ -19,6 +19,7 @@ struct OnlineFoodSearchSheet: View {
     var onFoodSelected: ((FoodItem) -> Void)?
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var searchState: SearchState = .prompt
     @State private var results: [FoodItem] = []
@@ -248,7 +249,7 @@ struct OnlineFoodSearchSheet: View {
         FoodDatabase.shared.addFavorite(food)
 
         // Mark as added in the UI
-        _ = withAnimation {
+        _ = withAnimation(reduceMotion ? nil : .default) {
             addedItems.insert(food.id)
         }
 

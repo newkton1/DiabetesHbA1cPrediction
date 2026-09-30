@@ -970,6 +970,7 @@ struct AddExerciseSessionSheet: View {
                     Section("Distance") {
                         HStack {
                             Slider(value: $distance, in: 0.5...20, step: 0.5)
+                                .accessibilityLabel("Distance in kilometres")
                             Text(String(format: "%.1f km", distance))
                                 .frame(width: 75, alignment: .trailing)
                                 .font(.headline)
@@ -980,6 +981,7 @@ struct AddExerciseSessionSheet: View {
                     Section("Intensity (1-10)") {
                         HStack {
                             Slider(value: $intensity, in: 1...10, step: 1)
+                                .accessibilityLabel("Exercise intensity, 1 to 10")
                             Text("\(Int(intensity))")
                                 .frame(width: 30)
                                 .font(.headline)

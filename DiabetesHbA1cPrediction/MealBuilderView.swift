@@ -12,6 +12,7 @@ import Combine
 /// Main view for building a meal with multiple food items
 struct MealBuilderView: View {
     @StateObject private var mealBuilder: MealBuilder
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
 
@@ -359,7 +360,7 @@ struct MealBuilderView: View {
                                 .font(.title2)
                                 .fontWeight(.semibold)
                             Spacer()
-                            Stepper("", value: $mealBuilder.timeSinceLastMeal, in: 0...48, step: 0.5)
+                            Stepper("Hours since last meal", value: $mealBuilder.timeSinceLastMeal, in: 0...48, step: 0.5)
                                 .labelsHidden()
                         }
                         if isPortrait {
@@ -440,13 +441,13 @@ struct MealBuilderView: View {
 
                 // Show auto-dismissing warning for high glycemic load feasts
                 if mealBuilder.totalGlycemicLoad >= 50 {
-                    withAnimation(.easeInOut(duration: 0.3)) { showGlycemicWarning = true }
+                    withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { showGlycemicWarning = true }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
-                        withAnimation(.easeInOut(duration: 0.3)) { showGlycemicWarning = false }
-                        withAnimation { showResults = true }
+                        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { showGlycemicWarning = false }
+                        withAnimation(reduceMotion ? nil : .default) { showResults = true }
                     }
                 } else {
-                    withAnimation { showResults = true }
+                    withAnimation(reduceMotion ? nil : .default) { showResults = true }
                 }
             } else {
                 // Regular meals: save, show 2-second confirmation toast, then dismiss
@@ -459,9 +460,9 @@ struct MealBuilderView: View {
                 } else {
                     saveConfirmationText = "\(mealBuilder.mealName) saved — \(carbs) g carbs"
                 }
-                withAnimation(.easeInOut(duration: 0.3)) { showSaveConfirmation = true }
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { showSaveConfirmation = true }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                    withAnimation(.easeInOut(duration: 0.3)) { showSaveConfirmation = false }
+                    withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { showSaveConfirmation = false }
                     dismiss()
                 }
             }
@@ -483,9 +484,9 @@ struct MealBuilderView: View {
         let hasHighGIItem = mealBuilder.selectedFoods.contains { $0.foodItem.glycemicIndex >= 55 }
 
         if delta >= 15 && hasHighGIItem {
-            withAnimation(.easeInOut(duration: 0.3)) { showGlucoseElevatedWarning = true }
+            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { showGlucoseElevatedWarning = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
-                withAnimation(.easeInOut(duration: 0.3)) { showGlucoseElevatedWarning = false }
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { showGlucoseElevatedWarning = false }
             }
         }
     }

@@ -16,6 +16,7 @@ import SwiftUI
 struct CGMSetupView: View {
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.openURL) private var openURL
 
     @State private var expandedPath: CGMPath? = .zukka
@@ -115,7 +116,7 @@ struct CGMSetupView: View {
         return VStack(spacing: 0) {
             // Header row — always visible
             Button {
-                withAnimation(.easeInOut(duration: 0.2)) {
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
                     expandedPath = isExpanded ? nil : path
                 }
             } label: {

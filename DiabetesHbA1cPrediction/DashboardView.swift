@@ -19,6 +19,7 @@ struct DashboardView: View {
 
     // MARK: - Environment
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // MARK: - Fetch Requests
 
@@ -148,10 +149,10 @@ struct DashboardView: View {
             guard now.timeIntervalSince(lastShown) >= 3600 else { return }
         }
         UserDefaults.standard.set(now, forKey: cgmDropoutLastShownKey)
-        withAnimation(.easeInOut(duration: 0.3)) { showCGMDropoutToast = true }
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { showCGMDropoutToast = true }
         Task {
             try? await Task.sleep(nanoseconds: 3_000_000_000)
-            withAnimation(.easeInOut(duration: 0.3)) { showCGMDropoutToast = false }
+            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { showCGMDropoutToast = false }
         }
     }
 
@@ -160,7 +161,7 @@ struct DashboardView: View {
     /// The flag is cleared automatically when readings resume.
     private func dismissCGMDropoutWarning() {
         UserDefaults.standard.set(true, forKey: cgmDropoutDismissedKey)
-        withAnimation(.easeInOut(duration: 0.3)) { showCGMDropoutToast = false }
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { showCGMDropoutToast = false }
     }
 
     /// Called when glucose readings resume (data is no longer stale).
@@ -170,7 +171,7 @@ struct DashboardView: View {
         UserDefaults.standard.removeObject(forKey: cgmDropoutDismissedKey)
         UserDefaults.standard.removeObject(forKey: cgmDropoutLastShownKey)
         if showCGMDropoutToast {
-            withAnimation(.easeInOut(duration: 0.3)) { showCGMDropoutToast = false }
+            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) { showCGMDropoutToast = false }
         }
     }
 
@@ -722,7 +723,7 @@ private struct GMICardView: View {
     /// Force recalculation of the GMI estimate and run dawn effect detection.
     private func recalculateGMI() {
         isRecalculating = true
-        withAnimation(.easeInOut(duration: 0.2)) { recalcFlash = true }
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { recalcFlash = true }
 
         Task { @MainActor in
             let engine = GmiEstimateEngine()
@@ -739,7 +740,7 @@ private struct GMICardView: View {
             // Hold the spinner for 2 seconds so the user sees the recalculation feedback
             try? await Task.sleep(nanoseconds: 2_000_000_000)
 
-            withAnimation(.easeInOut(duration: 0.3)) {
+            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
                 recalcFlash = false
                 isRecalculating = false
             }
@@ -1220,7 +1221,7 @@ private struct FeastEncouragementBanner: View {
     }
 
     private func dismiss() {
-        withAnimation(.easeInOut(duration: 0.2)) { dismissed = true }
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { dismissed = true }
         UserDefaults.standard.set(Date(), forKey: dismissKey)
     }
 }
@@ -1462,7 +1463,7 @@ private struct DawnEffectNoticeBanner: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Button {
-                withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { isExpanded.toggle() }
             } label: {
                 HStack(alignment: .top, spacing: 6) {
                     Image(systemName: "sunrise.fill")

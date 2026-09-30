@@ -9,6 +9,7 @@ import CoreData
 struct MealLogView: View {
     // MARK: - Environment & State
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
@@ -90,13 +91,13 @@ struct MealLogView: View {
 
         // Short delay lets the list finish rendering before the animation begins.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-            withAnimation(.spring(response: 0.25, dampingFraction: 0.35)) {
+            withAnimation(reduceMotion ? nil : .spring(response: 0.25, dampingFraction: 0.35)) {
                 _ = animatingMealIDs.insert(matchID)
                 _ = completedMealIDs.insert(matchID)   // icon stays green this session
             }
             // Let the spring settle, then release the scale/rotation back to rest.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
+                withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.6)) {
                     _ = animatingMealIDs.remove(matchID)
                 }
             }
@@ -174,7 +175,7 @@ struct MealLogView: View {
                                     isFeastAnimating: animatingMealIDs.contains(meal.id ?? UUID()),
                                     isFeastCompleted: completedMealIDs.contains(meal.id ?? UUID()),
                                     onTap: {
-                                        withAnimation {
+                                        withAnimation(reduceMotion ? nil : .default) {
                                             if let id = meal.id {
                                                 if expandedMealIds.contains(id) {
                                                     expandedMealIds.remove(id)
@@ -258,7 +259,7 @@ struct MealLogView: View {
                         isFeastAnimating: animatingMealIDs.contains(meal.id ?? UUID()),
                         isFeastCompleted: completedMealIDs.contains(meal.id ?? UUID()),
                         onTap: {
-                            withAnimation {
+                            withAnimation(reduceMotion ? nil : .default) {
                                 if let id = meal.id {
                                     if expandedMealIds.contains(id) {
                                         expandedMealIds.remove(id)
