@@ -634,6 +634,7 @@ private struct FoodSearchContentDirect: View {
 
 /// Displays the list of recent meals as tappable cards
 private struct RecentMealsList: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let recentMeals: [RecentMeal]
     @ObservedObject var mealBuilder: MealBuilder
     let onAddToMyMenu: (RecentMeal) -> Void

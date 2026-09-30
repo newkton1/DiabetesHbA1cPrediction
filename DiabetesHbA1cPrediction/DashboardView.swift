@@ -483,6 +483,7 @@ private struct GMICardView: View {
     var onDawnEffectUpdated: ((Bool) -> Void)? = nil
     @ObservedObject private var profile = HbA1cUserProfile.shared
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Rolling window length used for GMI computation.
     /// Bergenstal 2018 validates the formula on 10–14 day CGM windows.
@@ -1156,6 +1157,7 @@ private struct FeastEncouragementBanner: View {
     private let dismissKey   = "feastEncouragementDismissedDate"
     private let cooldownDays = 14
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Immediate local dismiss state so the banner vanishes without waiting
     /// for a UserDefaults-driven recompose.
     @State private var dismissed = false
@@ -1458,6 +1460,7 @@ private struct LandscapeActionsGrid: View {
 /// rise pattern is detected without a preceding meal. This is observational —
 /// it describes a pattern in the user's data, not a diagnosis.
 private struct DawnEffectNoticeBanner: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isExpanded = false
 
     var body: some View {
