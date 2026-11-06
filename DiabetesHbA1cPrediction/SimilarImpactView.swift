@@ -214,36 +214,45 @@ struct SimilarImpactView: View {
     @ViewBuilder
     private func matchedPatternCard(_ match: SimilarImpactResult) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Meal info
+            // 1. The answer: last rise, then what to do about it
             HStack {
-                Image(systemName: "fork.knife")
-                    .foregroundColor(.orange)
-                Text("Most recent similar meal")
-                    .font(.subheadline.bold())
+                Image(systemName: "arrow.up.right")
+                    .foregroundColor(.red)
+                Text("Rise after a similar meal")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
                 Spacer()
+                Text("+\(Int(match.maxIncrease)) mg/dL")
+                    .font(.title3.bold())
+                    .foregroundColor(match.maxIncrease > 50 ? .red : match.maxIncrease > 30 ? .orange : .green)
             }
 
-            if let name = match.mealName, !name.isEmpty {
-                Text(name)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            // Exercise offset recommendation
+            if match.maxIncrease > 15 {
+                Divider()
+                exerciseOffsetSection(glucoseRise: match.maxIncrease)
             }
 
-            if let ts = match.mealTimestamp {
-                Text(dateString(ts))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            Text("GL: \(Int(match.mealGL)) · Carbs: \(Int(match.mealCarbs)) g")
-                .font(.caption)
-                .foregroundColor(.secondary)
-
+            // 2. The evidence: chart
             Divider()
 
-            // Glucose chart 60–120 min after the meal
-            Text("Glucose 60–120 min after eating")
-                .font(.subheadline.bold())
+            // Walk-offset projection: branches off the historic curve at T+90
+            // (when the walk nudge fires); the x-axis extends if the walk runs past 120 min.
+            let walkPlan: WalkOffsetPlan? = match.maxIncrease > 15 ? walkOffsetPlan(glucoseRise: match.maxIncrease) : nil
+            let walkProjection = walkPlan.map { walkProjectionPoints(match: match, plan: $0) } ?? []
+            let xMax = max(120, walkPlan.map { Self.walkStartMinute + $0.minutes } ?? 120)
+
+            // Glucose chart 60–xMax min after the meal
+            if walkPlan == nil {
+                Text("Glucose 60–120 min after eating")
+                    .font(.subheadline.bold())
+            } else if xMax == 120 {
+                Text("Glucose 60–120 min after eating & offset effect")
+                    .font(.subheadline.bold())
+            } else {
+                Text("Glucose 60–\(xMax) min after eating & offset effect")
+                    .font(.subheadline.bold())
+            }
 
             if match.glucosePoints.count >= 2 {
                 // Dynamic y-axis: narrow the range around the actual data
@@ -256,10 +265,26 @@ struct SimilarImpactView: View {
                 let yStep  = yRange <= 60 ? 10.0 : 20.0                       // finer ticks for narrow ranges
 
                 Chart {
+                    // Shaded walk window
+                    if let plan = walkPlan {
+                        RectangleMark(
+                            xStart: .value("Walk start", Self.walkStartMinute),
+                            xEnd: .value("Walk end", Self.walkStartMinute + plan.minutes)
+                        )
+                        .foregroundStyle(Color.green.opacity(0.10))
+                        .annotation(position: .overlay, alignment: .top) {
+                            Text("Walk \(plan.minutes) min")
+                                .font(.caption2)
+                                .foregroundColor(.green)
+                                .padding(.top, 2)
+                        }
+                    }
+
                     ForEach(match.glucosePoints, id: \.minutesAfterMeal) { point in
                         LineMark(
                             x: .value("Min", point.minutesAfterMeal),
-                            y: .value("mg/dL", point.value)
+                            y: .value("mg/dL", point.value),
+                            series: .value("Series", "History")
                         )
                         .foregroundStyle(Color.orange)
 
@@ -269,6 +294,25 @@ struct SimilarImpactView: View {
                         )
                         .foregroundStyle(point.value == match.peakValue ? Color.red : Color.orange)
                         .symbolSize(point.value == match.peakValue ? 80 : 40)
+                    }
+
+                    // Estimated glucose with the walk (dashed), branching at T+90
+                    ForEach(walkProjection, id: \.minutesAfterMeal) { point in
+                        LineMark(
+                            x: .value("Min", point.minutesAfterMeal),
+                            y: .value("mg/dL", point.value),
+                            series: .value("Series", "With walk")
+                        )
+                        .foregroundStyle(Color.green)
+                        .lineStyle(StrokeStyle(lineWidth: 2, dash: [6, 4]))
+                    }
+                    if let last = walkProjection.last {
+                        PointMark(
+                            x: .value("Min", last.minutesAfterMeal),
+                            y: .value("mg/dL", last.value)
+                        )
+                        .foregroundStyle(Color.green)
+                        .symbolSize(50)
                     }
 
                     // Baseline reference
@@ -282,11 +326,13 @@ struct SimilarImpactView: View {
                                 .offset(y: 4)
                         }
                 }
-                .chartXScale(domain: 60...120)
+                .chartXScale(domain: 60...xMax)
                 .chartXAxis {
-                    AxisMarks(values: .stride(by: 30)) { value in
+                    AxisMarks(values: xAxisTicks(upTo: xMax)) { value in
                         AxisGridLine()
-                        AxisValueLabel {
+                        // Anchor the last label to the trailing edge so it isn't clipped
+                        AxisValueLabel(anchor: value.as(Int.self) == xMax ? .topTrailing
+                                             : value.as(Int.self) == 60 ? .topLeading : .top) {
                             if let mins = value.as(Int.self) {
                                 Text("\(mins) min")
                                     .font(.caption2)
@@ -315,32 +361,52 @@ struct SimilarImpactView: View {
                 .frame(height: 200)
                 .padding(.vertical, 4)
                 .accessibilityLabel("Glucose chart showing readings 60 to 120 minutes after a similar meal. Baseline: \(Int(match.baselineValue)) mg/dL. Peak: \(Int(match.peakValue)) mg/dL. Maximum increase: \(Int(match.maxIncrease)) mg/dL.")
+                .accessibilityValue(walkProjection.last.map { "With a \(walkPlan?.minutes ?? 0)-minute walk from 90 minutes, estimated \(Int($0.value)) mg/dL at \($0.minutesAfterMeal) minutes." } ?? "")
+
+                if !walkProjection.isEmpty {
+                    HStack(spacing: 14) {
+                        legendSwatch(color: .orange, dashed: false, label: "Last time")
+                        legendSwatch(color: .green, dashed: true, label: "With walk (estimate)")
+                    }
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                }
             } else {
                 Text("Not enough glucose readings in this window to show a chart.")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
 
-            // Max increase
             Divider()
 
+            // 3. Details: which past meal the chart is based on
             HStack {
-                Image(systemName: "arrow.up.right")
-                    .foregroundColor(.red)
-                Text("Max increase over baseline")
-                    .font(.subheadline)
+                Image(systemName: "fork.knife")
+                    .foregroundColor(.orange)
+                    .font(.caption)
+                Text("Most recent similar meal")
+                    .font(.caption.bold())
                     .foregroundColor(.secondary)
                 Spacer()
-                Text("+\(Int(match.maxIncrease)) mg/dL")
-                    .font(.title3.bold())
-                    .foregroundColor(match.maxIncrease > 50 ? .red : match.maxIncrease > 30 ? .orange : .green)
             }
 
-            // Exercise offset recommendation
-            if match.maxIncrease > 15 {
-                Divider()
-                exerciseOffsetSection(glucoseRise: match.maxIncrease)
+            if let name = match.mealName, !name.isEmpty {
+                // Generated names ("Snack", "Late Night Snack"…) are stored in English;
+                // look them up so they show in the user's language. Custom names pass through.
+                Text(LocalizedStringKey(name))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
+
+            if let ts = match.mealTimestamp {
+                Text(dateString(ts))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Text("GL: \(Int(match.mealGL)) · Carbs: \(Int(match.mealCarbs)) g")
+                .font(.caption)
+                .foregroundColor(.secondary)
         }
         .padding()
         .background(Color(.systemGray6))
@@ -360,18 +426,15 @@ struct SimilarImpactView: View {
         // Same clinical model as MealBuilderView.computeWalkRecommendation:
         // 1.5 mg/dL reduction per minute of brisk walking (3.5 METs), scaled by MET.
         // Target: offset ~50% of expected rise.
-        let walkMET = 3.5
-        let reductionPerMinute = 1.5 * (exerciseType.metValue / walkMET)
-        let targetReduction = glucoseRise * 0.5
-        let rawMinutes = targetReduction / reductionPerMinute
-        let exerciseMinutes = min(60, max(5, rawMinutes))
-        let roundedMinutes = Int((exerciseMinutes / 5).rounded()) * 5
+        let plan = walkOffsetPlan(glucoseRise: glucoseRise)
+        let targetReduction = plan.targetReduction
+        let roundedMinutes = plan.minutes
 
         // Personal pace from last 30 days, or type default
         let personalPace = fetchExercisePace(for: exerciseType)
         let pace = personalPace > 0 ? personalPace : exerciseType.defaultPace
         let rawDistance = Double(roundedMinutes) * pace
-        let hitCap = rawMinutes > 60
+        let hitCap = plan.hitCap
 
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -381,7 +444,7 @@ struct SimilarImpactView: View {
                     .font(.subheadline.bold())
             }
 
-            Text("Based on this previous glucose pattern and previous post-meal exercise logs, the following post-meal \(exerciseType.actionVerb) could help reduce your glucose spike:")
+            Text("Based on previous logged activity and targeting halved glucose increase calculated at 1.5 mg/dL per minute, the following post-meal activity could help reduce your glucose increase.")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -417,7 +480,7 @@ struct SimilarImpactView: View {
                     Text("-\(Int(targetReduction))")
                         .font(.title2.bold())
                         .foregroundColor(.green)
-                    Text("mg/dL target")
+                    Text("mg/dL")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
@@ -430,6 +493,85 @@ struct SimilarImpactView: View {
                     .foregroundColor(.secondary)
                     .italic()
             }
+        }
+    }
+
+    // MARK: - Walk Offset Model (shared by chart and offset card)
+
+    /// Minute after eating when the walk starts — matches the T+90 nudge.
+    static let walkStartMinute = 90
+
+    private struct WalkOffsetPlan {
+        let minutes: Int              // rounded to nearest 5, clamped 5…60
+        let targetReduction: Double   // mg/dL the walk aims to remove (50% of rise)
+        let reductionPerMinute: Double
+        let hitCap: Bool
+    }
+
+    /// Same clinical model as MealBuilderView.computeWalkRecommendation:
+    /// 1.5 mg/dL reduction per minute of brisk walking (3.5 METs), scaled by MET.
+    /// Target: offset ~50% of expected rise.
+    private func walkOffsetPlan(glucoseRise: Double) -> WalkOffsetPlan {
+        let exerciseType = ExerciseOffsetType.current
+        let walkMET = 3.5
+        let reductionPerMinute = 1.5 * (exerciseType.metValue / walkMET)
+        let targetReduction = glucoseRise * 0.5
+        let rawMinutes = targetReduction / reductionPerMinute
+        let exerciseMinutes = min(60, max(5, rawMinutes))
+        let roundedMinutes = Int((exerciseMinutes / 5).rounded()) * 5
+        return WalkOffsetPlan(minutes: roundedMinutes,
+                              targetReduction: targetReduction,
+                              reductionPerMinute: reductionPerMinute,
+                              hitCap: rawMinutes > 60)
+    }
+
+    /// No-walk glucose at minute `t`, linearly interpolated from the historic readings.
+    /// Beyond the last reading the value is held flat (conservative).
+    private func historicValue(at t: Int, in points: [SimilarImpactGlucosePoint]) -> Double {
+        let sorted = points.sorted { $0.minutesAfterMeal < $1.minutesAfterMeal }
+        guard let first = sorted.first, let last = sorted.last else { return 0 }
+        if t <= first.minutesAfterMeal { return first.value }
+        if t >= last.minutesAfterMeal { return last.value }
+        for i in 1..<sorted.count where t <= sorted[i].minutesAfterMeal {
+            let a = sorted[i - 1], b = sorted[i]
+            let span = Double(b.minutesAfterMeal - a.minutesAfterMeal)
+            guard span > 0 else { return b.value }
+            return a.value + (b.value - a.value) * Double(t - a.minutesAfterMeal) / span
+        }
+        return last.value
+    }
+
+    /// Estimated curve with the walk: historic curve minus the walk's effect,
+    /// which builds linearly over the walk and then holds. Never below baseline.
+    private func walkProjectionPoints(match: SimilarImpactResult, plan: WalkOffsetPlan) -> [SimilarImpactGlucosePoint] {
+        let start = Self.walkStartMinute
+        let end = max(120, start + plan.minutes)
+        let totalDrop = plan.hitCap ? Double(plan.minutes) * plan.reductionPerMinute : plan.targetReduction
+        return stride(from: start, through: end, by: 5).map { t in
+            let progress = min(1.0, Double(t - start) / Double(max(plan.minutes, 1)))
+            let projected = historicValue(at: t, in: match.glucosePoints) - totalDrop * progress
+            return SimilarImpactGlucosePoint(minutesAfterMeal: t, value: max(match.baselineValue, projected))
+        }
+    }
+
+    /// 60, 90, 120 … plus the axis end; merges the end into the last tick if they'd crowd.
+    private func xAxisTicks(upTo xMax: Int) -> [Int] {
+        var ticks = Array(stride(from: 60, through: xMax, by: 30))
+        if let last = ticks.last, last != xMax {
+            if xMax - last < 15 { ticks[ticks.count - 1] = xMax } else { ticks.append(xMax) }
+        }
+        return ticks
+    }
+
+    private func legendSwatch(color: Color, dashed: Bool, label: LocalizedStringKey) -> some View {
+        HStack(spacing: 4) {
+            Path { p in
+                p.move(to: CGPoint(x: 0, y: 1))
+                p.addLine(to: CGPoint(x: 16, y: 1))
+            }
+            .stroke(color, style: StrokeStyle(lineWidth: 2, dash: dashed ? [4, 3] : []))
+            .frame(width: 16, height: 2)
+            Text(label)
         }
     }
 
