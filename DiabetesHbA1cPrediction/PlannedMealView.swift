@@ -75,10 +75,11 @@ struct PlannedMealView: View {
                     // Feature highlights
                     VStack(alignment: .leading, spacing: 12) {
                         Text("What you'll see").font(.headline).padding(.horizontal, 4)
-                        PlanFeatureRow(icon: "waveform.path.ecg",         color: .orange,     title: "Your glucose history",           detail: "See how your glucose responded to similar meals in the past")
-                        PlanFeatureRow(icon: "chart.line.uptrend.xyaxis", color: .red,        title: "Your GMI trend",                 detail: "Review your 14-day GMI trend alongside similar past meals")
-                        PlanFeatureRow(icon: ExerciseOffsetType.current.iconName, color: .green, title: "Personalised exercise plan",   detail: "Minutes & distance for your chosen activity")
-                        PlanFeatureRow(icon: "arrow.left.arrow.right",    color: .planAccent, title: "Compared to your typical meal", detail: "Ranks this feast against your last 30 days")
+                        // Same order as the Your Pattern with Similar Meals screen
+                        PlanFeatureRow(icon: ExerciseOffsetType.current.iconName, color: .blue, title: "Personalised exercise offset", detail: "Minutes & distance for your chosen activity")
+                        PlanFeatureRow(icon: "waveform.path.ecg",         color: .orange,     title: "Glucose 60–120 min after eating & offset effect", detail: "How your glucose responded last time, and the estimated effect of your activity")
+                        PlanFeatureRow(icon: "fork.knife",                color: .orange,     title: "Most recent similar meal",       detail: "The past meal your pattern is based on")
+                        PlanFeatureRow(icon: "chart.line.uptrend.xyaxis", color: .purple,     title: "14-day GMI trend",               detail: "Review your 14-day GMI trend alongside similar past meals")
                     }
                     .padding(14)
                     .background(Color(.secondarySystemGroupedBackground))
@@ -93,7 +94,7 @@ struct PlannedMealView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(LocalizedStringKey(feastsThisWeek >= 3
                                      ? "Feast frequency is high"
-                                     : "Second feast this week"))
+                                     : "Third feast this week"))
                                     .font(.caption)
                                     .fontWeight(.semibold)
                                     .foregroundColor(feastsThisWeek >= 3 ? .red : .orange)
@@ -178,6 +179,8 @@ struct PlannedMealView: View {
 
     /// Returns ordinal string for a number (1st, 2nd, 3rd, etc.)
     private func ordinal(_ n: Int) -> String {
+        // Japanese strings already include 回目, so pass the bare number
+        if Bundle.main.preferredLocalizations.first == "ja" { return "\(n)" }
         let ones = n % 10
         let tens = (n / 10) % 10
         if tens == 1 { return "\(n)th" }

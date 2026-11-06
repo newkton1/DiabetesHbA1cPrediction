@@ -590,8 +590,8 @@ struct SimilarImpactView: View {
             var totalDistanceKm = 0.0
             for session in sessions {
                 guard session.duration > 0 else { continue }
-                totalMinutes += session.duration / 60.0   // seconds → minutes
-                totalDistanceKm += session.distance / 1000.0  // metres → km
+                totalMinutes += session.duration      // stored in minutes
+                totalDistanceKm += session.distance   // stored in km (metres for swim)
             }
             guard totalMinutes > 0 && totalDistanceKm > 0 else { return 0 }
             return totalDistanceKm / totalMinutes   // km per minute

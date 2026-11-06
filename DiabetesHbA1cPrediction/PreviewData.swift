@@ -199,7 +199,7 @@ struct PreviewData {
             session.type = template.type
             session.startDate = Calendar.current.date(byAdding: .day, value: -daysAgo,
                 to: Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: Date())!)
-            session.duration = template.durationMin * 60  // stored in seconds
+            session.duration = template.durationMin  // stored in minutes
             session.endDate = session.startDate?.addingTimeInterval(session.duration)
             session.intensity = template.intensity
             session.caloriesBurned = template.calories
