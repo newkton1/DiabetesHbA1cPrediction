@@ -27,6 +27,7 @@ struct MealBuilderView: View {
     @State private var showGlycemicWarning = false      // auto-dismissing high GL warning
     @State private var showGlucoseElevatedWarning = false  // auto-dismissing warning for regular meals
     @State private var glBeforeFoodSearch: Double = 0      // GL snapshot before opening food search
+    @State private var hasAutoOpenedSearch = false         // feast: open food search once on arrival
     @State private var showSimilarImpact = false           // navigate to Similar Impact screen (feast only)
     @State private var showSaveConfirmation = false        // 2-second toast after regular meal save
     @State private var saveConfirmationText = ""           // e.g. "Lunch saved — 45 g carbs"
@@ -181,6 +182,15 @@ struct MealBuilderView: View {
                 // Defer heavy form rendering until after the sheet animation completes
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                     isReady = true
+                    // Feast: skip the empty builder and go straight to food search.
+                    // After "Plan", the user lands back here to review foods and
+                    // continue to Similar Meal. Only once per opening, so Cancel in
+                    // search (or returning from Similar Meal) doesn't reopen it.
+                    if mealType == .feast && mealBuilder.selectedFoods.isEmpty && !hasAutoOpenedSearch {
+                        hasAutoOpenedSearch = true
+                        glBeforeFoodSearch = mealBuilder.totalGlycemicLoad
+                        showingFoodSearch = true
+                    }
                 }
             }
         }
