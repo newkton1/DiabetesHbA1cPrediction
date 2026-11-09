@@ -192,7 +192,7 @@ struct GlucoseLogView: View {
             readingsList
         }
         .navigationTitle("Glucose")
-        .navigationBarTitleDisplayMode(.inline)
+        .toolbarTitleDisplayMode(.inlineLarge)   // large, left-aligned, stays put (chart is pinned)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 HStack(spacing: 12) {

@@ -44,19 +44,21 @@ struct PlannedMealView: View {
     var body: some View {
             ScrollView {
                 VStack(spacing: 20) {
-                    // Custom header with back chevron + title
-                    HStack {
-                        Button(action: { selectedTab = .dashboard }) {
-                            Image(systemName: "chevron.left")
-                                .font(.callout.weight(.semibold))
-                                .foregroundColor(.white)
-                                .accessibilityLabel("Back to dashboard")
+                    // Landscape keeps the compact custom header; portrait uses the native large title
+                    if isLandscape {
+                        HStack {
+                            Button(action: { selectedTab = .dashboard }) {
+                                Image(systemName: "chevron.left")
+                                    .font(.callout.weight(.semibold))
+                                    .foregroundColor(.white)
+                                    .accessibilityLabel("Back to dashboard")
+                            }
+                            Text("What If?")
+                                .font(.title3.bold())
+                            Spacer()
                         }
-                        Text("What If?")
-                            .font(.title3.bold())
-                        Spacer()
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
                     // Explainer banner
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Before You Eat")
@@ -125,8 +127,19 @@ struct PlannedMealView: View {
                 .padding(.vertical)
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
+            // Portrait: native large title (same style as Dashboard / Exercise / User)
+            .navigationTitle(isLandscape ? Text("") : Text("What If?"))
+            .navigationBarTitleDisplayMode(isLandscape ? .inline : .large)
+            .toolbar {
+                if !isLandscape {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button(action: { selectedTab = .dashboard }) {
+                            Image(systemName: "chevron.left")
+                        }
+                        .accessibilityLabel("Back to dashboard")
+                    }
+                }
+            }
             .sheet(isPresented: $showingFeastPlanner) {
                 MealBuilderView(mealType: .feast)
                     .environment(\.managedObjectContext, viewContext)
@@ -278,7 +291,7 @@ private struct HighFeastWarningSheet: View {
                                 .padding()
                                 .background(isAcknowledged ? Color.red : Color(.systemGray4))
                                 .foregroundColor(.white)
-                                .cornerRadius(12)
+                                .clipShape(Capsule())   // same capsule as Plan Feast Treat
                         }
                         .disabled(!isAcknowledged)
                         .animation(.easeInOut(duration: 0.2), value: isAcknowledged)
@@ -290,9 +303,10 @@ private struct HighFeastWarningSheet: View {
                                 .padding()
                                 .background(Color(.systemGray5))
                                 .foregroundColor(.primary)
-                                .cornerRadius(12)
+                                .clipShape(Capsule())
                         }
                     }
+                    .padding(.horizontal, 16)   // + the sheet's 24 pt = 40 pt, same width as Plan Feast Treat
                 }
                 .padding(24)
             }

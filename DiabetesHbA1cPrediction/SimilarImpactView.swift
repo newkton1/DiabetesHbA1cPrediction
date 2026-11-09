@@ -367,7 +367,7 @@ struct SimilarImpactView: View {
 
                 if !walkProjection.isEmpty {
                     HStack(spacing: 14) {
-                        legendSwatch(color: Self.historyColorBeforeWalk, secondColor: Self.useTrafficLightChart ? Self.historyColorAfterWalk : nil, dashed: false, label: "Last time")
+                        legendSwatch(color: Self.historyColorBeforeWalk, secondColor: Self.historyColorAfterWalk, dashed: false, label: "Last time")
                         legendSwatch(color: Self.walkLineColor, dashed: true, label: "With walk (estimate)")
                     }
                     .font(.caption2)
@@ -501,19 +501,12 @@ struct SimilarImpactView: View {
     /// Minute after eating when the walk starts — matches the T+90 nudge.
     static let walkStartMinute = 90
 
-    /// Same line colour as the glucose curve on the Glucose screen (GlucoseLogView.chartCurveLine).
-    static let chartLineBlue = Color.blue.opacity(0.45)
-
-    // MARK: Chart style switch (for Marketing's A/B comparison)
-    /// false = calm blue lines (matches the Glucose screen)
-    /// true  = red (before walk) / yellow (no walk after 90 min) / green dashed (with walk)
-    static let useTrafficLightChart = true
-
-    static var historyColorBeforeWalk: Color { useTrafficLightChart ? .red    : chartLineBlue }
-    static var historyColorAfterWalk:  Color { useTrafficLightChart ? .yellow : chartLineBlue }
-    static var walkLineColor:          Color { useTrafficLightChart ? .green  : chartLineBlue }
-    /// Blue: 2.75 pt (paler colour needs a bit of weight). Traffic-light: slightly heavier for impact.
-    static var chartLineWidth: CGFloat { useTrafficLightChart ? 3.5 : 2.75 }
+    // MARK: Chart line colours (traffic-light style, chosen by Marketing)
+    /// Red: last time, up to the walk start. Yellow: last time, no walk. Green dashed: with walk.
+    static let historyColorBeforeWalk: Color = .red
+    static let historyColorAfterWalk:  Color = .yellow
+    static let walkLineColor:          Color = .green
+    static let chartLineWidth: CGFloat = 3.5
 
     private struct HistorySegment: Identifiable {
         let id: String
@@ -521,12 +514,9 @@ struct SimilarImpactView: View {
         let points: [SimilarImpactGlucosePoint]
     }
 
-    /// One blue segment, or (traffic-light) split at the walk start: red before, yellow after.
+    /// "Last time" line split at the walk start: red before, yellow after.
     private func historyLineSegments(_ match: SimilarImpactResult) -> [HistorySegment] {
         let pts = match.glucosePoints.sorted { $0.minutesAfterMeal < $1.minutesAfterMeal }
-        guard Self.useTrafficLightChart else {
-            return [HistorySegment(id: "History", color: Self.chartLineBlue, points: pts)]
-        }
         let split = Self.walkStartMinute
         var before = pts.filter { $0.minutesAfterMeal <= split }
         var after  = pts.filter { $0.minutesAfterMeal >= split }
