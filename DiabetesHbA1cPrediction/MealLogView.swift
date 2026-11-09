@@ -120,7 +120,7 @@ struct MealLogView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Text("Meals")
+                Text("Meals History")
                     .font(.title3.bold())
                     .fixedSize(horizontal: true, vertical: false)
             }
@@ -137,7 +137,7 @@ struct MealLogView: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Text("Meals")
+                Text("Meals History")
                     .font(.title3.bold())
 
                 Spacer()
