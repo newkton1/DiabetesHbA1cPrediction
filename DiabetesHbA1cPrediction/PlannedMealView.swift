@@ -36,7 +36,7 @@ struct PlannedMealView: View {
         Text("Build your feast treat and review your glucose and GMI trends from previous meals with similar GI, ")
             .foregroundColor(.secondary) +
         Text("as well as how to offset it")
-            .foregroundColor(.orange) +
+            .foregroundColor(.secondary) +
         Text(", before taking a single bite.")
             .foregroundColor(.secondary)
     }
@@ -59,17 +59,13 @@ struct PlannedMealView: View {
                     .padding(.horizontal)
                     // Explainer banner
                     VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "sparkles").foregroundColor(.planAccent).accessibilityHidden(true)
-                            Text("Before You Eat")
-                                .font(.title3).fontWeight(.bold)
-                                .foregroundColor(.planAccent)
-                        }
+                        Text("Before You Eat")
+                            .font(.title3).fontWeight(.bold)
                         Self.beforeYouEatDescription
                             .font(.caption)
                     }
                     .padding(16).frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.planAccent.opacity(0.08))
+                    .background(Color(.secondarySystemGroupedBackground))   // same as the "What you'll see" card
                     .cornerRadius(14).padding(.horizontal)
 
                     // Feature highlights
@@ -85,7 +81,7 @@ struct PlannedMealView: View {
                     .background(Color(.secondarySystemGroupedBackground))
                     .cornerRadius(14).padding(.horizontal)
 
-                    // Feast frequency notice (shown inline when 2+ feasts this week)
+                    // Feast frequency notice (shown inline when 2+ feasts in the last 7 days)
                     if feastsThisWeek >= 2 {
                         HStack(spacing: 8) {
                             Image(systemName: feastsThisWeek >= 3 ? "exclamationmark.triangle.fill" : "info.circle.fill")
@@ -94,7 +90,7 @@ struct PlannedMealView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(LocalizedStringKey(feastsThisWeek >= 3
                                      ? "Feast frequency is high"
-                                     : "Third feast this week"))
+                                     : "Third feast in the last 7 days"))
                                     .font(.caption)
                                     .fontWeight(.semibold)
                                     .foregroundColor(feastsThisWeek >= 3 ? .red : .orange)
@@ -118,11 +114,11 @@ struct PlannedMealView: View {
                     Button(action: { handlePlanFeast() }) {
                         Label("Plan Feast Treat", systemImage: "party.popper.fill")
                             .frame(maxWidth: .infinity).padding()
-                            .background(Color.feastAccent).foregroundColor(.white)
-                            .cornerRadius(12).font(.headline)
+                            .background(Color.blue).foregroundColor(.white)   // system blue, same as Eat Treat
+                            .clipShape(Capsule()).font(.headline)   // Apple-style capsule button
                     }
                     .buttonStyle(.plain)
-                    .padding(.horizontal)
+                    .padding(.horizontal, 40)   // narrower than full width: reads as a button, not a banner
 
                     Spacer(minLength: 24)
                 }

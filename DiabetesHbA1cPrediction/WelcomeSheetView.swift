@@ -37,7 +37,7 @@ struct WelcomeSheetView: View {
             // App icon / hero image
             Image(systemName: "fork.knife.circle.fill")
                 .font(.largeTitle)
-                .foregroundStyle(AppTheme.Programmatic.primary)
+                .foregroundStyle(Color.blue)
                 .accessibilityHidden(true)
 
             // Welcome title
@@ -99,9 +99,9 @@ struct WelcomeSheetView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(AppTheme.Programmatic.primary)
+                    .background(Color.blue)   // system blue, same as the app's other primary buttons
                     .foregroundStyle(.white)
-                    .cornerRadius(14)
+                    .clipShape(Capsule())     // Apple-style capsule button
                 }
                 .accessibilityHint("Opens the onboarding video on YouTube")
 
@@ -115,8 +115,8 @@ struct WelcomeSheetView: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(AppTheme.surfaceSecondary)
-                        .foregroundStyle(AppTheme.Programmatic.primary)
-                        .cornerRadius(14)
+                        .foregroundStyle(Color.blue)
+                        .clipShape(Capsule())
                 }
             }
             .padding(.horizontal, 24)

@@ -102,9 +102,9 @@ struct SimilarImpactView: View {
                             .padding()
                             .background(Color.blue)
                             .foregroundColor(.white)
-                            .cornerRadius(14)
+                            .clipShape(Capsule())   // Apple-style capsule button
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 40)   // narrower than full width: reads as a button, not a banner
                         .padding(.top, 8)
                     } else {
                         // No similar meal found — show cold-start card but still
@@ -154,9 +154,9 @@ struct SimilarImpactView: View {
                             .padding()
                             .background(Color.blue)
                             .foregroundColor(.white)
-                            .cornerRadius(14)
+                            .clipShape(Capsule())   // Apple-style capsule button
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 40)   // narrower than full width: reads as a button, not a banner
                         .padding(.top, 8)
                     }
 
@@ -216,11 +216,8 @@ struct SimilarImpactView: View {
         VStack(alignment: .leading, spacing: 12) {
             // 1. The answer: last rise, then what to do about it
             HStack {
-                Image(systemName: "arrow.up.right")
-                    .foregroundColor(.red)
                 Text("Rise after a similar meal")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .font(.subheadline.bold())
                 Spacer()
                 Text("+\(Int(match.maxIncrease)) mg/dL")
                     .font(.title3.bold())
@@ -271,23 +268,28 @@ struct SimilarImpactView: View {
                             xStart: .value("Walk start", Self.walkStartMinute),
                             xEnd: .value("Walk end", Self.walkStartMinute + plan.minutes)
                         )
-                        .foregroundStyle(Color.green.opacity(0.10))
+                        .foregroundStyle(Color.blue.opacity(0.10))   // exercise blue, same opacity as before
                         .annotation(position: .overlay, alignment: .top) {
                             Text("Walk \(plan.minutes) min")
                                 .font(.caption2)
-                                .foregroundColor(.green)
+                                .foregroundColor(.primary)
                                 .padding(.top, 2)
                         }
                     }
 
-                    ForEach(match.glucosePoints, id: \.minutesAfterMeal) { point in
-                        LineMark(
-                            x: .value("Min", point.minutesAfterMeal),
-                            y: .value("mg/dL", point.value),
-                            series: .value("Series", "History")
-                        )
-                        .foregroundStyle(Color.orange)
+                    ForEach(historyLineSegments(match)) { segment in
+                        ForEach(segment.points, id: \.minutesAfterMeal) { point in
+                            LineMark(
+                                x: .value("Min", point.minutesAfterMeal),
+                                y: .value("mg/dL", point.value),
+                                series: .value("Series", segment.id)
+                            )
+                            .foregroundStyle(segment.color)
+                            .lineStyle(StrokeStyle(lineWidth: Self.chartLineWidth))
+                        }
+                    }
 
+                    ForEach(match.glucosePoints, id: \.minutesAfterMeal) { point in
                         PointMark(
                             x: .value("Min", point.minutesAfterMeal),
                             y: .value("mg/dL", point.value)
@@ -303,15 +305,15 @@ struct SimilarImpactView: View {
                             y: .value("mg/dL", point.value),
                             series: .value("Series", "With walk")
                         )
-                        .foregroundStyle(Color.green)
-                        .lineStyle(StrokeStyle(lineWidth: 2, dash: [6, 4]))
+                        .foregroundStyle(Self.walkLineColor)
+                        .lineStyle(StrokeStyle(lineWidth: Self.chartLineWidth, dash: [6, 4]))
                     }
                     if let last = walkProjection.last {
                         PointMark(
                             x: .value("Min", last.minutesAfterMeal),
                             y: .value("mg/dL", last.value)
                         )
-                        .foregroundStyle(Color.green)
+                        .foregroundStyle(Self.walkLineColor)   // end marker of the dashed line
                         .symbolSize(50)
                     }
 
@@ -322,7 +324,7 @@ struct SimilarImpactView: View {
                         .annotation(position: .overlay, alignment: .topLeading, spacing: 0) {
                             Text("Baseline")
                                 .font(.caption2)
-                                .foregroundColor(.green)
+                                .foregroundColor(.primary)
                                 .offset(y: 4)
                         }
                 }
@@ -365,8 +367,8 @@ struct SimilarImpactView: View {
 
                 if !walkProjection.isEmpty {
                     HStack(spacing: 14) {
-                        legendSwatch(color: .orange, dashed: false, label: "Last time")
-                        legendSwatch(color: .green, dashed: true, label: "With walk (estimate)")
+                        legendSwatch(color: Self.historyColorBeforeWalk, secondColor: Self.useTrafficLightChart ? Self.historyColorAfterWalk : nil, dashed: false, label: "Last time")
+                        legendSwatch(color: Self.walkLineColor, dashed: true, label: "With walk (estimate)")
                     }
                     .font(.caption2)
                     .foregroundColor(.secondary)
@@ -383,10 +385,8 @@ struct SimilarImpactView: View {
             HStack {
                 Image(systemName: "fork.knife")
                     .foregroundColor(.orange)
-                    .font(.caption)
                 Text("Most recent similar meal")
-                    .font(.caption.bold())
-                    .foregroundColor(.secondary)
+                    .font(.subheadline.bold())
                 Spacer()
             }
 
@@ -501,6 +501,44 @@ struct SimilarImpactView: View {
     /// Minute after eating when the walk starts — matches the T+90 nudge.
     static let walkStartMinute = 90
 
+    /// Same line colour as the glucose curve on the Glucose screen (GlucoseLogView.chartCurveLine).
+    static let chartLineBlue = Color.blue.opacity(0.45)
+
+    // MARK: Chart style switch (for Marketing's A/B comparison)
+    /// false = calm blue lines (matches the Glucose screen)
+    /// true  = red (before walk) / yellow (no walk after 90 min) / green dashed (with walk)
+    static let useTrafficLightChart = true
+
+    static var historyColorBeforeWalk: Color { useTrafficLightChart ? .red    : chartLineBlue }
+    static var historyColorAfterWalk:  Color { useTrafficLightChart ? .yellow : chartLineBlue }
+    static var walkLineColor:          Color { useTrafficLightChart ? .green  : chartLineBlue }
+    /// Blue: 2.75 pt (paler colour needs a bit of weight). Traffic-light: slightly heavier for impact.
+    static var chartLineWidth: CGFloat { useTrafficLightChart ? 3.5 : 2.75 }
+
+    private struct HistorySegment: Identifiable {
+        let id: String
+        let color: Color
+        let points: [SimilarImpactGlucosePoint]
+    }
+
+    /// One blue segment, or (traffic-light) split at the walk start: red before, yellow after.
+    private func historyLineSegments(_ match: SimilarImpactResult) -> [HistorySegment] {
+        let pts = match.glucosePoints.sorted { $0.minutesAfterMeal < $1.minutesAfterMeal }
+        guard Self.useTrafficLightChart else {
+            return [HistorySegment(id: "History", color: Self.chartLineBlue, points: pts)]
+        }
+        let split = Self.walkStartMinute
+        var before = pts.filter { $0.minutesAfterMeal <= split }
+        var after  = pts.filter { $0.minutesAfterMeal >= split }
+        if !pts.contains(where: { $0.minutesAfterMeal == split }) {
+            let joint = SimilarImpactGlucosePoint(minutesAfterMeal: split, value: historicValue(at: split, in: pts))
+            before.append(joint)
+            after.insert(joint, at: 0)
+        }
+        return [HistorySegment(id: "Before walk", color: Self.historyColorBeforeWalk, points: before),
+                HistorySegment(id: "After 90 min", color: Self.historyColorAfterWalk, points: after)]
+    }
+
     private struct WalkOffsetPlan {
         let minutes: Int              // rounded to nearest 5, clamped 5…60
         let targetReduction: Double   // mg/dL the walk aims to remove (50% of rise)
@@ -563,13 +601,22 @@ struct SimilarImpactView: View {
         return ticks
     }
 
-    private func legendSwatch(color: Color, dashed: Bool, label: LocalizedStringKey) -> some View {
+    private func legendSwatch(color: Color, secondColor: Color? = nil, dashed: Bool, label: LocalizedStringKey) -> some View {
         HStack(spacing: 4) {
-            Path { p in
-                p.move(to: CGPoint(x: 0, y: 1))
-                p.addLine(to: CGPoint(x: 16, y: 1))
+            ZStack {
+                Path { p in
+                    p.move(to: CGPoint(x: 0, y: 1))
+                    p.addLine(to: CGPoint(x: secondColor == nil ? 16 : 8, y: 1))
+                }
+                .stroke(color, style: StrokeStyle(lineWidth: Self.chartLineWidth, dash: dashed ? [4, 3] : []))
+                if let secondColor {
+                    Path { p in
+                        p.move(to: CGPoint(x: 8, y: 1))
+                        p.addLine(to: CGPoint(x: 16, y: 1))
+                    }
+                    .stroke(secondColor, style: StrokeStyle(lineWidth: Self.chartLineWidth))
+                }
             }
-            .stroke(color, style: StrokeStyle(lineWidth: 2, dash: dashed ? [4, 3] : []))
             .frame(width: 16, height: 2)
             Text(label)
         }
@@ -710,7 +757,7 @@ struct SimilarImpactView: View {
             HStack {
                 Image(systemName: "party.popper.fill")
                     .foregroundColor(feastCount >= 3 ? .red : feastCount >= 2 ? .orange : .green)
-                Text("Feast treats this week")
+                Text("Feast treats in the last 7 days")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 Spacer()
@@ -720,8 +767,8 @@ struct SimilarImpactView: View {
             }
             if feastCount >= 2 {
                 Text(feastCount >= 3
-                     ? "You have logged 3 or more feast treats this week."
-                     : "You have logged \(feastCount) feast treats so far this week.")
+                     ? "You have logged 3 or more feast treats in the last 7 days."
+                     : "You have logged \(feastCount) feast treats in the last 7 days.")
                     .font(.caption)
                     .foregroundColor(feastCount >= 3 ? .red : .orange)
                     .fixedSize(horizontal: false, vertical: true)
