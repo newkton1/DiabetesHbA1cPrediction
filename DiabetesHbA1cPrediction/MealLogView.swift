@@ -116,15 +116,9 @@ struct MealLogView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .navigationTitle("")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Text("Meals History")
-                    .font(.title3.bold())
-                    .fixedSize(horizontal: true, vertical: false)
-            }
-        }
+        // Native large title (no Liquid Glass capsule)
+        .navigationTitle(Text("Meals History"))
+        .navigationBarTitleDisplayMode(.large)
         .alert("Save Error", isPresented: $showSaveError) {
             Button("OK", role: .cancel) { }
         } message: {

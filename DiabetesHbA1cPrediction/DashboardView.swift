@@ -302,17 +302,9 @@ struct DashboardView: View {
                     .padding(.vertical)
                 }
             }
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                if !isLandscape {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Text("Dashboard")
-                            .font(.title3.bold())
-                            .fixedSize(horizontal: true, vertical: false)
-                    }
-                }
-            }
+            // Native large title (no Liquid Glass capsule); hidden in landscape as before
+            .navigationTitle(isLandscape ? Text("") : Text("Dashboard"))
+            .navigationBarTitleDisplayMode(isLandscape ? .inline : .large)
             .sheet(isPresented: $showLastMealSheet) {
                 LastMealView()
                     .environment(\.managedObjectContext, viewContext)

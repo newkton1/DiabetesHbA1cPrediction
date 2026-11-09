@@ -461,16 +461,12 @@ struct UserProfileView: View {
 
         }
         }
-        .navigationTitle("")
-        .navigationBarTitleDisplayMode(.inline)
+        // Native large title (no Liquid Glass capsule); hidden in landscape as before
+        .navigationTitle(isPortrait ? Text("User") : Text(""))
+        .navigationBarTitleDisplayMode(isPortrait ? .large : .inline)
         .toolbar {
-            // Portrait: title on left, Save button on right
+            // Portrait: Save button on right
             if isPortrait {
-                ToolbarItem(placement: .topBarLeading) {
-                    Text("User")
-                        .font(.title3.bold())
-                        .fixedSize(horizontal: true, vertical: false)
-                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: saveProfile) {
                         if isSaving {

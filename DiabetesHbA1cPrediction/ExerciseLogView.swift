@@ -45,15 +45,12 @@ struct ExerciseLogView: View {
                 }
             }
             .id(isPortrait) // Force full view rebuild on orientation change
-            .navigationBarTitleDisplayMode(.inline)
+            // Native large title (no Liquid Glass capsule); hidden in landscape as before
+            .navigationTitle(isPortrait ? Text("Exercise Log") : Text(""))
+            .navigationBarTitleDisplayMode(isPortrait ? .large : .inline)
             .toolbar {
-                // Portrait only: title on left, + button on right
+                // Portrait only: + button on right
                 if isPortrait {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Text("Exercise Log")
-                            .font(.title3.bold())
-                            .fixedSize(horizontal: true, vertical: false)
-                    }
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(action: {
                             if DemoDataManager.isDemoDataLoaded {
@@ -131,7 +128,9 @@ struct ExerciseLogView: View {
 
     // MARK: - Portrait Content
     private var portraitContent: some View {
-        VStack(spacing: 0) {
+        // One scrolling List for the whole screen, so the large "Exercise Log"
+        // title collapses into the nav bar (like Dashboard) instead of vanishing.
+        List {
             // MARK: - Last 7 Days Summary header with Sync Button
             HStack {
                 Text("Last 7 Days Summary")
@@ -140,50 +139,49 @@ struct ExerciseLogView: View {
                 Spacer()
 
                 syncHealthButton
+                    .buttonStyle(.borderless)   // only the button is tappable, not the whole row
             }
-            .padding(.horizontal)
-            .padding(.bottom, 8)
+            .listRowSeparator(.hidden)
+            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
 
             // MARK: - Weekly Summary Card (without its own title)
             WeeklySummaryCardNoTitle(exercises: exercises)
-                .padding(.horizontal)
-                .padding(.bottom)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
 
             // MARK: - Full Exercise Log header
             Text("Full Exercise Log")
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal)
-                .padding(.bottom, 4)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
 
             // MARK: - Exercise List
-            List {
-                if exercises.isEmpty {
-                    emptyStateView
-                } else {
-                    ForEach(exercises, id: \.id) { exercise in
-                        ExerciseRowView(exercise: exercise)
-                            .contextMenu {
-                                Button(role: .destructive) {
-                                    exerciseToDelete = exercise
-                                    showDeleteConfirmation = true
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
+            if exercises.isEmpty {
+                emptyStateView
+            } else {
+                ForEach(exercises, id: \.id) { exercise in
+                    ExerciseRowView(exercise: exercise)
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                exerciseToDelete = exercise
+                                showDeleteConfirmation = true
+                            } label: {
+                                Label("Delete", systemImage: "trash")
                             }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    deleteSingleExercise(exercise)
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                                .tint(.red)
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                deleteSingleExercise(exercise)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
                             }
-                    }
+                            .tint(.red)
+                        }
                 }
             }
-            .listStyle(.plain)
         }
+        .listStyle(.plain)
     }
 
     // MARK: - Landscape Content
