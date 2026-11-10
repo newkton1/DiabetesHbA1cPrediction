@@ -833,13 +833,10 @@ class HealthKitManager: ObservableObject {
                     entity.duration = workoutData.duration
                     entity.caloriesBurned = workoutData.caloriesBurned
                     entity.distance = workoutData.distanceKm
-                    // Estimate intensity from calories and duration (moderate = 5)
-                    if workoutData.duration > 0 {
-                        let calPerMin = workoutData.caloriesBurned / workoutData.duration
-                        entity.intensity = min(10, max(1, calPerMin / 2.0))
-                    } else {
-                        entity.intensity = 5
-                    }
+                    // Shared intensity rule (same as manual entries): pace if distance, else cal/min vs typical
+                    entity.intensity = ExerciseSessionEntity.estimatedIntensity(
+                        type: workoutData.type, minutes: workoutData.duration,
+                        distanceKm: workoutData.distanceKm, calories: workoutData.caloriesBurned)
                     // Store HealthKit UUID and distance in notes for reference
                     var noteParts = ["HealthKit UUID: \(workoutData.uuid)"]
                     if workoutData.distanceKm > 0 {
@@ -1093,13 +1090,10 @@ class HealthKitManager: ObservableObject {
                                 entity.caloriesBurned = activityData.calories
                                 entity.distance = activityData.distanceKm
                                 entity.notes = String(format: "DailyActivity | Steps: %.0f | Distance: %.2f km", activityData.steps, activityData.distanceKm)
-                                // Intensity from calories/minute (same formula as formal workouts)
-                                if activityData.estimatedMinutes > 0 {
-                                    let calPerMin = activityData.calories / activityData.estimatedMinutes
-                                    entity.intensity = min(10, max(1, calPerMin / 2.0))
-                                } else {
-                                    entity.intensity = 3
-                                }
+                                // Shared intensity rule (same as manual entries and workouts)
+                                entity.intensity = ExerciseSessionEntity.estimatedIntensity(
+                                    type: "Walking", minutes: activityData.estimatedMinutes,
+                                    distanceKm: activityData.distanceKm, calories: activityData.calories)
                                 updatedCount += 1
                             }
                             continue
@@ -1123,13 +1117,10 @@ class HealthKitManager: ObservableObject {
                     entity.distance = activityData.distanceKm
                     entity.notes = String(format: "DailyActivity | Steps: %.0f | Distance: %.2f km", activityData.steps, activityData.distanceKm)
 
-                    // Intensity from calories/minute (same formula as formal workouts)
-                    if activityData.estimatedMinutes > 0 {
-                        let calPerMin = activityData.calories / activityData.estimatedMinutes
-                        entity.intensity = min(10, max(1, calPerMin / 2.0))
-                    } else {
-                        entity.intensity = 3
-                    }
+                    // Shared intensity rule (same as manual entries and workouts)
+                    entity.intensity = ExerciseSessionEntity.estimatedIntensity(
+                        type: "Walking", minutes: activityData.estimatedMinutes,
+                        distanceKm: activityData.distanceKm, calories: activityData.calories)
 
                     newCount += 1
                 }

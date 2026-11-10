@@ -9554,6 +9554,16 @@
     },
     "日本食" : {
 
+    },
+    "Intensity %lld of 10 (from pace)" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "運動強度 %lld／10（ペースから算出）"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

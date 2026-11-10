@@ -219,7 +219,7 @@ struct DataExportView: View {
                 type: ex.type ?? "",
                 durationMinutes: ex.duration,
                 distance: ex.distance,
-                intensity: ex.intensity,
+                intensity: ex.effectiveIntensity,
                 caloriesBurned: ex.caloriesBurned,
                 notes: ex.notes ?? ""
             )

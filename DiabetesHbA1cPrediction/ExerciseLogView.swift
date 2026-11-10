@@ -696,7 +696,7 @@ struct ExerciseRowView: View {
 
     /// Color for the flame icon — red when intensity bar is red (7+), otherwise secondary
     private var flameColor: Color {
-        Int(exercise.intensity) > 6 ? .red : .secondary
+        Int(exercise.effectiveIntensity) > 6 ? .red : .secondary
     }
 
     /// Duration displayed in minutes only for both portrait and landscape
@@ -765,12 +765,12 @@ struct ExerciseRowView: View {
                 VStack(spacing: 0.5) {
                     ForEach((1...10).reversed(), id: \.self) { level in
                         Rectangle()
-                            .fill(intensityColor(for: level, currentIntensity: Int(exercise.intensity)))
+                            .fill(intensityColor(for: level, currentIntensity: Int(exercise.effectiveIntensity)))
                             .frame(width: 6, height: 5.5)
                     }
                 }
                 .accessibilityElement(children: .ignore)
-                .accessibilityValue("Intensity: \(Int(exercise.intensity)) out of 10")
+                .accessibilityValue("Intensity: \(Int(exercise.effectiveIntensity)) out of 10")
 
                 // Rotated label
                 Text("Intensity")
@@ -828,12 +828,12 @@ struct ExerciseRowView: View {
                 HStack(spacing: 2) {
                     ForEach(1...10, id: \.self) { level in
                         Rectangle()
-                            .fill(intensityColor(for: level, currentIntensity: Int(exercise.intensity)))
+                            .fill(intensityColor(for: level, currentIntensity: Int(exercise.effectiveIntensity)))
                             .frame(height: 4)
                     }
                 }
                 .accessibilityElement(children: .ignore)
-                .accessibilityValue("Intensity: \(Int(exercise.intensity)) out of 10")
+                .accessibilityValue("Intensity: \(Int(exercise.effectiveIntensity)) out of 10")
             }
             .frame(width: 70)
         }
@@ -910,6 +910,14 @@ struct AddExerciseSessionSheet: View {
         ["Walking", "Running", "Cycling"].contains(selectedType)
     }
 
+    /// Intensity saved for a manual entry: from pace for Walking/Running/Cycling
+    /// (shared rule, same as Apple Health imports); the slider value otherwise.
+    private var effectiveManualIntensity: Double {
+        guard isDistanceBasedExercise else { return intensity }
+        return ExerciseSessionEntity.estimatedIntensity(
+            type: selectedType, minutes: Double(durationMinutes), distanceKm: distance, calories: 0)
+    }
+
     private var isPortrait: Bool {
         verticalSizeClass != .compact
     }
@@ -974,6 +982,9 @@ struct AddExerciseSessionSheet: View {
                                 .font(.headline)
                                 .lineLimit(1)
                         }
+                        Text("Intensity \(Int(effectiveManualIntensity)) of 10 (from pace)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 } else {
                     Section("Intensity (1-10)") {
@@ -1044,7 +1055,7 @@ struct AddExerciseSessionSheet: View {
         newExercise.startDate = selectedStartDate
         newExercise.endDate = Calendar.current.date(byAdding: .minute, value: Int(durationInMinutes), to: selectedStartDate)
         newExercise.duration = durationInMinutes
-        newExercise.intensity = intensity
+        newExercise.intensity = effectiveManualIntensity
         newExercise.caloriesBurned = calories
         newExercise.distance = isDistanceBasedExercise ? distance : 0.0
         newExercise.notes = notes.isEmpty ? nil : notes
@@ -1077,7 +1088,6 @@ struct AddExerciseSessionSheet: View {
     /// Uses approximate values for average person (varies by weight, fitness level, etc.)
     func estimateCalories() -> Double {
         let durationInMinutes = Double(durationMinutes)
-        let intensity = self.intensity
 
         // Base calories per minute for each exercise type
         let baseCaloriesPerMinute: Double = {
@@ -1107,8 +1117,11 @@ struct AddExerciseSessionSheet: View {
             }
         }()
 
-        // Adjust by intensity (1-10 scale)
-        let intensityMultiplier = intensity / 5.0 // 5 is baseline
+        // Distance activities: scale by pace intensity vs that activity's typical MET.
+        // Others: the 1–10 slider, 5 = typical.
+        let intensityMultiplier = isDistanceBasedExercise
+            ? effectiveManualIntensity / ExerciseSessionEntity.baseline(for: selectedType).met
+            : intensity / 5.0
 
         return baseCaloriesPerMinute * durationInMinutes * intensityMultiplier
     }
